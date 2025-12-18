@@ -6134,6 +6134,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pack-your-bag@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "pack-your-bag@workspace:."
+  dependencies:
+    "@types/node": "npm:^24.10.1"
+    playwright: "npm:^1.56.1"
+    prettier: "npm:^3.6.2"
+    ts-node: "npm:^10.9.2"
+    turbo: "npm:^2.6.2"
+    typescript: "npm:5.9.3"
+  languageName: unknown
+  linkType: soft
+
 "package-hash@npm:^4.0.0":
   version: 4.0.0
   resolution: "package-hash@npm:4.0.0"
@@ -7813,19 +7826,6 @@ __metadata:
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
-
-"turbo-tryout@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "turbo-tryout@workspace:."
-  dependencies:
-    "@types/node": "npm:^24.10.1"
-    playwright: "npm:^1.56.1"
-    prettier: "npm:^3.6.2"
-    ts-node: "npm:^10.9.2"
-    turbo: "npm:^2.6.2"
-    typescript: "npm:5.9.3"
-  languageName: unknown
-  linkType: soft
 
 "turbo-windows-64@npm:2.6.1":
   version: 2.6.1
