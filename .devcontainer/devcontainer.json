@@ -43,6 +43,6 @@
       }
     }
   },
-  "postCreateCommand": "corepack yarn install --immutable",
+  "postCreateCommand": "corepack yarn install",
   "remoteUser": "node"
 }
