@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
 .yarn/*
@@ -30,8 +30,8 @@ coverage
 # Build Outputs
 .next/
 out/
-build
-dist
+build/
+dist/
 
 
 # Debug
@@ -42,3 +42,7 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Docker / Dev Container logs
+.devcontainer/*.log
+
