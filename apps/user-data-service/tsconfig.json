@@ -6,8 +6,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "noEmit": false
+    "noEmit": false,
+    "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "test/**/*", "vitest.config.ts"],
   "exclude": ["dist", "node_modules"]
 }
