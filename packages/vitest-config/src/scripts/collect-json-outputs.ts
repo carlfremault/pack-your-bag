@@ -1,6 +1,6 @@
-import fs from "fs/promises";
-import path from "path";
-import { glob } from "glob";
+import fs from 'fs/promises';
+import path from 'path';
+import { glob } from 'glob';
 
 async function fileExists(filePath: string) {
   try {
@@ -14,15 +14,11 @@ async function fileExists(filePath: string) {
 async function collectCoverageFiles() {
   try {
     // Folders to scan
-    const patterns = ["../../apps/*", "../../packages/*"];
-    const destinationDir = path.join(process.cwd(), "coverage/raw");
+    const patterns = ['../../apps/*', '../../packages/*'];
+    const destinationDir = path.join(process.cwd(), 'coverage/raw');
     await fs.mkdir(destinationDir, { recursive: true });
 
-    const coverageFiles = [
-      "coverage.json",
-      "coverage-node.json",
-      "coverage-browser.json",
-    ];
+    const coverageFiles = ['coverage.json', 'coverage-node.json', 'coverage-browser.json'];
     const collected: string[] = [];
 
     for (const pattern of patterns) {
@@ -38,12 +34,12 @@ async function collectCoverageFiles() {
 
           // Check inside "coverage/" folder
           if (!(await fileExists(coverageFilePath))) {
-            coverageFilePath = path.join(match, "coverage", coverageFile);
+            coverageFilePath = path.join(match, 'coverage', coverageFile);
             if (!(await fileExists(coverageFilePath))) continue;
           }
 
           // Copy to raw/ with unique name
-          const fileName = `${path.basename(match)}-${coverageFile.replace(".json", "")}.json`;
+          const fileName = `${path.basename(match)}-${coverageFile.replace('.json', '')}.json`;
           const destFile = path.join(destinationDir, fileName);
           await fs.copyFile(coverageFilePath, destFile);
 
@@ -53,14 +49,14 @@ async function collectCoverageFiles() {
     }
 
     if (collected.length > 0) {
-      console.log("Found coverage files:", collected.join(", "));
+      console.log('Found coverage files:', collected.join(', '));
     } else {
-      console.log("No coverage files found.");
+      console.log('No coverage files found.');
     }
 
-    console.log("Coverage collected into:", destinationDir);
+    console.log('Coverage collected into:', destinationDir);
   } catch (error) {
-    console.error("Error collecting coverage files:", error);
+    console.error('Error collecting coverage files:', error);
   }
 }
 

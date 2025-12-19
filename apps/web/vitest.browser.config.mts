@@ -1,8 +1,8 @@
-import { defineConfig } from "vitest/config";
-import { playwright } from "@vitest/browser-playwright";
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { uiConfig } from "@repo/vitest-config/ui";
+import { defineConfig } from 'vitest/config';
+import { playwright } from '@vitest/browser-playwright';
+import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { uiConfig } from '@repo/vitest-config/ui';
 
 export default defineConfig({
   ...uiConfig,
@@ -14,16 +14,16 @@ export default defineConfig({
       provider: playwright(),
       instances: [
         {
-          browser: "chromium",
+          browser: 'chromium',
         },
       ],
     },
     coverage: {
       ...uiConfig.test.coverage,
-      provider: "istanbul",
-      reporter: [["json", { file: "coverage-browser.json" }]],
-      reportsDirectory: "./coverage",
+      provider: 'istanbul',
+      reporter: [['json', { file: 'coverage-browser.json' }]],
+      reportsDirectory: './coverage',
     },
-    include: ["**/*.browser.test.tsx"],
+    include: ['**/*.browser.test.tsx'],
   },
 });
