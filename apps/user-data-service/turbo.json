@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "env": ["UDS_PORT"]
+    },
+    "lint": {
+      "env": ["UDS_PORT"]
+    }
+  }
+}

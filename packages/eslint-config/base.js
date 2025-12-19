@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import turboPlugin from 'eslint-plugin-turbo';
 import tseslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 import onlyWarn from 'eslint-plugin-only-warn';
 
 /**
@@ -9,7 +10,7 @@ import onlyWarn from 'eslint-plugin-only-warn';
  *
  * @type {import("eslint").Linter.Config[]}
  * */
-export const config = tseslint(
+export const config = defineConfig(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,

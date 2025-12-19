@@ -1,6 +1,7 @@
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 import { config as baseConfig } from './base.js';
 
 /**
@@ -8,7 +9,7 @@ import { config as baseConfig } from './base.js';
  *
  * @type {import("eslint").Linter.Config[]}
  * */
-export const nestJsConfig = tseslint(
+export const nestJsConfig = defineConfig(
   ...baseConfig,
   ...tseslint.configs.recommendedTypeChecked,
   eslintPluginPrettierRecommended,
