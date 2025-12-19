@@ -1,0 +1,48 @@
+{
+  "name": "Pack Your Bag Dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "dev-container",
+  "workspaceFolder": "/workspaces/pack-your-bag",
+  "mounts": [
+    "source=pack-your-bag-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=pack-your-bag-extensions,target=/home/node/.vscode-server/extensions,type=volume"
+  ],
+  "containerEnv": {
+    "SHELL": "/usr/bin/zsh",
+    "YARN_CACHE_FOLDER": "/home/node/.cache/yarn",
+    "YARN_ENABLE_TELEMETRY": "0"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "redhat.vscode-yaml",
+        "google.geminicodeassist",
+        "codeium.codeium",
+        "ms-azuretools.vscode-docker",
+        "prisma.prisma"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "remote.autoForwardPortsSource": "hybrid",
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/usr/bin/zsh",
+            "args": ["-l"]
+          }
+        }
+      }
+    }
+  },
+  "postCreateCommand": "corepack yarn install",
+  "remoteUser": "node"
+}

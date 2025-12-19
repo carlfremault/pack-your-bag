@@ -1,0 +1,37 @@
+services:
+  postgres_db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - postgres-run:/var/run/postgresql
+
+  dev-container:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - .:/workspaces/pack-your-bag:cached
+      - pack-your-bag-cache:/home/node/.cache/yarn
+    network_mode: service:postgres_db
+    init: true
+    command: sleep infinity
+
+volumes:
+  pack-your-bag-cache:
+    name: pack-your-bag-cache
+  pack-your-bag-node-modules:
+    name: pack-your-bag-node-modules
+  pack-your-bag-extensions:
+    name: pack-your-bag-extensions
+  postgres-data:
+    name: postgres-data
+  postgres-run:
+    name: postgres-run
