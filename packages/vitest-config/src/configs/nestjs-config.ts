@@ -16,7 +16,7 @@ export const nestjsConfig = mergeConfig(
     test: {
       globals: true,
       environment: 'node',
-      include: ['src/**/*.spec.ts', 'test/**/*.spec.ts'],
+      include: ['src/**/*.spec.ts', 'test/**/*.spec.ts', 'test/**/*.e2e-spec.ts'],
       coverage: {
         provider: 'v8',
         reporter: [['json', { file: 'coverage-node.json' }], 'text', 'html'],
