@@ -6,6 +6,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "nest start",
+    "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest --watch --no-coverage"
