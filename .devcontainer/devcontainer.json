@@ -12,6 +12,7 @@
     "YARN_CACHE_FOLDER": "/home/node/.cache/yarn",
     "YARN_ENABLE_TELEMETRY": "0"
   },
+  "forwardPorts": [3000, 3001, 8001],
   "customizations": {
     "vscode": {
       "extensions": [
