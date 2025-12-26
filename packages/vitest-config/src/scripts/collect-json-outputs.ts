@@ -57,8 +57,12 @@ async function collectCoverageFiles() {
     console.log('Coverage collected into:', destinationDir);
   } catch (error) {
     console.error('Error collecting coverage files:', error);
+    process.exit(1);
   }
 }
 
 // Run the function
-collectCoverageFiles();
+collectCoverageFiles().catch((error) => {
+  console.error('Unexpected error:', error);
+  process.exit(1);
+});
