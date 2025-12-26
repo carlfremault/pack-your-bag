@@ -10,10 +10,13 @@
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
     "test:browser": "turbo run test:browser",
-    "view-report": "turbo run view-report"
+    "view-report": "turbo run view-report",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "playwright": "^1.56.1",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
@@ -22,6 +25,12 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "prettier --write",
+      "turbo run lint --filter=[...]"
+    ]
   },
   "packageManager": "yarn@4.11.0",
   "workspaces": [
