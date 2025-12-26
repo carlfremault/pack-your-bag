@@ -1,4 +1,9 @@
 {
   "eslint.useFlatConfig": true,
-  "eslint.workingDirectories": [{ "mode": "auto" }]
+  "eslint.run": "onSave",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.workingDirectories": [{ "pattern": "./apps/*/" }, { "pattern": "./packages/*/" }],
+  "eslint.probe": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
 }
