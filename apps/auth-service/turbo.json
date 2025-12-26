@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "env": ["AUTH_PORT"]
+    },
+    "lint": {
+      "env": ["AUTH_PORT"]
+    }
+  }
+}

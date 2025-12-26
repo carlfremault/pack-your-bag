@@ -3,9 +3,9 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.UDS_PORT ?? 3003);
+  await app.listen(process.env.AUTH_PORT ?? 3001);
 }
 bootstrap().catch((err) => {
-  console.error('Failed to start User Data Service:', err);
+  console.error('Failed to start Auth Service:', err);
   process.exit(1);
 });
