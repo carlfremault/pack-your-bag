@@ -1,9 +1,9 @@
-import { nestJsConfig } from '@repo/eslint-config/nest-js';
+import { getNestJsConfig } from '@repo/eslint-config/nest-js';
 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
   {
     ignores: ['eslint.config.mjs', 'dist/**', 'coverage/**'],
   },
-  ...nestJsConfig,
+  ...getNestJsConfig(import.meta.dirname),
 ];

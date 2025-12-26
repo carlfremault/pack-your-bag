@@ -1,8 +1,4 @@
 {
   "eslint.useFlatConfig": true,
-  "eslint.workingDirectories": [
-    { "pattern": "./apps/*/" },
-    { "pattern": "./packages/*/" },
-    { "mode": "auto" }
-  ]
+  "eslint.workingDirectories": [{ "mode": "auto" }]
 }

@@ -8,26 +8,36 @@ import onlyWarn from 'eslint-plugin-only-warn';
 /**
  * A shared ESLint configuration for the repository.
  *
- * @type {import("eslint").Linter.Config[]}
+ * @param {string} appDir
+ * @returns {import("typescript-eslint").ConfigArray}
  * */
-export const config = defineConfig(
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-  eslintConfigPrettier,
-  {
-    plugins: {
-      turbo: turboPlugin,
+export const getBaseConfig = (appDir) =>
+  defineConfig(
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
+    eslintConfigPrettier,
+    {
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir: appDir,
+        },
+      },
     },
-    rules: {
-      'turbo/no-undeclared-env-vars': 'warn',
+    {
+      plugins: {
+        turbo: turboPlugin,
+      },
+      rules: {
+        'turbo/no-undeclared-env-vars': 'warn',
+      },
     },
-  },
-  {
-    plugins: {
-      onlyWarn,
+    {
+      plugins: {
+        onlyWarn,
+      },
     },
-  },
-  {
-    ignores: ['dist/**'],
-  },
-);
+    {
+      ignores: ['dist/**'],
+    },
+  );
