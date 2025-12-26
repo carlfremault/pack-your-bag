@@ -13,7 +13,9 @@
     ".next/types/**/*.ts",
     "vitest.config.mts",
     "vitest.browser.config.mts",
-    "vitest.browser.config.mts"
+    "vitest.browser.config.mts",
+    "eslint.config.mjs",
+    "postcss.config.mjs"
   ],
   "exclude": ["node_modules"]
 }

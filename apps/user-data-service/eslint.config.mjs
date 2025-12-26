@@ -1,4 +1,6 @@
-import { nestJsConfig } from '@repo/eslint-config/nest-js';
+import { getNestJsConfig } from '@repo/eslint-config/nest-js';
+
+const nestJsConfig = getNestJsConfig(import.meta.dirname);
 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
