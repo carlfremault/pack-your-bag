@@ -29,7 +29,8 @@
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
-      "prettier --write"
+      "prettier --write",
+      "turbo run lint --filter=...staged"
     ]
   },
   "packageManager": "yarn@4.11.0",
