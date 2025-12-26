@@ -8,8 +8,8 @@ import onlyWarn from 'eslint-plugin-only-warn';
 /**
  * A shared ESLint configuration for the repository.
  *
- * @type{import("typescript-eslint").ConfigArray}
  * @param {string} appDir
+ * @returns {import("typescript-eslint").ConfigArray}
  * */
 export const getBaseConfig = (appDir) =>
   defineConfig(

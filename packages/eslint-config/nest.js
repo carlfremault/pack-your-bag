@@ -7,8 +7,8 @@ import { getBaseConfig } from './base.js';
 /**
  * A custom ESLint configuration for libraries that use Nest.js.
  *
- * @type {import("eslint").Linter.Config[]}
  * @param {string} appDir
+ * @returns {import("eslint").Linter.Config[]}
  * */
 export const getNestJsConfig = (appDir) =>
   defineConfig(

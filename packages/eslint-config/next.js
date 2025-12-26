@@ -8,8 +8,8 @@ import { getBaseConfig } from './base.js';
 /**
  * A custom ESLint configuration for libraries that use Next.js.
  *
- * @type {import("eslint").Linter.Config[]}
  * @param {string} appDir
+ * @returns {import("eslint").Linter.Config[]}
  * */
 export const getNextJsConfig = (appDir) => [
   ...getBaseConfig(appDir),
