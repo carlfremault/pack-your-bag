@@ -1,4 +1,6 @@
-import { nextJsConfig } from "@repo/eslint-config/next-js";
+import { getNextJsConfig } from '@repo/eslint-config/next-js';
 
-/** @type {import("eslint").Linter.Config[]} */
-export default nextJsConfig;
+/** @type {Object[]} */
+const config = getNextJsConfig(import.meta.dirname);
+
+export default config;
