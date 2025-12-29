@@ -2,10 +2,13 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "env": ["AUTH_PORT"]
+      "env": ["AUTH_PORT", "AUTH_URL"]
     },
     "lint": {
-      "env": ["AUTH_PORT"]
+      "env": ["AUTH_PORT", "AUTH_URL"]
+    },
+    "migrate": {
+      "env": ["AUTH_PORT", "AUTH_URL"]
     }
   }
 }

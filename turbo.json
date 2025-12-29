@@ -28,6 +28,13 @@
       "cache": false,
       "persistent": true
     },
+    "generate": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma"]
+    },
+    "migrate": {
+      "cache": false
+    },
     "transit": {
       "dependsOn": ["^transit"]
     }
