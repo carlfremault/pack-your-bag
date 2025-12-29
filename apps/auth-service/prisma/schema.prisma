@@ -9,8 +9,8 @@ datasource db {
 }
 
 model Role {
-  id        Int      @default(autoincrement()) @id
-  title     String
+  id        Int       @default(autoincrement()) @id
+  title     String    @unique
   users User[]
 
   @@schema("app_auth")
@@ -19,10 +19,10 @@ model Role {
 model User {
   id        String    @id @db.Uuid
   email     String    @unique
-  password  String
+  password  String    // hashed with Bcrypt
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  role      Role?     @relation(fields: [roleId], references:[id])
+  role      Role?     @relation(fields: [roleId], references: [id])
   roleId    Int
   
   @@schema("app_auth")

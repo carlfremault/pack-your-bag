@@ -60,6 +60,7 @@ async function setup() {
     console.log('✅ Schemas and Users configured successfully.');
   } catch (err) {
     console.error('❌ Database setup failed:', err);
+    process.exit(1);
   } finally {
     await client.end();
   }
