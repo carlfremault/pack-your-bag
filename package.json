@@ -16,7 +16,7 @@
     "db:init": "node --experimental-strip-types scripts/database-setup.ts",
     "db:migrate:auth": "turbo run migrate --filter=auth-service",
     "db:migrate:prod": "turbo run migrate --filter=product-service",
-    "db:generate": "turbo run generate"
+    "db:generate:auth": "turbo run generate --filter=auth-service"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
@@ -28,7 +28,7 @@
     "prisma": "^7.2.0",
     "ts-node": "^10.9.2",
     "turbo": "^2.6.2",
-    "typescript": "5.9.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=22.6.0"

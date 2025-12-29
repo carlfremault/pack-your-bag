@@ -1773,6 +1773,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@prisma/client-runtime-utils@npm:7.2.0":
+  version: 7.2.0
+  resolution: "@prisma/client-runtime-utils@npm:7.2.0"
+  checksum: 10c0/2d28cd04f3e8ef156d27bfc405d85603f9f4c604a54c935a9bbb8ace322c47f795223d168945e5f76ec1978dcdba10d2cef29853e91a93735fc654c69dd5deb4
+  languageName: node
+  linkType: hard
+
+"@prisma/client@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@prisma/client@npm:7.2.0"
+  dependencies:
+    "@prisma/client-runtime-utils": "npm:7.2.0"
+  peerDependencies:
+    prisma: "*"
+    typescript: ">=5.4.0"
+  peerDependenciesMeta:
+    prisma:
+      optional: true
+    typescript:
+      optional: true
+  checksum: 10c0/3c790af2bbfbbcdcaae0f0a8d33b17e8945daa0f731007d85d95ec1c726c7f8a8ed617802e39bde905613d302eaa8eaac804ab9bce5efc4ed174d9985cdf942a
+  languageName: node
+  linkType: hard
+
 "@prisma/config@npm:7.2.0":
   version: 7.2.0
   resolution: "@prisma/config@npm:7.2.0"
@@ -1906,7 +1930,7 @@ __metadata:
     globals: "npm:^16.5.0"
     prettier: "npm:^3.6.2"
     turbo: "npm:^2.6.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.46.3"
   languageName: unknown
   linkType: soft
@@ -3779,6 +3803,7 @@ __metadata:
     "@nestjs/platform-express": "npm:^11.0.1"
     "@nestjs/schematics": "npm:^11.0.0"
     "@nestjs/testing": "npm:^11.0.1"
+    "@prisma/client": "npm:^7.2.0"
     "@repo/eslint-config": "workspace:*"
     "@repo/typescript-config": "workspace:*"
     "@repo/vitest-config": "workspace:*"
@@ -8507,7 +8532,7 @@ __metadata:
     prisma: "npm:^7.2.0"
     ts-node: "npm:^10.9.2"
     turbo: "npm:^2.6.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
 

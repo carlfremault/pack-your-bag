@@ -29,11 +29,13 @@
       "persistent": true
     },
     "generate": {
-      "cache": false,
-      "inputs": ["prisma/schema.prisma"]
+      "cache": true,
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["src/generated/prisma/**"]
     },
     "migrate": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["generate"]
     },
     "transit": {
       "dependsOn": ["^transit"]
