@@ -12,20 +12,27 @@
     "test:browser": "turbo run test:browser",
     "view-report": "turbo run view-report",
     "prepare": "husky",
-    "pre-commit": "turbo run lint --filter=[{staged}] && lint-staged"
+    "pre-commit": "turbo run lint --filter=[{staged}] && lint-staged",
+    "db:init": "node --experimental-strip-types scripts/database-setup.ts",
+    "db:migrate:auth": "turbo run migrate --filter=auth-service",
+    "db:migrate:prod": "turbo run migrate --filter=product-service",
+    "db:generate:auth": "turbo run generate --filter=auth-service",
+    "db:seed:auth": "turbo run seed --filter=auth-service"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.3",
+    "@types/pg": "^8.16.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "playwright": "^1.56.1",
     "prettier": "^3.6.2",
+    "prisma": "^7.2.0",
     "ts-node": "^10.9.2",
     "turbo": "^2.6.2",
-    "typescript": "5.9.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.6.0"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
@@ -36,5 +43,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "dotenv-expand": "^12.0.3",
+    "pg": "^8.16.3"
+  }
 }

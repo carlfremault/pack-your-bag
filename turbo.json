@@ -28,6 +28,20 @@
       "cache": false,
       "persistent": true
     },
+    "generate": {
+      "cache": true,
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["src/generated/prisma/**"]
+    },
+    "migrate": {
+      "cache": false,
+      "dependsOn": ["generate"]
+    },
+    "seed": {
+      "cache": true,
+      "dependsOn": ["migrate"],
+      "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
+    },
     "transit": {
       "dependsOn": ["^transit"]
     }

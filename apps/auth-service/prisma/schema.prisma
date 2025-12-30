@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["app_auth"]
+}
+
+model Role {
+  id        Int       @default(autoincrement()) @id
+  title     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  users User[]
+
+  @@schema("app_auth")
+}
+
+model User {
+  id        String    @id @db.Uuid
+  email     String    @unique
+  password  String    // hashed with Bcrypt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  role      Role      @relation(fields: [roleId], references: [id])
+  roleId    Int
+  
+  @@schema("app_auth")
+}
+

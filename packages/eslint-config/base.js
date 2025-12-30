@@ -38,6 +38,6 @@ export const getBaseConfig = (appDir) =>
       },
     },
     {
-      ignores: ['dist/**'],
+      ignores: ['dist/**', '**/generated/prisma/**'],
     },
   );
