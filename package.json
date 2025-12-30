@@ -16,7 +16,8 @@
     "db:init": "node --experimental-strip-types scripts/database-setup.ts",
     "db:migrate:auth": "turbo run migrate --filter=auth-service",
     "db:migrate:prod": "turbo run migrate --filter=product-service",
-    "db:generate:auth": "turbo run generate --filter=auth-service"
+    "db:generate:auth": "turbo run generate --filter=auth-service",
+    "db:seed:auth": "turbo run seed --filter=auth-service"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

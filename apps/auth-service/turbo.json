@@ -9,6 +9,9 @@
     },
     "migrate": {
       "env": ["AUTH_PORT", "AUTH_URL"]
+    },
+    "seed": {
+      "env": ["AUTH_PORT", "AUTH_URL"]
     }
   }
 }
