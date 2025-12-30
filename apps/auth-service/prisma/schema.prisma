@@ -24,7 +24,7 @@ model User {
   password  String    // hashed with Bcrypt
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
-  role      Role?     @relation(fields: [roleId], references: [id])
+  role      Role      @relation(fields: [roleId], references: [id])
   roleId    Int
   
   @@schema("app_auth")

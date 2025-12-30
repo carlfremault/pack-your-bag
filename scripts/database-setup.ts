@@ -18,6 +18,9 @@ async function setup() {
 
   const client = new Client({ connectionString: adminConnectionString });
 
+  // The CREATEDB privilege is needed for Prisma 'migrate dev' to spin up Shadow Databases locally.
+  // In production, we use 'migrate deploy' which doesn't require this privilege.
+  // Furthermore, managed DB providers often block this flag for non-superuser roles. Trying to grant it would make deployment fail.
   const createDbFlag = isLocal ? 'CREATEDB' : '';
 
   try {
