@@ -5,7 +5,7 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
-    seed: 'node --experimental-strip-types prisma/seed.ts',
+    seed: 'node --experimental-strip-types prisma/seed.mts',
   },
   datasource: {
     url: process.env['AUTH_URL'],

@@ -2,10 +2,9 @@
   "name": "auth-service",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch",
+    "dev": "nest start --watch --debug 0.0.0.0:9229",
     "start": "nest start",
     "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
@@ -22,9 +21,12 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "bcrypt": "^6.0.0",
+    "class-validator": "^0.14.3",
     "dotenv": "^17.2.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuidv7": "^1.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
@@ -33,6 +35,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/vitest-config": "workspace:*",
+    "@types/bcrypt": "^6",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
