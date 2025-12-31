@@ -1,8 +1,8 @@
+import { Response } from 'express';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Prisma } from '@prisma-client';
-import { Response } from 'express';
-import capitalizeFirstLetter from '../utils/capitalizeFirstLetter';
 import { PrismaDriverError } from '../interfaces/prisma-error.interface';
+import capitalizeFirstLetter from '../utils/capitalizeFirstLetter';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
@@ -73,6 +73,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           message: 'Internal server error',
           error: 'Internal Server Error',
         });
+        break;
       }
     }
   }

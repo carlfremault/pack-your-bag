@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch --debug 0.0.0.0:9229",
+    "dev": "nest start --watch --debug 127.0.0.1:9229",
     "start": "nest start",
     "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
@@ -22,6 +22,7 @@
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "dotenv": "^17.2.3",
     "reflect-metadata": "^0.2.2",
