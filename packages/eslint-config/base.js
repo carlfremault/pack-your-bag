@@ -38,12 +38,10 @@ export const getBaseConfig = (appDir) =>
               // 2. Monorepo Workspace (@repo/...)
               ['^@repo/'],
 
-              // 3. ALL External packages (vitest, lodash, @prisma, @anything)
-              // This catches everything from node_modules automatically.
+              // 3. All External packages
               ['^@?\\w'],
 
               // 4. Internal Aliases & Absolute imports
-              // By using the slash ^@/ we distinguish your code from npm @packages.
               ['^@/', '^(@|src|app|modules|components|hooks|utils|services|prisma)(/.*|$)'],
 
               // 5. Parent imports (../)
