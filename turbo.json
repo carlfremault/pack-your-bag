@@ -5,7 +5,8 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["AUTH_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -15,7 +16,8 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["AUTH_*"]
     },
     "test": {
       "dependsOn": ["transit"]
@@ -35,12 +37,14 @@
     },
     "migrate": {
       "cache": false,
-      "dependsOn": ["generate"]
+      "dependsOn": ["generate"],
+      "env": ["AUTH_URL"]
     },
     "seed": {
       "cache": true,
       "dependsOn": ["migrate"],
-      "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
+      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
+      "env": ["AUTH_*"]
     },
     "transit": {
       "dependsOn": ["^transit"]

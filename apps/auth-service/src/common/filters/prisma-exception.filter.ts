@@ -1,0 +1,82 @@
+import { Response } from 'express';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma-client';
+import { PrismaDriverError } from '../interfaces/prisma-error.interface';
+import capitalizeFirstLetter from '../utils/capitalizeFirstLetter';
+
+@Catch(Prisma.PrismaClientKnownRequestError)
+export class PrismaExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaExceptionFilter.name, { timestamp: true });
+
+  catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+
+    switch (exception.code) {
+      case 'P2002': {
+        // Unique constraint failed
+
+        let statusCode = HttpStatus.CONFLICT;
+        let message = 'Record already exists.';
+        let error = 'Conflict';
+
+        const meta = exception.meta as PrismaDriverError;
+        const adapterFields = meta?.driverAdapterError?.cause?.constraint?.fields;
+        const standardFields = meta?.target;
+        const fields = standardFields || adapterFields || [];
+
+        if (fields.includes('id')) {
+          // One-in-a-trillion chance of this happening.
+          // Don't bother user with details, user can just try again.
+          // TODO: send to Sentry
+          this.logger.warn('Data Integrity Error: ID Collision detected', exception);
+          statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+          message = 'Something went wrong, please try again.';
+          error = 'Internal Server Error';
+        } else if (fields.length) {
+          message = `${capitalizeFirstLetter(fields.join(', '))} already exists.`;
+        }
+
+        response.status(statusCode).json({
+          statusCode,
+          message,
+          error,
+        });
+        break;
+      }
+      case 'P2025': {
+        // Record not found
+
+        const meta = exception.meta as PrismaDriverError;
+        const targetModel = meta?.model || 'record';
+        const operation = meta?.operation;
+
+        const isRelationError = operation?.toLowerCase().includes('nested connect');
+
+        const statusCode = isRelationError ? HttpStatus.BAD_REQUEST : HttpStatus.NOT_FOUND;
+        const message = isRelationError
+          ? `The provided ${targetModel} ID does not exist.`
+          : `The requested ${targetModel} was not found.`;
+        const error = isRelationError ? 'Bad Request' : 'Not Found';
+
+        response.status(statusCode).json({
+          statusCode,
+          message,
+          error,
+        });
+        break;
+      }
+      default: {
+        // TODO: send to Sentry
+        this.logger.error(`Unhandled Prisma Error: ${exception.message}`, exception.stack);
+
+        response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Internal server error',
+          error: 'Internal Server Error',
+        });
+        break;
+      }
+    }
+  }
+}
