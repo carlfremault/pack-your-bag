@@ -1,11 +1,13 @@
 import { Response } from 'express';
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma-client';
 import { PrismaDriverError } from '../interfaces/prisma-error.interface';
 import capitalizeFirstLetter from '../utils/capitalizeFirstLetter';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaExceptionFilter.name, { timestamp: true });
+
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -27,7 +29,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           // One-in-a-trillion chance of this happening.
           // Don't bother user with details, user can just try again.
           // TODO: send to Sentry
-          console.error('Data Integrity Error: ID Collision detected', exception);
+          this.logger.warn('Data Integrity Error: ID Collision detected', exception);
           statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
           message = 'Something went wrong, please try again.';
           error = 'Internal Server Error';
@@ -66,7 +68,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       }
       default: {
         // TODO: send to Sentry
-        console.error('Unhandled Prisma Error:', exception);
+        this.logger.error(`Unhandled Prisma Error: ${exception.message}`, exception.stack);
 
         response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
