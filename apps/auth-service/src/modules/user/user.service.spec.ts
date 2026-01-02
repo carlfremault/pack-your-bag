@@ -15,8 +15,6 @@ describe('UserService', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-
-    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
