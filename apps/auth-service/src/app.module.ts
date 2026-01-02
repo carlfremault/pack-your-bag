@@ -36,8 +36,8 @@ import { PrismaModule } from './prisma/prisma.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
         {
-          ttl: config.get('AUTH_THROTTLE_TTL', 60000), // 1 minute
-          limit: config.get('AUTH_THROTTLE_LIMIT', 100), // Global limit
+          ttl: config.get('AUTH_THROTTLE_TTL', 60000),
+          limit: config.get('AUTH_THROTTLE_LIMIT', 100),
         },
       ],
     }),
