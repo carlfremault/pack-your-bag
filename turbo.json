@@ -20,7 +20,8 @@
       "env": ["AUTH_*"]
     },
     "test": {
-      "dependsOn": ["transit"]
+      "dependsOn": ["transit"],
+      "env": ["AUTH_*"]
     },
     "test:watch": {
       "cache": false,
