@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
 import { Prisma } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { uuidv7 } from 'uuidv7';
-import { UserService } from '@/modules/user/user.service';
+
 import { UserDto } from '@/modules/user/dtos/user.dto';
+import { UserService } from '@/modules/user/user.service';
 
 @Injectable()
 export class AuthService {
