@@ -5574,6 +5574,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-simple-import-sort@npm:^12.1.1":
+  version: 12.1.1
+  resolution: "eslint-plugin-simple-import-sort@npm:12.1.1"
+  peerDependencies:
+    eslint: ">=5.0.0"
+  checksum: 10c0/0ad1907ad9ddbadd1db655db0a9d0b77076e274b793a77b982c8525d808d868e6ecfce24f3a411e8a1fa551077387f9ebb38c00956073970ebd7ee6a029ce2b3
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-turbo@npm:^2.6.0":
   version: 2.6.1
   resolution: "eslint-plugin-turbo@npm:2.6.1"
@@ -8696,6 +8705,7 @@ __metadata:
     "@types/pg": "npm:^8.16.0"
     dotenv: "npm:^17.2.3"
     dotenv-expand: "npm:^12.0.3"
+    eslint-plugin-simple-import-sort: "npm:^12.1.1"
     husky: "npm:^9.1.7"
     lint-staged: "npm:^16.2.7"
     pg: "npm:^8.16.3"

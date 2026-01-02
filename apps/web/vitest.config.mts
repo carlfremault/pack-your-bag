@@ -1,6 +1,7 @@
-import { defineConfig } from 'vitest/config';
 import { uiConfig } from '@repo/vitest-config/ui';
+
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   ...uiConfig,

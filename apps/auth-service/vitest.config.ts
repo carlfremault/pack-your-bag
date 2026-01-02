@@ -1,4 +1,5 @@
 import { nestjsConfig } from '@repo/vitest-config/nestjs';
+
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 export default mergeConfig(

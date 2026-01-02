@@ -1,6 +1,8 @@
-import { Response } from 'express';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
+
 import { Prisma } from '@prisma-client';
+import { Response } from 'express';
+
 import { PrismaDriverError } from '../interfaces/prisma-error.interface';
 import capitalizeFirstLetter from '../utils/capitalizeFirstLetter';
 

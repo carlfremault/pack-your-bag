@@ -2,7 +2,9 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+
 import Joi from 'joi';
+
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';

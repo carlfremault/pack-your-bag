@@ -1,4 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
+
 import { PrismaClient } from '../src/generated/prisma/index.js';
 
 const connectionString = process.env.AUTH_URL;
