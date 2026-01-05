@@ -19,6 +19,10 @@
       "persistent": true,
       "env": ["AUTH_*"]
     },
+    "test:reset-db": {
+      "cache": false,
+      "env": ["AUTH_*"]
+    },
     "test": {
       "dependsOn": ["transit"],
       "env": ["AUTH_*"]
