@@ -51,7 +51,9 @@ describe('AuthService', () => {
     await service.register(userDto);
     expect(mockUserService.createUser).toHaveBeenCalledTimes(1);
 
-    const createUserArgs = mockUserService.createUser.mock.lastCall![0] as Prisma.UserCreateInput;
+    const lastCall = mockUserService.createUser.mock.lastCall;
+    expect(lastCall).toBeDefined();
+    const createUserArgs = lastCall![0] as Prisma.UserCreateInput;
     expect(createUserArgs.id).toBeDefined();
     expect(createUserArgs.email).toBe(userDto.email);
     expect(createUserArgs.password).not.toBe(userDto.password);

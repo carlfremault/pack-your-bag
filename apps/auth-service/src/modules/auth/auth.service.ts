@@ -29,7 +29,7 @@ export class AuthService {
 
     const data: Prisma.UserCreateInput = {
       id: uuid,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       role: {
         connect: { id: this.defaultUserRoleId },
