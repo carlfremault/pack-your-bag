@@ -32,6 +32,12 @@ import { PrismaModule } from './prisma/prisma.module';
 
         // Default Role
         AUTH_DEFAULT_USER_ROLE_ID: Joi.number().default(1),
+
+        // JWT
+        RSA_PRIVATE_KEY_B64: Joi.string().base64().required().messages({
+          'string.base64': 'RSA_PRIVATE_KEY_B64 must be a valid base64 encoded string',
+        }),
+        AUTH_JWT_EXPIRATION: Joi.number().default(3600),
       }),
     }),
     ThrottlerModule.forRootAsync({

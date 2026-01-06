@@ -6,7 +6,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["AUTH_*"]
+      "env": ["AUTH_*", "RSA_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -17,23 +17,23 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*"]
+      "env": ["AUTH_*", "RSA_*"]
     },
     "test:setup": {
       "dependsOn": ["transit"],
-      "env": ["AUTH_*", "NODE_ENV"],
+      "env": ["AUTH_*", "RSA_*", "NODE_ENV"],
       "cache": true,
       "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
     },
     "test": {
       "dependsOn": ["test:setup"],
-      "env": ["AUTH_*"]
+      "env": ["AUTH_*", "RSA_*"]
     },
     "test:watch": {
       "dependsOn": ["test:setup"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*"]
+      "env": ["AUTH_*", "RSA_*"]
     },
     "test:browser": {
       "cache": false,

@@ -1,4 +1,6 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import bcrypt from 'bcrypt';
@@ -13,7 +15,12 @@ describe('AuthService', () => {
   let userService: UserService;
 
   const mockUserService = {
-    createUser: vi.fn(),
+    createUser: vi.fn().mockResolvedValue({ id: 'uuid-123', roleId: 1 }),
+    getUser: vi.fn(),
+  };
+
+  const mockJwtService = {
+    signAsync: vi.fn().mockResolvedValue('mock-jwt-token'),
   };
 
   const mockConfigService = {
@@ -31,6 +38,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: JwtService, useValue: mockJwtService },
         { provide: UserService, useValue: mockUserService },
       ],
     }).compile();
@@ -45,36 +53,74 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  it('register should call userService.createUser with correctly prepared data', async () => {
-    const userDto = { email: 'testemail@test.com', password: 'validPassword123' };
-    mockUserService.createUser.mockResolvedValue({});
-    await service.register(userDto);
+  describe('register', () => {
+    it('register should call userService.createUser with correctly prepared data', async () => {
+      const userDto = { email: 'testemail@test.com', password: 'validPassword123' };
+      await service.register(userDto);
 
-    expect(mockUserService.createUser).toHaveBeenCalledTimes(1);
+      expect(mockUserService.createUser).toHaveBeenCalledTimes(1);
 
-    const mockedUserService = vi.mocked(userService);
-    const lastCall = mockedUserService.createUser.mock.lastCall;
+      const mockedUserService = vi.mocked(userService);
+      const lastCall = mockedUserService.createUser.mock.lastCall;
+      expect(lastCall).toBeDefined();
+      const createUserArgs = lastCall![0];
 
-    expect(lastCall).toBeDefined();
-    const createUserArgs = lastCall![0];
+      expect(createUserArgs.id).toBeDefined();
+      expect(createUserArgs.email).toBe(userDto.email);
 
-    expect(createUserArgs.id).toBeDefined();
-    expect(createUserArgs.email).toBe(userDto.email);
+      expect(createUserArgs.password).not.toBe(userDto.password);
+      const isMatch = await bcrypt.compare(userDto.password, createUserArgs.password);
+      expect(isMatch).toBe(true);
 
-    expect(createUserArgs.password).not.toBe(userDto.password);
-    const isMatch = await bcrypt.compare(userDto.password, createUserArgs.password);
-    expect(isMatch).toBe(true);
+      expect(createUserArgs.role).toEqual({
+        connect: { id: 1 },
+      });
+    });
 
-    expect(createUserArgs.role).toEqual({
-      connect: { id: 1 },
+    it('should transform email to lowercase before persistence', async () => {
+      const userDto = { email: 'UPPER@domain.COM', password: 'validPassword123' };
+      await service.register(userDto);
+      const mockedUserService = vi.mocked(userService);
+      const createUserArgs = mockedUserService.createUser.mock.lastCall![0];
+      expect(createUserArgs.email).toBe('upper@domain.com');
     });
   });
 
-  it('should transform email to lowercase before persistence', async () => {
-    const userDto = { email: 'UPPER@domain.COM', password: 'validPassword123' };
-    await service.register(userDto);
-    const mockedUserService = vi.mocked(userService);
-    const createUserArgs = mockedUserService.createUser.mock.lastCall![0];
-    expect(createUserArgs.email).toBe('upper@domain.com');
+  describe('signin', () => {
+    const userDto = { email: 'testemail@test.com', password: 'validPassword123' };
+    const mockUser = {
+      id: 'uuid-123',
+      email: 'testemail@test.com',
+      password: '',
+      roleId: 1,
+    };
+
+    it('should return tokens for valid credentials', async () => {
+      const hashedPassword = await bcrypt.hash(userDto.password, 10);
+      mockUserService.getUser.mockResolvedValue({ ...mockUser, password: hashedPassword });
+
+      const result = await service.signin(userDto);
+      expect(result.access_token).toBe('mock-jwt-token');
+      expect(mockUserService.getUser).toHaveBeenCalledWith({ email: 'testemail@test.com' });
+    });
+
+    it('should throw UnauthorizedException if user is not found', async () => {
+      mockUserService.getUser.mockResolvedValue(null);
+      await expect(service.signin(userDto)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException if password does not match', async () => {
+      const wrongHashedPassword = await bcrypt.hash('differentPassword', 10);
+      mockUserService.getUser.mockResolvedValue({ ...mockUser, password: wrongHashedPassword });
+      await expect(service.signin(userDto)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should transform email to lowercase when looking up user', async () => {
+      mockUserService.getUser.mockResolvedValue(null);
+      const upperCaseDto = { email: 'TESTEMAIL@Test.Com', password: 'validPassword123' };
+
+      await service.signin(upperCaseDto).catch(() => {});
+      expect(mockUserService.getUser).toHaveBeenCalledWith({ email: 'testemail@test.com' });
+    });
   });
 });

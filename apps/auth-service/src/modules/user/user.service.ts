@@ -13,4 +13,10 @@ export class UserService {
       data,
     });
   }
+
+  async getUser(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where,
+    });
+  }
 }
