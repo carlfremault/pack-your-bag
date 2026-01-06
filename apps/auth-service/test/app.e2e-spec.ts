@@ -70,7 +70,11 @@ describe('AppController (e2e)', () => {
         payload: userDtoWithInvalidEmail,
       },
     ])('should return 400 when $condition', async ({ payload }) => {
-      await request(app.getHttpServer()).post('/auth/register').send(payload).expect(400);
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send(payload)
+        .expect(400);
+      expect((response.body as { message: string }).message).toBeDefined();
     });
   });
 
@@ -88,14 +92,19 @@ describe('AppController (e2e)', () => {
 
   it('/register (POST) - should not accept a duplicate email', async () => {
     await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
-    await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(409);
+    const response = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(validUserDto)
+      .expect(409);
+    expect((response.body as { message: string }).message).toBeDefined();
   });
 
   it('/register (POST) - should not accept a duplicate email with different casing', async () => {
     await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
-    await request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post('/auth/register')
       .send(validUserDtoWithUppercaseEmail)
       .expect(409);
+    expect((response.body as { message: string }).message).toBeDefined();
   });
 });

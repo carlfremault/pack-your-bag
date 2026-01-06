@@ -19,15 +19,18 @@
       "persistent": true,
       "env": ["AUTH_*"]
     },
-    "test:reset-db": {
-      "cache": false,
-      "env": ["AUTH_*"]
+    "test:setup": {
+      "dependsOn": ["transit"],
+      "env": ["AUTH_*", "NODE_ENV"],
+      "cache": true,
+      "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
     },
     "test": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["test:setup"],
       "env": ["AUTH_*"]
     },
     "test:watch": {
+      "dependsOn": ["test:setup"],
       "cache": false,
       "persistent": true,
       "env": ["AUTH_*"]

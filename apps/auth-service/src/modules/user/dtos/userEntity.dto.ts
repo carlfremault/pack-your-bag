@@ -2,11 +2,11 @@ import { Expose } from 'class-transformer';
 
 export class UserEntity {
   @Expose()
-  id: number;
+  readonly id: number;
 
   @Expose()
-  email: string;
+  readonly email: string;
 
   @Expose()
-  roleId: number;
+  readonly roleId: number;
 }

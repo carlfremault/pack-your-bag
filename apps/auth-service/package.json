@@ -8,7 +8,7 @@
     "start": "nest start",
     "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
-    "test:reset-db": "prisma db push --accept-data-loss && prisma db seed",
+    "test:setup": "node -e \"if(process.env.NODE_ENV!=='test')throw new Error('Must set NODE_ENV=test')\" && prisma db push --accept-data-loss && prisma db seed",
     "test": "vitest run",
     "test:watch": "vitest --watch --no-coverage",
     "migrate": "prisma migrate dev",
