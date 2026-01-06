@@ -19,11 +19,18 @@
       "persistent": true,
       "env": ["AUTH_*"]
     },
-    "test": {
+    "test:setup": {
       "dependsOn": ["transit"],
+      "env": ["AUTH_*", "NODE_ENV"],
+      "cache": true,
+      "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
+    },
+    "test": {
+      "dependsOn": ["test:setup"],
       "env": ["AUTH_*"]
     },
     "test:watch": {
+      "dependsOn": ["test:setup"],
       "cache": false,
       "persistent": true,
       "env": ["AUTH_*"]
@@ -35,7 +42,8 @@
     "generate": {
       "cache": true,
       "inputs": ["prisma/schema.prisma"],
-      "outputs": ["src/generated/prisma/**"]
+      "outputs": ["src/generated/prisma/**"],
+      "env": ["AUTH_URL"]
     },
     "migrate": {
       "cache": false,
