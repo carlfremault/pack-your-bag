@@ -1,11 +1,12 @@
 import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { UserEntity } from '@/modules/user/dtos/userEntity.dto';
+import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { AppModule } from '../src/app.module';
@@ -13,6 +14,7 @@ import { AppModule } from '../src/app.module';
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
+  let configService: ConfigService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,6 +23,7 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
+    configService = moduleFixture.get(ConfigService);
     await app.init();
   });
 
@@ -79,10 +82,10 @@ describe('AppController (e2e)', () => {
       .send(validUserDto)
       .expect(201);
 
-    const body = response.body as UserEntity;
-    expect(body.email).toBe(validUserDto.email);
-    expect(body.id).toBeDefined();
-    expect(body).not.toHaveProperty('password');
+    const body = response.body as AuthResponseDto;
+    expect(body.access_token).toBeDefined();
+    expect(body.token_type).toBe('Bearer');
+    expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
   });
 
   it('/register (POST) - should not accept a duplicate email', async () => {
@@ -100,6 +103,48 @@ describe('AppController (e2e)', () => {
       .post('/auth/register')
       .send(validUserDtoWithUppercaseEmail)
       .expect(409);
+    expect((response.body as { message: string }).message).toBeDefined();
+  });
+
+  it('/signin (POST) - should signin existing user with correct credentials', async () => {
+    await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
+    const response = await request(app.getHttpServer())
+      .post('/auth/signin')
+      .send(validUserDto)
+      .expect(200);
+
+    const body = response.body as AuthResponseDto;
+    expect(body.access_token).toBeDefined();
+    expect(body.token_type).toBe('Bearer');
+    expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
+  });
+  it('/signin (POST) - should signin existing user with correct credentials and different email casing', async () => {
+    await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
+    const response = await request(app.getHttpServer())
+      .post('/auth/signin')
+      .send(validUserDtoWithUppercaseEmail)
+      .expect(200);
+
+    const body = response.body as AuthResponseDto;
+    expect(body.access_token).toBeDefined();
+    expect(body.token_type).toBe('Bearer');
+    expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
+  });
+
+  it('/signin (POST) - should not signin with incorrect password', async () => {
+    await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
+    const response = await request(app.getHttpServer())
+      .post('/auth/signin')
+      .send({ email: validUserDto.email, password: 'IncorrectPassword123' })
+      .expect(401);
+    expect((response.body as { message: string }).message).toBeDefined();
+  });
+
+  it('/signin (POST) - should not signin non-existing user', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/signin')
+      .send(validUserDto)
+      .expect(401);
     expect((response.body as { message: string }).message).toBeDefined();
   });
 });
