@@ -41,33 +41,28 @@ describe('AppController (e2e)', () => {
     email: 'TESTEMAIL@TEST.COM',
     password: 'validPassword123',
   };
-  const userDtoWithoutPassword = { email: 'testemail@test.com' };
-  const userDtoWithoutEmail = { password: 'validPassword123' };
-  const userDtoWithShortPassword = { email: 'testemail@test.com', password: 'short' };
-  const userDtoWithUnsafePassword = { email: 'testemail@test.com', password: 'unsafepassword' };
-  const userDtoWithInvalidEmail = { email: 'invalidemail', password: 'validPassword123' };
 
   describe('/register (POST) - should validate input data', () => {
     it.each([
       {
         condition: 'missing password',
-        payload: userDtoWithoutPassword,
+        payload: { email: 'testemail@test.com' },
       },
       {
         condition: 'missing email',
-        payload: userDtoWithoutEmail,
+        payload: { password: 'validPassword123' },
       },
       {
         condition: 'short password',
-        payload: userDtoWithShortPassword,
+        payload: { email: 'testemail@test.com', password: 'short' },
       },
       {
         condition: 'unsafe password',
-        payload: userDtoWithUnsafePassword,
+        payload: { email: 'testemail@test.com', password: 'unsafepassword' },
       },
       {
         condition: 'invalid email format',
-        payload: userDtoWithInvalidEmail,
+        payload: { email: 'invalidemail', password: 'validPassword123' },
       },
     ])('should return 400 when $condition', async ({ payload }) => {
       const response = await request(app.getHttpServer())
