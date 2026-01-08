@@ -7,6 +7,7 @@ import Joi from 'joi';
 
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -51,6 +52,7 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     AuthModule,
     PrismaModule,
+    UserModule,
   ],
   providers: [
     {

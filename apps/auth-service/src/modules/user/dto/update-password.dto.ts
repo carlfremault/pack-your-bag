@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 import {
   PASSWORD_MAX_LENGTH,
@@ -9,10 +9,10 @@ import {
   PASSWORD_REGEX,
 } from '@/common/constants/auth.constants';
 
-export class UserDto {
+export class UpdatePasswordDto {
   @IsNotEmpty()
-  @IsEmail()
-  readonly email: string;
+  @IsString()
+  readonly currentPassword: string;
 
   @IsNotEmpty()
   @IsString()
@@ -21,5 +21,5 @@ export class UserDto {
   })
   @MinLength(PASSWORD_MIN_LENGTH, { message: PASSWORD_MIN_LENGTH_MESSAGE })
   @MaxLength(PASSWORD_MAX_LENGTH, { message: PASSWORD_MAX_LENGTH_MESSAGE })
-  readonly password: string;
+  readonly newPassword: string;
 }
