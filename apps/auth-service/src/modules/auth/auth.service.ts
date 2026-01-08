@@ -25,9 +25,9 @@ export class AuthService {
   private readonly dummyHash: string;
 
   constructor(
-    private configService: ConfigService,
-    private jwtService: JwtService,
-    private userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
   ) {
     this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
     this.defaultUserRoleId = this.configService.get<number>('AUTH_DEFAULT_USER_ROLE_ID', 1);
