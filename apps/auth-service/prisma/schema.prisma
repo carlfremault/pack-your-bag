@@ -19,14 +19,34 @@ model Role {
 }
 
 model User {
-  id        String    @id @db.Uuid
-  email     String    @unique
-  password  String    // hashed with Bcrypt
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  role      Role      @relation(fields: [roleId], references: [id])
-  roleId    Int
+  id            String    @id @db.Uuid
+  email         String    @unique
+  password      String    // hashed with Bcrypt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  role          Role      @relation(fields: [roleId], references: [id])
+  roleId        Int
+  refreshToken  RefreshToken[]
   
+  @@schema("app_auth")
+}
+
+model RefreshToken {
+  id            String        @id @db.Uuid
+  family        String        @db.Uuid
+  isRevoked     Boolean       @default(false)
+  revokedAt     DateTime?
+  expiresAt     DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String        @db.Uuid
+  replacedBy    RefreshToken? @relation("TokenRotation", fields: [replacedById], references: [id])
+  replacedById  String?       @unique @db.Uuid
+  replaces      RefreshToken? @relation("TokenRotation")
+
+  @@index([family])
+  @@index([userId])
   @@schema("app_auth")
 }
 
