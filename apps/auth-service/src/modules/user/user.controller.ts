@@ -1,4 +1,5 @@
 import { Body, Controller, Patch, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
@@ -12,6 +13,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Patch('update-password')
   async updatePassword(@CurrentUser('userId') userId: string, @Body() body: UpdatePasswordDto) {
     await this.userService.updatePassword(userId, body);

@@ -86,7 +86,7 @@ describe('AuthService', () => {
     });
   });
 
-  describe('signin', () => {
+  describe('login', () => {
     const userDto = { email: 'testemail@test.com', password: 'validPassword123' };
     const mockUser = {
       id: 'uuid-123',
@@ -99,27 +99,36 @@ describe('AuthService', () => {
       const hashedPassword = await bcrypt.hash(userDto.password, 10);
       mockUserService.getUser.mockResolvedValue({ ...mockUser, password: hashedPassword });
 
-      const result = await service.signin(userDto);
+      const result = await service.login(userDto);
       expect(result.access_token).toBe('mock-jwt-token');
       expect(mockUserService.getUser).toHaveBeenCalledWith({ email: 'testemail@test.com' });
+      expect(mockJwtService.signAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sub: mockUser.id,
+          role: mockUser.roleId,
+        }),
+        expect.objectContaining({
+          expiresIn: 3600,
+        }),
+      );
     });
 
     it('should throw UnauthorizedException if user is not found', async () => {
       mockUserService.getUser.mockResolvedValue(null);
-      await expect(service.signin(userDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(userDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if password does not match', async () => {
       const wrongHashedPassword = await bcrypt.hash('differentPassword', 10);
       mockUserService.getUser.mockResolvedValue({ ...mockUser, password: wrongHashedPassword });
-      await expect(service.signin(userDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(userDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should transform email to lowercase when looking up user', async () => {
       mockUserService.getUser.mockResolvedValue(null);
       const upperCaseDto = { email: 'TESTEMAIL@Test.Com', password: 'validPassword123' };
 
-      await service.signin(upperCaseDto).catch(() => {});
+      await service.login(upperCaseDto).catch(() => {});
       expect(mockUserService.getUser).toHaveBeenCalledWith({ email: 'testemail@test.com' });
     });
   });
