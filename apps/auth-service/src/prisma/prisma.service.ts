@@ -9,23 +9,31 @@ import { PrismaClient } from '@/generated/prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name, { timestamp: true });
-  private pool: Pool;
+  private readonly pool: Pool;
 
   constructor(configService: ConfigService) {
-    const connectionString = configService.get<string>('AUTH_URL');
+    const connectionString = configService.getOrThrow<string>('AUTH_URL');
 
-    if (!connectionString) {
-      throw new Error('❌ Connection failed: AUTH_URL is missing in .env');
-    }
-    const poolInstance = new Pool({ connectionString });
+    const poolInstance = new Pool({
+      connectionString,
+      max: configService.get<number>('AUTH_DB_POOL_MAX', 20),
+      idleTimeoutMillis: configService.get<number>('AUTH_DB_IDLE_TIMEOUT', 30000),
+      connectionTimeoutMillis: configService.get<number>('AUTH_DB_CONN_TIMEOUT', 5000),
+    });
+
     const adapter = new PrismaPg(poolInstance);
     super({ adapter });
     this.pool = poolInstance;
   }
 
   async onModuleInit() {
-    await this.$connect();
-    this.logger.log('Database connection established');
+    try {
+      await this.$connect();
+      this.logger.log('✅ Database connection established successfully');
+    } catch (err) {
+      this.logger.error('❌ Failed to connect to the database on init', err);
+      throw err;
+    }
   }
 
   async onModuleDestroy() {

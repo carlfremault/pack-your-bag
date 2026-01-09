@@ -11,7 +11,8 @@ import { Prisma } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { uuidv7 } from 'uuidv7';
 
-import { UserDto } from '@/modules/user/dto/user.dto';
+import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
+import { RegisterAndSignInDto } from '@/modules/user/dto/register-and-sign-in.dto';
 import { UserService } from '@/modules/user/user.service';
 
 import { AuthResponseDto } from './dto/auth-response.dto';
@@ -29,13 +30,13 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
   ) {
-    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
-    this.defaultUserRoleId = this.configService.get<number>('AUTH_DEFAULT_USER_ROLE_ID', 1);
+    this.bcryptSaltRounds = Number(this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10));
+    this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
     this.jwtExpiresIn = this.configService.get<number>('AUTH_JWT_EXPIRATION', 3600);
     this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
   }
 
-  async register(body: UserDto): Promise<AuthResponseDto> {
+  async register(body: RegisterAndSignInDto): Promise<AuthResponseDto> {
     const { email, password } = body;
 
     const uuid = uuidv7();
@@ -54,7 +55,7 @@ export class AuthService {
     return this.generateAuthResponse(newUser.id, newUser.roleId);
   }
 
-  async signin(body: UserDto): Promise<AuthResponseDto> {
+  async login(body: RegisterAndSignInDto): Promise<AuthResponseDto> {
     const { email, password } = body;
 
     const user = await this.userService.getUser({ email: email.toLowerCase() });
@@ -72,7 +73,9 @@ export class AuthService {
     const payload = { sub: userId, role: roleId };
 
     try {
-      const token = await this.jwtService.signAsync(payload);
+      const token = await this.jwtService.signAsync(payload, {
+        expiresIn: this.jwtExpiresIn,
+      });
 
       return {
         access_token: token,

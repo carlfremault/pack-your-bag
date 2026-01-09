@@ -1,8 +1,8 @@
-import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { User } from '@prisma/client';
+import { User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 

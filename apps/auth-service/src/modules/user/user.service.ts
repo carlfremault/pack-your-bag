@@ -16,7 +16,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
+    this.bcryptSaltRounds = Number(this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10));
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {

@@ -9,7 +9,7 @@ import {
   PASSWORD_REGEX,
 } from '@/common/constants/auth.constants';
 
-export class UserDto {
+export class RegisterAndSignInDto {
   @IsNotEmpty()
   @IsEmail()
   readonly email: string;

@@ -39,20 +39,21 @@
       "cache": false,
       "persistent": true
     },
+    "migrate": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["AUTH_URL"]
+    },
     "generate": {
       "cache": true,
+      "dependsOn": ["migrate"],
       "inputs": ["prisma/schema.prisma"],
       "outputs": ["src/generated/prisma/**"],
       "env": ["AUTH_URL"]
     },
-    "migrate": {
-      "cache": false,
-      "dependsOn": ["generate"],
-      "env": ["AUTH_URL"]
-    },
     "seed": {
       "cache": true,
-      "dependsOn": ["migrate"],
+      "dependsOn": ["generate"],
       "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
       "env": ["AUTH_*"]
     },
