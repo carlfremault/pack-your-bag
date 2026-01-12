@@ -85,6 +85,7 @@ export class RefreshTokenService {
         this.logger.warn(`Race condition detected: Token in grace period used. userId=${userId}`);
         return latestValidToken;
       }
+      this.logger.debug(`Grace period token used but no valid replacement found. userId=${userId}`);
       throw new UnauthorizedException('Invalid refresh token');
     }
 
