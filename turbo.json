@@ -44,6 +44,11 @@
       "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
       "env": ["AUTH_URL"]
     },
+    "status": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["AUTH_URL"]
+    },
     "generate": {
       "cache": true,
       "dependsOn": ["migrate"],
@@ -52,7 +57,7 @@
       "env": ["AUTH_URL"]
     },
     "seed": {
-      "cache": true,
+      "cache": false,
       "dependsOn": ["generate"],
       "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
       "env": ["AUTH_*"]

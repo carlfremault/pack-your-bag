@@ -18,6 +18,7 @@
     "db:init:test": "cross-env NODE_ENV=test node --experimental-strip-types scripts/database-setup.ts",
     "db:migrate:auth": "turbo run migrate --filter=auth-service",
     "db:migrate:prod": "turbo run migrate --filter=product-service",
+    "db:status:auth": "turbo run status --filter=auth-service",
     "db:generate:auth": "turbo run generate --filter=auth-service",
     "db:seed:auth": "turbo run seed --filter=auth-service"
   },

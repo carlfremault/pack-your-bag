@@ -7,3 +7,4 @@ export const PASSWORD_MAX_LENGTH = 128;
 export const PASSWORD_MAX_LENGTH_MESSAGE = `Password must not exceed ${PASSWORD_MAX_LENGTH} characters.`;
 
 export const AUTH_DEFAULT_USER_ROLE_ID = 1;
+export const REFRESH_TOKEN_GRACE_PERIOD_MS = 15 * 1000;

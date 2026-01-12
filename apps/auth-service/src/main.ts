@@ -4,8 +4,13 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const logLevels: ('log' | 'error' | 'warn' | 'debug' | 'verbose')[] =
+    process.env.NODE_ENV === 'production'
+      ? ['log', 'error', 'warn']
+      : ['log', 'error', 'warn', 'debug'];
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: ['log', 'error', 'warn'],
+    logger: logLevels,
   });
   app.set('trust proxy', 1);
   await app.listen(process.env.AUTH_PORT ?? 8001);

@@ -40,7 +40,8 @@ import { PrismaModule } from './prisma/prisma.module';
         RSA_PRIVATE_KEY_B64: Joi.string().base64().required().messages({
           'string.base64': 'RSA_PRIVATE_KEY_B64 must be a valid base64 encoded string',
         }),
-        AUTH_JWT_EXPIRATION: Joi.number().default(3600),
+        AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(900),
+        AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
       }),
     }),
     ThrottlerModule.forRootAsync({

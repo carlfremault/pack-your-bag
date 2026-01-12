@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 import {
@@ -9,9 +10,11 @@ import {
   PASSWORD_REGEX,
 } from '@/common/constants/auth.constants';
 
-export class RegisterAndSignInDto {
+export class AuthCredentialsDto {
   @IsNotEmpty()
+  @IsString()
   @IsEmail()
+  @Transform(({ value }: { value: string }) => value?.trim().toLowerCase())
   readonly email: string;
 
   @IsNotEmpty()
