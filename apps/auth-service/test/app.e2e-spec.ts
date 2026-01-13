@@ -85,7 +85,9 @@ describe('AppController (e2e)', () => {
       const body = response.body as AuthResponseDto;
       expect(body.access_token).toBeDefined();
       expect(body.token_type).toBe('Bearer');
-      expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
+      expect(body.expires_in).toBe(
+        configService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS') || 900,
+      );
     });
 
     it('/register (POST) - should not accept a duplicate email', async () => {
@@ -150,7 +152,9 @@ describe('AppController (e2e)', () => {
       const body = response.body as AuthResponseDto;
       expect(body.access_token).toBeDefined();
       expect(body.token_type).toBe('Bearer');
-      expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
+      expect(body.expires_in).toBe(
+        configService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS') || 900,
+      );
     });
     it('/login (POST) - should signiloginn existing user with correct credentials and different email casing', async () => {
       await request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
@@ -162,7 +166,9 @@ describe('AppController (e2e)', () => {
       const body = response.body as AuthResponseDto;
       expect(body.access_token).toBeDefined();
       expect(body.token_type).toBe('Bearer');
-      expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
+      expect(body.expires_in).toBe(
+        configService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS') || 900,
+      );
     });
 
     it('/login (POST) - should not login with incorrect password', async () => {
@@ -248,7 +254,9 @@ describe('AppController (e2e)', () => {
       const body = response.body as AuthResponseDto;
       expect(body.access_token).toBeDefined();
       expect(body.token_type).toBe('Bearer');
-      expect(body.expires_in).toBe(configService.get('AUTH_JWT_EXPIRATION') || 3600);
+      expect(body.expires_in).toBe(
+        configService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS') || 900,
+      );
     });
   });
 });

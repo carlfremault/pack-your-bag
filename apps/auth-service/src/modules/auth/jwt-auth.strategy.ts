@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtAuthStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
     const publicKey = Buffer.from(
       configService.getOrThrow<string>('RSA_PUBLIC_KEY_B64'),
@@ -21,6 +21,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: { sub: string; role: number }) {
+    if (!payload.sub || !payload.role) {
+      throw new UnauthorizedException('Invalid refresh token payload');
+    }
     return { userId: payload.sub, roleId: payload.role };
   }
 }

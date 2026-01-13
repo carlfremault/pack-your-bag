@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest --watch --no-coverage",
     "migrate": "prisma migrate dev",
+    "status": "prisma migrate status",
     "generate": "prisma generate",
     "seed": "prisma db seed"
   },

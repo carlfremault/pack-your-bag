@@ -5,8 +5,14 @@ export class AuthResponseDto {
   readonly access_token: string;
 
   @Expose()
+  readonly refresh_token: string;
+
+  @Expose()
   readonly token_type: string = 'Bearer';
 
   @Expose()
   readonly expires_in: number;
+
+  @Expose()
+  readonly user: { id: string; role: number };
 }

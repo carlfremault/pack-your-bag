@@ -31,7 +31,7 @@ export class UserService {
     });
   }
 
-  async updatePassword(userId: string, body: UpdatePasswordDto): Promise<void> {
+  async updatePassword(userId: string, body: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = body;
 
     if (currentPassword === newPassword) {
@@ -50,9 +50,26 @@ export class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
+    return await this.prisma.$transaction(async (tx) => {
+      // Update Password
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+
+      // Revoke all active tokens for this user
+      await tx.refreshToken.updateMany({
+        where: {
+          userId,
+          isRevoked: false,
+        },
+        data: {
+          isRevoked: true,
+          revokedAt: new Date(),
+        },
+      });
+
+      return updatedUser;
     });
   }
 }
