@@ -12,8 +12,9 @@ import bcrypt from 'bcrypt';
 import { uuidv7 } from 'uuidv7';
 
 import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
-import { AuthCredentialsDto } from '@/modules/user/dto/auth-credentials';
+import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
 
 import { AuthResponseDto } from './dto/auth-response.dto';
@@ -136,6 +137,14 @@ export class AuthService {
       isRevoked: false,
       userId,
     });
+  }
+
+  async updatePasswordAndReauthenticate(
+    userId: string,
+    body: UpdatePasswordDto,
+  ): Promise<AuthResponseDto> {
+    const user = await this.userService.updatePassword(userId, body);
+    return this.issueRefreshToken(user.id, user.roleId);
   }
 
   // Helper functions

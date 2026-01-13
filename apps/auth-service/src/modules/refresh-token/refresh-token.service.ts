@@ -87,7 +87,7 @@ export class RefreshTokenService {
         return latestValidToken;
       }
       this.logger.debug(`Grace period token used but no valid replacement found. userId=${userId}`);
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Session expired');
     }
 
     // Case 2. Token reused or expired

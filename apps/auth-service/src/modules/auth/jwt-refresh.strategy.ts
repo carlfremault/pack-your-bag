@@ -22,7 +22,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     });
   }
 
-  validate(req: Request, payload: { type: string; sub: string; jti: string; family: string }) {
+  validate(_req: Request, payload: { sub: string; jti: string; family: string }) {
     if (!payload.sub || !payload.jti || !payload.family) {
       throw new UnauthorizedException('Invalid refresh token payload');
     }

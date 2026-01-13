@@ -1,10 +1,20 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
-import { AuthCredentialsDto } from '@/modules/user/dto/auth-credentials';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
@@ -54,5 +64,13 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logoutAllDevices(@CurrentUser('userId') userId: string) {
     return this.authService.logoutAllDevices(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Serialize(AuthResponseDto)
+  @Patch('update-password')
+  async updatePassword(@CurrentUser('userId') userId: string, @Body() body: UpdatePasswordDto) {
+    return this.authService.updatePasswordAndReauthenticate(userId, body);
   }
 }
