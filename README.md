@@ -1,6 +1,7 @@
 # Pack your bag
 
 Luggage management tool
+Work in Progress - `dev` branch is where the amazing stuff is happening right now
 
 ## Installation
 
