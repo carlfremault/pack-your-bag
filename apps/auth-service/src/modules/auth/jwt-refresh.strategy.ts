@@ -18,6 +18,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       ignoreExpiration: false,
       secretOrKey: publicKey,
       algorithms: ['RS256'],
+      passReqToCallback: true,
     });
   }
 

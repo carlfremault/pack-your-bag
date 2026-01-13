@@ -28,6 +28,7 @@ export class RefreshTokenService {
   ): Promise<RefreshToken> {
     return await this.prisma.$transaction(async (tx) => {
       const newToken = await tx.refreshToken.create({ data });
+
       await tx.refreshToken.update({
         where: { id: oldTokenId },
         data: {
@@ -98,6 +99,6 @@ export class RefreshTokenService {
       }
     }
 
-    throw new UnauthorizedException('Invalid refresh token');
+    throw new UnauthorizedException('Session expired');
   }
 }

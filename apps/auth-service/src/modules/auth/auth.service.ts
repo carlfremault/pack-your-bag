@@ -35,14 +35,13 @@ export class AuthService {
   ) {
     this.bcryptSaltRounds = Number(this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10));
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
+    this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
     this.accessTokenExpiresIn = Number(
       this.configService.get<number>('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS', 900),
     );
     this.refreshTokenExpiresIn = Number(
       this.configService.get<number>('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS', 604800),
     );
-
-    this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
   }
 
   async register(body: AuthCredentialsDto): Promise<AuthResponseDto> {
@@ -90,18 +89,22 @@ export class AuthService {
 
     const storedToken = await this.refreshTokenService.getRefreshToken({ id: tokenId });
     if (!storedToken) {
-      this.logger.warn('Token not found', { tokenId: tokenId.slice(-4) });
+      this.logger.warn('Token not found', { tokenId });
       throw new UnauthorizedException('Access Denied');
     }
 
     if (storedToken.family !== tokenFamilyId || storedToken.userId !== userId) {
       this.logger.error('Token ownership/family mismatch', {
-        expectedUserId: userId.slice(-4),
-        actualUserId: storedToken.userId.slice(-4),
-        expectedFamily: tokenFamilyId.slice(-4),
-        actualFamily: storedToken.family.slice(-4),
+        expectedUserId: userId,
+        actualUserId: storedToken.userId,
+        expectedFamily: tokenFamilyId,
+        actualFamily: storedToken.family,
       });
       throw new UnauthorizedException('Access Denied');
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException('Session expired');
     }
 
     if (storedToken.isRevoked) {
