@@ -15,7 +15,6 @@ export class SessionExpiredException extends UnauthorizedException {
       { message: 'Session expired', error: 'SESSION_EXPIRED' },
       { cause: internalDetails || 'Session expired' },
     );
-
     this.name = 'SessionExpiredException';
   }
 }

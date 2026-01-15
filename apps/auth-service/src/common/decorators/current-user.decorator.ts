@@ -1,6 +1,14 @@
 import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
-import { ActiveUser } from '../interfaces/active-user.interface';
+export enum UserRole {
+  User = 1,
+  Admin = 2,
+}
+
+export interface ActiveUser {
+  userId: string;
+  roleId: UserRole;
+}
 
 export const CurrentUser = createParamDecorator(
   (data: keyof ActiveUser | undefined, context: ExecutionContext) => {
