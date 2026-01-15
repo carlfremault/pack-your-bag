@@ -7,6 +7,9 @@ export default mergeConfig(
   defineConfig({
     test: {
       setupFiles: ['./test/vitest-setup.ts'],
+      coverage: {
+        exclude: ['**/generated/**'],
+      },
     },
   }),
 );

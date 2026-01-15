@@ -28,6 +28,12 @@ describe('UserService', () => {
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    refreshToken: {
+      updateMany: vi.fn(),
+    },
+    $transaction: vi.fn((callback: (tx: typeof mockPrismaService) => Promise<User>) => {
+      return callback(mockPrismaService);
+    }),
   };
 
   beforeEach(async () => {
@@ -58,8 +64,11 @@ describe('UserService', () => {
     const validDto = { currentPassword: 'currentPassword123', newPassword: 'newPassword456' };
     const mockUser = { password: 'hashed-old-pass' } as User;
 
-    it('should call update with correct params and return void (undefined) upon success', async () => {
+    it('should call update with correct params and return the updated user upon success', async () => {
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
+      mockPrismaService.user.update.mockResolvedValue(mockUser); // Return the updated user
+      mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
+
       const mockedSaltRounds = mockConfigService.get() as number;
 
       const result = await service.updatePassword(userId, validDto);
@@ -69,7 +78,11 @@ describe('UserService', () => {
         where: { id: userId },
         data: { password: 'new-hashed-val' },
       });
-      expect(result).toBeUndefined();
+      expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: { userId, isRevoked: false },
+        data: { isRevoked: true, revokedAt: expect.any(Date) as Date },
+      });
+      expect(result).toEqual(mockUser);
     });
 
     it('should throw BadRequestException if new password is identical to current password', async () => {
