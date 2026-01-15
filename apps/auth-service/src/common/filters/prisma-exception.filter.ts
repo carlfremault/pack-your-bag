@@ -3,8 +3,25 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nest
 import { Prisma } from '@prisma-client';
 import { Response } from 'express';
 
-import { PrismaDriverError } from '../interfaces/prisma-error.interface';
-import capitalizeFirstLetter from '../utils/capitalizeFirstLetter';
+import capitalizeFirstLetter from '@/common/utils/capitalizeFirstLetter';
+
+export interface PrismaDriverError {
+  // P2002 fields
+  driverAdapterError?: {
+    cause?: {
+      constraint?: {
+        fields: string[];
+      };
+    };
+  };
+  target?: string[];
+
+  // P2025 fields
+  modelName?: string;
+  model?: string;
+  operation?: string;
+  relation?: string;
+}
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
@@ -50,7 +67,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         // Record not found
 
         const meta = exception.meta as PrismaDriverError;
-        const targetModel = meta?.model || 'record';
+        const targetModel = meta?.model || meta?.modelName || 'record';
         const operation = meta?.operation;
 
         const isRelationError = operation?.toLowerCase().includes('nested connect');

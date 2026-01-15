@@ -10,7 +10,7 @@ import {
 } from '@/common/exceptions/auth.exceptions';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import anonymizeIp from '@/common/utils/anonymizeIp';
-import { AuditLogProvider } from '@/modules/audit/audit-log.provider';
+import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface UnauthorizedExceptionResponse {
   message: string | string[];
@@ -20,7 +20,7 @@ interface UnauthorizedExceptionResponse {
 
 @Catch(UnauthorizedException)
 export class AuthExceptionFilter implements ExceptionFilter {
-  constructor(private readonly auditProvider: AuditLogProvider) {}
+  constructor(private readonly auditLogProvider: AuditLogProvider) {}
 
   catch(exception: UnauthorizedException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -55,7 +55,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
 
     const user = request.user as RefreshTokenUser | undefined;
 
-    this.auditProvider.safeEmit({
+    this.auditLogProvider.safeEmit({
       eventType,
       severity,
       userId: user?.userId ?? null,

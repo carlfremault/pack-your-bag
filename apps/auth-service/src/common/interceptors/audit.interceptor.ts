@@ -8,7 +8,7 @@ import { tap } from 'rxjs/operators';
 
 import { AUDIT_EVENT_KEY } from '@/common/decorators/audit-log.decorator';
 import anonymizeIp from '@/common/utils/anonymizeIp';
-import { AuditLogProvider } from '@/modules/audit/audit-log.provider';
+import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface AuditableResponse {
   user?: {
@@ -20,7 +20,7 @@ interface AuditableResponse {
 export class AuditInterceptor implements NestInterceptor {
   private readonly logger = new Logger(AuditInterceptor.name, { timestamp: true });
   constructor(
-    private reflector: Reflector,
+    private readonly reflector: Reflector,
     private readonly auditProvider: AuditLogProvider,
   ) {}
 

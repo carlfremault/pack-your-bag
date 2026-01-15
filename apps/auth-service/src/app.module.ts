@@ -9,7 +9,7 @@ import Joi from 'joi';
 import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import { AuditLogModule } from './modules/audit/audit-log.module';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
