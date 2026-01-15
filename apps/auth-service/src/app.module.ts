@@ -1,11 +1,15 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import Joi from 'joi';
 
+import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { AuditLogModule } from './modules/audit/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -54,9 +58,11 @@ import { PrismaModule } from './prisma/prisma.module';
         },
       ],
     }),
-    AuthModule,
+    EventEmitterModule.forRoot(),
     PrismaModule,
+    AuthModule,
     UserModule,
+    AuditLogModule,
   ],
   providers: [
     {
@@ -73,7 +79,15 @@ import { PrismaModule } from './prisma/prisma.module';
     },
     {
       provide: APP_FILTER,
+      useClass: AuthExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
       useClass: PrismaExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
     },
   ],
 })
