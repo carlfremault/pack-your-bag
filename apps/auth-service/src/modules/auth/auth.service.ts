@@ -7,11 +7,15 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { Prisma } from '@prisma-client';
+import { AuditEventType, Prisma } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { uuidv7 } from 'uuidv7';
 
 import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
+import {
+  InvalidSessionException,
+  SessionExpiredException,
+} from '@/common/exceptions/auth.exceptions';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
@@ -75,6 +79,7 @@ export class AuthService {
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password.');
     }
+
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
@@ -90,8 +95,8 @@ export class AuthService {
 
     const storedToken = await this.refreshTokenService.getRefreshToken({ id: tokenId });
     if (!storedToken) {
-      this.logger.warn('Token not found', { tokenId });
-      throw new UnauthorizedException('Access Denied');
+      this.logger.warn('Token not found in DB', { userId, tokenId });
+      throw new InvalidSessionException('Token not found in DB');
     }
 
     if (storedToken.family !== tokenFamilyId || storedToken.userId !== userId) {
@@ -101,23 +106,25 @@ export class AuthService {
         expectedFamily: tokenFamilyId,
         actualFamily: storedToken.family,
       });
-      throw new UnauthorizedException('Access Denied');
+      throw new InvalidSessionException('Token ownership/family mismatch');
     }
 
     if (storedToken.expiresAt < new Date()) {
-      throw new UnauthorizedException('Session expired');
+      this.logger.debug('Token expired in DB', { userId, tokenId });
+      throw new SessionExpiredException('Refresh token expired in DB');
     }
 
     if (storedToken.isRevoked) {
-      const latestValidToken = await this.refreshTokenService.handleRevokedTokenRequest(
+      const newerValidToken = await this.refreshTokenService.handleRevokedTokenRequest(
         userId,
         storedToken,
       );
       return this.generateJwtResponse(
         userId,
         user.roleId,
-        latestValidToken.id,
-        latestValidToken.family,
+        newerValidToken.id,
+        newerValidToken.family,
+        AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       );
     }
 
@@ -181,7 +188,11 @@ export class AuthService {
         await this.refreshTokenService.createRefreshToken(refreshTokenData);
       }
     } catch (error) {
-      this.logger.error(`Database persistence failed for user ${userId}`, error);
+      this.logger.error('Database persistence failed', {
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       throw new InternalServerErrorException('Session creation failed');
     }
 
@@ -193,6 +204,7 @@ export class AuthService {
     roleId: number,
     tokenId: string,
     tokenFamilyId: string,
+    auditOverride?: AuditEventType,
   ): Promise<AuthResponseDto> {
     const payload = {
       sub: userId,
@@ -218,11 +230,14 @@ export class AuthService {
         token_type: 'Bearer',
         expires_in: this.accessTokenExpiresIn,
         user: { id: userId, role: roleId },
+        ...(auditOverride && { auditOverride }),
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('JWT Signing Failed:', { error: errorMessage, userId });
-      throw new InternalServerErrorException('Could not generate session');
+      this.logger.error('JWT Signing Failed:', {
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      throw new InternalServerErrorException('Could not generate JWT tokens');
     }
   }
 }

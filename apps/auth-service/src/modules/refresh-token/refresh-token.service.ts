@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { Prisma, RefreshToken } from '@prisma-client';
 
 import { REFRESH_TOKEN_GRACE_PERIOD_MS } from '@/common/constants/auth.constants';
+import {
+  InvalidSessionException,
+  SessionExpiredException,
+  TokenReusedException,
+} from '@/common/exceptions/auth.exceptions';
 import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
@@ -71,34 +76,79 @@ export class RefreshTokenService {
     storedToken: RefreshToken,
   ): Promise<RefreshToken> {
     const family = storedToken.family;
-    const requestWithinGracePeriod =
-      Date.now() - new Date(storedToken.updatedAt).getTime() < REFRESH_TOKEN_GRACE_PERIOD_MS;
 
-    // Case 1. Race condition
-    if (storedToken.isRevoked && requestWithinGracePeriod) {
-      const latestValidToken = await this.getLatestRefreshToken({
+    if (!storedToken.revokedAt) {
+      this.logger.error('Revoked token missing revokedAt timestamp', {
+        userId,
+        tokenId: storedToken.id,
+        family,
+      });
+      throw new InvalidSessionException('Token state is inconsistent');
+    }
+    const timeSinceRevocation = Date.now() - storedToken.revokedAt.getTime();
+    const isWithinGracePeriod = timeSinceRevocation < REFRESH_TOKEN_GRACE_PERIOD_MS;
+
+    // Case 1: Handle grace period (race condition)
+    if (isWithinGracePeriod) {
+      const newerValidToken = await this.getLatestRefreshToken({
         userId,
         family,
         isRevoked: false,
         expiresAt: { gt: new Date() },
       });
-      if (latestValidToken) {
-        this.logger.warn(`Race condition detected: Token in grace period used. userId=${userId}`);
-        return latestValidToken;
+
+      if (newerValidToken) {
+        this.logger.warn('Race condition handled', {
+          userId: userId,
+          revokedToken: storedToken.id,
+          validToken: newerValidToken.id,
+          family: family,
+          timeSinceRevocation,
+        });
+        return newerValidToken;
       }
-      this.logger.debug(`Grace period token used but no valid replacement found. userId=${userId}`);
-      throw new UnauthorizedException('Session expired');
+
+      // No valid token found within grace period
+      // This means: Manual logout OR token expired OR something went wrong
+
+      if (!storedToken.replacedById) {
+        throw new SessionExpiredException(
+          'Refresh requested after manual logout, within grace period',
+        );
+      }
+
+      this.logger.warn('Race condition: Rotated token found but replacement invalid/expired', {
+        userId: userId,
+        tokenId: storedToken.id,
+        replacedById: storedToken.replacedById,
+        family: family,
+      });
+      throw new InvalidSessionException('Rotated token found but replacement invalid/expired');
     }
 
-    // Case 2. Token reused or expired
-    if (storedToken.isRevoked) {
-      await this.revokeManyTokens({ family, isRevoked: false });
+    // Case 2: Outside grace period
+    // Revoke entire family as security measure
+    const { count } = await this.revokeManyTokens({ family, isRevoked: false });
 
-      if (storedToken.replacedById) {
-        this.logger.error(`Security alert: Refresh token reuse detected. userId=${userId}`);
-      }
+    if (storedToken.replacedById) {
+      // Token reuse attack: Token was rotated but old one is being used
+      this.logger.error('CRITICAL: Token reuse attack detected', {
+        userId,
+        tokenId: storedToken.id,
+        replacedById: storedToken.replacedById,
+        family,
+        timeSinceRevocation,
+        revokedTokenCount: count,
+      });
+      throw new TokenReusedException();
     }
 
-    throw new UnauthorizedException('Session expired');
+    this.logger.debug('Refresh attempt on manually logged-out session', {
+      userId,
+      tokenId: storedToken.id,
+      family,
+      timeSinceRevocation,
+    });
+    throw new SessionExpiredException('Refresh attempt on manually logged-out session');
   }
 }
