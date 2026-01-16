@@ -58,6 +58,7 @@ export class AuthController {
     { userId, tokenId, tokenFamilyId }: RefreshTokenUser,
   ) {
     const result = await this.authService.refreshToken(userId, tokenId, tokenFamilyId);
+    // auditOverride can be used to customize the audit log success event
     if (result.auditOverride) {
       req.auditOverride = result.auditOverride;
     }
