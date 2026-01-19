@@ -29,6 +29,7 @@ describe('AuthService', () => {
   const mockUserService = {
     createUser: vi.fn(),
     getUser: vi.fn(),
+    updatePassword: vi.fn(),
   };
 
   const mockJwtService = {
@@ -397,7 +398,30 @@ describe('AuthService', () => {
     });
   });
 
-  describe('JWT token generation (common for register/login/refreshToken)', () => {
+  describe('updatePasswordAndReauthenticate', () => {
+    it('should call updatePassword and issue a new token pair', async () => {
+      const userId = 'user-uuid-123';
+      const body = { currentPassword: 'currentPassword123', newPassword: 'newPassword123' };
+      const mockUser = { id: userId, roleId: 1 };
+      mockUserService.updatePassword.mockResolvedValue(mockUser);
+
+      const result = await service.updatePasswordAndReauthenticate(userId, body);
+
+      expect(mockUserService.updatePassword).toHaveBeenCalledWith(userId, body);
+      expect(result).toEqual({
+        access_token: 'mock-jwt-token',
+        refresh_token: 'mock-jwt-token',
+        token_type: 'Bearer',
+        expires_in: mockConfigService.get(
+          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
+          MOCK_ACCESS_EXPIRATION,
+        ),
+        user: { id: mockUser.id, role: mockUser.roleId },
+      });
+    });
+  });
+
+  describe('JWT token generation (common for register/login/refreshToken/updatePassword)', () => {
     it('should generate access token and refresh token with correct payload structure and consistent token IDs', async () => {
       const userDto = { email: 'TESTEMAIL@test.com', password: 'validPassword123' };
       const mockUser = { id: 'uuid-123', roleId: 1 };
