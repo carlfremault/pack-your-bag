@@ -16,6 +16,7 @@ import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/auth.exceptions';
+import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
@@ -77,17 +78,14 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, passwordToCompare);
 
     if (!user || !isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password.');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
-  async refreshToken(
-    userId: string,
-    tokenId: string,
-    tokenFamilyId: string,
-  ): Promise<AuthResponseDto> {
+  async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<AuthResponseDto> {
+    const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
     const user = await this.userService.getUser({ id: userId });
     if (!user) {
       throw new UnauthorizedException('Access Denied');
@@ -110,7 +108,7 @@ export class AuthService {
     }
 
     if (storedToken.expiresAt < new Date()) {
-      this.logger.debug('Token expired in DB', { userId, tokenId });
+      this.logger.debug('Refresh token expired in DB', { userId, tokenId });
       throw new SessionExpiredException('Refresh token expired in DB');
     }
 
