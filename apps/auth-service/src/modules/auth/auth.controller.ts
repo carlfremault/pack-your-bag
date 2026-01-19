@@ -70,8 +70,8 @@ export class AuthController {
   @Delete('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog('USER_LOGOUT')
-  async logout(@CurrentUser() { userId, tokenFamilyId }: RefreshTokenUser) {
-    return this.authService.logout(userId, tokenFamilyId);
+  async logout(@CurrentUser() user: RefreshTokenUser) {
+    return this.authService.logout(user);
   }
 
   @UseGuards(JwtAuthGuard)

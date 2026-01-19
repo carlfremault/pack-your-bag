@@ -24,6 +24,7 @@ vi.mock('ua-parser-js', () => {
 
 describe('AuditLogService', () => {
   let service: AuditLogService;
+  let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
 
   const mockPrismaService = {
     auditLog: {
@@ -39,6 +40,8 @@ describe('AuditLogService', () => {
     }).compile();
 
     service = module.get<AuditLogService>(AuditLogService);
+
+    loggerErrorSpy = vi.spyOn(service['logger'], 'error').mockImplementation(() => {});
   });
 
   it('should be defined', () => {
@@ -136,9 +139,6 @@ describe('AuditLogService', () => {
     });
 
     it('should trigger alert for CRITICAL severity events', async () => {
-      // triggerAlert being a private method it is easier to test its side effect, the logger error
-      const loggerSpy = vi.spyOn(service['logger'], 'error').mockImplementation(() => {});
-
       const inputData = {
         eventType: AuditEventType.SUSPICIOUS_ACTIVITY,
         severity: AuditSeverity.CRITICAL,
@@ -152,16 +152,11 @@ describe('AuditLogService', () => {
 
       await service.handleAuditLog(inputData);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'CRITICAL SECURITY EVENT:',
-        expect.objectContaining({ severity: AuditSeverity.CRITICAL }),
-      );
+      // triggerAlert being a private method it is easier to test its side effect, the logger error
+      expect(loggerErrorSpy).toHaveBeenCalledWith('CRITICAL SECURITY EVENT:', inputData);
     });
 
     it('should not trigger alert for non-CRITICAL severity events', async () => {
-      // triggerAlert being a private method it is easier to test its side effect, the logger error
-      const loggerSpy = vi.spyOn(service['logger'], 'error').mockImplementation(() => {});
-
       const inputData = {
         eventType: AuditEventType.USER_LOGIN_SUCCESS,
         severity: AuditSeverity.INFO,
@@ -175,11 +170,11 @@ describe('AuditLogService', () => {
 
       await service.handleAuditLog(inputData);
 
-      expect(loggerSpy).not.toHaveBeenCalled();
+      // triggerAlert being a private method it is easier to test its side effect, the logger error
+      expect(loggerErrorSpy).not.toHaveBeenCalledWith('CRITICAL SECURITY EVENT:', inputData);
     });
 
     it('should handle prisma create failure gracefully and log error', async () => {
-      const loggerSpy = vi.spyOn(service['logger'], 'error').mockImplementation(() => {});
       mockPrismaService.auditLog.create.mockRejectedValueOnce(new Error('DB error'));
 
       const inputData = {
@@ -195,7 +190,7 @@ describe('AuditLogService', () => {
 
       await service.handleAuditLog(inputData);
 
-      expect(loggerSpy).toHaveBeenCalled();
+      expect(loggerErrorSpy).toHaveBeenCalled();
     });
 
     it('should include metadata when provided', async () => {

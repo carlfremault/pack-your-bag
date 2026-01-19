@@ -108,7 +108,6 @@ export class AuthService {
     }
 
     if (storedToken.expiresAt < new Date()) {
-      this.logger.debug('Refresh token expired in DB', { userId, tokenId });
       throw new SessionExpiredException('Refresh token expired in DB');
     }
 
@@ -129,7 +128,8 @@ export class AuthService {
     return this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId);
   }
 
-  async logout(userId: string, tokenFamilyId: string): Promise<void> {
+  async logout(user: RefreshTokenUser): Promise<void> {
+    const { userId, tokenFamilyId } = user;
     await this.refreshTokenService.revokeManyTokens({
       userId,
       family: tokenFamilyId,

@@ -50,7 +50,7 @@ export class RefreshTokenService {
   // - Revoke all tokens of a specific family ("sign out on this device" and after Reuse Attack detection)
   // - Revoke all tokens of a specific user ("sign out on all devices")
   async revokeManyTokens(where: Prisma.RefreshTokenWhereInput): Promise<Prisma.BatchPayload> {
-    if (!where || Object.keys(where).length === 0) {
+    if (Object.keys(where).length === 0) {
       throw new BadRequestException('A filter must be provided for bulk token revocation.');
     }
     return await this.prisma.refreshToken.updateMany({
@@ -64,7 +64,7 @@ export class RefreshTokenService {
 
   // For cron job
   async deleteRefreshTokens(where: Prisma.RefreshTokenWhereInput): Promise<Prisma.BatchPayload> {
-    if (!where || Object.keys(where).length === 0) {
+    if (Object.keys(where).length === 0) {
       throw new BadRequestException('A filter must be provided for bulk token deletion.');
     }
     return await this.prisma.refreshToken.deleteMany({ where });
@@ -143,12 +143,6 @@ export class RefreshTokenService {
       throw new TokenReusedException();
     }
 
-    this.logger.debug('Refresh attempt on manually logged-out session', {
-      userId,
-      tokenId: storedToken.id,
-      family,
-      timeSinceRevocation,
-    });
     throw new SessionExpiredException('Refresh attempt on manually logged-out session');
   }
 }

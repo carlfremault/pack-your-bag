@@ -21,7 +21,6 @@ describe('AuthService', () => {
   let hashedPassword: string;
   let loggerWarnSpy: ReturnType<typeof vi.spyOn>;
   let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
-  let loggerDebugSpy: ReturnType<typeof vi.spyOn>;
   const MOCK_ACCESS_EXPIRATION = 1234;
   const MOCK_REFRESH_EXPIRATION = 4321;
   const MOCK_SALT_ROUNDS = 4;
@@ -64,7 +63,6 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-01-01'));
 
     const module: TestingModule = await Test.createTestingModule({
@@ -81,11 +79,9 @@ describe('AuthService', () => {
 
     loggerWarnSpy = vi.spyOn(service['logger'], 'warn').mockImplementation(() => {});
     loggerErrorSpy = vi.spyOn(service['logger'], 'error').mockImplementation(() => {});
-    loggerDebugSpy = vi.spyOn(service['logger'], 'debug').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -332,28 +328,19 @@ describe('AuthService', () => {
     });
 
     it('should throw SessionExpiredException if refresh token is expired', async () => {
-      const inSevenDays = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const mockRefreshToken = {
         id: 'token-uuid-456',
         family: refreshTokenUser.tokenFamilyId,
         isRevoked: false,
-        expiresAt: inSevenDays,
+        expiresAt: new Date('2000-01-01'),
         userId: refreshTokenUser.userId,
       };
       mockUserService.getUser.mockResolvedValue({ id: refreshTokenUser.userId, roleId: 1 });
-      mockRefreshTokenService.getRefreshToken.mockResolvedValue({
-        ...mockRefreshToken,
-        expiresAt: new Date('2000-01-01'),
-      });
+      mockRefreshTokenService.getRefreshToken.mockResolvedValue(mockRefreshToken);
 
       await expect(service.refreshToken(refreshTokenUser)).rejects.toThrow(
         new SessionExpiredException('Refresh token expired in DB'),
       );
-
-      expect(loggerDebugSpy).toHaveBeenCalledWith('Refresh token expired in DB', {
-        userId: refreshTokenUser.userId,
-        tokenId: refreshTokenUser.tokenId,
-      });
     });
 
     it('should handle revoked token with race condition recovery', async () => {
