@@ -6,7 +6,11 @@ export default mergeConfig(
   nestjsConfig,
   defineConfig({
     test: {
+      fileParallelism: false,
       setupFiles: ['./test/vitest-setup.ts'],
+      coverage: {
+        exclude: ['**/generated/**'],
+      },
     },
   }),
 );

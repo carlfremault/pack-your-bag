@@ -16,6 +16,7 @@ import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/auth.exceptions';
+import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
@@ -38,14 +39,16 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly userService: UserService,
   ) {
-    this.bcryptSaltRounds = Number(this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10));
+    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
     this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
-    this.accessTokenExpiresIn = Number(
-      this.configService.get<number>('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS', 900),
+    this.accessTokenExpiresIn = this.configService.get<number>(
+      'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
+      900,
     );
-    this.refreshTokenExpiresIn = Number(
-      this.configService.get<number>('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS', 604800),
+    this.refreshTokenExpiresIn = this.configService.get<number>(
+      'AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS',
+      604800,
     );
   }
 
@@ -77,17 +80,14 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, passwordToCompare);
 
     if (!user || !isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password.');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
-  async refreshToken(
-    userId: string,
-    tokenId: string,
-    tokenFamilyId: string,
-  ): Promise<AuthResponseDto> {
+  async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<AuthResponseDto> {
+    const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
     const user = await this.userService.getUser({ id: userId });
     if (!user) {
       throw new UnauthorizedException('Access Denied');
@@ -110,7 +110,6 @@ export class AuthService {
     }
 
     if (storedToken.expiresAt < new Date()) {
-      this.logger.debug('Token expired in DB', { userId, tokenId });
       throw new SessionExpiredException('Refresh token expired in DB');
     }
 
@@ -131,7 +130,8 @@ export class AuthService {
     return this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId);
   }
 
-  async logout(userId: string, tokenFamilyId: string): Promise<void> {
+  async logout(user: RefreshTokenUser): Promise<void> {
+    const { userId, tokenFamilyId } = user;
     await this.refreshTokenService.revokeManyTokens({
       userId,
       family: tokenFamilyId,
@@ -210,6 +210,7 @@ export class AuthService {
       sub: userId,
       role: roleId,
       iat: Math.floor(Date.now() / 1000),
+      jti: uuidv7(),
     };
 
     const refreshPayload = {

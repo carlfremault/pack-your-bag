@@ -12,6 +12,10 @@ import { UserService } from './user.service';
 
 vi.mock('bcrypt');
 
+const MOCK_CONFIG = {
+  AUTH_BCRYPT_SALT_ROUNDS: 4,
+};
+
 describe('UserService', () => {
   let service: UserService;
   let prisma: PrismaService;
@@ -20,7 +24,9 @@ describe('UserService', () => {
   const mockedHash = vi.mocked(bcrypt.hash);
 
   const mockConfigService = {
-    get: vi.fn().mockReturnValue(10),
+    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    }),
   };
 
   const mockPrismaService = {
@@ -28,6 +34,12 @@ describe('UserService', () => {
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    refreshToken: {
+      updateMany: vi.fn(),
+    },
+    $transaction: vi.fn((callback: (tx: typeof mockPrismaService) => Promise<User>) => {
+      return callback(mockPrismaService);
+    }),
   };
 
   beforeEach(async () => {
@@ -58,9 +70,12 @@ describe('UserService', () => {
     const validDto = { currentPassword: 'currentPassword123', newPassword: 'newPassword456' };
     const mockUser = { password: 'hashed-old-pass' } as User;
 
-    it('should call update with correct params and return void (undefined) upon success', async () => {
+    it('should call update with correct params and return the updated user upon success', async () => {
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
-      const mockedSaltRounds = mockConfigService.get() as number;
+      mockPrismaService.user.update.mockResolvedValue(mockUser); // Return the updated user
+      mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
+
+      const mockedSaltRounds = mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS');
 
       const result = await service.updatePassword(userId, validDto);
       expect(mockedCompare).toHaveBeenCalledWith(validDto.currentPassword, mockUser.password);
@@ -69,7 +84,11 @@ describe('UserService', () => {
         where: { id: userId },
         data: { password: 'new-hashed-val' },
       });
-      expect(result).toBeUndefined();
+      expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: { userId, isRevoked: false },
+        data: { isRevoked: true, revokedAt: expect.any(Date) as Date },
+      });
+      expect(result).toEqual(mockUser);
     });
 
     it('should throw BadRequestException if new password is identical to current password', async () => {
