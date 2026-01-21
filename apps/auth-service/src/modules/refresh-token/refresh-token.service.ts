@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { Prisma, RefreshToken } from '@prisma-client';
 
-import { REFRESH_TOKEN_GRACE_PERIOD_MS } from '@/common/constants/auth.constants';
 import {
   InvalidSessionException,
   SessionExpiredException,
@@ -13,25 +13,35 @@ import { PrismaService } from '@/prisma/prisma.service';
 @Injectable()
 export class RefreshTokenService {
   private readonly logger = new Logger(RefreshTokenService.name, { timestamp: true });
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly refreshTokenGracePeriod: number;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {
+    this.refreshTokenGracePeriod = this.configService.get<number>(
+      'AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS',
+      15000,
+    );
+  }
 
   async createRefreshToken(data: Prisma.RefreshTokenCreateInput): Promise<{ id: string }> {
-    return await this.prisma.refreshToken.create({ data, select: { id: true } });
+    return this.prisma.refreshToken.create({ data, select: { id: true } });
   }
 
   async getRefreshToken(where: Prisma.RefreshTokenWhereUniqueInput): Promise<RefreshToken | null> {
-    return await this.prisma.refreshToken.findUnique({ where });
+    return this.prisma.refreshToken.findUnique({ where });
   }
 
   async getLatestRefreshToken(where: Prisma.RefreshTokenWhereInput): Promise<RefreshToken | null> {
-    return await this.prisma.refreshToken.findFirst({ where, orderBy: { createdAt: 'desc' } });
+    return this.prisma.refreshToken.findFirst({ where, orderBy: { createdAt: 'desc' } });
   }
 
   async rotateRefreshToken(
     oldTokenId: string,
     data: Prisma.RefreshTokenCreateInput,
   ): Promise<RefreshToken> {
-    return await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       const newToken = await tx.refreshToken.create({ data });
 
       await tx.refreshToken.update({
@@ -50,10 +60,10 @@ export class RefreshTokenService {
   // - Revoke all tokens of a specific family ("sign out on this device" and after Reuse Attack detection)
   // - Revoke all tokens of a specific user ("sign out on all devices")
   async revokeManyTokens(where: Prisma.RefreshTokenWhereInput): Promise<Prisma.BatchPayload> {
-    if (Object.keys(where).length === 0) {
+    if (!where || Object.keys(where).length === 0) {
       throw new BadRequestException('A filter must be provided for bulk token revocation.');
     }
-    return await this.prisma.refreshToken.updateMany({
+    return this.prisma.refreshToken.updateMany({
       where,
       data: {
         isRevoked: true,
@@ -64,10 +74,10 @@ export class RefreshTokenService {
 
   // For cron job
   async deleteRefreshTokens(where: Prisma.RefreshTokenWhereInput): Promise<Prisma.BatchPayload> {
-    if (Object.keys(where).length === 0) {
+    if (!where || Object.keys(where).length === 0) {
       throw new BadRequestException('A filter must be provided for bulk token deletion.');
     }
-    return await this.prisma.refreshToken.deleteMany({ where });
+    return this.prisma.refreshToken.deleteMany({ where });
   }
 
   // Helper functions
@@ -86,7 +96,7 @@ export class RefreshTokenService {
       throw new InvalidSessionException('Token state is inconsistent');
     }
     const timeSinceRevocation = Date.now() - storedToken.revokedAt.getTime();
-    const isWithinGracePeriod = timeSinceRevocation < REFRESH_TOKEN_GRACE_PERIOD_MS;
+    const isWithinGracePeriod = timeSinceRevocation < this.refreshTokenGracePeriod;
 
     // Case 1: Handle grace period (race condition)
     if (isWithinGracePeriod) {

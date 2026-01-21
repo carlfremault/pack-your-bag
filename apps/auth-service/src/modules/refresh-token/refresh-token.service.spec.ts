@@ -13,25 +13,24 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 import { RefreshTokenService } from './refresh-token.service';
 
+const MOCK_CONFIG = {
+  AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: 2000,
+};
+
 describe('RefreshTokenService', () => {
   let service: RefreshTokenService;
   let loggerWarnSpy: ReturnType<typeof vi.spyOn>;
   let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
-  const MOCK_GRACE_PERIOD = 15000;
-  const CURRENT_TIME = '2026-02-01T12:00:00.000Z';
 
   const mockConfigService = {
-    get: vi.fn((key: string, defaultValue: number) => {
-      const config: { [key: string]: number } = {
-        REFRESH_TOKEN_GRACE_PERIOD_MS: MOCK_GRACE_PERIOD,
-      };
-      return config[key] ?? defaultValue;
+    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
     }),
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    vi.setSystemTime(new Date(CURRENT_TIME));
+    vi.setSystemTime(new Date('2026-02-01T12:00:00.000Z'));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -54,6 +53,8 @@ describe('RefreshTokenService', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
+
+  const msAgo = (ms: number) => new Date(Date.now() - ms);
 
   describe('rotateRefreshToken', () => {
     it('should create new token and revoke old token in transaction', async () => {
@@ -123,13 +124,7 @@ describe('RefreshTokenService', () => {
   });
 
   describe('handleRevokedTokenRequest', () => {
-    const gracePeriod = mockConfigService.get('REFRESH_TOKEN_GRACE_PERIOD_MS', MOCK_GRACE_PERIOD);
-    const revokedAtWithinGracePeriod = new Date(
-      new Date(CURRENT_TIME).getTime() - gracePeriod + 10000,
-    );
-    const revokedAtOutsideGracePeriod = new Date(
-      new Date(CURRENT_TIME).getTime() - gracePeriod - 10000,
-    );
+    const gracePeriod = mockConfigService.get('AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS') as number;
     const mockUserId = 'user-uuid-123';
 
     it('should handle race condition refresh token request', async () => {
@@ -137,7 +132,7 @@ describe('RefreshTokenService', () => {
         id: 'refresh-token-uuid-123',
         family: 'family-uuid-123',
         isRevoked: true,
-        revokedAt: revokedAtWithinGracePeriod,
+        revokedAt: msAgo(1000),
         expiresAt: new Date('2026-02-01'),
         userId: mockUserId,
         createdAt: new Date('2026-01-01'),
@@ -204,7 +199,7 @@ describe('RefreshTokenService', () => {
         id: 'refresh-token-uuid-123',
         family: 'family-uuid-123',
         isRevoked: true,
-        revokedAt: revokedAtWithinGracePeriod,
+        revokedAt: msAgo(1000),
         expiresAt: new Date('2026-02-01'),
         userId: mockUserId,
         createdAt: new Date('2026-01-01'),
@@ -225,7 +220,7 @@ describe('RefreshTokenService', () => {
         id: 'refresh-token-uuid-123',
         family: 'family-uuid-123',
         isRevoked: true,
-        revokedAt: revokedAtWithinGracePeriod,
+        revokedAt: msAgo(1000),
         expiresAt: new Date('2026-02-01'),
         userId: mockUserId,
         createdAt: new Date('2026-01-01'),
@@ -256,7 +251,7 @@ describe('RefreshTokenService', () => {
         id: 'refresh-token-uuid-123',
         family: 'family-uuid-123',
         isRevoked: true,
-        revokedAt: revokedAtOutsideGracePeriod,
+        revokedAt: msAgo(gracePeriod + 1000),
         expiresAt: new Date('2026-02-01'),
         userId: mockUserId,
         createdAt: new Date('2026-01-01'),
@@ -288,7 +283,7 @@ describe('RefreshTokenService', () => {
         id: 'refresh-token-uuid-123',
         family: 'family-uuid-123',
         isRevoked: true,
-        revokedAt: revokedAtOutsideGracePeriod,
+        revokedAt: msAgo(gracePeriod + 1000),
         expiresAt: new Date('2026-02-01'),
         userId: mockUserId,
         createdAt: new Date('2026-01-01'),

@@ -16,17 +16,17 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.bcryptSaltRounds = Number(this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10));
+    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return await this.prisma.user.create({
+    return this.prisma.user.create({
       data,
     });
   }
 
   async getUser(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where,
     });
   }
@@ -50,7 +50,7 @@ export class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
-    return await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       // Update Password
       const updatedUser = await tx.user.update({
         where: { id: userId },

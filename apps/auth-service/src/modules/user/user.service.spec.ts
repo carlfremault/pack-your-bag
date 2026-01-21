@@ -12,6 +12,10 @@ import { UserService } from './user.service';
 
 vi.mock('bcrypt');
 
+const MOCK_CONFIG = {
+  AUTH_BCRYPT_SALT_ROUNDS: 4,
+};
+
 describe('UserService', () => {
   let service: UserService;
   let prisma: PrismaService;
@@ -20,7 +24,9 @@ describe('UserService', () => {
   const mockedHash = vi.mocked(bcrypt.hash);
 
   const mockConfigService = {
-    get: vi.fn().mockReturnValue(10),
+    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    }),
   };
 
   const mockPrismaService = {
@@ -69,7 +75,7 @@ describe('UserService', () => {
       mockPrismaService.user.update.mockResolvedValue(mockUser); // Return the updated user
       mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
 
-      const mockedSaltRounds = mockConfigService.get() as number;
+      const mockedSaltRounds = mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS');
 
       const result = await service.updatePassword(userId, validDto);
       expect(mockedCompare).toHaveBeenCalledWith(validDto.currentPassword, mockUser.password);

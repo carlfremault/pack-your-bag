@@ -16,14 +16,18 @@ import { UserService } from '../user/user.service';
 
 import { AuthService } from './auth.service';
 
+const MOCK_CONFIG = {
+  AUTH_BCRYPT_SALT_ROUNDS: 4,
+  AUTH_DEFAULT_USER_ROLE_ID: 1,
+  AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: 1234,
+  AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: 4321,
+} as const;
+
 describe('AuthService', () => {
   let service: AuthService;
   let hashedPassword: string;
   let loggerWarnSpy: ReturnType<typeof vi.spyOn>;
   let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
-  const MOCK_ACCESS_EXPIRATION = 1234;
-  const MOCK_REFRESH_EXPIRATION = 4321;
-  const MOCK_SALT_ROUNDS = 4;
 
   const mockUserService = {
     createUser: vi.fn(),
@@ -43,21 +47,15 @@ describe('AuthService', () => {
   };
 
   const mockConfigService = {
-    get: vi.fn((key: string, defaultValue: number) => {
-      const config: { [key: string]: number } = {
-        AUTH_BCRYPT_SALT_ROUNDS: MOCK_SALT_ROUNDS,
-        AUTH_DEFAULT_USER_ROLE_ID: 1,
-        AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: MOCK_ACCESS_EXPIRATION,
-        AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: MOCK_REFRESH_EXPIRATION,
-      };
-      return config[key] ?? defaultValue;
+    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
     }),
   };
 
   beforeAll(async () => {
     hashedPassword = await bcrypt.hash(
       'validPassword123',
-      mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS', MOCK_SALT_ROUNDS),
+      mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS') as number,
     );
   });
 
@@ -127,10 +125,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get(
-          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-          MOCK_ACCESS_EXPIRATION,
-        ),
+        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -164,10 +159,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get(
-          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-          MOCK_ACCESS_EXPIRATION,
-        ),
+        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -191,7 +183,7 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if password does not match', async () => {
       const wrongHashedPassword = await bcrypt.hash(
         'differentPassword',
-        mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS', MOCK_SALT_ROUNDS),
+        mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS') as number,
       );
       mockUserService.getUser.mockResolvedValue({ ...mockUser, password: wrongHashedPassword });
 
@@ -244,10 +236,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get(
-          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-          MOCK_ACCESS_EXPIRATION,
-        ),
+        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -375,10 +364,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get(
-          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-          MOCK_ACCESS_EXPIRATION,
-        ),
+        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
         auditOverride: 'TOKEN_REFRESHED_RACE_CONDITION',
       });
@@ -399,10 +385,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get(
-          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-          MOCK_ACCESS_EXPIRATION,
-        ),
+        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -440,10 +423,7 @@ describe('AuthService', () => {
           family: expect.any(String) as string,
         }),
         expect.objectContaining({
-          expiresIn: mockConfigService.get(
-            'AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS',
-            MOCK_REFRESH_EXPIRATION,
-          ),
+          expiresIn: mockConfigService.get('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS'),
         }),
       );
 
@@ -451,10 +431,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get(
-          'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-          MOCK_ACCESS_EXPIRATION,
-        ),
+        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });

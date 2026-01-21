@@ -39,14 +39,16 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly userService: UserService,
   ) {
-    this.bcryptSaltRounds = Number(this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10));
+    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
     this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
-    this.accessTokenExpiresIn = Number(
-      this.configService.get<number>('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS', 900),
+    this.accessTokenExpiresIn = this.configService.get<number>(
+      'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
+      900,
     );
-    this.refreshTokenExpiresIn = Number(
-      this.configService.get<number>('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS', 604800),
+    this.refreshTokenExpiresIn = this.configService.get<number>(
+      'AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS',
+      604800,
     );
   }
 
@@ -208,6 +210,7 @@ export class AuthService {
       sub: userId,
       role: roleId,
       iat: Math.floor(Date.now() / 1000),
+      jti: uuidv7(),
     };
 
     const refreshPayload = {
