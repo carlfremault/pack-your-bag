@@ -44,7 +44,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
       const request = context.switchToHttp().getRequest<Request>();
       const rawTracker = await this.getTracker(request);
       const { headers, user, path, method } = request;
-      const headersUserAgent = Array.isArray(headers['user-agent'])
+      const userAgent = Array.isArray(headers['user-agent'])
         ? (headers['user-agent'][0] as string)
         : (headers['user-agent'] as string);
 
@@ -62,7 +62,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
         severity: 'WARN',
         userId: user?.userId ?? null,
         ipAddress: anonymizeIp(this.getClientIp(request)),
-        userAgent: headersUserAgent, // will be anonymized in audit log service as we will extract deviceInfo only
+        userAgent,
         path,
         method,
         statusCode: 429,
