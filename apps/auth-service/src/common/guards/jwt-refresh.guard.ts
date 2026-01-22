@@ -3,12 +3,11 @@ import { TokenExpiredError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 
 import { SessionExpiredException } from '@/common/exceptions/auth.exceptions';
-import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 
 @Injectable()
 export class JwtRefreshGuard extends AuthGuard('refresh') {
   // Function override to enable error logging through the exception filter
-  handleRequest<TUser = RefreshTokenUser>(
+  handleRequest<TUser>(
     err: unknown,
     user: unknown,
     info: unknown,

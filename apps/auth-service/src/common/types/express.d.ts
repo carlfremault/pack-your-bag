@@ -5,6 +5,7 @@ declare global {
   namespace Express {
     interface User extends Partial<PrismaUser> {
       userId: string;
+      tokenId?: string;
       tokenFamilyId?: string;
     }
     interface Request {

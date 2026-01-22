@@ -8,7 +8,6 @@ import {
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/auth.exceptions';
-import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import anonymizeIp from '@/common/utils/anonymizeIp';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
@@ -53,22 +52,25 @@ export class AuthExceptionFilter implements ExceptionFilter {
       eventType = 'USER_LOGIN_FAILED';
     }
 
-    const user = request.user as RefreshTokenUser | undefined;
+    const { user, ip, headers, path, method } = request;
+    const userAgent = Array.isArray(headers['user-agent'])
+      ? (headers['user-agent'][0] as string)
+      : (headers['user-agent'] as string);
 
     this.auditLogProvider.safeEmit({
       eventType,
       severity,
       userId: user?.userId ?? null,
-      ipAddress: anonymizeIp(request.ip),
-      userAgent: request.headers['user-agent'],
-      path: request.path,
-      method: request.method,
+      ipAddress: anonymizeIp(ip),
+      userAgent,
+      path,
+      method,
       statusCode: 401,
       errorCode,
       message: auditMessage,
       metadata: {
-        tokenId: user?.tokenId ?? null,
-        tokenFamily: user?.tokenFamilyId ?? null,
+        ...(user?.tokenId && { tokenId: user.tokenId }),
+        ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
       },
     });
 

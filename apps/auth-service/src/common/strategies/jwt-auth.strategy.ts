@@ -21,7 +21,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: { sub: string; role: number }) {
-    if (!payload.sub || payload.role === undefined || payload.role === null) {
+    if (typeof payload.sub !== 'string' || !payload.sub || typeof payload.role !== 'number') {
       throw new UnauthorizedException({
         message: 'Invalid access token payload',
         error: 'INVALID_TOKEN',

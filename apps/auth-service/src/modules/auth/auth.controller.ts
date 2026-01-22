@@ -15,6 +15,9 @@ import type { Request } from 'express';
 
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
@@ -22,13 +25,12 @@ import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { JwtRefreshGuard } from './jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   @Serialize(AuthResponseDto)
@@ -37,6 +39,7 @@ export class AuthController {
     return this.authService.register(body);
   }
 
+  @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -46,7 +49,7 @@ export class AuthController {
     return this.authService.login(body);
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
@@ -65,7 +68,7 @@ export class AuthController {
     return result;
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Delete('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -74,7 +77,7 @@ export class AuthController {
     return this.authService.logout(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Delete('logout-all')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -83,7 +86,7 @@ export class AuthController {
     return this.authService.logoutAllDevices(userId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Patch('update-password')
   @Serialize(AuthResponseDto)

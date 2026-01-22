@@ -86,6 +86,7 @@ enum AuditEventType {
   USER_LOGOUT
   USER_LOGOUT_ALL_DEVICES
   PASSWORD_CHANGED
+  SECURITY_RATE_LIMIT_EXCEEDED
   
   @@schema("app_auth")
 }

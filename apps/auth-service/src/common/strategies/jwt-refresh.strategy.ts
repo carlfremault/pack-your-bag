@@ -5,6 +5,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+import { RefreshTokenUser } from '../interfaces/refresh-token-user.interface';
+
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
   constructor(configService: ConfigService) {
@@ -22,7 +24,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     });
   }
 
-  validate(_req: Request, payload: { sub: string; jti: string; family: string }) {
+  validate(_req: Request, payload: { sub: string; jti: string; family: string }): RefreshTokenUser {
     if (!payload.sub || !payload.jti || !payload.family) {
       throw new UnauthorizedException({
         message: 'Invalid refresh token payload',

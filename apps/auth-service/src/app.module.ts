@@ -1,9 +1,10 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 
+import { Request } from 'express';
 import Joi from 'joi';
 
 import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
@@ -20,6 +21,7 @@ const validationSchema = Joi.object({
 
   // Application
   AUTH_PORT: Joi.number().default(8001),
+  ALLOWED_ORIGINS: Joi.string().required(),
 
   // Database
   AUTH_USER: Joi.string().required(),
@@ -66,7 +68,11 @@ const validationSchema = Joi.object({
         {
           ttl: config.get('AUTH_THROTTLE_TTL', 60000),
           limit: config.get('AUTH_THROTTLE_LIMIT', 100),
-          skipIf: () => config.get('NODE_ENV') === 'test',
+          skipIf: (context) => {
+            const req = context.switchToHttp().getRequest<Request>();
+            if (req.headers['x-force-throttling']) return false;
+            return config.get('NODE_ENV') === 'test';
+          },
         },
       ],
     }),
@@ -84,10 +90,6 @@ const validationSchema = Joi.object({
         forbidNonWhitelisted: true,
         transform: true,
       }),
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
     },
     {
       provide: APP_FILTER,
