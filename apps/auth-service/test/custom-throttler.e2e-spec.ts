@@ -1,4 +1,5 @@
 import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import request from 'supertest';
@@ -15,6 +16,8 @@ import { AppModule } from '../src/app.module';
 describe('Custom Throttler Log (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
+  let configService: ConfigService;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,6 +26,9 @@ describe('Custom Throttler Log (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
+    configService = moduleFixture.get(ConfigService);
+
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
 
     await app.init();
   });
@@ -54,6 +60,7 @@ describe('Custom Throttler Log (e2e)', () => {
   const registerUser = async (): Promise<AuthResponseDto> => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
+      .set('x-bff-secret', bffSecret)
       .send(validUserDto)
       .expect(201);
     return response.body as AuthResponseDto;
@@ -63,6 +70,7 @@ describe('Custom Throttler Log (e2e)', () => {
     return await request(app.getHttpServer())
       .post('/auth/login')
       .set('x-force-throttling', 'true')
+      .set('x-bff-secret', bffSecret)
       .send(validUserDto)
       .expect(expectedStatus);
   };

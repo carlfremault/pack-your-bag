@@ -16,6 +16,7 @@ describe('Auth login (e2e)', () => {
   let prisma: PrismaService;
   let configService: ConfigService;
   let accessTokenExpires: number;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,7 +26,9 @@ describe('Auth login (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     configService = moduleFixture.get(ConfigService);
+
     accessTokenExpires = configService.get<number>('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS', 2000);
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
 
     await app.init();
   });
@@ -46,7 +49,11 @@ describe('Auth login (e2e)', () => {
   };
 
   const registerUser = async () => {
-    return request(app.getHttpServer()).post('/auth/register').send(validUserDto).expect(201);
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .set('x-bff-secret', bffSecret)
+      .send(validUserDto)
+      .expect(201);
   };
 
   const loginUser = async (
@@ -56,7 +63,11 @@ describe('Auth login (e2e)', () => {
     },
     expectedStatus = 200,
   ) => {
-    return request(app.getHttpServer()).post('/auth/login').send(payload).expect(expectedStatus);
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .set('x-bff-secret', bffSecret)
+      .send(payload)
+      .expect(expectedStatus);
   };
 
   describe('Auth Service - /login (POST)', () => {

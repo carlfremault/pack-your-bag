@@ -23,6 +23,7 @@ describe('Auth Refresh Token (e2e)', () => {
   let configService: ConfigService;
   let jwtService: JwtService;
   let gracePeriod: number;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -35,6 +36,7 @@ describe('Auth Refresh Token (e2e)', () => {
     jwtService = moduleFixture.get(JwtService);
 
     gracePeriod = configService.get<number>('AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS', 2000);
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
 
     await app.init();
   });
@@ -58,6 +60,7 @@ describe('Auth Refresh Token (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
       .send(dto || validUserDto)
+      .set('x-bff-secret', bffSecret)
       .expect(201);
     return response.body as AuthResponseDto;
   };
@@ -66,12 +69,14 @@ describe('Auth Refresh Token (e2e)', () => {
     return request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Authorization', `Bearer ${token}`)
+      .set('x-bff-secret', bffSecret)
       .expect(expectedStatus);
   };
 
   const loginUser = async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
+      .set('x-bff-secret', bffSecret)
       .send(validUserDto)
       .expect(200);
     return response.body as AuthResponseDto;
@@ -80,6 +85,7 @@ describe('Auth Refresh Token (e2e)', () => {
     return request(app.getHttpServer())
       .delete('/auth/logout')
       .set('Authorization', `Bearer ${token}`)
+      .set('x-bff-secret', bffSecret)
       .expect(204);
   };
 
@@ -341,6 +347,7 @@ describe('Auth Refresh Token (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/auth/logout-all')
         .set('Authorization', `Bearer ${user.access_token}`)
+        .set('x-bff-secret', bffSecret)
         .expect(204);
 
       await refreshToken(user.refresh_token, 401);
@@ -351,7 +358,10 @@ describe('Auth Refresh Token (e2e)', () => {
 
   describe('Edge Cases', () => {
     it('should handle missing Authorization header', async () => {
-      const response = await request(app.getHttpServer()).post('/auth/refresh-token').expect(401);
+      const response = await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .set('x-bff-secret', bffSecret)
+        .expect(401);
       expect((response.body as { message: string }).message).toBeDefined();
     });
 
@@ -359,6 +369,7 @@ describe('Auth Refresh Token (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/refresh-token')
         .set('Authorization', 'InvalidFormat')
+        .set('x-bff-secret', bffSecret)
         .expect(401);
       expect((response.body as { message: string }).message).toBeDefined();
     });

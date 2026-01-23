@@ -15,6 +15,7 @@ describe('Auth Register (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let configService: ConfigService;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,6 +25,9 @@ describe('Auth Register (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     configService = moduleFixture.get(ConfigService);
+
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
+
     await app.init();
   });
 
@@ -46,7 +50,11 @@ describe('Auth Register (e2e)', () => {
     payload: { email?: string; password?: string },
     expectedStatus = 201,
   ) => {
-    return request(app.getHttpServer()).post('/auth/register').send(payload).expect(expectedStatus);
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .set('x-bff-secret', bffSecret)
+      .send(payload)
+      .expect(expectedStatus);
   };
 
   describe('Auth Service - /register (POST)', () => {
