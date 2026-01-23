@@ -1,7 +1,7 @@
 import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { ThrottlerModuleOptions } from '@nestjs/throttler';
-import { ThrottlerGuard, ThrottlerStorage } from '@nestjs/throttler';
+import { ThrottlerException, ThrottlerGuard, ThrottlerStorage } from '@nestjs/throttler';
 
 import { Request } from 'express';
 
@@ -41,6 +41,10 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     try {
       return await super.canActivate(context);
     } catch (error) {
+      if (!(error instanceof ThrottlerException)) {
+        throw error;
+      }
+
       const request = context.switchToHttp().getRequest<Request>();
       const rawTracker = await this.getTracker(request);
       const { headers, user, path, method } = request;

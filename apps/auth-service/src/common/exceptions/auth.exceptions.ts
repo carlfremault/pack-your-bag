@@ -29,3 +29,14 @@ export class InvalidSessionException extends UnauthorizedException {
     this.name = 'InvalidSessionException';
   }
 }
+
+// Used when: request without x-bff-secret header is received
+export class BffAuthenticationException extends UnauthorizedException {
+  constructor(internalDetails?: string) {
+    super(
+      { message: 'Unauthorized', error: 'UNAUTHORIZED' },
+      { cause: internalDetails || 'Unauthorized' },
+    );
+    this.name = 'BffAuthenticationException';
+  }
+}

@@ -54,8 +54,8 @@ export class AuditInterceptor implements NestInterceptor {
           userId,
           ipAddress: anonymizeIp(ip),
           userAgent,
-          path: path,
-          method: method,
+          path,
+          method,
           statusCode: response.statusCode,
           message: 'Success',
           metadata: {

@@ -19,9 +19,12 @@ const validationSchema = Joi.object({
   // Environment
   NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
 
+  // Security
+  TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
+  BFF_SHARED_SECRET: Joi.string().required(),
+
   // Application
   AUTH_PORT: Joi.number().default(8001),
-  ALLOWED_ORIGINS: Joi.string().required(),
 
   // Database
   AUTH_USER: Joi.string().required(),
@@ -34,14 +37,12 @@ const validationSchema = Joi.object({
   AUTH_DB_IDLE_TIMEOUT: Joi.number().min(1000).max(30000).default(30000),
   AUTH_DB_CONN_TIMEOUT: Joi.number().min(1000).max(10000).default(5000),
 
-  // Security
-  AUTH_BCRYPT_SALT_ROUNDS: Joi.number()
-
-    .when('NODE_ENV', {
-      is: 'test',
-      then: Joi.number().min(4).max(14).default(4),
-      otherwise: Joi.number().min(10).max(14).default(10),
-    }),
+  // Hashing
+  AUTH_BCRYPT_SALT_ROUNDS: Joi.number().when('NODE_ENV', {
+    is: 'test',
+    then: Joi.number().min(4).max(14).default(4),
+    otherwise: Joi.number().min(10).max(14).default(10),
+  }),
 
   // Throttling
   AUTH_THROTTLE_TTL: Joi.number().default(60000),

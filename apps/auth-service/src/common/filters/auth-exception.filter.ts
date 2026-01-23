@@ -4,6 +4,7 @@ import { AuditEventType, AuditSeverity } from '@prisma-client';
 import { Request, Response } from 'express';
 
 import {
+  BffAuthenticationException,
   InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
@@ -39,6 +40,9 @@ export class AuthExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof TokenReusedException) {
       eventType = 'TOKEN_REUSE_DETECTED';
+      severity = 'CRITICAL';
+    } else if (exception instanceof BffAuthenticationException) {
+      eventType = 'BFF_SECRET_MISMATCH';
       severity = 'CRITICAL';
     } else if (exception instanceof SessionExpiredException) {
       eventType = 'SESSION_EXPIRED';

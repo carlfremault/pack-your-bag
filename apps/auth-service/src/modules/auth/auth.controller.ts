@@ -15,6 +15,7 @@ import type { Request } from 'express';
 
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
@@ -27,6 +28,7 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
+@UseGuards(BffGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
