@@ -87,7 +87,9 @@ describe('Auth login (e2e)', () => {
         },
       ])('should return 400 when $condition', async ({ payload }) => {
         const response = await loginUser(payload, 400);
-        expect((response.body as { message: string }).message).toBeDefined();
+        expect(response.body).toMatchObject({
+          error: 'Bad Request',
+        });
       });
     });
 
@@ -122,12 +124,18 @@ describe('Auth login (e2e)', () => {
         { email: validUserDto.email, password: 'IncorrectPassword123' },
         401,
       );
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'Unauthorized',
+        message: 'Invalid email or password',
+      });
     });
 
     it('should not login non-existing user', async () => {
       const response = await loginUser(validUserDto, 401);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'Unauthorized',
+        message: 'Invalid email or password',
+      });
     });
   });
 });

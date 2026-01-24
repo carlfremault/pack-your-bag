@@ -13,6 +13,7 @@ import { Throttle } from '@nestjs/throttler';
 
 import type { Request } from 'express';
 
+import { THROTTLE_LIMITS, THROTTLE_TTL } from '@/common/constants/auth.constants';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { BffGuard } from '@/common/guards/bff.guard';
@@ -33,7 +34,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.REGISTER, ttl: THROTTLE_TTL } })
   @Post('register')
   @Serialize(AuthResponseDto)
   @AuditLog('USER_REGISTERED')
@@ -42,7 +43,7 @@ export class AuthController {
   }
 
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_TTL } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
@@ -52,7 +53,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.REFRESH_TOKEN, ttl: THROTTLE_TTL } })
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
@@ -71,7 +72,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT, ttl: THROTTLE_TTL } })
   @Delete('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog('USER_LOGOUT')
@@ -80,7 +81,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT_ALL_DEVICES, ttl: THROTTLE_TTL } })
   @Delete('logout-all')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog('USER_LOGOUT_ALL_DEVICES')
@@ -89,7 +90,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.UPDATE_PASSWORD, ttl: THROTTLE_TTL } })
   @Patch('update-password')
   @Serialize(AuthResponseDto)
   @AuditLog('PASSWORD_CHANGED')

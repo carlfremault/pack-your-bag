@@ -211,11 +211,13 @@ export class AuthService {
       role: roleId,
       iat: Math.floor(Date.now() / 1000),
       jti: uuidv7(),
+      type: 'access',
     };
 
     const refreshPayload = {
       ...payload,
       jti: tokenId,
+      type: 'refresh',
       family: tokenFamilyId,
     };
 

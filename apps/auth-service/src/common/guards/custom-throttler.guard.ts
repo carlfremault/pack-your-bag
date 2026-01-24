@@ -5,7 +5,9 @@ import { ThrottlerException, ThrottlerGuard, ThrottlerStorage } from '@nestjs/th
 
 import { Request } from 'express';
 
+import { anonymizeEmail } from '@/common/utils/anonymizeEmail';
 import anonymizeIp from '@/common/utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 @Injectable()
@@ -30,11 +32,27 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     }
 
     const ip = this.getClientIp(req);
+
+    if (req.path === '/auth/login' && this.isLoginBody(req.body)) {
+      return `ip-email:${ip}:${req.body.email.toLowerCase()}`;
+    }
+
     return `ip:${ip}`;
   }
 
   private getClientIp(req: Request): string {
     return req.ip ?? 'unknown';
+  }
+
+  private isLoginBody(body: unknown): body is { email: string } {
+    return (
+      body !== null &&
+      typeof body === 'object' &&
+      'email' in body &&
+      typeof body.email === 'string' &&
+      body.email.length > 0 &&
+      body.email.length < 255
+    );
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -48,14 +66,18 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
       const request = context.switchToHttp().getRequest<Request>();
       const rawTracker = await this.getTracker(request);
       const { headers, user, path, method } = request;
-      const userAgent = Array.isArray(headers['user-agent'])
-        ? (headers['user-agent'][0] as string)
-        : (headers['user-agent'] as string);
+      const userAgent = getUserAgentFromHeaders(headers);
 
       // Masking for GDPR-compliant logging
       let maskedTracker: string;
       if (rawTracker.startsWith('user:')) {
         maskedTracker = `user:***${rawTracker.slice(-4)}`;
+      } else if (rawTracker.startsWith('ip-email:')) {
+        const dataPart = rawTracker.replace('ip-email:', '');
+        const lastColonIndex = dataPart.lastIndexOf(':');
+        const originalIp = dataPart.substring(0, lastColonIndex);
+        const email = dataPart.substring(lastColonIndex + 1);
+        maskedTracker = `ip-email:${anonymizeIp(originalIp)}:${anonymizeEmail(email)}`;
       } else {
         const rawIp = rawTracker.replace('ip:', '');
         maskedTracker = `ip:${anonymizeIp(rawIp)}`;

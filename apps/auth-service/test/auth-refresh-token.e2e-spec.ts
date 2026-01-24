@@ -362,7 +362,10 @@ describe('Auth Refresh Token (e2e)', () => {
         .post('/auth/refresh-token')
         .set('x-bff-secret', bffSecret)
         .expect(401);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      });
     });
 
     it('should handle malformed Authorization header', async () => {
@@ -371,7 +374,58 @@ describe('Auth Refresh Token (e2e)', () => {
         .set('Authorization', 'InvalidFormat')
         .set('x-bff-secret', bffSecret)
         .expect(401);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      });
+    });
+
+    it('should reject request with missing x-bff-secret header', async () => {
+      const { refresh_token } = await registerUser();
+      const response = await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .set('Authorization', `Bearer ${refresh_token}`)
+        .expect(401);
+      expect(response.body).toMatchObject({
+        error: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      });
+    });
+
+    it('should reject request with invalid x-bff-secret header', async () => {
+      const { refresh_token } = await registerUser();
+      const response = await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .set('Authorization', `Bearer ${refresh_token}`)
+        .set('x-bff-secret', 'invalid-secret')
+        .expect(401);
+      expect(response.body).toMatchObject({
+        error: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      });
+    });
+
+    it('should not accept an access token when a refresh token is needed', async () => {
+      const { access_token } = await registerUser();
+      const response = await refreshToken(access_token, 401);
+
+      expect(response.body).toMatchObject({
+        error: 'INVALID_SESSION',
+        message: 'Access Denied',
+      });
+    });
+
+    it('should not accept a refresh token when an access token is needed', async () => {
+      const { refresh_token } = await registerUser();
+      const response = await request(app.getHttpServer())
+        .delete('/auth/logout-all')
+        .set('Authorization', `Bearer ${refresh_token}`)
+        .set('x-bff-secret', bffSecret)
+        .expect(401);
+      expect(response.body).toMatchObject({
+        error: 'INVALID_SESSION',
+        message: 'Access Denied',
+      });
     });
   });
 });

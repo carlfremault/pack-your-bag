@@ -4,7 +4,7 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule } from '@nestjs/throttler';
 
-import { Request } from 'express';
+import type { Request } from 'express';
 import Joi from 'joi';
 
 import { AuthExceptionFilter } from './common/filters/auth-exception.filter';

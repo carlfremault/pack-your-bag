@@ -1,11 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 
+import { plainToInstance } from 'class-transformer';
+import { validateSync } from 'class-validator';
 import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { RefreshTokenUser } from '../interfaces/refresh-token-user.interface';
+import { InvalidSessionException } from '@/common/exceptions/auth.exceptions';
+
+import { JwtPayload } from './dto/jwt-payload.dto';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
@@ -24,18 +28,21 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     });
   }
 
-  validate(_req: Request, payload: { sub: string; jti: string; family: string }): RefreshTokenUser {
-    if (!payload.sub || !payload.jti || !payload.family) {
-      throw new UnauthorizedException({
-        message: 'Invalid refresh token payload',
-        error: 'INVALID_TOKEN',
-      });
+  validate(
+    _req: Request,
+    payload: unknown,
+  ): { userId: string; tokenId: string; tokenFamilyId: string } {
+    const dto = plainToInstance(JwtPayload, payload, { excludeExtraneousValues: true });
+    const errors = validateSync(dto);
+
+    if (errors.length > 0 || dto.type !== 'refresh' || !dto.family) {
+      throw new InvalidSessionException('Invalid refresh token payload');
     }
 
     return {
-      userId: payload.sub,
-      tokenId: payload.jti,
-      tokenFamilyId: payload.family,
+      userId: dto.sub,
+      tokenId: dto.jti,
+      tokenFamilyId: dto.family,
     };
   }
 }

@@ -11,13 +11,13 @@ import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'crypto';
 import { Request } from 'express';
 
+import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
 import { BffAuthenticationException } from '@/common/exceptions/auth.exceptions';
 
 @Injectable()
 export class BffGuard implements CanActivate, OnModuleDestroy {
   private readonly logger = new Logger(BffGuard.name);
   private readonly failedAttempts = new Map<string, { count: number; resetAt: number }>();
-  private readonly MAX_ATTEMPTS = 10;
   private readonly LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
   private cleanupInterval: ReturnType<typeof setInterval>;
 
@@ -41,7 +41,7 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
     const ip = request.ip || 'unknown';
     const attempts = this.failedAttempts.get(ip);
 
-    if (attempts && attempts.count >= this.MAX_ATTEMPTS) {
+    if (attempts && attempts.count >= THROTTLE_LIMITS.BFF_GUARD) {
       if (Date.now() < attempts.resetAt) {
         this.logger.warn('IP locked out', { ip, attempts: attempts.count });
         throw new BffAuthenticationException('Too many failed attempts');

@@ -10,6 +10,7 @@ import {
   TokenReusedException,
 } from '@/common/exceptions/auth.exceptions';
 import anonymizeIp from '@/common/utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface UnauthorizedExceptionResponse {
@@ -57,9 +58,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
     }
 
     const { user, ip, headers, path, method } = request;
-    const userAgent = Array.isArray(headers['user-agent'])
-      ? (headers['user-agent'][0] as string)
-      : (headers['user-agent'] as string);
+    const userAgent = getUserAgentFromHeaders(headers);
 
     this.auditLogProvider.safeEmit({
       eventType,

@@ -82,7 +82,9 @@ describe('Auth Register (e2e)', () => {
         },
       ])('should return 400 when $condition', async ({ payload }) => {
         const response = await registerUser(payload, 400);
-        expect((response.body as { message: string }).message).toBeDefined();
+        expect(response.body).toMatchObject({
+          error: 'Bad Request',
+        });
       });
     });
 
@@ -101,13 +103,19 @@ describe('Auth Register (e2e)', () => {
     it('should not accept a duplicate email', async () => {
       await registerUser(validUserDto);
       const response = await registerUser(validUserDto, 409);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'Conflict',
+        message: 'Email already exists.',
+      });
     });
 
     it('should not accept a duplicate email with different casing', async () => {
       await registerUser(validUserDto);
       const response = await registerUser(validUserDtoWithUppercaseEmail, 409);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'Conflict',
+        message: 'Email already exists.',
+      });
     });
   });
 });

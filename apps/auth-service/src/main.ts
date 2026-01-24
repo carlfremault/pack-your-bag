@@ -20,7 +20,19 @@ async function bootstrap() {
   });
 
   // Trust proxy - critical for rate limiting
-  app.set('trust proxy', process.env.TRUST_PROXY);
+  const trustProxy = process.env.TRUST_PROXY;
+  if (trustProxy !== undefined) {
+    if (trustProxy === 'true') {
+      app.set('trust proxy', true);
+    } else if (trustProxy === 'false') {
+      app.set('trust proxy', false);
+    } else if (/^\d+$/.test(trustProxy)) {
+      app.set('trust proxy', parseInt(trustProxy, 10));
+    } else {
+      // IP pattern, subnet, or Express preset like 'loopback', 'linklocal'
+      app.set('trust proxy', trustProxy);
+    }
+  }
 
   // Security headers
   app.use(
@@ -70,7 +82,7 @@ async function bootstrap() {
 
       // In production, block all browser requests
       if (isProduction) {
-        callback(new Error('Not allowed by CORS'));
+        callback(null, false);
       } else {
         callback(null, true);
       }

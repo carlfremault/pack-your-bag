@@ -1,12 +1,13 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerStorage } from '@nestjs/throttler';
 
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { AUDIT_LOG_FLUSH_TIMEOUT_MS } from '@/common/constants/auth.constants';
+import { AUDIT_LOG_FLUSH_TIMEOUT_MS, THROTTLE_LIMITS } from '@/common/constants/auth.constants';
 import { Prisma } from '@/generated/prisma';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -17,6 +18,8 @@ describe('Custom Throttler Log (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let configService: ConfigService;
+  let storage: ThrottlerStorage;
+
   let bffSecret: string;
 
   beforeAll(async () => {
@@ -27,6 +30,7 @@ describe('Custom Throttler Log (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     configService = moduleFixture.get(ConfigService);
+    storage = moduleFixture.get<ThrottlerStorage>(ThrottlerStorage);
 
     bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
 
@@ -37,6 +41,15 @@ describe('Custom Throttler Log (e2e)', () => {
     await prisma.auditLog.deleteMany();
     await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
+  });
+
+  afterEach(() => {
+    // We need to reset the throttle storage after each test
+    // Accessing internal ThrottlerStorage structure - may break if library internals change
+    const internalStorage = storage as unknown as Record<string, Map<string, number>>;
+    if (internalStorage.storage instanceof Map) {
+      internalStorage.storage.clear();
+    }
   });
 
   afterAll(async () => {
@@ -57,12 +70,16 @@ describe('Custom Throttler Log (e2e)', () => {
     throw new Error(`Audit log not found for conditions: ${JSON.stringify(where)}`);
   };
 
-  const registerUser = async (): Promise<AuthResponseDto> => {
+  const registerUser = async (
+    dto?: { email: string; password: string },
+    expectedStatus = 201,
+  ): Promise<AuthResponseDto> => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
+      .set('x-force-throttling', 'true')
       .set('x-bff-secret', bffSecret)
-      .send(validUserDto)
-      .expect(201);
+      .send(dto || validUserDto)
+      .expect(expectedStatus);
     return response.body as AuthResponseDto;
   };
 
@@ -75,10 +92,50 @@ describe('Custom Throttler Log (e2e)', () => {
       .expect(expectedStatus);
   };
 
+  const updatePassword = async (
+    token: string,
+    body: { currentPassword?: string; newPassword?: string },
+    expectedStatus = 200,
+  ) => {
+    return request(app.getHttpServer())
+      .patch(`/auth/update-password`)
+      .set('Authorization', `Bearer ${token}`)
+      .set('x-force-throttling', 'true')
+      .set('x-bff-secret', bffSecret)
+      .send(body)
+      .expect(expectedStatus);
+  };
+
   describe('Auth Service - Custom Throttler', () => {
-    it('should trigger custom throttler guard and create an audit log entry when throttle limit exceeded', async () => {
-      await registerUser();
-      for (let i = 0; i < 10; i++) {
+    it('should trigger custom throttler guard and create an audit log entry - ip based tracking', async () => {
+      for (let i = 0; i < THROTTLE_LIMITS.REGISTER; i++) {
+        await registerUser({
+          email: `testemail${i}@test.com`,
+          password: 'validPassword123',
+        });
+      }
+      await registerUser(validUserDto, 429);
+
+      const auditLogEntry = await waitForLog({
+        eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
+      });
+
+      expect(auditLogEntry).toMatchObject({
+        severity: 'WARN',
+        ipAddress: expect.any(String) as string,
+        path: '/auth/register',
+        method: 'POST',
+        statusCode: 429,
+      });
+
+      expect(auditLogEntry.metadata).toBeTruthy();
+      const metadata = auditLogEntry.metadata as Record<string, unknown>;
+      expect(metadata.tracker).toContain('ip:');
+    });
+
+    it('should trigger custom throttler guard and create an audit log entry - email based tracking', async () => {
+      await registerUser(validUserDto);
+      for (let i = 0; i < THROTTLE_LIMITS.LOGIN; i++) {
         await loginUser();
       }
       await loginUser(429);
@@ -94,6 +151,47 @@ describe('Custom Throttler Log (e2e)', () => {
         method: 'POST',
         statusCode: 429,
       });
+
+      expect(auditLogEntry.metadata).toBeTruthy();
+      const metadata = auditLogEntry.metadata as Record<string, unknown>;
+      expect(metadata.tracker).toContain('ip-email:');
+    });
+
+    it('should trigger custom throttler guard and create an audit log entry - userId based tracking', async () => {
+      const { access_token } = await registerUser(validUserDto);
+      await updatePassword(access_token, {
+        currentPassword: 'validPassword123',
+        newPassword: 'validPassword456',
+      });
+      await updatePassword(access_token, {
+        currentPassword: 'validPassword456',
+        newPassword: 'validPassword789',
+      });
+      await updatePassword(access_token, {
+        currentPassword: 'validPassword789',
+        newPassword: 'validPassword123',
+      });
+      await updatePassword(
+        access_token,
+        { currentPassword: 'validPassword123', newPassword: 'validPassword456' },
+        429,
+      );
+
+      const auditLogEntry = await waitForLog({
+        eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
+      });
+
+      expect(auditLogEntry).toMatchObject({
+        severity: 'WARN',
+        ipAddress: expect.any(String) as string,
+        path: '/auth/update-password',
+        method: 'PATCH',
+        statusCode: 429,
+      });
+
+      expect(auditLogEntry.metadata).toBeTruthy();
+      const metadata = auditLogEntry.metadata as Record<string, unknown>;
+      expect(metadata.tracker).toContain('user:');
     });
   });
 });
