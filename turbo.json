@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -21,7 +22,7 @@
     },
     "test:setup": {
       "dependsOn": ["transit"],
-      "env": ["AUTH_*", "RSA_*", "NODE_ENV"],
+      "env": ["AUTH_*", "RSA_*"],
       "cache": true,
       "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
     },

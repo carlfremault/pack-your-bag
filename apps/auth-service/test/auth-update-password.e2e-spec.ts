@@ -15,6 +15,7 @@ describe('Auth Update Password (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let configService: ConfigService;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,6 +25,9 @@ describe('Auth Update Password (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     configService = moduleFixture.get(ConfigService);
+
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
+
     await app.init();
   });
 
@@ -41,6 +45,7 @@ describe('Auth Update Password (e2e)', () => {
   const registerUser = async (): Promise<AuthResponseDto> => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
+      .set('x-bff-secret', bffSecret)
       .send(validUserDto)
       .expect(201);
     return response.body as AuthResponseDto;
@@ -54,6 +59,7 @@ describe('Auth Update Password (e2e)', () => {
     return request(app.getHttpServer())
       .patch(`/auth/update-password`)
       .set('Authorization', `Bearer ${token}`)
+      .set('x-bff-secret', bffSecret)
       .send(body)
       .expect(expectedStatus);
   };
@@ -108,6 +114,7 @@ describe('Auth Update Password (e2e)', () => {
       await request(app.getHttpServer())
         .post('/auth/refresh-token')
         .set('Authorization', `Bearer ${refresh_token}`)
+        .set('x-bff-secret', bffSecret)
         .expect(401);
     });
 
@@ -139,6 +146,7 @@ describe('Auth Update Password (e2e)', () => {
       await updatePassword(access_token, body);
       await request(app.getHttpServer())
         .post('/auth/login')
+        .set('x-bff-secret', bffSecret)
         .send({ email: validUserDto.email, password: 'newPassword123' })
         .expect(200);
     });

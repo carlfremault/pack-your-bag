@@ -3,16 +3,20 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
+import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
+import { JwtAuthStrategy } from '@/common/strategies/jwt-auth.strategy';
+import { JwtRefreshStrategy } from '@/common/strategies/jwt-refresh.strategy';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
 import { UserModule } from '@/modules/user/user.module';
 
+import { AuditLogModule } from '../audit-log/audit-log.module';
+
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtAuthStrategy } from './jwt-auth.strategy';
-import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 
 @Module({
   imports: [
+    AuditLogModule,
     UserModule,
     RefreshTokenModule,
     PassportModule,
@@ -42,6 +46,6 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthStrategy, JwtRefreshStrategy],
+  providers: [AuthService, JwtAuthStrategy, JwtRefreshStrategy, CustomThrottlerGuard],
 })
 export class AuthModule {}

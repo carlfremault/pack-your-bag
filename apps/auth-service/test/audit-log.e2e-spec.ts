@@ -19,6 +19,7 @@ describe('Audit Log (e2e)', () => {
   let configService: ConfigService;
   let jwtService: JwtService;
   let gracePeriod: number;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -31,6 +32,7 @@ describe('Audit Log (e2e)', () => {
     jwtService = moduleFixture.get(JwtService);
 
     gracePeriod = configService.get<number>('AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS', 2000);
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
 
     await app.init();
   });
@@ -62,6 +64,7 @@ describe('Audit Log (e2e)', () => {
   const registerUser = async (): Promise<AuthResponseDto> => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
+      .set('x-bff-secret', bffSecret)
       .send(validUserDto)
       .expect(201);
     return response.body as AuthResponseDto;
@@ -71,6 +74,7 @@ describe('Audit Log (e2e)', () => {
     return request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Authorization', `Bearer ${token}`)
+      .set('x-bff-secret', bffSecret)
       .expect(expectedStatus);
   };
 

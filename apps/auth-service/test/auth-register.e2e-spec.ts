@@ -15,6 +15,7 @@ describe('Auth Register (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let configService: ConfigService;
+  let bffSecret: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,6 +25,9 @@ describe('Auth Register (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     configService = moduleFixture.get(ConfigService);
+
+    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
+
     await app.init();
   });
 
@@ -46,7 +50,11 @@ describe('Auth Register (e2e)', () => {
     payload: { email?: string; password?: string },
     expectedStatus = 201,
   ) => {
-    return request(app.getHttpServer()).post('/auth/register').send(payload).expect(expectedStatus);
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .set('x-bff-secret', bffSecret)
+      .send(payload)
+      .expect(expectedStatus);
   };
 
   describe('Auth Service - /register (POST)', () => {
@@ -74,7 +82,9 @@ describe('Auth Register (e2e)', () => {
         },
       ])('should return 400 when $condition', async ({ payload }) => {
         const response = await registerUser(payload, 400);
-        expect((response.body as { message: string }).message).toBeDefined();
+        expect(response.body).toMatchObject({
+          error: 'Bad Request',
+        });
       });
     });
 
@@ -93,13 +103,19 @@ describe('Auth Register (e2e)', () => {
     it('should not accept a duplicate email', async () => {
       await registerUser(validUserDto);
       const response = await registerUser(validUserDto, 409);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'Conflict',
+        message: 'Email already exists.',
+      });
     });
 
     it('should not accept a duplicate email with different casing', async () => {
       await registerUser(validUserDto);
       const response = await registerUser(validUserDtoWithUppercaseEmail, 409);
-      expect((response.body as { message: string }).message).toBeDefined();
+      expect(response.body).toMatchObject({
+        error: 'Conflict',
+        message: 'Email already exists.',
+      });
     });
   });
 });

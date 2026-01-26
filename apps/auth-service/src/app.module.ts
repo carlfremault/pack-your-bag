@@ -1,9 +1,10 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 
+import type { Request } from 'express';
 import Joi from 'joi';
 
 import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
@@ -16,7 +17,11 @@ import { PrismaModule } from './prisma/prisma.module';
 
 const validationSchema = Joi.object({
   // Environment
-  NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+  NODE_ENV: Joi.string().valid('development', 'test', 'production').required(),
+
+  // Security
+  TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
+  BFF_SHARED_SECRET: Joi.string().required(),
 
   // Application
   AUTH_PORT: Joi.number().default(8001),
@@ -32,14 +37,12 @@ const validationSchema = Joi.object({
   AUTH_DB_IDLE_TIMEOUT: Joi.number().min(1000).max(30000).default(30000),
   AUTH_DB_CONN_TIMEOUT: Joi.number().min(1000).max(10000).default(5000),
 
-  // Security
-  AUTH_BCRYPT_SALT_ROUNDS: Joi.number()
-
-    .when('NODE_ENV', {
-      is: 'test',
-      then: Joi.number().min(4).max(14).default(4),
-      otherwise: Joi.number().min(10).max(14).default(10),
-    }),
+  // Hashing
+  AUTH_BCRYPT_SALT_ROUNDS: Joi.number().when('NODE_ENV', {
+    is: 'test',
+    then: Joi.number().min(4).max(14).default(4),
+    otherwise: Joi.number().min(10).max(14).default(10),
+  }),
 
   // Throttling
   AUTH_THROTTLE_TTL: Joi.number().default(60000),
@@ -66,7 +69,12 @@ const validationSchema = Joi.object({
         {
           ttl: config.get('AUTH_THROTTLE_TTL', 60000),
           limit: config.get('AUTH_THROTTLE_LIMIT', 100),
-          skipIf: () => config.get('NODE_ENV') === 'test',
+          skipIf: (context) => {
+            const isTestEnv = config.get('NODE_ENV') === 'test';
+            if (!isTestEnv) return false;
+            const req = context.switchToHttp().getRequest<Request>();
+            return !req.headers['x-force-throttling'];
+          },
         },
       ],
     }),
@@ -84,10 +92,6 @@ const validationSchema = Joi.object({
         forbidNonWhitelisted: true,
         transform: true,
       }),
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
     },
     {
       provide: APP_FILTER,

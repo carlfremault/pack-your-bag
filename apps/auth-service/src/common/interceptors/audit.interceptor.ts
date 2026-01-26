@@ -8,6 +8,7 @@ import { tap } from 'rxjs/operators';
 
 import { AUDIT_EVENT_KEY } from '@/common/decorators/audit-log.decorator';
 import anonymizeIp from '@/common/utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface AuditableResponse {
@@ -33,11 +34,14 @@ export class AuditInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap((data: AuditableResponse) => {
+        const { user, auditOverride, ip, headers, path, method } = request;
+        const userAgent = getUserAgentFromHeaders(headers);
+
         // Logic to find the ID:
         // 1. Look in the request (for authenticated actions like password change)
         // 2. Look in the returned response (for login/register)
-        const userId = request.user?.userId || data?.user?.id || null;
-        const eventType: AuditEventType = request.auditOverride || defaultEvent;
+        const userId = user?.userId || data?.user?.id || null;
+        const eventType: AuditEventType = auditOverride || defaultEvent;
 
         if (!userId && eventType !== 'USER_REGISTERED') {
           this.logger.warn(`Could not resolve userId for audit event: ${eventType}`);
@@ -47,14 +51,15 @@ export class AuditInterceptor implements NestInterceptor {
           eventType,
           severity: 'INFO',
           userId,
-          ipAddress: anonymizeIp(request.ip),
-          userAgent: request.headers['user-agent'],
-          path: request.path,
-          method: request.method,
+          ipAddress: anonymizeIp(ip),
+          userAgent,
+          path,
+          method,
           statusCode: response.statusCode,
           message: 'Success',
           metadata: {
-            family: request.user?.tokenFamilyId ?? null,
+            ...(user?.tokenId && { tokenId: user.tokenId }),
+            ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
           },
         });
       }),

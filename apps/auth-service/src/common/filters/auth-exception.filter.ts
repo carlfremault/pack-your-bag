@@ -4,12 +4,13 @@ import { AuditEventType, AuditSeverity } from '@prisma-client';
 import { Request, Response } from 'express';
 
 import {
+  BffAuthenticationException,
   InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/auth.exceptions';
-import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import anonymizeIp from '@/common/utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface UnauthorizedExceptionResponse {
@@ -41,6 +42,9 @@ export class AuthExceptionFilter implements ExceptionFilter {
     if (exception instanceof TokenReusedException) {
       eventType = 'TOKEN_REUSE_DETECTED';
       severity = 'CRITICAL';
+    } else if (exception instanceof BffAuthenticationException) {
+      eventType = 'BFF_SECRET_MISMATCH';
+      severity = 'CRITICAL';
     } else if (exception instanceof SessionExpiredException) {
       eventType = 'SESSION_EXPIRED';
       severity = 'INFO';
@@ -53,22 +57,23 @@ export class AuthExceptionFilter implements ExceptionFilter {
       eventType = 'USER_LOGIN_FAILED';
     }
 
-    const user = request.user as RefreshTokenUser | undefined;
+    const { user, ip, headers, path, method } = request;
+    const userAgent = getUserAgentFromHeaders(headers);
 
     this.auditLogProvider.safeEmit({
       eventType,
       severity,
       userId: user?.userId ?? null,
-      ipAddress: anonymizeIp(request.ip),
-      userAgent: request.headers['user-agent'],
-      path: request.path,
-      method: request.method,
+      ipAddress: anonymizeIp(ip),
+      userAgent,
+      path,
+      method,
       statusCode: 401,
       errorCode,
       message: auditMessage,
       metadata: {
-        tokenId: user?.tokenId ?? null,
-        tokenFamily: user?.tokenFamilyId ?? null,
+        ...(user?.tokenId && { tokenId: user.tokenId }),
+        ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
       },
     });
 
