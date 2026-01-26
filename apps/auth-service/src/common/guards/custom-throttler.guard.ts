@@ -7,8 +7,6 @@ import { Request } from 'express';
 
 import { anonymizeEmail } from '@/common/utils/anonymizeEmail';
 import anonymizeIp from '@/common/utils/anonymizeIp';
-import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
@@ -18,8 +16,6 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     options: ThrottlerModuleOptions,
     storageService: ThrottlerStorage,
     reflector: Reflector,
-
-    private readonly auditProvider: AuditLogProvider,
   ) {
     super(options, storageService, reflector);
   }
@@ -40,6 +36,24 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     return `ip:${ip}`;
   }
 
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    try {
+      return await super.canActivate(context);
+    } catch (error) {
+      if (!(error instanceof ThrottlerException)) {
+        throw error;
+      }
+
+      const request = context.switchToHttp().getRequest<Request>();
+      const rawTracker = await this.getTracker(request);
+      const maskedTracker = this.maskTracker(rawTracker);
+
+      (error as ThrottlerException & { tracker?: string }).tracker = maskedTracker;
+
+      throw error;
+    }
+  }
+
   private getClientIp(req: Request): string {
     return req.ip ?? 'unknown';
   }
@@ -55,58 +69,18 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     );
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    try {
-      return await super.canActivate(context);
-    } catch (error) {
-      if (!(error instanceof ThrottlerException)) {
-        throw error;
-      }
-
-      const request = context.switchToHttp().getRequest<Request>();
-      const rawTracker = await this.getTracker(request);
-      const { headers, user, path, method } = request;
-      const userAgent = getUserAgentFromHeaders(headers);
-
-      // Masking for GDPR-compliant logging
-      let maskedTracker: string;
-      if (rawTracker.startsWith('user:')) {
-        maskedTracker = `user:***${rawTracker.slice(-4)}`;
-      } else if (rawTracker.startsWith('ip-email:')) {
-        const dataPart = rawTracker.replace('ip-email:', '');
-        const lastColonIndex = dataPart.lastIndexOf(':');
-        const originalIp = dataPart.substring(0, lastColonIndex);
-        const email = dataPart.substring(lastColonIndex + 1);
-        maskedTracker = `ip-email:${anonymizeIp(originalIp)}:${anonymizeEmail(email)}`;
-      } else {
-        const rawIp = rawTracker.replace('ip:', '');
-        maskedTracker = `ip:${anonymizeIp(rawIp)}`;
-      }
-
-      this.auditProvider.safeEmit({
-        eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
-        severity: 'WARN',
-        userId: user?.userId ?? null,
-        ipAddress: anonymizeIp(this.getClientIp(request)),
-        userAgent,
-        path,
-        method,
-        statusCode: 429,
-        message: 'Rate limit exceeded',
-        metadata: {
-          tracker: maskedTracker,
-          ...(user?.tokenId && { tokenId: user.tokenId }),
-          ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
-        },
-      });
-
-      this.logger.warn('Rate limit exceeded', {
-        tracker: maskedTracker,
-        method,
-        path,
-      });
-
-      throw error;
+  private maskTracker(rawTracker: string): string {
+    if (rawTracker.startsWith('user:')) {
+      return `user:***${rawTracker.slice(-4)}`;
+    } else if (rawTracker.startsWith('ip-email:')) {
+      const dataPart = rawTracker.replace('ip-email:', '');
+      const lastColonIndex = dataPart.lastIndexOf(':');
+      const originalIp = dataPart.substring(0, lastColonIndex);
+      const email = dataPart.substring(lastColonIndex + 1);
+      return `ip-email:${anonymizeIp(originalIp)}:${anonymizeEmail(email)}`;
+    } else {
+      const rawIp = rawTracker.replace('ip:', '');
+      return `ip:${anonymizeIp(rawIp)}`;
     }
   }
 }

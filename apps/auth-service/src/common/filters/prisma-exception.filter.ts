@@ -1,4 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 
 import { Prisma } from '@prisma-client';
 import { Response } from 'express';
@@ -60,6 +67,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           statusCode,
           message,
           error,
+          timestamp: new Date().toISOString(),
         });
         break;
       }
@@ -82,19 +90,17 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           statusCode,
           message,
           error,
+          timestamp: new Date().toISOString(),
         });
         break;
       }
       default: {
-        // TODO: send to Sentry
-        this.logger.error(`Unhandled Prisma Error: ${exception.message}`, exception.stack);
+        this.logger.error(
+          `Unhandled Prisma Error: ${exception.code} - ${exception.message}`,
+          exception.stack,
+        );
 
-        response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'Internal server error',
-          error: 'Internal Server Error',
-        });
-        break;
+        throw new InternalServerErrorException('Database operation failed', { cause: exception });
       }
     }
   }

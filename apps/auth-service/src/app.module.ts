@@ -8,6 +8,7 @@ import type { Request } from 'express';
 import Joi from 'joi';
 
 import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
+import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
@@ -92,6 +93,10 @@ const validationSchema = Joi.object({
         forbidNonWhitelisted: true,
         transform: true,
       }),
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionsFilter,
     },
     {
       provide: APP_FILTER,

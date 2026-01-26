@@ -51,16 +51,12 @@ export class AuditInterceptor implements NestInterceptor {
           eventType,
           severity: 'INFO',
           userId,
-          ipAddress: anonymizeIp(ip),
+          ipAddress: ip ? anonymizeIp(ip) : 'unknown',
           userAgent,
           path,
           method,
           statusCode: response.statusCode,
           message: 'Success',
-          metadata: {
-            ...(user?.tokenId && { tokenId: user.tokenId }),
-            ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
-          },
         });
       }),
     );

@@ -29,11 +29,8 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const exceptionResponse = exception.getResponse() as UnauthorizedExceptionResponse;
-
     const errorCode = exceptionResponse.error || 'UNAUTHORIZED';
-    const clientMessage = Array.isArray(exceptionResponse.message)
-      ? (exceptionResponse.message[0] ?? 'Unauthorized')
-      : exceptionResponse.message || 'Unauthorized';
+    const clientMessage = this.getClientMessage(exceptionResponse);
     const auditMessage = typeof exception.cause === 'string' ? exception.cause : exception.message;
 
     let severity: AuditSeverity = 'WARN';
@@ -64,7 +61,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
       eventType,
       severity,
       userId: user?.userId ?? null,
-      ipAddress: anonymizeIp(ip),
+      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
       userAgent,
       path,
       method,
@@ -83,5 +80,12 @@ export class AuthExceptionFilter implements ExceptionFilter {
       error: errorCode,
       timestamp: new Date().toISOString(),
     });
+  }
+
+  private getClientMessage(exceptionResponse: UnauthorizedExceptionResponse): string {
+    if (Array.isArray(exceptionResponse.message)) {
+      return exceptionResponse.message[0] || 'Unauthorized';
+    }
+    return exceptionResponse.message || 'Unauthorized';
   }
 }
