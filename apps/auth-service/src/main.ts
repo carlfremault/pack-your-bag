@@ -7,7 +7,16 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const isProduction = process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test';
+  const nodeEnv = process.env.NODE_ENV;
+  if (!nodeEnv || !['development', 'test', 'production'].includes(nodeEnv)) {
+    console.error(
+      `NODE_ENV must be explicitly set to 'development', 'test', or 'production'. ` +
+        `Current value: "${nodeEnv}"`,
+    );
+    process.exit(1);
+  }
+
+  const isProduction = nodeEnv === 'production';
 
   // Logger setup
   const logLevels: ('log' | 'error' | 'warn' | 'debug' | 'verbose')[] = isProduction

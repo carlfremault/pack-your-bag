@@ -17,7 +17,7 @@ import { PrismaModule } from './prisma/prisma.module';
 
 const validationSchema = Joi.object({
   // Environment
-  NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+  NODE_ENV: Joi.string().valid('development', 'test', 'production').required(),
 
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
@@ -70,9 +70,10 @@ const validationSchema = Joi.object({
           ttl: config.get('AUTH_THROTTLE_TTL', 60000),
           limit: config.get('AUTH_THROTTLE_LIMIT', 100),
           skipIf: (context) => {
+            const isTestEnv = config.get('NODE_ENV') === 'test';
+            if (!isTestEnv) return false;
             const req = context.switchToHttp().getRequest<Request>();
-            if (req.headers['x-force-throttling']) return false;
-            return config.get('NODE_ENV') === 'test';
+            return !req.headers['x-force-throttling'];
           },
         },
       ],

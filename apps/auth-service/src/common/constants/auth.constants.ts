@@ -10,9 +10,6 @@ export const PASSWORD_MAX_LENGTH_MESSAGE = `Password must not exceed ${PASSWORD_
 // User
 export const AUTH_DEFAULT_USER_ROLE_ID = 1;
 
-// Audit
-export const AUDIT_LOG_FLUSH_TIMEOUT_MS = 500;
-
 // Throttling
 export const THROTTLE_TTL = 60000;
 export const THROTTLE_LIMITS = {
