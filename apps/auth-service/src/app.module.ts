@@ -13,6 +13,7 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { HealthModule } from './modules/health/health.module';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -26,6 +27,7 @@ const validationSchema = Joi.object({
 
   // Application
   AUTH_PORT: Joi.number().default(8001),
+  AUTH_HEALTH_DISK_PATH: Joi.string().default('/'),
 
   // Database
   AUTH_USER: Joi.string().required(),
@@ -84,6 +86,7 @@ const validationSchema = Joi.object({
     AuthModule,
     UserModule,
     AuditLogModule,
+    HealthModule,
   ],
   providers: [
     {
