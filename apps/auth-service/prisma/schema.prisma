@@ -94,6 +94,7 @@ enum AuditEventType {
   RESOURCE_NOT_FOUND
   CONFLICT_ERROR
   HTTP_ERROR // Fallback
+  SCHEDULED_TASK
   
   @@schema("app_auth")
 }
