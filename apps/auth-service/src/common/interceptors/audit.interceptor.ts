@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { AuditEventType } from '@prisma-client';
+import { AuditEventType, AuditSeverity } from '@prisma-client';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -43,13 +43,13 @@ export class AuditInterceptor implements NestInterceptor {
         const userId = user?.userId || data?.user?.id || null;
         const eventType: AuditEventType = auditOverride || defaultEvent;
 
-        if (!userId && eventType !== 'USER_REGISTERED') {
+        if (!userId && eventType !== AuditEventType.USER_REGISTERED) {
           this.logger.warn(`Could not resolve userId for audit event: ${eventType}`);
         }
 
         this.auditProvider.safeEmit({
           eventType,
-          severity: 'INFO',
+          severity: AuditSeverity.INFO,
           userId,
           ipAddress: ip ? anonymizeIp(ip) : 'unknown',
           userAgent,

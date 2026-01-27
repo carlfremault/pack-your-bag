@@ -45,6 +45,7 @@ export class AuditLogService {
       this.logger.error('Audit logging failed internally:', error);
     }
   }
+
   private parseDeviceInfo(userAgent?: string) {
     if (!userAgent) return null;
 
@@ -69,5 +70,34 @@ export class AuditLogService {
     // TODO: Implement email alerting
     // For now, just log
     this.logger.error('CRITICAL SECURITY EVENT:', data);
+  }
+
+  // For cron job
+  async deleteAuditLogs(where: Prisma.AuditLogWhereInput): Promise<Prisma.BatchPayload> {
+    // Ensure there's a meaningful time-based filter to prevent accidental mass deletion
+    const validateAndCheckTimeFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
+      if (!filter || typeof filter !== 'object') return false;
+
+      if ('NOT' in filter) {
+        throw new Error('NOT clauses are not allowed in audit log deletion for safety reasons.');
+      }
+
+      if ('createdAt' in filter) return true;
+
+      if (filter.AND && Array.isArray(filter.AND)) {
+        return filter.AND.some(validateAndCheckTimeFilter);
+      }
+      if (filter.OR && Array.isArray(filter.OR)) {
+        return filter.OR.some(validateAndCheckTimeFilter);
+      }
+
+      return false;
+    };
+
+    if (!validateAndCheckTimeFilter(where)) {
+      throw new Error('A createdAt filter must be provided for bulk audit log deletion.');
+    }
+
+    return this.prisma.auditLog.deleteMany({ where });
   }
 }

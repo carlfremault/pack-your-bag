@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -47,14 +47,14 @@ describe('Auth Update Password (e2e)', () => {
       .post('/auth/register')
       .set('x-bff-secret', bffSecret)
       .send(validUserDto)
-      .expect(201);
+      .expect(HttpStatus.CREATED);
     return response.body as AuthResponseDto;
   };
 
   const updatePassword = async (
     token: string,
     body: { currentPassword?: string; newPassword?: string },
-    expectedStatus = 200,
+    expectedStatus = HttpStatus.OK,
   ) => {
     return request(app.getHttpServer())
       .patch(`/auth/update-password`)
@@ -83,9 +83,9 @@ describe('Auth Update Password (e2e)', () => {
           condition: 'unsafe newPassword',
           body: { currentPassword: 'validPassword123', newPassword: 'unsafepassword' },
         },
-      ])('should return 400 when $condition', async ({ body }) => {
+      ])('should return BAD_REQUEST(400) when $condition', async ({ body }) => {
         const { access_token } = await registerUser();
-        const response = await updatePassword(access_token, body, 400);
+        const response = await updatePassword(access_token, body, HttpStatus.BAD_REQUEST);
 
         expect(response.body).toHaveProperty('message');
       });
@@ -115,20 +115,20 @@ describe('Auth Update Password (e2e)', () => {
         .post('/auth/refresh-token')
         .set('Authorization', `Bearer ${refresh_token}`)
         .set('x-bff-secret', bffSecret)
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
     });
 
     it('should not update password with identical current and new password', async () => {
       const { access_token } = await registerUser();
       const body = { currentPassword: validUserDto.password, newPassword: validUserDto.password };
-      const response = await updatePassword(access_token, body, 400);
+      const response = await updatePassword(access_token, body, HttpStatus.BAD_REQUEST);
       expect(response.body).toHaveProperty('message');
     });
 
     it('should not update password with incorrect current password', async () => {
       const { access_token } = await registerUser();
       const body = { currentPassword: 'IncorrectPassword123', newPassword: 'newPassword123' };
-      const response = await updatePassword(access_token, body, 400);
+      const response = await updatePassword(access_token, body, HttpStatus.BAD_REQUEST);
       expect(response.body).toHaveProperty('message');
     });
 
@@ -136,7 +136,7 @@ describe('Auth Update Password (e2e)', () => {
       const { access_token } = await registerUser();
       await prisma.user.delete({ where: { email: validUserDto.email } });
       const body = { currentPassword: 'currentPassword123', newPassword: 'newPassword123' };
-      const response = await updatePassword(access_token, body, 404);
+      const response = await updatePassword(access_token, body, HttpStatus.NOT_FOUND);
       expect(response.body).toHaveProperty('message');
     });
 
@@ -148,7 +148,7 @@ describe('Auth Update Password (e2e)', () => {
         .post('/auth/login')
         .set('x-bff-secret', bffSecret)
         .send({ email: validUserDto.email, password: 'newPassword123' })
-        .expect(200);
+        .expect(HttpStatus.OK);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -61,11 +61,11 @@ describe('Auth Refresh Token (e2e)', () => {
       .post('/auth/register')
       .send(dto || validUserDto)
       .set('x-bff-secret', bffSecret)
-      .expect(201);
+      .expect(HttpStatus.CREATED);
     return response.body as AuthResponseDto;
   };
 
-  const refreshToken = async (token: string, expectedStatus = 200) => {
+  const refreshToken = async (token: string, expectedStatus = HttpStatus.OK) => {
     return request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Authorization', `Bearer ${token}`)
@@ -78,7 +78,7 @@ describe('Auth Refresh Token (e2e)', () => {
       .post('/auth/login')
       .set('x-bff-secret', bffSecret)
       .send(validUserDto)
-      .expect(200);
+      .expect(HttpStatus.OK);
     return response.body as AuthResponseDto;
   };
   const logoutUser = async (token: string) => {
@@ -86,7 +86,7 @@ describe('Auth Refresh Token (e2e)', () => {
       .delete('/auth/logout')
       .set('Authorization', `Bearer ${token}`)
       .set('x-bff-secret', bffSecret)
-      .expect(204);
+      .expect(HttpStatus.NO_CONTENT);
   };
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -134,10 +134,10 @@ describe('Auth Refresh Token (e2e)', () => {
 
     describe('Invalid Token Cases', () => {
       it('should reject malformed refresh token', async () => {
-        const response = await refreshToken('not-a-refresh-token', 401);
+        const response = await refreshToken('not-a-refresh-token', HttpStatus.UNAUTHORIZED);
 
         expect(response.body).toMatchObject({
-          statusCode: 401,
+          statusCode: HttpStatus.UNAUTHORIZED,
           message: expect.any(String) as string,
           error: expect.any(String) as string,
         });
@@ -152,7 +152,7 @@ describe('Auth Refresh Token (e2e)', () => {
         const corruptedSignature = 'CorruptedSignature' + signature.substring(20);
         const tamperedToken = `${parts[0]}.${parts[1]}.${corruptedSignature}`;
 
-        const response = await refreshToken(tamperedToken, 401);
+        const response = await refreshToken(tamperedToken, HttpStatus.UNAUTHORIZED);
         expect((response.body as { error: string }).error).toBe('UNAUTHORIZED');
       });
 
@@ -160,7 +160,7 @@ describe('Auth Refresh Token (e2e)', () => {
         const { refresh_token } = await registerUser();
         await prisma.refreshToken.deleteMany();
 
-        const response = await refreshToken(refresh_token, 401);
+        const response = await refreshToken(refresh_token, HttpStatus.UNAUTHORIZED);
         expect((response.body as { error: string }).error).toBe('INVALID_SESSION');
       });
     });
@@ -176,11 +176,11 @@ describe('Auth Refresh Token (e2e)', () => {
         // Try to reuse OLD token (outside grace period)
         await sleep(gracePeriod + 1000); // Wait for grace period to expire
 
-        const reuseResponse = await refreshToken(initial.refresh_token, 401);
+        const reuseResponse = await refreshToken(initial.refresh_token, HttpStatus.UNAUTHORIZED);
         expect((reuseResponse.body as { error: string }).error).toBe('SESSION_EXPIRED');
 
         // NEW token should also be revoked (entire family killed)
-        const newTokenResponse = await refreshToken(tokens1.refresh_token, 401);
+        const newTokenResponse = await refreshToken(tokens1.refresh_token, HttpStatus.UNAUTHORIZED);
         expect((newTokenResponse.body as { error: string }).error).toBe('SESSION_EXPIRED');
 
         // Verify all tokens in family are revoked
@@ -204,11 +204,11 @@ describe('Auth Refresh Token (e2e)', () => {
         await sleep(gracePeriod + 100);
 
         // Try to reuse the FIRST token (2 rotations ago)
-        await refreshToken(initial.refresh_token, 401);
+        await refreshToken(initial.refresh_token, HttpStatus.UNAUTHORIZED);
 
         // All tokens should be revoked
-        await refreshToken(tokens1.refresh_token, 401);
-        await refreshToken(tokens2.refresh_token, 401);
+        await refreshToken(tokens1.refresh_token, HttpStatus.UNAUTHORIZED);
+        await refreshToken(tokens2.refresh_token, HttpStatus.UNAUTHORIZED);
       });
     });
 
@@ -223,8 +223,8 @@ describe('Auth Refresh Token (e2e)', () => {
         ]);
 
         // Both should succeed (race condition handling)
-        expect(response1.status).toBe(200);
-        expect(response2.status).toBe(200);
+        expect(response1.status).toBe(HttpStatus.OK);
+        expect(response2.status).toBe(HttpStatus.OK);
 
         const tokens1 = response1.body as AuthResponseDto;
         const tokens2 = response2.body as AuthResponseDto;
@@ -244,7 +244,7 @@ describe('Auth Refresh Token (e2e)', () => {
         const raceResponse = await refreshToken(initial.refresh_token);
         const raceTokens = raceResponse.body as AuthResponseDto;
 
-        expect(raceResponse.status).toBe(200);
+        expect(raceResponse.status).toBe(HttpStatus.OK);
 
         // Access Tokens should be different
         expect(raceTokens.access_token).not.toBe(tokens1.access_token);
@@ -264,7 +264,7 @@ describe('Auth Refresh Token (e2e)', () => {
           data: { expiresAt: new Date(Date.now() - 1000) },
         });
 
-        const response = await refreshToken(refresh_token, 401);
+        const response = await refreshToken(refresh_token, HttpStatus.UNAUTHORIZED);
         expect((response.body as { error: string }).error).toBe('SESSION_EXPIRED');
       });
     });
@@ -284,7 +284,7 @@ describe('Auth Refresh Token (e2e)', () => {
           data: { userId: user2.user.id },
         });
 
-        const response = await refreshToken(user1.refresh_token, 401);
+        const response = await refreshToken(user1.refresh_token, HttpStatus.UNAUTHORIZED);
         expect((response.body as { error: string }).error).toBe('INVALID_SESSION');
       });
 
@@ -302,7 +302,7 @@ describe('Auth Refresh Token (e2e)', () => {
           data: { family: user2Token.family },
         });
 
-        const response = await refreshToken(user.refresh_token, 401);
+        const response = await refreshToken(user.refresh_token, HttpStatus.UNAUTHORIZED);
         expect((response.body as { error: string }).error).toBe('INVALID_SESSION');
       });
     });
@@ -313,7 +313,7 @@ describe('Auth Refresh Token (e2e)', () => {
       const { refresh_token } = await registerUser();
       await logoutUser(refresh_token);
 
-      const response = await refreshToken(refresh_token, 401);
+      const response = await refreshToken(refresh_token, HttpStatus.UNAUTHORIZED);
       expect((response.body as { error: string }).error).toBe('SESSION_EXPIRED');
     });
 
@@ -323,7 +323,7 @@ describe('Auth Refresh Token (e2e)', () => {
 
       await sleep(gracePeriod + 100); // Wait for grace period to expire
 
-      const response = await refreshToken(refresh_token, 401);
+      const response = await refreshToken(refresh_token, HttpStatus.UNAUTHORIZED);
       expect((response.body as { error: string }).error).toBe('SESSION_EXPIRED');
     });
 
@@ -332,9 +332,9 @@ describe('Auth Refresh Token (e2e)', () => {
       const device2 = await loginUser();
       await logoutUser(device1.refresh_token);
 
-      await refreshToken(device1.refresh_token, 401);
+      await refreshToken(device1.refresh_token, HttpStatus.UNAUTHORIZED);
       const device2Refresh = await refreshToken(device2.refresh_token);
-      expect(device2Refresh.status).toBe(200);
+      expect(device2Refresh.status).toBe(HttpStatus.OK);
     });
   });
 
@@ -348,11 +348,11 @@ describe('Auth Refresh Token (e2e)', () => {
         .delete('/auth/logout-all')
         .set('Authorization', `Bearer ${user.access_token}`)
         .set('x-bff-secret', bffSecret)
-        .expect(204);
+        .expect(HttpStatus.NO_CONTENT);
 
-      await refreshToken(user.refresh_token, 401);
-      await refreshToken(device1.refresh_token, 401);
-      await refreshToken(device2.refresh_token, 401);
+      await refreshToken(user.refresh_token, HttpStatus.UNAUTHORIZED);
+      await refreshToken(device1.refresh_token, HttpStatus.UNAUTHORIZED);
+      await refreshToken(device2.refresh_token, HttpStatus.UNAUTHORIZED);
     });
   });
 
@@ -361,7 +361,7 @@ describe('Auth Refresh Token (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/refresh-token')
         .set('x-bff-secret', bffSecret)
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
       expect(response.body).toMatchObject({
         error: 'UNAUTHORIZED',
         message: 'Unauthorized',
@@ -373,7 +373,7 @@ describe('Auth Refresh Token (e2e)', () => {
         .post('/auth/refresh-token')
         .set('Authorization', 'InvalidFormat')
         .set('x-bff-secret', bffSecret)
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
       expect(response.body).toMatchObject({
         error: 'UNAUTHORIZED',
         message: 'Unauthorized',
@@ -385,7 +385,7 @@ describe('Auth Refresh Token (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/refresh-token')
         .set('Authorization', `Bearer ${refresh_token}`)
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
       expect(response.body).toMatchObject({
         error: 'UNAUTHORIZED',
         message: 'Unauthorized',
@@ -398,7 +398,7 @@ describe('Auth Refresh Token (e2e)', () => {
         .post('/auth/refresh-token')
         .set('Authorization', `Bearer ${refresh_token}`)
         .set('x-bff-secret', 'invalid-secret')
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
       expect(response.body).toMatchObject({
         error: 'UNAUTHORIZED',
         message: 'Unauthorized',
@@ -407,7 +407,7 @@ describe('Auth Refresh Token (e2e)', () => {
 
     it('should not accept an access token when a refresh token is needed', async () => {
       const { access_token } = await registerUser();
-      const response = await refreshToken(access_token, 401);
+      const response = await refreshToken(access_token, HttpStatus.UNAUTHORIZED);
 
       expect(response.body).toMatchObject({
         error: 'INVALID_SESSION',
@@ -421,7 +421,7 @@ describe('Auth Refresh Token (e2e)', () => {
         .delete('/auth/logout-all')
         .set('Authorization', `Bearer ${refresh_token}`)
         .set('x-bff-secret', bffSecret)
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
       expect(response.body).toMatchObject({
         error: 'INVALID_SESSION',
         message: 'Access Denied',

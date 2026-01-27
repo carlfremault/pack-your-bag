@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -53,7 +53,7 @@ describe('Auth login (e2e)', () => {
       .post('/auth/register')
       .set('x-bff-secret', bffSecret)
       .send(validUserDto)
-      .expect(201);
+      .expect(HttpStatus.CREATED);
   };
 
   const loginUser = async (
@@ -61,7 +61,7 @@ describe('Auth login (e2e)', () => {
       email?: string;
       password?: string;
     },
-    expectedStatus = 200,
+    expectedStatus = HttpStatus.OK,
   ) => {
     return request(app.getHttpServer())
       .post('/auth/login')
@@ -85,8 +85,8 @@ describe('Auth login (e2e)', () => {
           condition: 'invalid email format',
           payload: { email: 'invalidemail', password: 'validPassword123' },
         },
-      ])('should return 400 when $condition', async ({ payload }) => {
-        const response = await loginUser(payload, 400);
+      ])('should return BAD_REQUEST(400) when $condition', async ({ payload }) => {
+        const response = await loginUser(payload, HttpStatus.BAD_REQUEST);
         expect(response.body).toMatchObject({
           error: 'Bad Request',
         });
@@ -122,7 +122,7 @@ describe('Auth login (e2e)', () => {
       await registerUser();
       const response = await loginUser(
         { email: validUserDto.email, password: 'IncorrectPassword123' },
-        401,
+        HttpStatus.UNAUTHORIZED,
       );
       expect(response.body).toMatchObject({
         error: 'Unauthorized',
@@ -131,7 +131,7 @@ describe('Auth login (e2e)', () => {
     });
 
     it('should not login non-existing user', async () => {
-      const response = await loginUser(validUserDto, 401);
+      const response = await loginUser(validUserDto, HttpStatus.UNAUTHORIZED);
       expect(response.body).toMatchObject({
         error: 'Unauthorized',
         message: 'Invalid email or password',
