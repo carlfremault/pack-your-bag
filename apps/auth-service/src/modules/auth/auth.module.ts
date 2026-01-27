@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
+import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthStrategy } from '@/common/strategies/jwt-auth.strategy';
 import { JwtRefreshStrategy } from '@/common/strategies/jwt-refresh.strategy';
@@ -46,6 +47,6 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthStrategy, JwtRefreshStrategy, CustomThrottlerGuard],
+  providers: [AuthService, JwtAuthStrategy, JwtRefreshStrategy, CustomThrottlerGuard, BffGuard],
 })
 export class AuthModule {}

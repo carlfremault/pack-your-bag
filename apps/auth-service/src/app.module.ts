@@ -2,6 +2,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import type { Request } from 'express';
@@ -16,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { TasksModule } from './tasks/tasks.module';
 
 const validationSchema = Joi.object({
   // Environment
@@ -58,6 +60,7 @@ const validationSchema = Joi.object({
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(900),
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
   AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: Joi.number().default(30000),
+  AUTH_REFRESH_TOKEN_DB_RETENTION_PERIOD_MS: Joi.number().default(1209600000),
 });
 
 @Module({
@@ -82,11 +85,13 @@ const validationSchema = Joi.object({
       ],
     }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UserModule,
     AuditLogModule,
     HealthModule,
+    TasksModule,
   ],
   providers: [
     {
