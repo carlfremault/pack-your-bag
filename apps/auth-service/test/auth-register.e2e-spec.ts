@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -48,7 +48,7 @@ describe('Auth Register (e2e)', () => {
 
   const registerUser = async (
     payload: { email?: string; password?: string },
-    expectedStatus = 201,
+    expectedStatus = HttpStatus.CREATED,
   ) => {
     return request(app.getHttpServer())
       .post('/auth/register')
@@ -80,8 +80,8 @@ describe('Auth Register (e2e)', () => {
           condition: 'invalid email format',
           payload: { email: 'invalidemail', password: 'validPassword123' },
         },
-      ])('should return 400 when $condition', async ({ payload }) => {
-        const response = await registerUser(payload, 400);
+      ])('should return HttpStatus.BAD_REQUEST(400) when $condition', async ({ payload }) => {
+        const response = await registerUser(payload, HttpStatus.BAD_REQUEST);
         expect(response.body).toMatchObject({
           error: 'Bad Request',
         });
@@ -102,7 +102,7 @@ describe('Auth Register (e2e)', () => {
 
     it('should not accept a duplicate email', async () => {
       await registerUser(validUserDto);
-      const response = await registerUser(validUserDto, 409);
+      const response = await registerUser(validUserDto, HttpStatus.CONFLICT);
       expect(response.body).toMatchObject({
         error: 'Conflict',
         message: 'Email already exists.',
@@ -111,7 +111,7 @@ describe('Auth Register (e2e)', () => {
 
     it('should not accept a duplicate email with different casing', async () => {
       await registerUser(validUserDto);
-      const response = await registerUser(validUserDtoWithUppercaseEmail, 409);
+      const response = await registerUser(validUserDtoWithUppercaseEmail, HttpStatus.CONFLICT);
       expect(response.body).toMatchObject({
         error: 'Conflict',
         message: 'Email already exists.',

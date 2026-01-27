@@ -1,3 +1,4 @@
+import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuditEventType, AuditSeverity } from '@prisma-client';
@@ -58,7 +59,7 @@ describe('AuditLogService', () => {
         userAgent: 'Chrome',
         path: 'register',
         method: 'POST',
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: 'User registered successfully',
       };
 
@@ -93,7 +94,7 @@ describe('AuditLogService', () => {
         ipAddress: '127.0.0.1',
         path: 'register',
         method: 'POST',
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: 'User registered successfully',
       };
 
@@ -125,7 +126,7 @@ describe('AuditLogService', () => {
         userAgent: 'invalid-user-agent-that-causes-error',
         path: 'login',
         method: 'POST',
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: 'User logged in',
       };
 
@@ -146,7 +147,7 @@ describe('AuditLogService', () => {
         ipAddress: '127.0.0.1',
         path: 'refresh-token',
         method: 'POST',
-        statusCode: 403,
+        statusCode: HttpStatus.FORBIDDEN,
         message: 'Suspicious activity detected',
       };
 
@@ -164,7 +165,7 @@ describe('AuditLogService', () => {
         ipAddress: '127.0.0.1',
         path: 'login',
         method: 'POST',
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: 'User logged in',
       };
 
@@ -184,7 +185,7 @@ describe('AuditLogService', () => {
         ipAddress: '127.0.0.1',
         path: 'register',
         method: 'POST',
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: 'User registered successfully',
       };
 
@@ -201,7 +202,7 @@ describe('AuditLogService', () => {
         ipAddress: '127.0.0.1',
         path: 'register',
         method: 'POST',
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: 'User registered successfully',
         metadata: { customField: 'value', requestId: 'req-123' },
       };

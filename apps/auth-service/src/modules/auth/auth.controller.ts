@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
+import { AuditEventType } from '@/generated/prisma';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 
@@ -37,7 +38,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.REGISTER, ttl: THROTTLE_TTL } })
   @Post('register')
   @Serialize(AuthResponseDto)
-  @AuditLog('USER_REGISTERED')
+  @AuditLog(AuditEventType.USER_REGISTERED)
   async register(@Body() body: AuthCredentialsDto) {
     return this.authService.register(body);
   }
@@ -47,7 +48,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
-  @AuditLog('USER_LOGIN_SUCCESS')
+  @AuditLog(AuditEventType.USER_LOGIN_SUCCESS)
   async login(@Body() body: AuthCredentialsDto) {
     return this.authService.login(body);
   }
@@ -57,7 +58,7 @@ export class AuthController {
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
-  @AuditLog('TOKEN_REFRESHED')
+  @AuditLog(AuditEventType.TOKEN_REFRESHED)
   async refreshToken(
     @Req() req: Request,
     @CurrentUser()
@@ -75,7 +76,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT, ttl: THROTTLE_TTL } })
   @Delete('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog('USER_LOGOUT')
+  @AuditLog(AuditEventType.USER_LOGOUT)
   async logout(@CurrentUser() user: RefreshTokenUser) {
     return this.authService.logout(user);
   }
@@ -84,7 +85,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT_ALL_DEVICES, ttl: THROTTLE_TTL } })
   @Delete('logout-all')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog('USER_LOGOUT_ALL_DEVICES')
+  @AuditLog(AuditEventType.USER_LOGOUT_ALL_DEVICES)
   async logoutAllDevices(@CurrentUser('userId') userId: string) {
     return this.authService.logoutAllDevices(userId);
   }
@@ -93,7 +94,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.UPDATE_PASSWORD, ttl: THROTTLE_TTL } })
   @Patch('update-password')
   @Serialize(AuthResponseDto)
-  @AuditLog('PASSWORD_CHANGED')
+  @AuditLog(AuditEventType.PASSWORD_CHANGED)
   async updatePassword(@CurrentUser('userId') userId: string, @Body() body: UpdatePasswordDto) {
     return this.authService.updatePasswordAndReauthenticate(userId, body);
   }

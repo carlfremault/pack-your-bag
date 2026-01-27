@@ -60,7 +60,12 @@ const validationSchema = Joi.object({
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(900),
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
   AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: Joi.number().default(30000),
-  AUTH_REFRESH_TOKEN_DB_RETENTION_PERIOD_MS: Joi.number().default(1209600000),
+  AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS: Joi.number().min(1).default(14),
+
+  // Logging
+  AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
+  AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
+  AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
 });
 
 @Module({

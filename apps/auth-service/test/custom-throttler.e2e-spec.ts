@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerStorage } from '@nestjs/throttler';
@@ -8,7 +8,7 @@ import { App } from 'supertest/types';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
-import { Prisma } from '@/generated/prisma';
+import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -74,7 +74,7 @@ describe('Custom Throttler Log (e2e)', () => {
 
   const registerUser = async (
     dto?: { email: string; password: string },
-    expectedStatus = 201,
+    expectedStatus = HttpStatus.CREATED,
   ): Promise<AuthResponseDto> => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
@@ -85,7 +85,7 @@ describe('Custom Throttler Log (e2e)', () => {
     return response.body as AuthResponseDto;
   };
 
-  const loginUser = async (expectedStatus = 200) => {
+  const loginUser = async (expectedStatus = HttpStatus.OK) => {
     return await request(app.getHttpServer())
       .post('/auth/login')
       .set('x-force-throttling', 'true')
@@ -97,7 +97,7 @@ describe('Custom Throttler Log (e2e)', () => {
   const updatePassword = async (
     token: string,
     body: { currentPassword?: string; newPassword?: string },
-    expectedStatus = 200,
+    expectedStatus = HttpStatus.OK,
   ) => {
     return request(app.getHttpServer())
       .patch(`/auth/update-password`)
@@ -116,18 +116,18 @@ describe('Custom Throttler Log (e2e)', () => {
           password: 'validPassword123',
         });
       }
-      await registerUser(validUserDto, 429);
+      await registerUser(validUserDto, HttpStatus.TOO_MANY_REQUESTS);
 
       const auditLogEntry = await waitForLog({
-        eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
+        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: 'WARN',
+        severity: AuditSeverity.WARN,
         ipAddress: expect.any(String) as string,
         path: '/auth/register',
         method: 'POST',
-        statusCode: 429,
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
       });
 
       expect(auditLogEntry.metadata).toBeTruthy();
@@ -140,18 +140,18 @@ describe('Custom Throttler Log (e2e)', () => {
       for (let i = 0; i < THROTTLE_LIMITS.LOGIN; i++) {
         await loginUser();
       }
-      await loginUser(429);
+      await loginUser(HttpStatus.TOO_MANY_REQUESTS);
 
       const auditLogEntry = await waitForLog({
-        eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
+        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: 'WARN',
+        severity: AuditSeverity.WARN,
         ipAddress: expect.any(String) as string,
         path: '/auth/login',
         method: 'POST',
-        statusCode: 429,
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
       });
 
       expect(auditLogEntry.metadata).toBeTruthy();
@@ -176,19 +176,19 @@ describe('Custom Throttler Log (e2e)', () => {
       await updatePassword(
         access_token,
         { currentPassword: 'validPassword123', newPassword: 'validPassword456' },
-        429,
+        HttpStatus.TOO_MANY_REQUESTS,
       );
 
       const auditLogEntry = await waitForLog({
-        eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
+        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: 'WARN',
+        severity: AuditSeverity.WARN,
         ipAddress: expect.any(String) as string,
         path: '/auth/update-password',
         method: 'PATCH',
-        statusCode: 429,
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
       });
 
       expect(auditLogEntry.metadata).toBeTruthy();

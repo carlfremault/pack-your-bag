@@ -82,8 +82,8 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     this.logger.warn(`Rate limit exceeded at ${method} ${path} with tracker ${tracker}`);
 
     this.auditLogProvider.safeEmit({
-      eventType: 'SECURITY_RATE_LIMIT_EXCEEDED',
-      severity: 'WARN',
+      eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
+      severity: AuditSeverity.WARN,
       userId: user?.userId ?? null,
       ipAddress: ip ? anonymizeIp(ip) : 'unknown',
       userAgent,
@@ -112,8 +112,8 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     this.logger.warn(`Unhandled ${status} at ${method} ${path}: ${message}`, errorStack);
 
     this.auditLogProvider.safeEmit({
-      eventType: 'INTERNAL_SERVER_ERROR',
-      severity: 'CRITICAL',
+      eventType: AuditEventType.INTERNAL_SERVER_ERROR,
+      severity: AuditSeverity.ERROR,
       userId: user?.userId ?? null,
       ipAddress: ip ? anonymizeIp(ip) : 'unknown',
       userAgent,
@@ -155,20 +155,20 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
   }
 
   private getSeverityForStatus(status: number): AuditSeverity {
-    if (status >= 500) return 'ERROR';
-    if (status === 403 || status === 401) return 'WARN';
-    return 'INFO';
+    if (status >= 500) return AuditSeverity.ERROR;
+    if (status >= 400) return AuditSeverity.WARN;
+    return AuditSeverity.INFO;
   }
 
   private getEventTypeForStatus(status: number): AuditEventType {
     const eventMap: Record<number, AuditEventType> = {
-      400: 'VALIDATION_ERROR',
-      403: 'AUTHORIZATION_FAILED',
-      404: 'RESOURCE_NOT_FOUND',
-      409: 'CONFLICT_ERROR',
+      400: AuditEventType.VALIDATION_ERROR,
+      403: AuditEventType.AUTHORIZATION_FAILED,
+      404: AuditEventType.RESOURCE_NOT_FOUND,
+      409: AuditEventType.CONFLICT_ERROR,
     };
 
-    return eventMap[status] ?? 'HTTP_ERROR';
+    return eventMap[status] ?? AuditEventType.HTTP_ERROR;
   }
 
   private getStatusCode(exception: unknown): number {

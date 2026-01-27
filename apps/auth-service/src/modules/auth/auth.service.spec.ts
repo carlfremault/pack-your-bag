@@ -10,6 +10,7 @@ import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/auth.exceptions';
+import { AuditEventType } from '@/generated/prisma';
 
 import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import { UserService } from '../user/user.service';
@@ -366,7 +367,7 @@ describe('AuthService', () => {
         token_type: 'Bearer',
         expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
-        auditOverride: 'TOKEN_REFRESHED_RACE_CONDITION',
+        auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       });
     });
   });

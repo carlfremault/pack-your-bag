@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -7,7 +7,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { Prisma } from '@/generated/prisma';
+import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -66,11 +66,11 @@ describe('Audit Log (e2e)', () => {
       .post('/auth/register')
       .set('x-bff-secret', bffSecret)
       .send(validUserDto)
-      .expect(201);
+      .expect(HttpStatus.CREATED);
     return response.body as AuthResponseDto;
   };
 
-  const refreshToken = async (token: string, expectedStatus = 200) => {
+  const refreshToken = async (token: string, expectedStatus = HttpStatus.OK) => {
     return request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Authorization', `Bearer ${token}`)
@@ -85,15 +85,15 @@ describe('Audit Log (e2e)', () => {
       const response = await registerUser();
       const auditLogEntry = await waitForLog({
         userId: response.user.id,
-        eventType: 'USER_REGISTERED',
+        eventType: AuditEventType.USER_REGISTERED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: 'INFO',
+        severity: AuditSeverity.INFO,
         userId: response.user.id,
         path: '/auth/register',
         method: 'POST',
-        statusCode: 201,
+        statusCode: HttpStatus.CREATED,
       });
     });
 
@@ -105,19 +105,19 @@ describe('Audit Log (e2e)', () => {
 
       // Try to reuse OLD token (outside grace period)
       await sleep(gracePeriod + 100);
-      await refreshToken(refresh_token, 401);
+      await refreshToken(refresh_token, HttpStatus.UNAUTHORIZED);
 
       const auditLogEntry = await waitForLog({
         userId: user.id,
-        eventType: 'TOKEN_REUSE_DETECTED',
+        eventType: AuditEventType.TOKEN_REUSE_DETECTED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: 'CRITICAL',
+        severity: AuditSeverity.CRITICAL,
         userId: user.id,
         path: '/auth/refresh-token',
         method: 'POST',
-        statusCode: 401,
+        statusCode: HttpStatus.UNAUTHORIZED,
         metadata: {
           tokenId: payload.jti,
           tokenFamily: payload.family,

@@ -1,4 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, UnauthorizedException } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { AuditEventType, AuditSeverity } from '@prisma-client';
 import { Request, Response } from 'express';
@@ -33,25 +39,25 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const clientMessage = this.getClientMessage(exceptionResponse);
     const auditMessage = typeof exception.cause === 'string' ? exception.cause : exception.message;
 
-    let severity: AuditSeverity = 'WARN';
+    let severity: AuditSeverity = AuditSeverity.WARN;
     let eventType: AuditEventType;
 
     if (exception instanceof TokenReusedException) {
-      eventType = 'TOKEN_REUSE_DETECTED';
-      severity = 'CRITICAL';
+      eventType = AuditEventType.TOKEN_REUSE_DETECTED;
+      severity = AuditSeverity.CRITICAL;
     } else if (exception instanceof BffAuthenticationException) {
-      eventType = 'BFF_SECRET_MISMATCH';
-      severity = 'CRITICAL';
+      eventType = AuditEventType.BFF_SECRET_MISMATCH;
+      severity = AuditSeverity.CRITICAL;
     } else if (exception instanceof SessionExpiredException) {
-      eventType = 'SESSION_EXPIRED';
-      severity = 'INFO';
+      eventType = AuditEventType.SESSION_EXPIRED;
+      severity = AuditSeverity.INFO;
     } else if (exception instanceof InvalidSessionException) {
-      eventType = 'INVALID_SESSION';
+      eventType = AuditEventType.INVALID_SESSION;
     } else if (errorCode === 'INVALID_TOKEN') {
-      eventType = 'SUSPICIOUS_ACTIVITY';
-      severity = 'CRITICAL';
+      eventType = AuditEventType.SUSPICIOUS_ACTIVITY;
+      severity = AuditSeverity.CRITICAL;
     } else {
-      eventType = 'USER_LOGIN_FAILED';
+      eventType = AuditEventType.USER_LOGIN_FAILED;
     }
 
     const { user, ip, headers, path, method } = request;
@@ -65,7 +71,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
       userAgent,
       path,
       method,
-      statusCode: 401,
+      statusCode: HttpStatus.UNAUTHORIZED,
       errorCode,
       message: auditMessage,
       metadata: {
@@ -74,8 +80,8 @@ export class AuthExceptionFilter implements ExceptionFilter {
       },
     });
 
-    response.status(401).json({
-      statusCode: 401,
+    response.status(HttpStatus.UNAUTHORIZED).json({
+      statusCode: HttpStatus.UNAUTHORIZED,
       message: clientMessage,
       error: errorCode,
       timestamp: new Date().toISOString(),
