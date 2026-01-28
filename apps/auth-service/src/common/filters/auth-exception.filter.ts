@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpStatus,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -28,6 +29,8 @@ interface UnauthorizedExceptionResponse {
 
 @Catch(UnauthorizedException)
 export class AuthExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AuthExceptionFilter.name);
+
   constructor(private readonly auditLogProvider: AuditLogProvider) {}
 
   catch(exception: UnauthorizedException, host: ArgumentsHost) {
@@ -68,14 +71,21 @@ export class AuthExceptionFilter implements ExceptionFilter {
     }
 
     if (severity === AuditSeverity.CRITICAL) {
-      captureSentryException({
-        exception,
-        request,
-        errorCode,
-        level: 'warning',
-        eventType,
-        fingerprint: fingerprint ?? [eventType, errorCode],
-      });
+      try {
+        captureSentryException({
+          exception,
+          request,
+          errorCode,
+          level: 'warning',
+          eventType,
+          fingerprint: fingerprint ?? [eventType, errorCode],
+        });
+      } catch (error) {
+        this.logger.error(
+          'Failed to capture Sentry exception',
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
     }
 
     this.auditLogProvider.safeEmit({
