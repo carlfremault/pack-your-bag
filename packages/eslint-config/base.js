@@ -32,25 +32,28 @@ export const getBaseConfig = (appDir) =>
           'error',
           {
             groups: [
-              // 1. External packages: React/NestJS
+              // 1. Sentry / Instrumentation MUST be first
+              ['^\\u0000./instrument'],
+
+              // 2. External packages: React/NestJS
               ['^react', '^@nestjs'],
 
-              // 2. Monorepo Workspace (@repo/...)
+              // 3. Monorepo Workspace (@repo/...)
               ['^@repo/'],
 
-              // 3. All External packages
+              // 4. All External packages
               ['^@?\\w'],
 
-              // 4. Internal Aliases & Absolute imports
+              // 5. Internal Aliases & Absolute imports
               ['^@/', '^(@|src|app|modules|components|hooks|utils|services|prisma)(/.*|$)'],
 
-              // 5. Parent imports (../)
+              // 6. Parent imports (../)
               ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
 
-              // 6. Relative imports (./)
+              // 7. Relative imports (./)
               ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
 
-              // 7. Side effect & Style imports
+              // 8. Side effect & Style imports
               ['^\\u0000', '^.+\\.s?css$'],
             ],
           },

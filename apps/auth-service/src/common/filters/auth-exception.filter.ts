@@ -16,6 +16,7 @@ import {
   TokenReusedException,
 } from '@/common/exceptions/auth.exceptions';
 import anonymizeIp from '@/common/utils/anonymizeIp';
+import { captureSentryException } from '@/common/utils/captureSentryException';
 import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
@@ -33,21 +34,26 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const { user, ip, headers, path, method } = request;
 
     const exceptionResponse = exception.getResponse() as UnauthorizedExceptionResponse;
     const errorCode = exceptionResponse.error || 'UNAUTHORIZED';
     const clientMessage = this.getClientMessage(exceptionResponse);
     const auditMessage = typeof exception.cause === 'string' ? exception.cause : exception.message;
+    const userAgent = getUserAgentFromHeaders(headers);
 
     let severity: AuditSeverity = AuditSeverity.WARN;
     let eventType: AuditEventType;
+    let fingerprint: string[] | undefined;
 
     if (exception instanceof TokenReusedException) {
       eventType = AuditEventType.TOKEN_REUSE_DETECTED;
       severity = AuditSeverity.CRITICAL;
+      fingerprint = ['token-reuse', user?.userId ?? 'unknown'];
     } else if (exception instanceof BffAuthenticationException) {
       eventType = AuditEventType.BFF_SECRET_MISMATCH;
       severity = AuditSeverity.CRITICAL;
+      fingerprint = ['bff-secret-mismatch'];
     } else if (exception instanceof SessionExpiredException) {
       eventType = AuditEventType.SESSION_EXPIRED;
       severity = AuditSeverity.INFO;
@@ -56,12 +62,21 @@ export class AuthExceptionFilter implements ExceptionFilter {
     } else if (errorCode === 'INVALID_TOKEN') {
       eventType = AuditEventType.SUSPICIOUS_ACTIVITY;
       severity = AuditSeverity.CRITICAL;
+      fingerprint = ['suspicious-activity', 'invalid-token', user?.userId ?? 'unknown'];
     } else {
       eventType = AuditEventType.USER_LOGIN_FAILED;
     }
 
-    const { user, ip, headers, path, method } = request;
-    const userAgent = getUserAgentFromHeaders(headers);
+    if (severity === AuditSeverity.CRITICAL) {
+      captureSentryException({
+        exception,
+        request,
+        errorCode,
+        level: 'warning',
+        eventType,
+        fingerprint: fingerprint ?? [eventType, errorCode],
+      });
+    }
 
     this.auditLogProvider.safeEmit({
       eventType,

@@ -54,7 +54,6 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         if (fields.includes('id')) {
           // One-in-a-trillion chance of this happening.
           // Don't bother user with details, user can just try again.
-          // TODO: send to Sentry
           this.logger.warn('Data Integrity Error: ID Collision detected', exception);
           statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
           message = 'Something went wrong, please try again.';

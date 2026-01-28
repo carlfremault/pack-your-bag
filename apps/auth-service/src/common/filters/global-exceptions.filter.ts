@@ -1,16 +1,11 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import type { ArgumentsHost } from '@nestjs/common';
+import { Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
 import { Request, Response } from 'express';
 
 import anonymizeIp from '@/common/utils/anonymizeIp';
+import { captureSentryException } from '@/common/utils/captureSentryException';
 import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { safeStringify } from '@/common/utils/safeStringify';
 import { AuditEventType, AuditSeverity } from '@/generated/prisma';
@@ -64,6 +59,19 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     }
 
     if (status >= 500) {
+      try {
+        captureSentryException({
+          exception,
+          request,
+          errorCode,
+          eventType: AuditEventType.INTERNAL_SERVER_ERROR,
+        });
+      } catch (error) {
+        this.logger.error(
+          'Failed to capture Sentry exception',
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
       this.auditInternalServerError(exception, request, status, errorCode);
       return;
     }

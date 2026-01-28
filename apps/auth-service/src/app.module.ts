@@ -5,6 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 
+import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
 import Joi from 'joi';
 
@@ -66,6 +67,15 @@ const validationSchema = Joi.object({
   AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
   AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
   AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
+
+  // Sentry
+  AUTH_SENTRY_DSN: Joi.string()
+    .uri()
+    .when('NODE_ENV', {
+      is: ['production', 'development'],
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
 });
 
 @Module({
@@ -91,6 +101,7 @@ const validationSchema = Joi.object({
     }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
+    SentryModule.forRoot(),
     PrismaModule,
     AuthModule,
     UserModule,
