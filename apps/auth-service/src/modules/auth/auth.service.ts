@@ -16,6 +16,7 @@ import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/auth.exceptions';
+import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
@@ -29,9 +30,10 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name, { timestamp: true });
   private readonly bcryptSaltRounds: number;
   private readonly defaultUserRoleId: number;
+  private readonly dummyHash: string;
+  private readonly deletedUserRetentionDays: number;
   private readonly accessTokenExpiresIn: number;
   private readonly refreshTokenExpiresIn: number;
-  private readonly dummyHash: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -42,6 +44,10 @@ export class AuthService {
     this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
     this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
+    this.deletedUserRetentionDays = this.configService.get<number>(
+      'AUTH_USER_DELETE_RETENTION_DAYS',
+      30,
+    );
     this.accessTokenExpiresIn = this.configService.get<number>(
       'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
       900,
@@ -83,12 +89,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
+
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
   async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<AuthResponseDto> {
     const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
-    const user = await this.userService.getUser({ id: userId });
+    const user = await this.userService.getUser({ id: userId, isDeleted: false });
     if (!user) {
       throw new UnauthorizedException('Access Denied');
     }
@@ -135,13 +143,11 @@ export class AuthService {
     await this.refreshTokenService.revokeManyTokens({
       userId,
       family: tokenFamilyId,
-      isRevoked: false,
     });
   }
 
   async logoutAllDevices(userId: string): Promise<void> {
     await this.refreshTokenService.revokeManyTokens({
-      isRevoked: false,
       userId,
     });
   }

@@ -46,15 +46,15 @@ describe('RefreshTokenService', () => {
     loggerErrorSpy = vi.spyOn(service['logger'], 'error').mockImplementation(() => {});
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   const msAgo = (ms: number) => new Date(Date.now() - ms);
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
   describe('rotateRefreshToken', () => {
     it('should create new token and revoke old token in transaction', async () => {
@@ -266,7 +266,6 @@ describe('RefreshTokenService', () => {
       ).rejects.toThrow(new TokenReusedException());
       expect(spyOnRevokeManyTokens).toHaveBeenCalledWith({
         family: mockStoredRefreshToken.family,
-        isRevoked: false,
       });
       expect(loggerErrorSpy).toHaveBeenCalledWith('CRITICAL: Token reuse attack detected', {
         userId: mockStoredRefreshToken.userId,
@@ -300,7 +299,6 @@ describe('RefreshTokenService', () => {
       );
       expect(spyOnRevokeManyTokens).toHaveBeenCalledWith({
         family: mockStoredRefreshToken.family,
-        isRevoked: false,
       });
     });
   });

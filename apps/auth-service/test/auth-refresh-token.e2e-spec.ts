@@ -7,10 +7,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { AppModule } from '@/app.module';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
-
-import { AppModule } from '../src/app.module';
 
 type RefreshTokenContent = {
   jti: string;

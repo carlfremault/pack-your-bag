@@ -5,9 +5,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { AppModule } from '@/app.module';
 import { PrismaService } from '@/prisma/prisma.service';
-
-import { AppModule } from '../src/app.module';
 
 describe('HealthController (e2e)', () => {
   let app: INestApplication<App>;

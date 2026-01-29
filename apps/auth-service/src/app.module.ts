@@ -68,6 +68,9 @@ const validationSchema = Joi.object({
   AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
   AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
 
+  // User
+  AUTH_USER_DELETE_RETENTION_DAYS: Joi.number().min(1).default(30),
+
   // Sentry
   AUTH_SENTRY_DSN: Joi.string()
     .uri()

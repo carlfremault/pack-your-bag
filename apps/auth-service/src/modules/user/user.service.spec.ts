@@ -6,6 +6,8 @@ import { User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 
+import { AuditLogService } from '@/modules/audit-log/audit-log.service';
+import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { UserService } from './user.service';
@@ -42,6 +44,10 @@ describe('UserService', () => {
     }),
   };
 
+  const mockRefreshTokenService = {
+    revokeManyTokens: vi.fn(),
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -50,6 +56,8 @@ describe('UserService', () => {
         UserService,
         { provide: ConfigService, useValue: mockConfigService },
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: AuditLogService, useValue: {} },
+        { provide: RefreshTokenService, useValue: mockRefreshTokenService },
       ],
     }).compile();
 
@@ -84,10 +92,11 @@ describe('UserService', () => {
         where: { id: userId },
         data: { password: 'new-hashed-val' },
       });
-      expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
-        where: { userId, isRevoked: false },
-        data: { isRevoked: true, revokedAt: expect.any(Date) as Date },
-      });
+      expect(mockRefreshTokenService.revokeManyTokens).toBeCalledTimes(1);
+      expect(mockRefreshTokenService.revokeManyTokens).toHaveBeenCalledWith(
+        { userId },
+        mockPrismaService,
+      );
       expect(result).toEqual(mockUser);
     });
 

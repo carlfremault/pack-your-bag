@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -24,6 +25,8 @@ describe('AuthController', () => {
       .overrideGuard(BffGuard)
       .useValue({ canActivate: () => true })
       .overrideGuard(CustomThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

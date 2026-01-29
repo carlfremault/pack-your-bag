@@ -63,16 +63,25 @@ export class AuditLogService {
     }
   }
 
-  // Temporary eslint disable. Should be removed after implementing email alerting
-  // 'async' is needed to make Promise.allSettled happy
-  // eslint-disable-next-line @typescript-eslint/require-await
-  private async triggerAlert(data: AuditLogData): Promise<void> {
-    // TODO: Implement email alerting
-    // For now, just log
-    this.logger.error('CRITICAL SECURITY EVENT:', data);
+  async anonymizeAuditLogs(
+    userIds: string[],
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.BatchPayload> {
+    if (userIds.length === 0) {
+      return { count: 0 };
+    }
+
+    const prisma = tx || this.prisma;
+
+    const result = await prisma.auditLog.updateMany({
+      where: { userId: { in: userIds } },
+      data: {
+        userId: null,
+      },
+    });
+    return result;
   }
 
-  // For cron job
   async deleteAuditLogs(where: Prisma.AuditLogWhereInput): Promise<Prisma.BatchPayload> {
     // Ensure there's a meaningful time-based filter to prevent accidental mass deletion
     const validateAndCheckTimeFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
@@ -99,5 +108,14 @@ export class AuditLogService {
     }
 
     return this.prisma.auditLog.deleteMany({ where });
+  }
+
+  // Temporary eslint disable. Should be removed after implementing email alerting
+  // 'async' is needed to make Promise.allSettled happy
+  // eslint-disable-next-line @typescript-eslint/require-await
+  private async triggerAlert(data: AuditLogData): Promise<void> {
+    // TODO: Implement email alerting
+    // For now, just log
+    this.logger.error('CRITICAL SECURITY EVENT:', data);
   }
 }

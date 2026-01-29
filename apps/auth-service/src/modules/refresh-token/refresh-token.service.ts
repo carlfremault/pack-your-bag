@@ -57,14 +57,18 @@ export class RefreshTokenService {
     });
   }
 
-  // - Revoke all tokens of a specific family ("sign out on this device" and after Reuse Attack detection)
-  // - Revoke all tokens of a specific user ("sign out on all devices")
-  async revokeManyTokens(where: Prisma.RefreshTokenWhereInput): Promise<Prisma.BatchPayload> {
+  async revokeManyTokens(
+    where: Prisma.RefreshTokenWhereInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.BatchPayload> {
     if (!where || Object.keys(where).length === 0) {
       throw new BadRequestException('A filter must be provided for bulk token revocation.');
     }
-    return this.prisma.refreshToken.updateMany({
-      where,
+
+    const prisma = tx || this.prisma;
+
+    return prisma.refreshToken.updateMany({
+      where: { ...where, isRevoked: false },
       data: {
         isRevoked: true,
         revokedAt: new Date(),
@@ -72,15 +76,18 @@ export class RefreshTokenService {
     });
   }
 
-  // For cron job
-  async deleteRefreshTokens(where: Prisma.RefreshTokenWhereInput): Promise<Prisma.BatchPayload> {
+  async deleteRefreshTokens(
+    where: Prisma.RefreshTokenWhereInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.BatchPayload> {
     if (!where || Object.keys(where).length === 0) {
       throw new BadRequestException('A filter must be provided for bulk token deletion.');
     }
-    return this.prisma.refreshToken.deleteMany({ where });
+    const prisma = tx || this.prisma;
+    const result = await prisma.refreshToken.deleteMany({ where });
+    return result;
   }
 
-  // Helper functions
   async handleRevokedTokenRequest(
     userId: string,
     storedToken: RefreshToken,
@@ -138,7 +145,7 @@ export class RefreshTokenService {
 
     // Case 2: Outside grace period
     // Revoke entire family as security measure
-    const { count } = await this.revokeManyTokens({ family, isRevoked: false });
+    const { count } = await this.revokeManyTokens({ family });
 
     if (storedToken.replacedById) {
       // Token reuse attack: Token was rotated but old one is being used

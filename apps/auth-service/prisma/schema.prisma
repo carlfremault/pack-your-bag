@@ -27,7 +27,9 @@ model User {
   role          Role      @relation(fields: [roleId], references: [id])
   roleId        Int
   refreshToken  RefreshToken[]
-  
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? 
+
   @@schema("app_auth")
 }
 
@@ -43,7 +45,7 @@ model RefreshToken {
   userId        String          @db.Uuid
   replacedBy    RefreshToken?   @relation("TokenRotation", fields: [replacedById], references: [id])
   replacedById  String?         @unique @db.Uuid
-  replaces      RefreshToken?  @relation("TokenRotation")
+  replaces      RefreshToken?   @relation("TokenRotation")
 
   @@index([family])
   @@index([userId])
@@ -94,6 +96,7 @@ enum AuditEventType {
   // INFO
   USER_REGISTERED
   USER_LOGIN_SUCCESS
+  USER_DELETED
   TOKEN_REFRESHED
   TOKEN_REFRESHED_RACE_CONDITION
   SESSION_EXPIRED
