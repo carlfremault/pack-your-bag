@@ -1,7 +1,7 @@
-import { HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity } from '@prisma-client';
+import { AuditEventType, AuditSeverity, User } from '@prisma-client';
 import { UAParser } from 'ua-parser-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -30,7 +30,12 @@ describe('AuditLogService', () => {
   const mockPrismaService = {
     auditLog: {
       create: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
     },
+    $transaction: vi.fn((callback: (tx: typeof mockPrismaService) => Promise<User>) => {
+      return callback(mockPrismaService);
+    }),
   };
 
   beforeEach(async () => {
@@ -214,6 +219,73 @@ describe('AuditLogService', () => {
           metadata: { customField: 'value', requestId: 'req-123' },
         }) as object,
       });
+    });
+  });
+
+  describe('anonymizeAuditLogs', () => {
+    it('should call updateMany if valid filter is provided', async () => {
+      const userIds = ['uuid-123', 'uuid-456'];
+      const where = { userId: { in: userIds } };
+
+      await service.anonymizeAuditLogs(where, mockPrismaService as unknown as PrismaService);
+
+      expect(mockPrismaService.auditLog.updateMany).toHaveBeenCalledWith({
+        where,
+        data: { userId: null },
+      });
+    });
+
+    it('should throw BadRequestException if NOT clause is used', async () => {
+      const where = { NOT: { userId: '123' } };
+
+      await expect(service.anonymizeAuditLogs(where)).rejects.toThrow(
+        new BadRequestException(
+          'Complex filters (AND, OR, NOT) are not allowed in audit log anonymization for safety reasons.',
+        ),
+      );
+      expect(mockPrismaService.auditLog.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if no filter is provided', async () => {
+      await expect(service.anonymizeAuditLogs({})).rejects.toThrow(
+        new BadRequestException(
+          'A userId filter must be provided for bulk Audit log anonymization.',
+        ),
+      );
+
+      expect(mockPrismaService.auditLog.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteAuditLogs', () => {
+    it('should call deleteMany if valid filter is provided', async () => {
+      const where = { createdAt: { gte: new Date() } };
+      await service.deleteAuditLogs(where);
+      expect(mockPrismaService.auditLog.deleteMany).toHaveBeenCalledWith({ where });
+    });
+
+    it('should call deleteMany if valid composite filter is provided', async () => {
+      const where = {
+        OR: [{ createdAt: { gte: new Date() } }, { createdAt: { gte: new Date() } }],
+      };
+      await service.deleteAuditLogs(where);
+      expect(mockPrismaService.auditLog.deleteMany).toHaveBeenCalledWith({ where });
+    });
+
+    it('should throw Error if createdAt filter is not provided', async () => {
+      await expect(service.deleteAuditLogs({})).rejects.toThrow(
+        new Error('A createdAt filter must be provided for bulk audit log deletion.'),
+      );
+    });
+
+    it('should throw Error if filter is provided but contains NOT clause', async () => {
+      await expect(
+        service.deleteAuditLogs({
+          NOT: {},
+        }),
+      ).rejects.toThrow(
+        new Error('NOT clauses are not allowed in audit log deletion for safety reasons.'),
+      );
     });
   });
 });

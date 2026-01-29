@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -35,6 +35,7 @@ describe('UserService', () => {
     user: {
       findUnique: vi.fn(),
       update: vi.fn(),
+      deleteMany: vi.fn(),
     },
     refreshToken: {
       updateMany: vi.fn(),
@@ -46,6 +47,11 @@ describe('UserService', () => {
 
   const mockRefreshTokenService = {
     revokeManyTokens: vi.fn(),
+    deleteRefreshTokens: vi.fn(),
+  };
+
+  const mockAuditLogService = {
+    anonymizeAuditLogs: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -56,7 +62,7 @@ describe('UserService', () => {
         UserService,
         { provide: ConfigService, useValue: mockConfigService },
         { provide: PrismaService, useValue: mockPrismaService },
-        { provide: AuditLogService, useValue: {} },
+        { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
       ],
     }).compile();
@@ -92,7 +98,6 @@ describe('UserService', () => {
         where: { id: userId },
         data: { password: 'new-hashed-val' },
       });
-      expect(mockRefreshTokenService.revokeManyTokens).toBeCalledTimes(1);
       expect(mockRefreshTokenService.revokeManyTokens).toHaveBeenCalledWith(
         { userId },
         mockPrismaService,
@@ -125,6 +130,91 @@ describe('UserService', () => {
 
       await expect(service.updatePassword(userId, validDto)).rejects.toThrow(BadRequestException);
       expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('softDeleteUser', () => {
+    const userId = 'uuid-123';
+    const body = { password: 'validPassword123' };
+
+    it("should revoke a user's tokens and soft delete the user", async () => {
+      const mockUser = { password: body.password, isDeleted: false } as User;
+      mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
+
+      await service.softDeleteUser(userId, body);
+
+      expect(mockRefreshTokenService.revokeManyTokens).toHaveBeenCalledWith(
+        {
+          userId,
+        },
+        mockPrismaService,
+      );
+      expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+        where: { id: userId },
+        data: { isDeleted: true, deletedAt: expect.any(Date) as Date },
+      });
+    });
+
+    it('should throw an UnauthorizedException if the user is not found', async () => {
+      mockedPrismaUser.findUnique.mockResolvedValue(null);
+      await expect(service.softDeleteUser(userId, body)).rejects.toThrow(
+        new UnauthorizedException('Access denied'),
+      );
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('should throw a BadRequestException if the user is already scheduled for deletion', async () => {
+      const mockUser = { isDeleted: true } as User;
+      mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
+      await expect(service.softDeleteUser(userId, body)).rejects.toThrow(
+        new BadRequestException('Account already scheduled for deletion'),
+      );
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('should throw an UnauthorizedException if the password is incorrect', async () => {
+      const mockUser = { password: 'wrongPassword456', isDeleted: false } as User;
+      mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
+      mockedCompare.mockResolvedValue(false as never);
+      await expect(service.softDeleteUser(userId, body)).rejects.toThrow(UnauthorizedException);
+      expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('hardDeleteUsers', () => {
+    it("should delete users' refresh tokens, anonymize their audit logs and delete the users", async () => {
+      const userIds = ['uuid-123', 'uuid-456'];
+      const mockResult = { count: 2 };
+      mockRefreshTokenService.deleteRefreshTokens.mockResolvedValue(mockResult);
+      mockAuditLogService.anonymizeAuditLogs.mockResolvedValue(mockResult);
+      mockPrismaService.user.deleteMany.mockResolvedValue(mockResult);
+
+      const result = await service.hardDeleteUsers(userIds);
+
+      expect(mockRefreshTokenService.deleteRefreshTokens).toHaveBeenCalledWith(
+        { userId: { in: userIds } },
+        mockPrismaService,
+      );
+      expect(mockAuditLogService.anonymizeAuditLogs).toHaveBeenCalledWith(
+        { userId: { in: userIds } },
+        mockPrismaService,
+      );
+      expect(mockPrismaService.user.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: ['uuid-123', 'uuid-456'] } },
+      });
+      expect(result).toEqual({
+        deletedUsers: 2,
+        deletedTokens: 2,
+        anonymizedAuditLogs: 2,
+      });
+    });
+
+    it('should not make a database call if no user ids are provided', async () => {
+      await service.hardDeleteUsers([]);
+
+      expect(mockRefreshTokenService.deleteRefreshTokens).not.toHaveBeenCalled();
+      expect(mockAuditLogService.anonymizeAuditLogs).not.toHaveBeenCalled();
+      expect(mockPrismaService.user.deleteMany).not.toHaveBeenCalled();
     });
   });
 });

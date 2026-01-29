@@ -21,12 +21,14 @@ describe('HealthController', () => {
   let controller: HealthController;
 
   const mockConfigService = {
-    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
-      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    get: vi.fn((key: string, defaultValue?: string): string => {
+      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as string;
     }),
   };
 
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
       providers: [

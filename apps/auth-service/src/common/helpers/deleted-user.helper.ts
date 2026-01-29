@@ -1,12 +1,10 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { MS_PER_DAY } from '@/common/constants/auth.constants';
+import { User } from '@/generated/prisma';
 
 export class DeletedUserHelper {
-  static checkDeletedUser(
-    user: { isDeleted: boolean; deletedAt: Date | null },
-    retentionDays: number,
-  ): void {
+  static checkDeletedUser(user: User, retentionDays: number): void {
     if (!user.isDeleted) {
       return;
     }

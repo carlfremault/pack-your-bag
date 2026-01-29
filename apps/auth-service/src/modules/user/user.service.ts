@@ -126,7 +126,7 @@ export class UserService {
         tx,
       );
       const { count: anonymizedAuditLogs } = await this.auditLogService.anonymizeAuditLogs(
-        userIds,
+        { userId: { in: userIds } },
         tx,
       );
       const { count: deletedUsers } = await tx.user.deleteMany({
