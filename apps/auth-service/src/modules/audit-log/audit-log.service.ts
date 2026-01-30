@@ -108,10 +108,11 @@ export class AuditLogService {
       if ('createdAt' in filter) return true;
 
       if (filter.AND && Array.isArray(filter.AND)) {
-        return filter.AND.some(validateCreatedAtFilter);
+        const andFilters = Array.isArray(filter.AND) ? filter.AND : [filter.AND];
+        return andFilters.some(validateCreatedAtFilter);
       }
-      if (filter.OR && Array.isArray(filter.OR)) {
-        return filter.OR.some(validateCreatedAtFilter);
+      if (filter.OR) {
+        return filter.OR.every(validateCreatedAtFilter);
       }
 
       return false;

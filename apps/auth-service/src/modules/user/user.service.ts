@@ -91,7 +91,7 @@ export class UserService {
 
     const user = await this.getUser({ id: userId });
     if (!user) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException('Access Denied');
     }
     if (user.isDeleted) {
       throw new BadRequestException('Account already scheduled for deletion');

@@ -158,7 +158,7 @@ describe('UserService', () => {
     it('should throw an UnauthorizedException if the user is not found', async () => {
       mockedPrismaUser.findUnique.mockResolvedValue(null);
       await expect(service.softDeleteUser(userId, body)).rejects.toThrow(
-        new UnauthorizedException('Access denied'),
+        new UnauthorizedException('Access Denied'),
       );
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
     });
