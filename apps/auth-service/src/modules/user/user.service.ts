@@ -1,20 +1,36 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { Prisma, User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 
+import { AuditLogService } from '@/modules/audit-log/audit-log.service';
+import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
+import { DeleteUserDto } from './dto/delete-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+
+interface UserDeletionResult {
+  deletedUsers: number;
+  deletedTokens: number;
+  anonymizedAuditLogs: number;
+}
 
 @Injectable()
 export class UserService {
   private readonly bcryptSaltRounds: number;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly auditLogService: AuditLogService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {
     this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
   }
@@ -31,6 +47,12 @@ export class UserService {
     });
   }
 
+  async getUsers(where: Prisma.UserWhereInput): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where,
+    });
+  }
+
   async updatePassword(userId: string, body: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = body;
 
@@ -39,7 +61,7 @@ export class UserService {
     }
 
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: userId, isDeleted: false },
       select: { password: true },
     });
     if (!user) throw new NotFoundException('User not found');
@@ -58,18 +80,64 @@ export class UserService {
       });
 
       // Revoke all active tokens for this user
-      await tx.refreshToken.updateMany({
-        where: {
-          userId,
-          isRevoked: false,
-        },
-        data: {
-          isRevoked: true,
-          revokedAt: new Date(),
-        },
-      });
+      await this.refreshTokenService.revokeManyTokens({ userId }, tx);
 
       return updatedUser;
+    });
+  }
+
+  async softDeleteUser(userId: string, body: DeleteUserDto): Promise<void> {
+    const { password } = body;
+
+    const user = await this.getUser({ id: userId });
+    if (!user) {
+      throw new UnauthorizedException('Access Denied');
+    }
+    if (user.isDeleted) {
+      throw new BadRequestException('Account already scheduled for deletion');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await this.refreshTokenService.revokeManyTokens({ userId }, tx);
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
+      });
+    });
+  }
+
+  // For cron job only
+  async hardDeleteUsers(userIds: string[]): Promise<UserDeletionResult> {
+    if (userIds.length === 0) {
+      return { deletedUsers: 0, deletedTokens: 0, anonymizedAuditLogs: 0 };
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const { count: deletedTokens } = await this.refreshTokenService.deleteRefreshTokens(
+        { userId: { in: userIds } },
+        tx,
+      );
+      const { count: anonymizedAuditLogs } = await this.auditLogService.anonymizeAuditLogs(
+        { userId: { in: userIds } },
+        tx,
+      );
+      const { count: deletedUsers } = await tx.user.deleteMany({
+        where: { id: { in: userIds } },
+      });
+
+      return {
+        deletedUsers,
+        deletedTokens,
+        anonymizedAuditLogs,
+      };
     });
   }
 }

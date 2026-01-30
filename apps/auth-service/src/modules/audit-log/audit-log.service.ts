@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 import { Prisma } from '@prisma-client';
@@ -63,19 +63,42 @@ export class AuditLogService {
     }
   }
 
-  // Temporary eslint disable. Should be removed after implementing email alerting
-  // 'async' is needed to make Promise.allSettled happy
-  // eslint-disable-next-line @typescript-eslint/require-await
-  private async triggerAlert(data: AuditLogData): Promise<void> {
-    // TODO: Implement email alerting
-    // For now, just log
-    this.logger.error('CRITICAL SECURITY EVENT:', data);
+  async anonymizeAuditLogs(
+    where: Prisma.AuditLogWhereInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.BatchPayload> {
+    const validateUserIdFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
+      if (!filter || typeof filter !== 'object') return false;
+
+      if ('NOT' in filter || 'AND' in filter || 'OR' in filter) {
+        throw new BadRequestException(
+          'Complex filters (AND, OR, NOT) are not allowed in audit log anonymization for safety reasons.',
+        );
+      }
+
+      return 'userId' in filter;
+    };
+
+    if (!validateUserIdFilter(where)) {
+      throw new BadRequestException(
+        'A userId filter must be provided for bulk Audit log anonymization.',
+      );
+    }
+
+    const prisma = tx || this.prisma;
+
+    const result = await prisma.auditLog.updateMany({
+      where,
+      data: {
+        userId: null,
+      },
+    });
+    return result;
   }
 
-  // For cron job
   async deleteAuditLogs(where: Prisma.AuditLogWhereInput): Promise<Prisma.BatchPayload> {
     // Ensure there's a meaningful time-based filter to prevent accidental mass deletion
-    const validateAndCheckTimeFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
+    const validateCreatedAtFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
       if (!filter || typeof filter !== 'object') return false;
 
       if ('NOT' in filter) {
@@ -85,19 +108,29 @@ export class AuditLogService {
       if ('createdAt' in filter) return true;
 
       if (filter.AND && Array.isArray(filter.AND)) {
-        return filter.AND.some(validateAndCheckTimeFilter);
+        const andFilters = Array.isArray(filter.AND) ? filter.AND : [filter.AND];
+        return andFilters.some(validateCreatedAtFilter);
       }
-      if (filter.OR && Array.isArray(filter.OR)) {
-        return filter.OR.some(validateAndCheckTimeFilter);
+      if (filter.OR) {
+        return filter.OR.every(validateCreatedAtFilter);
       }
 
       return false;
     };
 
-    if (!validateAndCheckTimeFilter(where)) {
+    if (!validateCreatedAtFilter(where)) {
       throw new Error('A createdAt filter must be provided for bulk audit log deletion.');
     }
 
     return this.prisma.auditLog.deleteMany({ where });
+  }
+
+  // Temporary eslint disable. Should be removed after implementing email alerting
+  // 'async' is needed to make Promise.allSettled happy
+  // eslint-disable-next-line @typescript-eslint/require-await
+  private async triggerAlert(data: AuditLogData): Promise<void> {
+    // TODO: Implement email alerting
+    // For now, just log
+    this.logger.error('CRITICAL SECURITY EVENT:', data);
   }
 }

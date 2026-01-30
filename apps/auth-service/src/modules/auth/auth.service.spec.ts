@@ -6,14 +6,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import bcrypt from 'bcrypt';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { MS_PER_DAY } from '@/common/constants/auth.constants';
 import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/auth.exceptions';
 import { AuditEventType } from '@/generated/prisma';
-
-import { RefreshTokenService } from '../refresh-token/refresh-token.service';
-import { UserService } from '../user/user.service';
+import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { UserService } from '@/modules/user/user.service';
 
 import { AuthService } from './auth.service';
 
@@ -200,7 +200,7 @@ describe('AuthService', () => {
     };
 
     it('should return new tokens for valid refresh token', async () => {
-      const inSevenDays = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const inSevenDays = new Date(Date.now() + 7 * MS_PER_DAY);
       const mockRefreshToken = {
         id: 'token-uuid-456',
         family: refreshTokenUser.tokenFamilyId,
@@ -215,7 +215,10 @@ describe('AuthService', () => {
 
       const result = await service.refreshToken(refreshTokenUser);
 
-      expect(mockUserService.getUser).toHaveBeenCalledWith({ id: refreshTokenUser.userId });
+      expect(mockUserService.getUser).toHaveBeenCalledWith({
+        id: refreshTokenUser.userId,
+        isDeleted: false,
+      });
       expect(mockRefreshTokenService.getRefreshToken).toHaveBeenCalledWith({
         id: refreshTokenUser.tokenId,
       });
@@ -263,7 +266,7 @@ describe('AuthService', () => {
     });
 
     it('should throw InvalidSessionException if there is a token familyId mismatch', async () => {
-      const inSevenDays = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const inSevenDays = new Date(Date.now() + 7 * MS_PER_DAY);
       const mockRefreshToken = {
         id: 'token-uuid-456',
         family: refreshTokenUser.tokenFamilyId,
@@ -291,7 +294,7 @@ describe('AuthService', () => {
     });
 
     it('should throw InvalidSessionException if there is a token userId mismatch', async () => {
-      const inSevenDays = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const inSevenDays = new Date(Date.now() + 7 * MS_PER_DAY);
       const mockRefreshToken = {
         id: 'token-uuid-456',
         family: refreshTokenUser.tokenFamilyId,
@@ -334,7 +337,7 @@ describe('AuthService', () => {
     });
 
     it('should handle revoked token with race condition recovery', async () => {
-      const inSevenDays = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const inSevenDays = new Date(Date.now() + 7 * MS_PER_DAY);
       const mockRefreshToken = {
         id: 'token-uuid-456',
         family: refreshTokenUser.tokenFamilyId,

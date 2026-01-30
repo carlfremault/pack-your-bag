@@ -19,10 +19,12 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
   private readonly logger = new Logger(BffGuard.name);
   private readonly failedAttempts = new Map<string, { count: number; resetAt: number }>();
   private readonly LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-  private cleanupInterval: ReturnType<typeof setInterval>;
+  private readonly cleanupInterval: ReturnType<typeof setInterval>;
+  private readonly bffSecret: string;
 
   constructor(private configService: ConfigService) {
     this.cleanupInterval = setInterval(() => this.cleanup(), 10 * 60 * 1000);
+    this.bffSecret = this.configService.get<string>('BFF_SHARED_SECRET', '');
   }
 
   onModuleDestroy(): void {
@@ -50,10 +52,9 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
       }
     }
 
-    const bffSecret = this.configService.get<string>('BFF_SHARED_SECRET');
     const providedSecret = request.headers['x-bff-secret'] as string;
 
-    if (!bffSecret) {
+    if (!this.bffSecret) {
       this.logger.error('BFF_SHARED_SECRET not configured');
       throw new InternalServerErrorException();
     }
@@ -63,7 +64,7 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
       throw new BffAuthenticationException();
     }
 
-    const expectedBuffer = Buffer.from(bffSecret, 'utf8');
+    const expectedBuffer = Buffer.from(this.bffSecret, 'utf8');
     const providedBuffer = Buffer.from(providedSecret, 'utf8');
 
     if (

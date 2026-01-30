@@ -20,4 +20,8 @@ export const THROTTLE_LIMITS = {
   LOGOUT: 10,
   LOGOUT_ALL_DEVICES: 10,
   UPDATE_PASSWORD: 3,
+  DELETE_USER: 3,
 } as const;
+
+// Various
+export const MS_PER_DAY = 24 * 60 * 60 * 1000;

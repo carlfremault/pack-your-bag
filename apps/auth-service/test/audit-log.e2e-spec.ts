@@ -7,11 +7,10 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { AppModule } from '@/app.module';
 import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
-
-import { AppModule } from '../src/app.module';
 
 describe('Audit Log (e2e)', () => {
   let app: INestApplication<App>;

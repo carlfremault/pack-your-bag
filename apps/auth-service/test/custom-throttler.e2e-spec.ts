@@ -7,12 +7,11 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { AppModule } from '@/app.module';
 import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
 import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
-
-import { AppModule } from '../src/app.module';
 
 const AUDIT_LOG_FLUSH_TIMEOUT_MS = 500;
 

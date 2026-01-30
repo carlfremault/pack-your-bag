@@ -7,10 +7,9 @@ import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthStrategy } from '@/common/strategies/jwt-auth.strategy';
 import { JwtRefreshStrategy } from '@/common/strategies/jwt-refresh.strategy';
+import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
 import { UserModule } from '@/modules/user/user.module';
-
-import { AuditLogModule } from '../audit-log/audit-log.module';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
