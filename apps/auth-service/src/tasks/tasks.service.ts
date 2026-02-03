@@ -67,12 +67,9 @@ export class TasksService {
       const auditMessage = `Cleaned up ${result.count} expired/revoked token${result.count === 1 ? '' : 's'}. Revoked cutoff: ${refreshTokenCutoff.toISOString()}`;
       this.logger.log(auditMessage);
 
-      this.auditLogProvider.safeEmit({
+      this.auditLogProvider.auditRequest({
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.INFO,
-        userId: null,
-        path: 'N/A',
-        method: 'N/A',
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata: { count: result.count, cutoff: refreshTokenCutoff.toISOString() },
@@ -83,12 +80,9 @@ export class TasksService {
 
       this.logger.error(`Failed to cleanup expired refresh tokens: ${errorMessage}`, errorStack);
 
-      this.auditLogProvider.safeEmit({
+      this.auditLogProvider.auditRequest({
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.ERROR,
-        userId: null,
-        path: 'N/A',
-        method: 'N/A',
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Token cleanup failed: ${errorMessage}`,
       });
@@ -125,12 +119,9 @@ export class TasksService {
 
       this.logger.log(auditMessage);
 
-      this.auditLogProvider.safeEmit({
+      this.auditLogProvider.auditRequest({
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.INFO,
-        userId: null,
-        path: 'N/A',
-        method: 'N/A',
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata: {
@@ -146,12 +137,9 @@ export class TasksService {
 
       this.logger.error(`Failed to cleanup audit logs: ${errorMessage}`, errorStack);
 
-      this.auditLogProvider.safeEmit({
+      this.auditLogProvider.auditRequest({
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.ERROR,
-        userId: null,
-        path: 'N/A',
-        method: 'N/A',
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Audit log cleanup failed: ${errorMessage}`,
       });
@@ -190,12 +178,9 @@ export class TasksService {
 
       this.logger.log(auditMessage);
 
-      this.auditLogProvider.safeEmit({
+      this.auditLogProvider.auditRequest({
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.INFO,
-        userId: null,
-        path: 'N/A',
-        method: 'N/A',
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata,
@@ -206,12 +191,9 @@ export class TasksService {
 
       this.logger.error(`Failed to cleanup deleted users: ${errorMessage}`, errorStack);
 
-      this.auditLogProvider.safeEmit({
+      this.auditLogProvider.auditRequest({
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.ERROR,
-        userId: null,
-        path: 'N/A',
-        method: 'N/A',
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Deleted users cleanup failed: ${errorMessage}`,
       });

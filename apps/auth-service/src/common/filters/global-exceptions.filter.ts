@@ -1,15 +1,22 @@
-import type { ArgumentsHost } from '@nestjs/common';
-import { Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import type { ArgumentsHost, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
 import { Request, Response } from 'express';
 
-import anonymizeIp from '@/common/utils/anonymizeIp';
 import { captureSentryException } from '@/common/utils/captureSentryException';
-import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { safeStringify } from '@/common/utils/safeStringify';
 import { AuditEventType, AuditSeverity } from '@/generated/prisma';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
+
+import { AccountDeletedException } from '../exceptions/forbidden.exceptions';
 
 interface HttpExceptionResponse {
   statusCode: number;
@@ -35,13 +42,13 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     const statusCode = this.getStatusCode(exception);
     const exceptionResponse = this.getExceptionResponse(exception);
     const errorCode = this.getErrorCode(exceptionResponse, statusCode);
-    const message = this.extractClientMessage(exception, exceptionResponse);
+    const clientMessage = this.extractClientMessage(exception, exceptionResponse);
 
-    this.auditException(exception, request, statusCode, errorCode);
+    this.auditException(exception, request, statusCode, errorCode, clientMessage);
 
     response.status(statusCode).json({
       statusCode,
-      message,
+      message: clientMessage,
       error: errorCode,
       timestamp: new Date().toISOString(),
     });
@@ -50,60 +57,82 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
   private auditException(
     exception: unknown,
     request: Request,
-    status: number,
+    status: HttpStatus,
     errorCode: string,
+    clientMessage?: string | string[],
   ): void {
     if (exception instanceof ThrottlerException) {
       this.auditRateLimitExceeded(request, exception, errorCode);
       return;
     }
 
-    if (status >= 500) {
-      try {
-        captureSentryException({
-          exception,
-          request,
-          errorCode,
-          eventType: AuditEventType.INTERNAL_SERVER_ERROR,
-        });
-      } catch (error) {
-        this.logger.error(
-          'Failed to capture Sentry exception',
-          error instanceof Error ? error.stack : String(error),
-        );
-      }
+    // 5xx Internal server error
+    if (this.isServerError(status)) {
       this.auditInternalServerError(exception, request, status, errorCode);
       return;
     }
 
-    // Wide range at first. Narrow down progressively after initial deployment
-    if (status >= 400) {
-      this.auditGeneralException(exception, request, status, errorCode);
+    // 401 Unauthorized
+    if (status === HttpStatus.UNAUTHORIZED) {
+      // Already handled by AuthExceptionFilter
+      return;
+    }
+
+    // 403 Account deleted attempts
+    if (exception instanceof AccountDeletedException) {
+      this.auditAccountDeletionAttempt(request, exception, errorCode);
+      return;
+    }
+
+    // 403 Other forbidden access
+    if (status === HttpStatus.FORBIDDEN) {
+      this.auditForbiddenAccess(exception, request, errorCode);
+      return;
+    }
+
+    // 400 Validation errors
+    if (status === HttpStatus.BAD_REQUEST && this.isValidationError(exception)) {
+      this.auditValidationError(request, exception, errorCode, clientMessage);
+      return;
+    }
+
+    // 409 Conflict
+    if (status === HttpStatus.CONFLICT) {
+      this.auditConflictError(exception, request, errorCode);
+      return;
+    }
+
+    // 404 not found
+    if (status === HttpStatus.NOT_FOUND) {
+      return;
+    }
+
+    // Any other 4xx
+    if (this.isClientError(status)) {
+      this.auditUnexpectedClientError(exception, request, status, errorCode);
+      return;
     }
   }
 
   private auditRateLimitExceeded(request: Request, exception: unknown, errorCode: string): void {
-    const { headers, user, path, method, ip } = request;
+    const { path, method } = request;
     const tracker = this.isThrottlerExceptionWithTracker(exception) ? exception.tracker : undefined;
-    const userAgent = getUserAgentFromHeaders(headers);
 
     this.logger.warn(`Rate limit exceeded at ${method} ${path} with tracker ${tracker}`);
 
-    this.auditLogProvider.safeEmit({
-      eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
-      severity: AuditSeverity.WARN,
-      userId: user?.userId ?? null,
-      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
-      userAgent,
-      path,
-      method,
-      statusCode: HttpStatus.TOO_MANY_REQUESTS,
-      errorCode,
-      message: 'Rate limit exceeded',
-      metadata: {
-        tracker,
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
+        severity: AuditSeverity.WARN,
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+        errorCode,
+        message: 'Rate limit exceeded',
+        metadata: {
+          tracker,
+        },
       },
-    });
+      request,
+    );
   }
 
   private auditInternalServerError(
@@ -112,74 +141,164 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     status: number,
     errorCode: string,
   ): void {
-    const { headers, user, path, method, ip } = request;
+    const { path, method } = request;
     const message = exception instanceof Error ? exception.message : 'Unknown error';
     const errorStack = exception instanceof Error ? exception.stack : safeStringify(exception);
-    const userAgent = getUserAgentFromHeaders(headers);
 
-    this.logger.warn(`Unhandled ${status} at ${method} ${path}: ${message}`, errorStack);
+    this.logger.error(`Unhandled ${status} at ${method} ${path}: ${message}`, errorStack);
 
-    this.auditLogProvider.safeEmit({
-      eventType: AuditEventType.INTERNAL_SERVER_ERROR,
-      severity: AuditSeverity.ERROR,
-      userId: user?.userId ?? null,
-      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
-      userAgent,
-      path,
-      method,
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      errorCode,
-      message,
-    });
+    try {
+      captureSentryException({
+        exception,
+        request,
+        errorCode,
+        eventType: AuditEventType.INTERNAL_SERVER_ERROR,
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to capture Sentry exception',
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.INTERNAL_SERVER_ERROR,
+        severity: AuditSeverity.ERROR,
+        statusCode: status,
+        errorCode,
+        message,
+      },
+      request,
+    );
   }
 
-  private auditGeneralException(
+  private auditAccountDeletionAttempt(
+    request: Request,
+    exception: ForbiddenException,
+    errorCode: string,
+  ): void {
+    const auditMessage = typeof exception.cause === 'string' ? exception.cause : exception.message;
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.AUTHORIZATION_FAILED,
+        severity: AuditSeverity.INFO,
+        statusCode: HttpStatus.FORBIDDEN,
+        errorCode,
+        message: auditMessage,
+      },
+      request,
+    );
+  }
+
+  private auditForbiddenAccess(exception: unknown, request: Request, errorCode: string): void {
+    const { path, method } = request;
+    const message = exception instanceof Error ? exception.message : 'Forbidden';
+
+    this.logger.warn(`Forbidden access at ${method} ${path}: ${message}`);
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.AUTHORIZATION_FAILED,
+        severity: AuditSeverity.WARN,
+        statusCode: HttpStatus.FORBIDDEN,
+        errorCode,
+        message,
+      },
+      request,
+    );
+  }
+
+  private auditValidationError(
+    request: Request,
+    exception: unknown,
+    errorCode: string,
+    clientMessage?: string | string[],
+  ): void {
+    const message = exception instanceof Error ? exception.message : 'Validation failed';
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.VALIDATION_ERROR,
+        severity: AuditSeverity.INFO,
+        statusCode: HttpStatus.BAD_REQUEST,
+        errorCode,
+        message: clientMessage ?? message,
+      },
+      request,
+    );
+  }
+
+  private auditConflictError(exception: unknown, request: Request, errorCode: string): void {
+    const message = exception instanceof Error ? exception.message : 'Conflict';
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.CONFLICT_ERROR,
+        severity: AuditSeverity.WARN,
+        statusCode: HttpStatus.CONFLICT,
+        errorCode,
+        message,
+      },
+      request,
+    );
+  }
+
+  private auditUnexpectedClientError(
     exception: unknown,
     request: Request,
     status: number,
     errorCode: string,
   ): void {
-    const { headers, user, path, method, ip } = request;
-    const severity = this.getSeverityForStatus(status);
-    const eventType = this.getEventTypeForStatus(status);
+    const { path, method } = request;
     const message = exception instanceof Error ? exception.message : 'Unknown error';
     const errorStack = exception instanceof Error ? exception.stack : safeStringify(exception);
-    const userAgent = getUserAgentFromHeaders(headers);
 
-    this.logger.error(`Unhandled ${status} at ${method} ${path}: ${message}`, errorStack);
+    this.logger.warn(`Unexpected ${status} at ${method} ${path}: ${message}`, errorStack);
 
-    this.auditLogProvider.safeEmit({
-      eventType,
-      severity,
-      userId: user?.userId ?? null,
-      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
-      userAgent,
-      path,
-      method,
-      statusCode: status,
-      errorCode,
-      message,
-    });
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.HTTP_ERROR,
+        severity: AuditSeverity.WARN,
+        statusCode: status,
+        errorCode,
+        message,
+      },
+      request,
+    );
   }
 
-  private getSeverityForStatus(status: number): AuditSeverity {
-    if (status >= 500) return AuditSeverity.ERROR;
-    if (status >= 400) return AuditSeverity.WARN;
-    return AuditSeverity.INFO;
+  private isServerError(status: HttpStatus): boolean {
+    const statusCode = status as number;
+    return statusCode >= 500 && statusCode < 600;
   }
 
-  private getEventTypeForStatus(status: number): AuditEventType {
-    const eventMap: Record<number, AuditEventType> = {
-      400: AuditEventType.VALIDATION_ERROR,
-      403: AuditEventType.AUTHORIZATION_FAILED,
-      404: AuditEventType.RESOURCE_NOT_FOUND,
-      409: AuditEventType.CONFLICT_ERROR,
-    };
-
-    return eventMap[status] ?? AuditEventType.HTTP_ERROR;
+  private isClientError(status: HttpStatus): boolean {
+    const statusCode = status as number;
+    return statusCode >= 400 && statusCode < 500;
   }
 
-  private getStatusCode(exception: unknown): number {
+  private isValidationError(exception: unknown): boolean {
+    if (!(exception instanceof BadRequestException)) {
+      return false;
+    }
+    const response = exception.getResponse();
+    return (
+      typeof response === 'object' &&
+      response !== null &&
+      'message' in response &&
+      Array.isArray(response.message)
+    );
+  }
+
+  private isThrottlerExceptionWithTracker(
+    exception: unknown,
+  ): exception is ThrottlerExceptionWithTracker {
+    return exception instanceof ThrottlerException && 'tracker' in exception;
+  }
+
+  private getStatusCode(exception: unknown): HttpStatus {
     return exception instanceof HttpException
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -200,8 +319,12 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       };
     }
 
-    if (this.isHttpExceptionResponse(response)) {
-      return response;
+    if (this.isObjectWithMessage(response)) {
+      return {
+        statusCode: status,
+        message: response.message,
+        ...(this.hasErrorCode(response) && { error: response.error }),
+      };
     }
 
     this.logger.warn(`Unexpected exception response format: ${safeStringify(response)}`);
@@ -212,19 +335,20 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     };
   }
 
-  private isHttpExceptionResponse(response: unknown): response is HttpExceptionResponse {
+  private isObjectWithMessage(response: unknown): response is { message: string } {
     return (
       typeof response === 'object' &&
       response !== null &&
-      'statusCode' in response &&
-      'message' in response
+      'message' in response &&
+      (typeof (response as Record<string, unknown>).message === 'string' ||
+        Array.isArray((response as Record<string, unknown>).message))
     );
   }
 
-  private isThrottlerExceptionWithTracker(
-    exception: unknown,
-  ): exception is ThrottlerExceptionWithTracker {
-    return exception instanceof ThrottlerException && 'tracker' in exception;
+  private hasErrorCode(response: {
+    message: string | string[];
+  }): response is { message: string | string[]; error: string } {
+    return 'error' in response && typeof (response as Record<string, unknown>).error === 'string';
   }
 
   private getErrorCode(exceptionResponse: HttpExceptionResponse | null, status: number): string {

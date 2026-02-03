@@ -7,8 +7,6 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { AUDIT_EVENT_KEY } from '@/common/decorators/audit-log.decorator';
-import anonymizeIp from '@/common/utils/anonymizeIp';
-import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface AuditableResponse {
@@ -34,8 +32,7 @@ export class AuditInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap((data: AuditableResponse) => {
-        const { user, auditOverride, ip, headers, path, method } = request;
-        const userAgent = getUserAgentFromHeaders(headers);
+        const { user, auditOverride } = request;
 
         // Logic to find the ID:
         // 1. Look in the request (for authenticated actions like password change)
@@ -47,17 +44,16 @@ export class AuditInterceptor implements NestInterceptor {
           this.logger.warn(`Could not resolve userId for audit event: ${eventType}`);
         }
 
-        this.auditProvider.safeEmit({
-          eventType,
-          severity: AuditSeverity.INFO,
-          userId,
-          ipAddress: ip ? anonymizeIp(ip) : 'unknown',
-          userAgent,
-          path,
-          method,
-          statusCode: response.statusCode,
-          message: 'Success',
-        });
+        this.auditProvider.auditRequest(
+          {
+            eventType,
+            severity: AuditSeverity.INFO,
+            statusCode: response.statusCode,
+            message: 'Success',
+            userId,
+          },
+          request,
+        );
       }),
     );
   }

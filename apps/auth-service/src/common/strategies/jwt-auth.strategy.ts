@@ -6,7 +6,7 @@ import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { InvalidSessionException } from '@/common/exceptions/auth.exceptions';
+import { InvalidSessionException } from '@/common/exceptions/unauthorized.exceptions';
 
 import { JwtPayload } from './dto/jwt-payload.dto';
 

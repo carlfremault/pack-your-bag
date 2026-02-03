@@ -15,7 +15,7 @@ import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
 import {
   InvalidSessionException,
   SessionExpiredException,
-} from '@/common/exceptions/auth.exceptions';
+} from '@/common/exceptions/unauthorized.exceptions';
 import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';

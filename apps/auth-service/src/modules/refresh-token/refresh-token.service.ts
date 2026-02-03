@@ -7,7 +7,7 @@ import {
   InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
-} from '@/common/exceptions/auth.exceptions';
+} from '@/common/exceptions/unauthorized.exceptions';
 import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()

@@ -10,7 +10,7 @@ import { MS_PER_DAY } from '@/common/constants/auth.constants';
 import {
   InvalidSessionException,
   SessionExpiredException,
-} from '@/common/exceptions/auth.exceptions';
+} from '@/common/exceptions/unauthorized.exceptions';
 import { AuditEventType } from '@/generated/prisma';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';

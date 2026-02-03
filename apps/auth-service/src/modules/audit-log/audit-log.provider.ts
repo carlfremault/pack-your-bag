@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+import { Request } from 'express';
+
 import type { AuditLogData } from '@/common/interfaces/audit-log-data.interface';
+import anonymizeIp from '@/common/utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 
 @Injectable()
 export class AuditLogProvider {
@@ -27,6 +31,23 @@ export class AuditLogProvider {
           stack,
         );
       }
+    });
+  }
+
+  auditRequest(
+    data: Omit<AuditLogData, 'ipAddress' | 'userAgent' | 'path' | 'method'>,
+    request?: Request,
+  ): void {
+    const { headers, user, path = 'N/A', method = 'N/A', ip } = request || {};
+    const userAgent = headers && getUserAgentFromHeaders(headers);
+
+    this.safeEmit({
+      ...data,
+      userId: data.userId ?? user?.userId ?? null,
+      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
+      userAgent,
+      path,
+      method,
     });
   }
 }
