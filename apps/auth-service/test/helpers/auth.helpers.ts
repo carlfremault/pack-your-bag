@@ -42,7 +42,12 @@ export class AuthHelpers {
     return req.expect(expectedStatus);
   }
 
-  async refreshToken(token: string, expectedStatus = HttpStatus.OK) {
+  async refreshToken(
+    token: string,
+    expectedStatus = HttpStatus.OK,
+  ): Promise<{
+    body: AuthResponseDto;
+  }> {
     return request(this.app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Authorization', `Bearer ${token}`)

@@ -66,11 +66,11 @@ describe('Auth Register (e2e)', () => {
 
     it('should not accept a duplicate email', async () => {
       await ctx.authHelpers.registerUser({ payload: ctx.authHelpers.defaultUser });
-      const response = await ctx.authHelpers.registerUser({
+      const { body } = await ctx.authHelpers.registerUser({
         payload: ctx.authHelpers.defaultUser,
         expectedStatus: HttpStatus.CONFLICT,
       });
-      expect(response.body).toMatchObject({
+      expect(body).toMatchObject({
         error: 'Conflict',
         message: 'Email already exists.',
       });
