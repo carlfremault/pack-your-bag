@@ -1,73 +1,24 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
 
-import request from 'supertest';
-import { App } from 'supertest/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { AppModule } from '@/app.module';
-import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
-import { PrismaService } from '@/prisma/prisma.service';
+import { createAndLoginUser, createAuthenticatedUser } from './fixtures/auth.fixtures';
+import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Auth login (e2e)', () => {
-  let app: INestApplication<App>;
-  let prisma: PrismaService;
-  let configService: ConfigService;
-  let accessTokenExpires: number;
-  let bffSecret: string;
+  let ctx: IntegrationTestContext;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    prisma = moduleFixture.get<PrismaService>(PrismaService);
-    configService = moduleFixture.get(ConfigService);
-
-    accessTokenExpires = configService.get<number>('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS', 2000);
-    bffSecret = configService.get<string>('BFF_SHARED_SECRET', '');
-
-    await app.init();
+    ctx = await createIntegrationContext();
   });
 
   beforeEach(async () => {
-    await prisma.user.deleteMany();
+    await ctx.resetDb();
   });
 
   afterAll(async () => {
-    await app.close();
-    await prisma.$disconnect();
+    await ctx?.close();
   });
-
-  const validUserDto = { email: 'testemail@test.com', password: 'validPassword123' };
-  const validUserDtoWithUppercaseEmail = {
-    email: 'TESTEMAIL@TEST.COM',
-    password: 'validPassword123',
-  };
-
-  const registerUser = async () => {
-    return request(app.getHttpServer())
-      .post('/auth/register')
-      .set('x-bff-secret', bffSecret)
-      .send(validUserDto)
-      .expect(HttpStatus.CREATED);
-  };
-
-  const loginUser = async (
-    payload: {
-      email?: string;
-      password?: string;
-    },
-    expectedStatus = HttpStatus.OK,
-  ) => {
-    return request(app.getHttpServer())
-      .post('/auth/login')
-      .set('x-bff-secret', bffSecret)
-      .send(payload)
-      .expect(expectedStatus);
-  };
 
   describe('Auth Service - /login (POST)', () => {
     describe('should validate input data', () => {
@@ -85,53 +36,68 @@ describe('Auth login (e2e)', () => {
           payload: { email: 'invalidemail', password: 'validPassword123' },
         },
       ])('should return BAD_REQUEST(400) when $condition', async ({ payload }) => {
-        const response = await loginUser(payload, HttpStatus.BAD_REQUEST);
-        expect(response.body).toMatchObject({
+        const { body } = await ctx.authHelpers.loginUser({
+          payload,
+          expectedStatus: HttpStatus.BAD_REQUEST,
+        });
+        expect(body).toMatchObject({
           error: 'Bad Request',
         });
       });
     });
 
     it('should log in existing user with correct credentials and return token pair', async () => {
-      await registerUser();
-      const response = await loginUser(validUserDto);
-      const body = response.body as AuthResponseDto;
-
+      const { body } = await createAndLoginUser(ctx);
       expect(body).toMatchObject({
         access_token: expect.any(String) as string,
         refresh_token: expect.any(String) as string,
         token_type: 'Bearer',
-        expires_in: accessTokenExpires,
+        expires_in: ctx.accessTokenExpires,
       });
     });
+
     it('should log in existing user with correct credentials and different email casing', async () => {
-      await registerUser();
-      const response = await loginUser(validUserDtoWithUppercaseEmail);
-      const body = response.body as AuthResponseDto;
+      await createAuthenticatedUser(ctx);
+      const defaultUser = ctx.authHelpers.defaultUser;
+      const { body } = await ctx.authHelpers.loginUser({
+        payload: {
+          email: defaultUser.email.toUpperCase(),
+          password: defaultUser.password,
+        },
+      });
 
       expect(body).toMatchObject({
         access_token: expect.any(String) as string,
         refresh_token: expect.any(String) as string,
         token_type: 'Bearer',
-        expires_in: accessTokenExpires,
+        expires_in: ctx.accessTokenExpires,
       });
     });
 
     it('should not login with incorrect password', async () => {
-      await registerUser();
-      const response = await loginUser(
-        { email: validUserDto.email, password: 'IncorrectPassword123' },
-        HttpStatus.UNAUTHORIZED,
-      );
-      expect(response.body).toMatchObject({
+      await createAuthenticatedUser(ctx);
+      const defaultUser = ctx.authHelpers.defaultUser;
+      const { body } = await ctx.authHelpers.loginUser({
+        payload: {
+          email: defaultUser.email,
+          password: 'IncorrectPassword123',
+        },
+        expectedStatus: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(body).toMatchObject({
         error: 'Unauthorized',
         message: 'Invalid email or password',
       });
     });
 
     it('should not login non-existing user', async () => {
-      const response = await loginUser(validUserDto, HttpStatus.UNAUTHORIZED);
-      expect(response.body).toMatchObject({
+      const { body } = await ctx.authHelpers.loginUser({
+        payload: ctx.authHelpers.defaultUser,
+        expectedStatus: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(body).toMatchObject({
         error: 'Unauthorized',
         message: 'Invalid email or password',
       });

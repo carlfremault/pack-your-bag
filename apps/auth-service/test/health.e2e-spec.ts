@@ -1,30 +1,23 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
 
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { AppModule } from '@/app.module';
-import { PrismaService } from '@/prisma/prisma.service';
+import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('HealthController (e2e)', () => {
-  let app: INestApplication<App>;
-  let prisma: PrismaService;
+  let ctx: IntegrationTestContext;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    ctx = await createIntegrationContext();
+  });
 
-    app = moduleFixture.createNestApplication();
-    prisma = moduleFixture.get<PrismaService>(PrismaService);
-
-    await app.init();
+  afterAll(async () => {
+    await ctx?.close();
   });
 
   it('/health (GET) - status should be ok', async () => {
-    const response = await request(app.getHttpServer()).get('/health');
+    const response = await request(ctx.app.getHttpServer()).get('/health');
 
     expect(response.status).toBe(HttpStatus.OK);
     expect(response.body).toMatchObject({
@@ -35,10 +28,5 @@ describe('HealthController (e2e)', () => {
         memory_heap: { status: 'up' },
       },
     });
-  });
-
-  afterAll(async () => {
-    await app.close();
-    await prisma.$disconnect();
   });
 });

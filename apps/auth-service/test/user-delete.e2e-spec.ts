@@ -25,7 +25,7 @@ describe('User Deletion (e2e)', () => {
   });
 
   afterAll(async () => {
-    await ctx.close();
+    await ctx?.close();
   });
 
   describe('Soft deletion', () => {
@@ -54,7 +54,7 @@ describe('User Deletion (e2e)', () => {
         password: ctx.authHelpers.defaultUser.password,
       });
 
-      await ctx.authHelpers.loginUser(undefined, HttpStatus.FORBIDDEN);
+      await ctx.authHelpers.loginUser({ payload: undefined, expectedStatus: HttpStatus.FORBIDDEN });
     });
 
     it('should not soft delete a user that is already soft deleted', async () => {
@@ -129,10 +129,10 @@ describe('User Deletion (e2e)', () => {
         token: access_token,
         password: ctx.authHelpers.defaultUser.password,
       });
-      const response = await ctx.authHelpers.registerUser(
-        ctx.authHelpers.defaultUser,
-        HttpStatus.CONFLICT,
-      );
+      const response = await ctx.authHelpers.registerUser({
+        payload: ctx.authHelpers.defaultUser,
+        expectedStatus: HttpStatus.CONFLICT,
+      });
 
       expect(response.body).toMatchObject({
         error: 'Conflict',
