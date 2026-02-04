@@ -3,7 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Request } from 'express';
 
-import type { AuditLogData } from '@/common/interfaces/audit-log-data.interface';
+import type { AuditLogData, AuditRequestInput } from '@/common/interfaces/audit-log-data.interface';
 import anonymizeIp from '@/common/utils/anonymizeIp';
 import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 
@@ -34,15 +34,7 @@ export class AuditLogProvider {
     });
   }
 
-  auditRequest(
-    data: Omit<
-      AuditLogData,
-      'ipAddress' | 'userAgent' | 'path' | 'method' | 'requestId' | 'userId'
-    > & {
-      userId?: string | null;
-    },
-    request?: Request,
-  ): void {
+  auditRequest(data: AuditRequestInput, request?: Request): void {
     const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request || {};
     const userAgent = headers && getUserAgentFromHeaders(headers);
 
