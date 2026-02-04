@@ -12,7 +12,7 @@ import { timingSafeEqual } from 'crypto';
 import { Request } from 'express';
 
 import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
-import { BffAuthenticationException } from '@/common/exceptions/auth.exceptions';
+import { BffAuthenticationException } from '@/common/exceptions/unauthorized.exceptions';
 
 @Injectable()
 export class BffGuard implements CanActivate, OnModuleDestroy {

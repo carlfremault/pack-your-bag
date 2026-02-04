@@ -15,16 +15,26 @@ import {
   InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
-} from '@/common/exceptions/auth.exceptions';
-import anonymizeIp from '@/common/utils/anonymizeIp';
+} from '@/common/exceptions/unauthorized.exceptions';
 import { captureSentryException } from '@/common/utils/captureSentryException';
-import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+
+import { anonymizeEmail } from '../utils/anonymizeEmail';
 
 interface UnauthorizedExceptionResponse {
   message: string | string[];
   error?: string;
   statusCode?: number;
+}
+
+interface AuthErrorContext {
+  errorCode: string;
+  clientMessage: string;
+  auditMessage: string;
+  eventType: AuditEventType;
+  severity: AuditSeverity;
+  fingerprint?: string[];
 }
 
 @Catch(UnauthorizedException)
@@ -37,16 +47,21 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const { user, ip, headers, path, method } = request;
 
+    const errorContext = this.getErrorContext(exception, request);
+
+    this.processError(errorContext, exception, request, response);
+  }
+
+  private getErrorContext(exception: UnauthorizedException, request: Request): AuthErrorContext {
     const exceptionResponse = exception.getResponse() as UnauthorizedExceptionResponse;
     const errorCode = exceptionResponse.error || 'UNAUTHORIZED';
     const clientMessage = this.getClientMessage(exceptionResponse);
     const auditMessage = typeof exception.cause === 'string' ? exception.cause : exception.message;
-    const userAgent = getUserAgentFromHeaders(headers);
+    const { user } = request;
 
+    let eventType: AuditEventType = AuditEventType.USER_LOGIN_FAILED;
     let severity: AuditSeverity = AuditSeverity.WARN;
-    let eventType: AuditEventType;
     let fingerprint: string[] | undefined;
 
     if (exception instanceof TokenReusedException) {
@@ -66,51 +81,75 @@ export class AuthExceptionFilter implements ExceptionFilter {
       eventType = AuditEventType.SUSPICIOUS_ACTIVITY;
       severity = AuditSeverity.CRITICAL;
       fingerprint = ['suspicious-activity', 'invalid-token', user?.userId ?? 'unknown'];
-    } else {
-      eventType = AuditEventType.USER_LOGIN_FAILED;
     }
 
-    if (severity === AuditSeverity.CRITICAL) {
-      try {
-        captureSentryException({
-          exception,
-          request,
-          errorCode,
-          level: 'warning',
-          eventType,
-          fingerprint: fingerprint ?? [eventType, errorCode],
-        });
-      } catch (error) {
-        this.logger.error(
-          'Failed to capture Sentry exception',
-          error instanceof Error ? error.stack : String(error),
-        );
-      }
-    }
-
-    this.auditLogProvider.safeEmit({
+    return {
+      errorCode,
+      clientMessage,
+      auditMessage,
       eventType,
       severity,
-      userId: user?.userId ?? null,
-      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
-      userAgent,
-      path,
-      method,
-      statusCode: HttpStatus.UNAUTHORIZED,
-      errorCode,
-      message: auditMessage,
-      metadata: {
-        ...(user?.tokenId && { tokenId: user.tokenId }),
-        ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
+      fingerprint,
+    };
+  }
+
+  private processError(
+    ctx: AuthErrorContext,
+    exception: UnauthorizedException,
+    request: Request,
+    response: Response,
+  ) {
+    const { user } = request;
+    const body = request.body as AuthCredentialsDto;
+
+    if (ctx.severity === AuditSeverity.CRITICAL) {
+      this.handleSentryReporting(ctx, exception, request);
+    }
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: ctx.eventType,
+        severity: ctx.severity,
+        statusCode: HttpStatus.UNAUTHORIZED,
+        errorCode: ctx.errorCode,
+        message: ctx.auditMessage,
+        metadata: {
+          ...(body?.email && { email: anonymizeEmail(body.email) }),
+          ...(user?.tokenId && { tokenId: user.tokenId }),
+          ...(user?.tokenFamilyId && { tokenFamily: user.tokenFamilyId }),
+        },
       },
-    });
+      request,
+    );
 
     response.status(HttpStatus.UNAUTHORIZED).json({
       statusCode: HttpStatus.UNAUTHORIZED,
-      message: clientMessage,
-      error: errorCode,
+      message: ctx.clientMessage,
+      error: ctx.errorCode,
       timestamp: new Date().toISOString(),
     });
+  }
+
+  private handleSentryReporting(
+    ctx: AuthErrorContext,
+    exception: UnauthorizedException,
+    request: Request,
+  ) {
+    try {
+      captureSentryException({
+        exception,
+        request,
+        errorCode: ctx.errorCode,
+        level: ctx.severity === AuditSeverity.CRITICAL ? 'error' : 'warning',
+        eventType: ctx.eventType,
+        fingerprint: ctx.fingerprint ?? [ctx.eventType, ctx.errorCode],
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to capture Sentry exception',
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   private getClientMessage(exceptionResponse: UnauthorizedExceptionResponse): string {

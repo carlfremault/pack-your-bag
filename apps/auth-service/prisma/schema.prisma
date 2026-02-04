@@ -64,7 +64,7 @@ model AuditLog {
   method        String
   statusCode    Int
   errorCode     String?
-  message       String
+  message       Json
   metadata      Json?
   createdAt     DateTime    @default(now())
   

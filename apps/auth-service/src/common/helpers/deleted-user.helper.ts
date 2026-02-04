@@ -3,6 +3,8 @@ import { ForbiddenException } from '@nestjs/common';
 import { MS_PER_DAY } from '@/common/constants/auth.constants';
 import { User } from '@/generated/prisma';
 
+import { AccountDeletedException } from '../exceptions/forbidden.exceptions';
+
 export class DeletedUserHelper {
   static checkDeletedUser(user: User, retentionDays: number): void {
     if (!user.isDeleted) {
@@ -21,17 +23,6 @@ export class DeletedUserHelper {
       Math.ceil((deletionDate.getTime() - Date.now()) / MS_PER_DAY),
     );
 
-    if (daysRemaining === 0) {
-      throw new ForbiddenException(
-        'Your account deletion is being processed. ' +
-          'If you believe this is an error, please contact support immediately.',
-      );
-    }
-
-    throw new ForbiddenException(
-      `Your account is scheduled for deletion in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}. ` +
-        'To cancel and restore your account, click the link in the deletion confirmation email ' +
-        'or contact support.',
-    );
+    throw new AccountDeletedException(daysRemaining);
   }
 }

@@ -2,7 +2,7 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 
-import { SessionExpiredException } from '@/common/exceptions/auth.exceptions';
+import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 
 @Injectable()
 export class JwtRefreshGuard extends AuthGuard('refresh') {
