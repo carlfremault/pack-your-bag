@@ -1,7 +1,5 @@
 import * as Sentry from '@sentry/nestjs';
 
-import { anonymizeEmail } from './common/utils/anonymizeEmail';
-
 if (process.env.AUTH_SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.AUTH_SENTRY_DSN,

@@ -43,7 +43,7 @@ export class AuditLogProvider {
 
     this.safeEmit({
       ...data,
-      userId: data.userId ?? user?.userId ?? null,
+      userId: data.userId ?? user?.userId ?? undefined,
       ipAddress: ip ? anonymizeIp(ip) : 'unknown',
       userAgent,
       path,
