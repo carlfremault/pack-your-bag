@@ -18,6 +18,32 @@ if (process.env.AUTH_SENTRY_DSN) {
         event.request.headers = filteredHeaders;
       }
 
+      if (event.request?.data) {
+        let data: Record<string, unknown>;
+
+        if (typeof event.request.data === 'string') {
+          try {
+            data = JSON.parse(event.request.data) as Record<string, unknown>;
+          } catch {
+            event.request.data = '[Unparsable request data redacted]';
+            return event;
+          }
+        } else if (typeof event.request.data === 'object' && event.request.data !== null) {
+          data = { ...event.request.data } as Record<string, unknown>;
+        } else {
+          return event;
+        }
+
+        const sensitiveFields = ['email', 'password', 'currentPassword', 'newPassword'];
+        for (const field of sensitiveFields) {
+          if (field in data) {
+            data[field] = '[Filtered]';
+          }
+        }
+
+        event.request.data = data;
+      }
+
       return event;
     },
   });

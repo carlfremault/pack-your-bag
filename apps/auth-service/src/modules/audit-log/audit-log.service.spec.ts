@@ -1,7 +1,7 @@
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity, User } from '@prisma-client';
+import { AuditEventType, AuditSeverity, Prisma, User } from '@prisma-client';
 import { UAParser } from 'ua-parser-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -57,6 +57,7 @@ describe('AuditLogService', () => {
   describe('handleAuditLog', () => {
     it('should create audit log', async () => {
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.USER_REGISTERED,
         severity: AuditSeverity.INFO,
         userId: '123',
@@ -93,6 +94,7 @@ describe('AuditLogService', () => {
 
     it('should create audit log with null deviceInfo when userAgent is not provided', async () => {
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.USER_REGISTERED,
         severity: AuditSeverity.INFO,
         userId: '123',
@@ -124,6 +126,7 @@ describe('AuditLogService', () => {
       });
 
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.USER_LOGIN_SUCCESS,
         severity: AuditSeverity.INFO,
         userId: '123',
@@ -146,6 +149,7 @@ describe('AuditLogService', () => {
 
     it('should trigger alert for CRITICAL severity events', async () => {
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.SUSPICIOUS_ACTIVITY,
         severity: AuditSeverity.CRITICAL,
         userId: '123',
@@ -164,6 +168,7 @@ describe('AuditLogService', () => {
 
     it('should not trigger alert for non-CRITICAL severity events', async () => {
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.USER_LOGIN_SUCCESS,
         severity: AuditSeverity.INFO,
         userId: '123',
@@ -184,6 +189,7 @@ describe('AuditLogService', () => {
       mockPrismaService.auditLog.create.mockRejectedValueOnce(new Error('DB error'));
 
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.USER_REGISTERED,
         severity: AuditSeverity.INFO,
         userId: '123',
@@ -201,6 +207,7 @@ describe('AuditLogService', () => {
 
     it('should include metadata when provided', async () => {
       const inputData = {
+        requestId: 'some-uuid-123',
         eventType: AuditEventType.USER_REGISTERED,
         severity: AuditSeverity.INFO,
         userId: '123',
@@ -231,7 +238,7 @@ describe('AuditLogService', () => {
 
       expect(mockPrismaService.auditLog.updateMany).toHaveBeenCalledWith({
         where,
-        data: { userId: null },
+        data: { userId: null, metadata: Prisma.DbNull },
       });
     });
 

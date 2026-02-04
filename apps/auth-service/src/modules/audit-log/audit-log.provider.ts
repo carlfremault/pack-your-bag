@@ -35,16 +35,22 @@ export class AuditLogProvider {
   }
 
   auditRequest(
-    data: Omit<AuditLogData, 'ipAddress' | 'userAgent' | 'path' | 'method'>,
+    data: Omit<
+      AuditLogData,
+      'ipAddress' | 'userAgent' | 'path' | 'method' | 'requestId' | 'userId'
+    > & {
+      userId?: string | null;
+    },
     request?: Request,
   ): void {
-    const { headers, user, path = 'N/A', method = 'N/A', ip } = request || {};
+    const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request || {};
     const userAgent = headers && getUserAgentFromHeaders(headers);
 
     this.safeEmit({
       ...data,
-      userId: data.userId ?? user?.userId ?? undefined,
-      ipAddress: ip ? anonymizeIp(ip) : 'unknown',
+      userId: data.userId ?? user?.userId ?? null,
+      requestId: id ?? null,
+      ipAddress: ip ? anonymizeIp(ip) : null,
       userAgent,
       path,
       method,

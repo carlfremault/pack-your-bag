@@ -4702,7 +4702,7 @@ __metadata:
     supertest: "npm:^7.0.0"
     typescript: "npm:^5.9.3"
     ua-parser-js: "npm:^2.0.8"
-    uuidv7: "npm:^1.1.0"
+    uuid: "npm:^13.0.0"
     vitest: "npm:^4.0.14"
   languageName: unknown
   linkType: soft
@@ -12498,21 +12498,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "uuid@npm:13.0.0"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10c0/950e4c18d57fef6c69675344f5700a08af21e26b9eff2bf2180427564297368c538ea11ac9fb2e6528b17fc3966a9fd2c5049361b0b63c7d654f3c550c9b3d67
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^8.3.2":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
   bin:
     uuid: dist/bin/uuid
   checksum: 10c0/bcbb807a917d374a49f475fae2e87fdca7da5e5530820ef53f65ba1d12131bd81a92ecf259cc7ce317cbe0f289e7d79fdfebcef9bfa3087c8c8a2fa304c9be54
-  languageName: node
-  linkType: hard
-
-"uuidv7@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "uuidv7@npm:1.1.0"
-  bin:
-    uuidv7: cli.js
-  checksum: 10c0/eceeb6cd682e323f14778cda6f221ebfafc339cd8bf8032a905b367cec547bffd5c717a60e956891525066c9a45f44fbe7688c269d1f95773ab940a212f1319c
   languageName: node
   linkType: hard
 

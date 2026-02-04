@@ -1,10 +1,11 @@
 import { AuditEventType, AuditSeverity, Prisma } from '@prisma-client';
 
 export interface AuditLogData {
+  readonly requestId: string | null;
   readonly eventType: AuditEventType;
   readonly severity: AuditSeverity;
-  readonly userId?: string;
-  readonly ipAddress?: string;
+  readonly userId: string | null;
+  readonly ipAddress: string | null;
   readonly userAgent?: string;
   readonly path: string;
   readonly method: string;

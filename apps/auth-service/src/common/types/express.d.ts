@@ -9,6 +9,7 @@ declare global {
       tokenFamilyId?: string;
     }
     interface Request {
+      id: string;
       user?: User;
       auditOverride?: AuditEventType;
     }

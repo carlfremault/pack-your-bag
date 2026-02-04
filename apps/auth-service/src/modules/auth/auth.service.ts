@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { AuditEventType, Prisma } from '@prisma-client';
 import bcrypt from 'bcrypt';
-import { uuidv7 } from 'uuidv7';
+import { v7 as uuidv7 } from 'uuid';
 
 import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
 import {
