@@ -105,8 +105,9 @@ enum AuditEventType {
   USER_LOGOUT
   USER_LOGOUT_ALL_DEVICES
   PASSWORD_CHANGED
-  HTTP_ERROR // Fallback
+  ACCOUNT_DELETION_ACCESS_ATTEMPT
   SCHEDULED_TASK
+  HTTP_ERROR // Fallback
   
   @@schema("app_auth")
 }
