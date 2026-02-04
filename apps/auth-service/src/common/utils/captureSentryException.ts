@@ -29,12 +29,11 @@ export function captureSentryException({
       errorCode,
       route: request.path,
       method: request.method,
+      authenticated: !!request.user,
     },
     extra: {
-      ...(request.user?.tokenId && { sessionTokenId: request.user.tokenId }),
-      ...(request.user?.tokenFamilyId && { sessionTokenFamilyId: request.user.tokenFamilyId }),
+      requestId: request.id,
     },
-    user: request.user ? { id: request.user.userId } : undefined,
     ...(fingerprint && { fingerprint }),
   });
 }

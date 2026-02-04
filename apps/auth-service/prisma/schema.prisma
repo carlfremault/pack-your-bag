@@ -55,10 +55,11 @@ model RefreshToken {
 
 model AuditLog {
   id            String      @id @db.Uuid
+  requestId     String?      @db.Uuid // nullable for cron jobs
   eventType     AuditEventType
   severity      AuditSeverity
-  userId        String?     @db.Uuid  // Null for failed auth attempts
-  ipAddress     String?     // anonymized
+  userId        String?     @db.Uuid  // Null for unauthenticated requests
+  ipAddress     String?     // anonymized and nullable for cron jobs
   deviceInfo    Json?
   path          String
   method        String
@@ -72,6 +73,7 @@ model AuditLog {
   @@index([eventType])
   @@index([severity])
   @@index([createdAt])
+  @@index([requestId])
   @@schema("app_auth")
 }
 

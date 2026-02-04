@@ -1,4 +1,4 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -13,6 +13,7 @@ import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
@@ -139,4 +140,8 @@ const validationSchema = Joi.object({
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}

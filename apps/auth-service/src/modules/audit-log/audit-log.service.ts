@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 import { Prisma } from '@prisma-client';
 import { UAParser } from 'ua-parser-js';
-import { uuidv7 } from 'uuidv7';
+import { v7 as uuidv7 } from 'uuid';
 
 import type { AuditLogData } from '@/common/interfaces/audit-log-data.interface';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -91,6 +91,7 @@ export class AuditLogService {
       where,
       data: {
         userId: null,
+        metadata: Prisma.DbNull,
       },
     });
     return result;
@@ -108,7 +109,7 @@ export class AuditLogService {
       if ('createdAt' in filter) return true;
 
       if (filter.AND && Array.isArray(filter.AND)) {
-        const andFilters = Array.isArray(filter.AND) ? filter.AND : [filter.AND];
+        const andFilters = filter.AND;
         return andFilters.some(validateCreatedAtFilter);
       }
       if (filter.OR) {
