@@ -67,12 +67,13 @@ describe('User Deletion (e2e)', () => {
       const response = await ctx.authHelpers.deleteUser({
         token: access_token,
         password: ctx.authHelpers.defaultUser.password,
-        expectedStatus: HttpStatus.BAD_REQUEST,
+        expectedStatus: HttpStatus.FORBIDDEN,
       });
 
       expect(response.body).toMatchObject({
-        error: 'Bad Request',
-        message: 'Account already scheduled for deletion',
+        error: 'ACCOUNT_DELETED',
+        message:
+          'Your account is scheduled for deletion in 30 days. To cancel and restore your account, click the link in the deletion confirmation email or contact support.',
       });
     });
 

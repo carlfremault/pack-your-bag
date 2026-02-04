@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Prisma, User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 
+import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -25,6 +26,7 @@ interface UserDeletionResult {
 @Injectable()
 export class UserService {
   private readonly bcryptSaltRounds: number;
+  private readonly deletedUserRetentionDays: number;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -32,7 +34,10 @@ export class UserService {
     private readonly auditLogService: AuditLogService,
     private readonly refreshTokenService: RefreshTokenService,
   ) {
-    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
+    this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
+    this.deletedUserRetentionDays = this.configService.getOrThrow<number>(
+      'AUTH_USER_DELETE_RETENTION_DAYS',
+    );
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
@@ -60,11 +65,10 @@ export class UserService {
       throw new BadRequestException('New password and current password cannot be the same');
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId, isDeleted: false },
-      select: { password: true },
-    });
+    const user = await this.getUser({ id: userId });
     if (!user) throw new NotFoundException('User not found');
+
+    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
@@ -93,9 +97,8 @@ export class UserService {
     if (!user) {
       throw new UnauthorizedException('Access Denied');
     }
-    if (user.isDeleted) {
-      throw new BadRequestException('Account already scheduled for deletion');
-    }
+
+    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {

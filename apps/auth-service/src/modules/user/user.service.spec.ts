@@ -6,6 +6,7 @@ import { User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 
+import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -16,6 +17,7 @@ vi.mock('bcrypt');
 
 const MOCK_CONFIG = {
   AUTH_BCRYPT_SALT_ROUNDS: 4,
+  AUTH_USER_DELETE_RETENTION_DAYS: 30,
 };
 
 describe('UserService', () => {
@@ -26,8 +28,12 @@ describe('UserService', () => {
   const mockedHash = vi.mocked(bcrypt.hash);
 
   const mockConfigService = {
-    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
-      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    getOrThrow: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
+      if (value === undefined && defaultValue === undefined) {
+        throw new Error(`Configuration key "${key}" does not exist`);
+      }
+      return (value ?? defaultValue) as T;
     }),
   };
 
@@ -89,7 +95,7 @@ describe('UserService', () => {
       mockPrismaService.user.update.mockResolvedValue(mockUser); // Return the updated user
       mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
 
-      const mockedSaltRounds = mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS');
+      const mockedSaltRounds = mockConfigService.getOrThrow('AUTH_BCRYPT_SALT_ROUNDS');
 
       const result = await service.updatePassword(userId, validDto);
       expect(mockedCompare).toHaveBeenCalledWith(validDto.currentPassword, mockUser.password);
@@ -163,12 +169,10 @@ describe('UserService', () => {
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
     });
 
-    it('should throw a BadRequestException if the user is already scheduled for deletion', async () => {
-      const mockUser = { isDeleted: true } as User;
+    it('should throw an AccountDeletedException if the user is already scheduled for deletion', async () => {
+      const mockUser = { isDeleted: true, deletedAt: new Date() } as User;
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
-      await expect(service.softDeleteUser(userId, body)).rejects.toThrow(
-        new BadRequestException('Account already scheduled for deletion'),
-      );
+      await expect(service.softDeleteUser(userId, body)).rejects.toThrow(AccountDeletedException);
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
     });
 

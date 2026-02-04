@@ -182,7 +182,7 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
 
     this.auditLogProvider.auditRequest(
       {
-        eventType: AuditEventType.AUTHORIZATION_FAILED,
+        eventType: AuditEventType.ACCOUNT_DELETION_ACCESS_ATTEMPT,
         severity: AuditSeverity.INFO,
         statusCode: HttpStatus.FORBIDDEN,
         errorCode,
