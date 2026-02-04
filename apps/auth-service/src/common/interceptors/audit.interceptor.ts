@@ -37,7 +37,7 @@ export class AuditInterceptor implements NestInterceptor {
         // Logic to find the ID:
         // 1. Look in the request (for authenticated actions like password change)
         // 2. Look in the returned response (for login/register)
-        const userId = user?.userId || data?.user?.id || null;
+        const userId = user?.userId || data?.user?.id || undefined;
         const eventType: AuditEventType = auditOverride || defaultEvent;
 
         if (!userId && eventType !== AuditEventType.USER_REGISTERED) {
