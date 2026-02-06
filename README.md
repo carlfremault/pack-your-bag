@@ -4,7 +4,24 @@ Luggage management tool
 
 Work in Progress - `dev` branch is where the amazing stuff is happening right now...
 
-## 1. Idea and motivation
+## Contents
+
+- [1. Idea & motivation](#1-idea--motivation)
+- [2. Key Features & Project Goals](#2-key-features--project-goals)
+  - [2.1 Structured Data Management (The Core Entities)](#21-structured-data-management-the-core-entities)
+  - [2.2 Efficient Pack Preparation](#22-efficient-pack-preparation)
+  - [2.3 Trip Readiness and Execution (Packing Check-Off)](#23-trip-readiness-and-execution-packing-check-off)
+- [3. Development & Skills](#3-development--skills)
+- [4. Technical Specifications & Architecture](#4-technical-specifications--architecture)
+  - [4.1 Project Architecture & Tech Stack](#41-project-architecture--tech-stack)
+  - [4.2 Data Persistence (Database & ORM)](#42-data-persistence-database--orm)
+  - [4.3 Authentication](#43-authentication)
+- [5. Development Strategy & Roadmap](#5-development-strategy--roadmap)
+- [6. Implementation](#6-implementation)
+  - [6.1 Phase 0: Development Setup & Foundation](#61-phase-0-development-setup--foundation)
+  - [6.2 Phase 1: Identity Provider](#62-phase-1-identity-provider)
+
+## 1. Idea & motivation
 
 As an avid backpacker and long-distance hiker, packing lists have always been a part of my routine. When you're out in the wilderness, finding out you forgot some essential gear is simply not an option. Before starting on a new adventure, I find myself manually ticking off items from a trusty Excel spreadsheet, to make sure nothing gets left behind.
 
@@ -21,7 +38,7 @@ This app evolves the packing list from a rigid spreadsheet into a dynamic, reusa
 
 While built for outdoor adventures, the modular architecture could adapt to any scenario requiring hierarchical inventory management.
 
-## 2. Key Features and Project Goals
+## 2. Key Features & Project Goals
 
 The application manages packing logistics through a hierarchical data model, enabling users to transition from granular item management to complex, trip-specific configurations.
 
@@ -220,17 +237,17 @@ With the infrastructure in place, I built a robust API following NestJS best pra
 Manual RS256 token signing was implemented for outbound logic, Passport.js strategies for inbound verification (Access and Refresh strategies). The system supports full lifecycle management: registration, login, token rotation with "family" tracking, and global sign-out.
 To handle edge cases like concurrent requests and reuse attacks, I designed the following decision matrix for refresh token validation:
 
-| **Scenario**             | **Stored Token Status (isRevoked)**         | **Within Grace Period** | **Action**                                                                            | **Client Message** | **Internal log**                             | **AuditLogEventType**          |
+| **Scenario**             | **Stored Token Status (isRevoked)**         | **Within Grace Period** | **Action**                                                                            | **Client Message** | **Internal log**                             | **AuditLog EventType**         |
 | ------------------------ | ------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------- | ------------------ | -------------------------------------------- | ------------------------------ |
-| Normal refresh           | Valid (not revoked, not expired)            | N/A                     | Rotate token, create new one in same family                                           | N/A                | N/A                                          | TOKEN_REFRESHED                |
-| Race condition           | Revoked                                     | Yes                     | Query latest valid token in family. Return JWTs with latest token's JTI (no DB write) | N/A                | Race condition handled: user [ID]            | TOKEN_REFRESHED_RACE_CONDITION |
-| Token reuse attack       | Revoked AND has `replacedById`              | No                      | Revoke all tokens in family. Log security alert. Throw exception                      | "Session expired”  | Critical: Token reuse detected for user [ID] | TOKEN_REUSE_DETECTED           |
-| Manual logout            | Revoked AND no `replacedById`               | Yes                     | Throw exception                                                                       | "Session expired”  | N/A                                          | SESSION_EXPIRED                |
-| Manual logout            | Revoked AND no `replacedById`               | No                      | Throw exception                                                                       | "Session expired”  | Refresh attempt on logged-out session        | SESSION_EXPIRED                |
-| Token not found in DB    | NULL                                        | N/A                     | Log warning. Throw exception                                                          | "Access Denied”    | Warn: Refresh token [ID] not found in DB     | INVALID_SESSION                |
-| Token ownership mismatch | Found but `userId` or `family` mismatch     | N/A                     | Log security error. Throw exception                                                   | "Access Denied”    | Security: User [ID] mismatch for token [ID]  | INVALID_SESSION                |
-| Token expired in DB      | Valid (not revoked) but `expiresAt < now()` | N/A                     | Throw exception                                                                       | "Session expired”  | N/A                                          | SESSION_EXPIRED                |
-| JWT expired              | N/A (never reaches service)                 | N/A                     | Passport strategy rejects. Returns 401 before service method called                   | "Unauthorized”     | N/A                                          | SESSION_EXPIRED                |
+| Normal refresh           | Valid (not revoked, not expired)            | N/A                     | Rotate token, create new one in same family                                           | N/A                | N/A                                          | TOKEN REFRESHED                |
+| Race condition           | Revoked                                     | Yes                     | Query latest valid token in family. Return JWTs with latest token's JTI (no DB write) | N/A                | Race condition handled: user [ID]            | TOKEN REFRESHED RACE CONDITION |
+| Token reuse attack       | Revoked AND has `replacedById`              | No                      | Revoke all tokens in family. Log security alert. Throw exception                      | "Session expired”  | Critical: Token reuse detected for user [ID] | TOKEN REUSE DETECTED           |
+| Manual logout            | Revoked AND no `replacedById`               | Yes                     | Throw exception                                                                       | "Session expired”  | N/A                                          | SESSION EXPIRED                |
+| Manual logout            | Revoked AND no `replacedById`               | No                      | Throw exception                                                                       | "Session expired”  | Refresh attempt on logged-out session        | SESSION EXPIRED                |
+| Token not found in DB    | NULL                                        | N/A                     | Log warning. Throw exception                                                          | "Access Denied”    | Warn: Refresh token [ID] not found in DB     | INVALID SESSION                |
+| Token ownership mismatch | Found but `userId` or `family` mismatch     | N/A                     | Log security error. Throw exception                                                   | "Access Denied”    | Security: User [ID] mismatch for token [ID]  | INVALID SESSION                |
+| Token expired in DB      | Valid (not revoked) but `expiresAt < now()` | N/A                     | Throw exception                                                                       | "Session expired”  | N/A                                          | SESSION EXPIRED                |
+| JWT expired              | N/A (never reaches service)                 | N/A                     | Passport strategy rejects. Returns 401 before service method called                   | "Unauthorized”     | N/A                                          | SESSION EXPIRED                |
 
 <p align="center">
     <br>
