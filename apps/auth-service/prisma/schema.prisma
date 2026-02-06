@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["app_auth"]
+}
+
+model Role {
+  id        Int       @default(autoincrement()) @id
+  title     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  users User[]
+
+  @@schema("app_auth")
+}
+
+model User {
+  id            String    @id @db.Uuid
+  email         String    @unique
+  password      String    // hashed with Bcrypt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  role          Role      @relation(fields: [roleId], references: [id])
+  roleId        Int
+  refreshToken  RefreshToken[]
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? 
+
+  @@schema("app_auth")
+}
+
+model RefreshToken {
+  id            String          @id @db.Uuid
+  family        String          @db.Uuid
+  isRevoked     Boolean         @default(false)
+  revokedAt     DateTime?
+  expiresAt     DateTime        @default(dbgenerated("(now() + '7 days'::interval)"))
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String          @db.Uuid
+  replacedBy    RefreshToken?   @relation("TokenRotation", fields: [replacedById], references: [id])
+  replacedById  String?         @unique @db.Uuid
+  replaces      RefreshToken?   @relation("TokenRotation")
+
+  @@index([family])
+  @@index([userId])
+  @@index([expiresAt])
+  @@schema("app_auth")
+}
+
+model AuditLog {
+  id            String      @id @db.Uuid
+  requestId     String?      @db.Uuid // nullable for cron jobs
+  eventType     AuditEventType
+  severity      AuditSeverity
+  userId        String?     @db.Uuid  // Null for unauthenticated requests
+  ipAddress     String?     // anonymized and nullable for cron jobs
+  deviceInfo    Json?
+  path          String
+  method        String
+  statusCode    Int
+  errorCode     String?
+  message       Json
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  
+  @@index([userId])
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@index([requestId])
+  @@schema("app_auth")
+}
+
+enum AuditEventType {
+  // CRITICAL
+  TOKEN_REUSE_DETECTED
+  SUSPICIOUS_ACTIVITY
+  BFF_SECRET_MISMATCH
+
+  // ERROR
+  INTERNAL_SERVER_ERROR
+
+  // WARN
+  USER_LOGIN_FAILED
+  INVALID_SESSION
+  SECURITY_RATE_LIMIT_EXCEEDED
+  VALIDATION_ERROR
+  AUTHORIZATION_FAILED
+  RESOURCE_NOT_FOUND
+  CONFLICT_ERROR
+
+  // INFO
+  USER_REGISTERED
+  USER_LOGIN_SUCCESS
+  USER_DELETED
+  TOKEN_REFRESHED
+  TOKEN_REFRESHED_RACE_CONDITION
+  SESSION_EXPIRED
+  USER_LOGOUT
+  USER_LOGOUT_ALL_DEVICES
+  PASSWORD_CHANGED
+  ACCOUNT_DELETION_ACCESS_ATTEMPT
+  SCHEDULED_TASK
+  HTTP_ERROR // Fallback
+  
+  @@schema("app_auth")
+}
+
+enum AuditSeverity {
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+  
+  @@schema("app_auth")
+}

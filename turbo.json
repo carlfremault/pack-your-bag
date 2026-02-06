@@ -1,11 +1,13 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["AUTH_*", "RSA_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -15,18 +17,51 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["AUTH_*", "RSA_*"]
+    },
+    "test:setup": {
+      "dependsOn": ["transit"],
+      "env": ["AUTH_*", "RSA_*"],
+      "cache": true,
+      "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
     },
     "test": {
-      "dependsOn": ["transit"]
+      "dependsOn": ["test:setup"],
+      "env": ["AUTH_*", "RSA_*"]
     },
     "test:watch": {
+      "dependsOn": ["test:setup"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["AUTH_*", "RSA_*"]
     },
     "test:browser": {
       "cache": false,
       "persistent": true
+    },
+    "migrate": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["AUTH_URL"]
+    },
+    "status": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["AUTH_URL"]
+    },
+    "generate": {
+      "cache": true,
+      "dependsOn": ["migrate"],
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["src/generated/prisma/**"],
+      "env": ["AUTH_URL"]
+    },
+    "seed": {
+      "cache": false,
+      "dependsOn": ["generate"],
+      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
+      "env": ["AUTH_*"]
     },
     "transit": {
       "dependsOn": ["^transit"]

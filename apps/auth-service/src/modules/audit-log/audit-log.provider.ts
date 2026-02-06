@@ -1,0 +1,51 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import { Request } from 'express';
+
+import type { AuditLogData, AuditRequestInput } from '@/common/interfaces/audit-log-data.interface';
+import anonymizeIp from '@/common/utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
+
+@Injectable()
+export class AuditLogProvider {
+  private readonly logger = new Logger(AuditLogProvider.name);
+
+  constructor(private readonly eventEmitter: EventEmitter2) {}
+
+  /**
+   * Dispatches an audit log event safely.
+   * Uses setImmediate to ensure it doesn't block the main execution thread
+   * and wraps in try/catch to protect the caller.
+   */
+  safeEmit(data: AuditLogData): void {
+    setImmediate(() => {
+      try {
+        this.eventEmitter.emit('audit.log', data);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+
+        this.logger.error(
+          `Failed to dispatch audit event for userId=${data.userId}: ${errorMessage}`,
+          stack,
+        );
+      }
+    });
+  }
+
+  auditRequest(data: AuditRequestInput, request?: Request): void {
+    const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request || {};
+    const userAgent = headers && getUserAgentFromHeaders(headers);
+
+    this.safeEmit({
+      ...data,
+      userId: data.userId ?? user?.userId ?? null,
+      requestId: id ?? null,
+      ipAddress: ip ? anonymizeIp(ip) : null,
+      userAgent,
+      path,
+      method,
+    });
+  }
+}
