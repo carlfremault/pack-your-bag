@@ -14,7 +14,9 @@ export class AuthCredentialsDto {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  @Transform(({ value }: { value: string }) => value?.trim().toLowerCase())
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   readonly email: string;
 
   @IsNotEmpty()

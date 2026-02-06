@@ -8,7 +8,7 @@ export default function anonymizeIp(ip?: string): string {
 
   // Handle IPv4-mapped IPv6 (e.g. ::ffff:192.168.1.1)
   const lowerIp = ip.toLowerCase();
-  if (lowerIp.includes('::ffff:') || (lowerIp.includes(':ffff:') && ip.includes('.'))) {
+  if (lowerIp.includes(':ffff:') && ip.includes('.')) {
     const ipv4Part = ip.split(':').pop();
     return `::ffff:${anonymizeIp(ipv4Part)}`;
   }

@@ -1,14 +1,5 @@
 import { Expose } from 'class-transformer';
-import {
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsPositive,
-  IsString,
-  IsUUID,
-  ValidateIf,
-} from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsPositive, IsString, IsUUID, ValidateIf } from 'class-validator';
 
 export class JwtPayload {
   @Expose()
@@ -23,7 +14,7 @@ export class JwtPayload {
   role: number;
 
   @Expose()
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   iat: number;
 

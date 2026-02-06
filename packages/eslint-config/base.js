@@ -33,7 +33,7 @@ export const getBaseConfig = (appDir) =>
           {
             groups: [
               // 1. Sentry / Instrumentation MUST be first
-              ['^\\u0000./instrument'],
+              ['^\\u0000\\./instrument'],
 
               // 2. External packages: React/NestJS
               ['^react', '^@nestjs'],

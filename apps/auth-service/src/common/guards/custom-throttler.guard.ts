@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { ThrottlerException, ThrottlerGuard, ThrottlerStorage } from '@nestjs/throttler';
@@ -10,8 +10,6 @@ import anonymizeIp from '@/common/utils/anonymizeIp';
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
-  private readonly logger = new Logger(CustomThrottlerGuard.name);
-
   constructor(
     options: ThrottlerModuleOptions,
     storageService: ThrottlerStorage,

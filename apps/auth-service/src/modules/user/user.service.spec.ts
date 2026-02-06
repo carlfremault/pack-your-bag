@@ -149,6 +149,7 @@ describe('UserService', () => {
 
       await service.softDeleteUser(userId, body);
 
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(mockRefreshTokenService.revokeManyTokens).toHaveBeenCalledWith(
         {
           userId,

@@ -347,7 +347,8 @@ describe('AuthService', () => {
       };
 
       const mockUser = { id: refreshTokenUser.userId, roleId: 1 };
-      mockUserService.getUser.mockResolvedValue({ id: refreshTokenUser.userId, roleId: 1 });
+      mockUserService.getUser.mockResolvedValue(mockUser);
+
       const mockRevokedToken = {
         ...mockRefreshToken,
         isRevoked: true,

@@ -8,10 +8,10 @@ export const PASSWORD_MAX_LENGTH = 128;
 export const PASSWORD_MAX_LENGTH_MESSAGE = `Password must not exceed ${PASSWORD_MAX_LENGTH} characters.`;
 
 // User
-export const AUTH_DEFAULT_USER_ROLE_ID = 1;
+export const AUTH_DEFAULT_USER_ROLE_ID = 1; // "user"
 
 // Throttling
-export const THROTTLE_TTL = 60000;
+export const THROTTLE_TTL_MS = 60000;
 export const THROTTLE_LIMITS = {
   BFF_GUARD: 10,
   REGISTER: 5,
