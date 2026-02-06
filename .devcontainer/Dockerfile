@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/typescript-node:22
+FROM mcr.microsoft.com/devcontainers/typescript-node:24
 
 ENV YARN_CACHE_FOLDER=/home/node/.cache/yarn
 

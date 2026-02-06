@@ -27,6 +27,10 @@ services:
 volumes:
   pack-your-bag-cache:
     name: pack-your-bag-cache
+  pack-your-bag-node-modules-v24:
+    name: pack-your-bag-node-modules-v24
+  pack-your-bag-extensions-v24:
+    name: pack-your-bag-extensions-v24
   pack-your-bag-node-modules:
     name: pack-your-bag-node-modules
   pack-your-bag-extensions:
