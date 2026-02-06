@@ -76,7 +76,7 @@ const validationSchema = Joi.object({
   AUTH_SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
-      is: ['production', 'development'],
+      is: Joi.valid('production', 'development'),
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),

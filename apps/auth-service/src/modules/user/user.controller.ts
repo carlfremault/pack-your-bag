@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
-import { THROTTLE_LIMITS, THROTTLE_TTL } from '@/common/constants/auth.constants';
+import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { BffGuard } from '@/common/guards/bff.guard';
@@ -18,8 +18,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
-  @Throttle({ default: { limit: THROTTLE_LIMITS.DELETE_USER, ttl: THROTTLE_TTL } })
-  @Delete('me')
+  @Throttle({ default: { limit: THROTTLE_LIMITS.DELETE_USER, ttl: THROTTLE_TTL_MS } })
+  @Post('delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog(AuditEventType.USER_DELETED)
   async deleteUser(

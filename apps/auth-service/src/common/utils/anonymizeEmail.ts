@@ -1,4 +1,4 @@
-export function anonymizeEmail(email: string) {
+export function anonymizeEmail(email: string): string {
   if (!email || !email.includes('@')) return 'invalid-email';
 
   const atIndex = email.indexOf('@');

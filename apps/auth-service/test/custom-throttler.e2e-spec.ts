@@ -29,7 +29,7 @@ describe('Custom Throttler Log (e2e)', () => {
     if (internalStorage.storage instanceof Map) {
       internalStorage.storage.clear();
     } else {
-      console.warn('ThrottlerStorage internal structure changed - throttle reset skipped');
+      throw new Error('ThrottlerStorage internal structure changed - throttle reset skipped');
     }
   });
 

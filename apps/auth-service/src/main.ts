@@ -91,7 +91,8 @@ async function bootstrap() {
       // BFF requests have no origin (server-to-server)
       if (!origin) return callback(null, true);
 
-      // In production, block all browser requests
+      // In production, deny CORS for browser requests
+      // (Note: Request still executes server-side but will hit BFF secret guard)
       if (isProduction) {
         callback(null, false);
       } else {

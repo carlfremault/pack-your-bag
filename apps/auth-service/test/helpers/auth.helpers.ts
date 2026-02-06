@@ -95,7 +95,7 @@ export class AuthHelpers {
   async deleteUser(options: { token: string; password: string; expectedStatus?: HttpStatus }) {
     const { token, password, expectedStatus = HttpStatus.NO_CONTENT } = options;
     return request(this.app.getHttpServer())
-      .delete('/user/me')
+      .post('/user/delete')
       .send({ password })
       .set('Authorization', `Bearer ${token}`)
       .set('x-bff-secret', this.bffSecret)
@@ -154,7 +154,10 @@ export class AuthHelpers {
   }
 
   jwtDecode(token: string) {
-    const payload: { jti: string; family: string } = this.jwtService.decode(token);
+    const payload: { jti: string; family: string } | null = this.jwtService.decode(token);
+    if (!payload) {
+      throw new Error('Failed to decode JWT token');
+    }
     return payload;
   }
 }

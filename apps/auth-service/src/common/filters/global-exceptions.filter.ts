@@ -335,7 +335,7 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     };
   }
 
-  private isObjectWithMessage(response: unknown): response is { message: string } {
+  private isObjectWithMessage(response: unknown): response is { message: string | string[] } {
     return (
       typeof response === 'object' &&
       response !== null &&

@@ -108,8 +108,8 @@ export class AuditLogService {
 
       if ('createdAt' in filter) return true;
 
-      if (filter.AND && Array.isArray(filter.AND)) {
-        const andFilters = filter.AND;
+      if (filter.AND) {
+        const andFilters = Array.isArray(filter.AND) ? filter.AND : [filter.AND];
         return andFilters.some(validateCreatedAtFilter);
       }
       if (filter.OR) {
@@ -132,6 +132,12 @@ export class AuditLogService {
   private async triggerAlert(data: AuditLogData): Promise<void> {
     // TODO: Implement email alerting
     // For now, just log
-    this.logger.error('CRITICAL SECURITY EVENT:', data);
+    this.logger.error('CRITICAL SECURITY EVENT:', {
+      eventType: data.eventType,
+      severity: data.severity,
+      path: data.path,
+      method: data.method,
+      timestamp: new Date().toISOString(),
+    });
   }
 }

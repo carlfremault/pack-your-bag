@@ -163,7 +163,16 @@ describe('AuditLogService', () => {
       await service.handleAuditLog(inputData);
 
       // triggerAlert being a private method it is easier to test its side effect, the logger error
-      expect(loggerErrorSpy).toHaveBeenCalledWith('CRITICAL SECURITY EVENT:', inputData);
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'CRITICAL SECURITY EVENT:',
+        expect.objectContaining({
+          eventType: inputData.eventType,
+          severity: inputData.severity,
+          path: inputData.path,
+          method: inputData.method,
+          timestamp: expect.any(String) as string,
+        }),
+      );
     });
 
     it('should not trigger alert for non-CRITICAL severity events', async () => {

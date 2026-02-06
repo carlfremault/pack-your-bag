@@ -79,7 +79,6 @@ describe('User Deletion (e2e)', () => {
 
     it('should not soft delete a user that does not exist', async () => {
       const { access_token } = await createAndHardDeleteUser(ctx);
-      await createAuthenticatedUser(ctx);
 
       const response = await ctx.authHelpers.deleteUser({
         token: access_token,
