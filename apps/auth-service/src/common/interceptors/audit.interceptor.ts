@@ -41,7 +41,7 @@ export class AuditInterceptor implements NestInterceptor {
         const eventType: AuditEventType = auditOverride || defaultEvent;
 
         const unauthenticatedEvents = [
-          AuditEventType.FORGOT_PASSWORD,
+          AuditEventType.PASSWORD_FORGOTTEN,
           AuditEventType.PASSWORD_RESET,
         ] as AuditEventType[];
 
