@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { UserService } from './user.service';
@@ -70,6 +71,7 @@ describe('UserService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
+        { provide: VerificationTokenService, useValue: {} },
       ],
     }).compile();
 

@@ -26,6 +26,8 @@ import { AuditEventType } from '@/generated/prisma';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 
+import { AuthForgotPasswordDto } from './dto/auth-forgot-password';
+import { AuthResetPasswordDto } from './dto/auth-reset-password';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
 
@@ -97,5 +99,23 @@ export class AuthController {
   @AuditLog(AuditEventType.PASSWORD_CHANGED)
   async updatePassword(@CurrentUser('userId') userId: string, @Body() body: UpdatePasswordDto) {
     return this.authService.updatePasswordAndReauthenticate(userId, body);
+  }
+
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.FORGOT_PASSWORD, ttl: THROTTLE_TTL_MS } })
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @AuditLog(AuditEventType.PASSWORD_FORGOTTEN)
+  async forgotPassword(@Body() body: AuthForgotPasswordDto) {
+    return this.authService.forgotPassword(body);
+  }
+
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.RESET_PASSWORD, ttl: THROTTLE_TTL_MS } })
+  @Post('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @AuditLog(AuditEventType.PASSWORD_RESET)
+  async resetPassword(@Body() body: AuthResetPasswordDto) {
+    return this.authService.resetPassword(body);
   }
 }

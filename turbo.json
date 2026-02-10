@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET"],
+  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET", "FRONTEND_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

@@ -21,6 +21,8 @@ export const THROTTLE_LIMITS = {
   LOGOUT_ALL_DEVICES: 10,
   UPDATE_PASSWORD: 3,
   DELETE_USER: 3,
+  FORGOT_PASSWORD: 3,
+  RESET_PASSWORD: 3,
 } as const;
 
 // Various
