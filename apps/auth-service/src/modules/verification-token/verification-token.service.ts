@@ -12,7 +12,7 @@ export class VerificationTokenService {
     where: Prisma.VerificationTokenWhereUniqueInput,
     update: Prisma.VerificationTokenUpdateInput,
     create: Prisma.VerificationTokenCreateInput,
-  ): Promise<{ id: string }> {
+  ): Promise<VerificationToken> {
     return this.prisma.verificationToken.upsert({ where, update, create });
   }
 
