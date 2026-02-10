@@ -2,6 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { MailerService } from '@nestjs-modules/mailer';
 
 import bcrypt from 'bcrypt';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -14,14 +15,17 @@ import {
 import { AuditEventType } from '@/generated/prisma';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
 import { AuthService } from './auth.service';
 
 const MOCK_CONFIG = {
   AUTH_BCRYPT_SALT_ROUNDS: 4,
-  AUTH_DEFAULT_USER_ROLE_ID: 1,
+  AUTH_USER_DELETE_RETENTION_DAYS: 1,
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: 1234,
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: 4321,
+  AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: 5678,
+  FRONTEND_URL: 'http://localhost:3000',
 } as const;
 
 describe('AuthService', () => {
@@ -48,15 +52,19 @@ describe('AuthService', () => {
   };
 
   const mockConfigService = {
-    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
-      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    getOrThrow: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
+      if (value === undefined && defaultValue === undefined) {
+        throw new Error(`Configuration key "${key}" does not exist`);
+      }
+      return (value ?? defaultValue) as T;
     }),
   };
 
   beforeAll(async () => {
     hashedPassword = await bcrypt.hash(
       'validPassword123',
-      mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS') as number,
+      mockConfigService.getOrThrow('AUTH_BCRYPT_SALT_ROUNDS') as number,
     );
   });
 
@@ -71,6 +79,8 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: mockJwtService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: UserService, useValue: mockUserService },
+        { provide: VerificationTokenService, useValue: {} },
+        { provide: MailerService, useValue: {} },
       ],
     }).compile();
 
@@ -126,7 +136,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -160,7 +170,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -184,7 +194,7 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if password does not match', async () => {
       const wrongHashedPassword = await bcrypt.hash(
         'differentPassword',
-        mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS') as number,
+        mockConfigService.getOrThrow('AUTH_BCRYPT_SALT_ROUNDS') as number,
       );
       mockUserService.getUser.mockResolvedValue({ ...mockUser, password: wrongHashedPassword });
 
@@ -240,7 +250,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -369,7 +379,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
         auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       });
@@ -390,7 +400,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -428,7 +438,7 @@ describe('AuthService', () => {
           family: expect.any(String) as string,
         }),
         expect.objectContaining({
-          expiresIn: mockConfigService.get('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS'),
+          expiresIn: mockConfigService.getOrThrow('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS'),
         }),
       );
 
@@ -436,7 +446,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });

@@ -6,12 +6,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
 
-import { AuditEventType, Prisma } from '@prisma-client';
+import { AuditEventType, Prisma, TokenType } from '@prisma-client';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { v7 as uuidv7 } from 'uuid';
 
 import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import {
   InvalidSessionException,
   SessionExpiredException,
@@ -22,7 +25,10 @@ import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
+import { AuthForgotPasswordDto } from './dto/auth-forgot-password';
+import { AuthResetPasswordDto } from './dto/auth-reset-password';
 import { AuthResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
@@ -34,28 +40,33 @@ export class AuthService {
   private readonly deletedUserRetentionDays: number;
   private readonly accessTokenExpiresIn: number;
   private readonly refreshTokenExpiresIn: number;
+  private readonly passwordResetTokenExpiresInMS: number;
+  private readonly frontendUrl: string;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly verificationTokenService: VerificationTokenService,
     private readonly userService: UserService,
+    private readonly mailerService: MailerService,
   ) {
-    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
+    this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
     this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
-    this.deletedUserRetentionDays = this.configService.get<number>(
+    this.deletedUserRetentionDays = this.configService.getOrThrow<number>(
       'AUTH_USER_DELETE_RETENTION_DAYS',
-      30,
     );
-    this.accessTokenExpiresIn = this.configService.get<number>(
+    this.accessTokenExpiresIn = this.configService.getOrThrow<number>(
       'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-      900,
     );
-    this.refreshTokenExpiresIn = this.configService.get<number>(
+    this.refreshTokenExpiresIn = this.configService.getOrThrow<number>(
       'AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS',
-      604800,
     );
+    this.passwordResetTokenExpiresInMS = this.configService.getOrThrow<number>(
+      'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
+    );
+    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
   }
 
   async register(body: AuthCredentialsDto): Promise<AuthResponseDto> {
@@ -158,6 +169,101 @@ export class AuthService {
   ): Promise<AuthResponseDto> {
     const user = await this.userService.updatePassword(userId, body);
     return this.issueRefreshToken(user.id, user.roleId);
+  }
+
+  async forgotPassword(body: AuthForgotPasswordDto): Promise<void> {
+    const { email } = body;
+    const user = await this.userService.getUser({ email: email.toLowerCase(), isDeleted: false });
+
+    if (!user) {
+      return;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiresAt = new Date(Date.now() + this.passwordResetTokenExpiresInMS);
+
+    await this.verificationTokenService.upsertVerificationToken(
+      {
+        userId_type: {
+          userId: user.id,
+          type: TokenType.PASSWORD_RESET,
+        },
+      },
+      {
+        token: hashedResetToken,
+        expiresAt,
+        used: false,
+      },
+      {
+        id: uuidv7(),
+        token: hashedResetToken,
+        type: TokenType.PASSWORD_RESET,
+        user: { connect: { id: user.id } },
+        expiresAt,
+      },
+    );
+
+    const resetLink = `${this.frontendUrl}/reset-password?token=${resetToken}`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Password Reset Request',
+        text: `Reset your password here: ${resetLink}`,
+        html: `<p>Click here to reset your password: <a href="${resetLink}">Reset Link</a></p>`,
+      });
+    } catch (error) {
+      this.logger.error('Failed to send password reset request email', {
+        userId: user.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+
+    return;
+  }
+
+  async resetPassword(body: AuthResetPasswordDto): Promise<void> {
+    const { token, password } = body;
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const resetRecord = await this.verificationTokenService.getVerificationToken({
+      where: {
+        token: hash,
+        type: TokenType.PASSWORD_RESET,
+        used: false,
+      },
+    });
+
+    if (!resetRecord || resetRecord.expiresAt < new Date()) {
+      throw new InvalidTokenException();
+    }
+
+    const user = await this.userService.getUser({ id: resetRecord.userId });
+    if (!user || user.isDeleted) {
+      throw new InvalidTokenException();
+    }
+
+    await this.userService.resetPasswordWithToken(resetRecord.id, resetRecord.userId, password);
+
+    const resetTime = new Date().toLocaleString();
+
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Password Reset Confirmation',
+        text: `Your password was successfully reset on ${resetTime}. If you did not make this change, please contact support immediately.`,
+        html: `
+        <p>Your password was successfully reset on ${resetTime}.</p>
+        <p><strong>If you did not make this change, please contact support immediately.</strong></p>
+      `,
+      });
+    } catch (error) {
+      this.logger.error('Failed to send password reset confirmation email', {
+        userId: user.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   // Helper functions

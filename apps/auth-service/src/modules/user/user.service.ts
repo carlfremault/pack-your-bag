@@ -6,12 +6,14 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { Prisma, User } from '@prisma-client';
+import { Prisma, TokenType, User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { DeleteUserDto } from './dto/delete-user.dto';
@@ -33,6 +35,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly auditLogService: AuditLogService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly verificationTokenService: VerificationTokenService,
   ) {
     this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
     this.deletedUserRetentionDays = this.configService.getOrThrow<number>(
@@ -75,19 +78,53 @@ export class UserService {
       throw new BadRequestException('Current password does not match');
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
     return this.prisma.$transaction(async (tx) => {
-      // Update Password
-      const updatedUser = await tx.user.update({
-        where: { id: userId },
-        data: { password: hashedPassword },
-      });
-
-      // Revoke all active tokens for this user
-      await this.refreshTokenService.revokeManyTokens({ userId }, tx);
-
-      return updatedUser;
+      return this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
     });
+  }
+
+  async resetPasswordWithToken(
+    tokenId: string,
+    userId: string,
+    newPassword: string,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      // Verify token ownership within the transaction to prevent TOCTOU issues.
+      const token = await this.verificationTokenService.getVerificationToken(
+        {
+          where: {
+            id: tokenId,
+            userId: userId,
+            type: TokenType.PASSWORD_RESET,
+            used: false,
+          },
+        },
+        tx,
+      );
+
+      if (!token || token.expiresAt < new Date()) {
+        throw new InvalidTokenException();
+      }
+      await this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
+      await this.verificationTokenService.markTokenAsUsed(tokenId, tx);
+    });
+  }
+
+  private async updatePasswordAndRevokeTokens(
+    userId: string,
+    newPassword: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User> {
+    const prisma = tx || this.prisma;
+    const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    await this.refreshTokenService.revokeManyTokens({ userId }, prisma);
+    return updatedUser;
   }
 
   async softDeleteUser(userId: string, body: DeleteUserDto): Promise<void> {

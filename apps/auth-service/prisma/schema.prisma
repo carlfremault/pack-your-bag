@@ -19,16 +19,17 @@ model Role {
 }
 
 model User {
-  id            String    @id @db.Uuid
-  email         String    @unique
-  password      String    // hashed with Bcrypt
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  role          Role      @relation(fields: [roleId], references: [id])
-  roleId        Int
-  refreshToken  RefreshToken[]
-  isDeleted     Boolean   @default(false)
-  deletedAt     DateTime? 
+  id                  String    @id @db.Uuid
+  email               String    @unique
+  password            String    // hashed with Bcrypt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @default(now()) @updatedAt
+  role                Role      @relation(fields: [roleId], references: [id])
+  roleId              Int
+  refreshToken        RefreshToken[]
+  verificationToken   VerificationToken[]
+  isDeleted           Boolean   @default(false)
+  deletedAt           DateTime? 
 
   @@schema("app_auth")
 }
@@ -50,6 +51,28 @@ model RefreshToken {
   @@index([family])
   @@index([userId])
   @@index([expiresAt])
+  @@schema("app_auth")
+}
+
+model VerificationToken {
+  id          String      @id @db.Uuid
+  token       String      @unique
+  type        TokenType
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String      @db.Uuid
+  expiresAt   DateTime    
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  used        Boolean     @default(false)
+
+  @@unique([userId, type])
+  @@index([expiresAt])
+  @@schema("app_auth")
+}
+
+enum TokenType {
+  PASSWORD_RESET
+
   @@schema("app_auth")
 }
 
@@ -89,6 +112,7 @@ enum AuditEventType {
   // WARN
   USER_LOGIN_FAILED
   INVALID_SESSION
+  INVALID_TOKEN
   SECURITY_RATE_LIMIT_EXCEEDED
   VALIDATION_ERROR
   AUTHORIZATION_FAILED
@@ -107,7 +131,9 @@ enum AuditEventType {
   PASSWORD_CHANGED
   ACCOUNT_DELETION_ACCESS_ATTEMPT
   SCHEDULED_TASK
-  HTTP_ERROR // Fallback
+  HTTP_ERROR
+  FORGOT_PASSWORD
+  PASSWORD_RESET
   
   @@schema("app_auth")
 }

@@ -8,8 +8,18 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - postgres-data:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql/data
       - postgres-run:/var/run/postgresql
+    networks:
+      - app-network
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    networks:
+      - app-network
 
   dev-container:
     build:
@@ -20,9 +30,17 @@ services:
     volumes:
       - .:/workspaces/pack-your-bag:cached
       - pack-your-bag-cache:/home/node/.cache/yarn
-    network_mode: service:postgres_db
+    networks:
+      - app-network
     init: true
     command: sleep infinity
+    depends_on:
+      - postgres_db
+      - mailpit
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   pack-your-bag-cache:

@@ -4,6 +4,7 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
@@ -24,6 +25,7 @@ import { TasksModule } from './tasks/tasks.module';
 const validationSchema = Joi.object({
   // Environment
   NODE_ENV: Joi.string().valid('development', 'test', 'production').required(),
+  FRONTEND_URL: Joi.string().uri().required(),
 
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
@@ -55,7 +57,7 @@ const validationSchema = Joi.object({
   AUTH_THROTTLE_TTL: Joi.number().default(60000),
   AUTH_THROTTLE_LIMIT: Joi.number().default(100),
 
-  // JWT
+  // Tokens
   RSA_PRIVATE_KEY_B64: Joi.string().base64().required().messages({
     'string.base64': 'RSA_PRIVATE_KEY_B64 must be a valid base64 encoded string',
   }),
@@ -63,6 +65,7 @@ const validationSchema = Joi.object({
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
   AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: Joi.number().default(30000),
   AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS: Joi.number().min(1).default(14),
+  AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: Joi.number().default(3600000),
 
   // Logging
   AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
@@ -80,6 +83,16 @@ const validationSchema = Joi.object({
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
+
+  // Mailing
+  AUTH_MAIL_HOST: Joi.string().required(),
+  AUTH_MAIL_PORT: Joi.number().required(),
+  AUTH_MAIL_SECURE: Joi.boolean().required(),
+  AUTH_MAIL_IGNORE_TLS: Joi.boolean().required(),
+  AUTH_MAIL_USER: Joi.string().optional().allow(''),
+  AUTH_MAIL_PASS: Joi.string().optional().allow(''),
+
+  AUTH_MAIL_FROM: Joi.string().required(),
 });
 
 @Module({
@@ -102,6 +115,26 @@ const validationSchema = Joi.object({
           },
         },
       ],
+    }),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get('AUTH_MAIL_HOST', 'mailpit'),
+          port: config.get<number>('AUTH_MAIL_PORT', 1025),
+          secure: config.get('AUTH_MAIL_SECURE'),
+          ignoreTLS: config.get('AUTH_MAIL_IGNORE_TLS'),
+          auth: config.get('AUTH_MAIL_USER')
+            ? {
+                user: config.get('AUTH_MAIL_USER'),
+                pass: config.get('AUTH_MAIL_PASS'),
+              }
+            : undefined,
+        },
+        defaults: {
+          from: config.get('AUTH_MAIL_FROM'),
+        },
+      }),
     }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),

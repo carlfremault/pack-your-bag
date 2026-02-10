@@ -11,12 +11,12 @@ import { ThrottlerException } from '@nestjs/throttler';
 
 import { Request, Response } from 'express';
 
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
 import { captureSentryException } from '@/common/utils/captureSentryException';
 import { safeStringify } from '@/common/utils/safeStringify';
 import { AuditEventType, AuditSeverity } from '@/generated/prisma';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
-
-import { AccountDeletedException } from '../exceptions/forbidden.exceptions';
 
 interface HttpExceptionResponse {
   statusCode: number;
@@ -87,6 +87,12 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     // 403 Other forbidden access
     if (status === HttpStatus.FORBIDDEN) {
       this.auditForbiddenAccess(exception, request, errorCode);
+      return;
+    }
+
+    // 400 Invalid token attempts (password reset, etc.)
+    if (exception instanceof InvalidTokenException) {
+      this.auditInvalidToken(request, exception, errorCode);
       return;
     }
 
@@ -203,6 +209,28 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
         eventType: AuditEventType.AUTHORIZATION_FAILED,
         severity: AuditSeverity.WARN,
         statusCode: HttpStatus.FORBIDDEN,
+        errorCode,
+        message,
+      },
+      request,
+    );
+  }
+
+  private auditInvalidToken(
+    request: Request,
+    exception: InvalidTokenException,
+    errorCode: string,
+  ): void {
+    const { path, method } = request;
+    const message = typeof exception.cause === 'string' ? exception.cause : exception.message;
+
+    this.logger.warn(`Invalid token attempt at ${method} ${path}: ${message}`);
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.INVALID_TOKEN,
+        severity: AuditSeverity.WARN,
+        statusCode: HttpStatus.BAD_REQUEST,
         errorCode,
         message,
       },

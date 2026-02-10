@@ -10,6 +10,7 @@ import { JwtRefreshStrategy } from '@/common/strategies/jwt-refresh.strategy';
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
 import { UserModule } from '@/modules/user/user.module';
+import { VerificationTokenModule } from '@/modules/verification-token/verification-token.module';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -19,6 +20,7 @@ import { AuthService } from './auth.service';
     AuditLogModule,
     UserModule,
     RefreshTokenModule,
+    VerificationTokenModule,
     PassportModule,
     JwtModule.registerAsync({
       global: true,
