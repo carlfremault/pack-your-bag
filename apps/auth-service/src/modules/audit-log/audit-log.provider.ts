@@ -1,44 +1,48 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Request } from 'express';
 
-import type { AuditLogData, AuditRequestInput } from '@/common/interfaces/audit-log-data.interface';
+import { AUTH_EVENTS } from '@/common/constants/auth.constants';
+import { BaseEventProvider } from '@/common/providers/base-event.provider';
 import anonymizeIp from '@/common/utils/anonymizeIp';
 import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
+import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
+
+interface AuditRequestInput {
+  readonly eventType: AuditEventType;
+  readonly severity: AuditSeverity;
+  readonly userId?: string | null;
+  readonly statusCode: number | null;
+  readonly errorCode?: string;
+  readonly message: Prisma.InputJsonValue;
+  readonly metadata?: Prisma.InputJsonValue;
+}
 
 @Injectable()
-export class AuditLogProvider {
-  private readonly logger = new Logger(AuditLogProvider.name);
-
-  constructor(private readonly eventEmitter: EventEmitter2) {}
-
-  /**
-   * Dispatches an audit log event safely.
-   * Uses setImmediate to ensure it doesn't block the main execution thread
-   * and wraps in try/catch to protect the caller.
-   */
-  safeEmit(data: AuditLogData): void {
-    setImmediate(() => {
-      try {
-        this.eventEmitter.emit('audit.log', data);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const stack = error instanceof Error ? error.stack : undefined;
-
-        this.logger.error(
-          `Failed to dispatch audit event for userId=${data.userId}: ${errorMessage}`,
-          stack,
-        );
-      }
-    });
+export class AuditLogProvider extends BaseEventProvider {
+  constructor(eventEmitter: EventEmitter2) {
+    super(eventEmitter, AuditLogProvider.name);
   }
 
   auditRequest(data: AuditRequestInput, request?: Request): void {
-    const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request || {};
+    if (!request) {
+      this.safeEmit(AUTH_EVENTS.AUDIT_LOG, {
+        ...data,
+        userId: data.userId ?? null,
+        requestId: null,
+        ipAddress: null,
+        userAgent: null,
+        path: null,
+        method: null,
+      });
+      return;
+    }
+
+    const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request;
     const userAgent = headers && getUserAgentFromHeaders(headers);
 
-    this.safeEmit({
+    this.safeEmit(AUTH_EVENTS.AUDIT_LOG, {
       ...data,
       userId: data.userId ?? user?.userId ?? null,
       requestId: id ?? null,

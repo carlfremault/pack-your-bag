@@ -2,7 +2,6 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailerService } from '@nestjs-modules/mailer';
 
 import bcrypt from 'bcrypt';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,6 +17,7 @@ import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
 import { AuthService } from './auth.service';
+import { AuthEventProvider } from './auth-event.provider';
 
 const MOCK_CONFIG = {
   AUTH_BCRYPT_SALT_ROUNDS: 4,
@@ -25,7 +25,6 @@ const MOCK_CONFIG = {
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: 1234,
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: 4321,
   AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: 5678,
-  FRONTEND_URL: 'http://localhost:3000',
 } as const;
 
 describe('AuthService', () => {
@@ -78,9 +77,9 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
-        { provide: UserService, useValue: mockUserService },
         { provide: VerificationTokenService, useValue: {} },
-        { provide: MailerService, useValue: {} },
+        { provide: UserService, useValue: mockUserService },
+        { provide: AuthEventProvider, useValue: {} },
       ],
     }).compile();
 

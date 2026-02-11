@@ -25,5 +25,12 @@ export const THROTTLE_LIMITS = {
   RESET_PASSWORD: 3,
 } as const;
 
+// Mailing
+export const AUTH_EVENTS = {
+  AUDIT_LOG: 'audit.log',
+  PASSWORD_RESET_REQUESTED: 'password.reset_requested',
+  PASSWORD_RESET_CONFIRMED: 'password.reset_confirmed',
+} as const;
+
 // Various
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;

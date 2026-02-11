@@ -16,11 +16,10 @@ import {
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';
-import { captureSentryException } from '@/common/utils/captureSentryException';
+import { anonymizeEmail } from '@/common/utils/anonymizeEmail';
+import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
-
-import { anonymizeEmail } from '../utils/anonymizeEmail';
 
 interface UnauthorizedExceptionResponse {
   message: string | string[];
@@ -103,7 +102,16 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const body = request.body as AuthCredentialsDto;
 
     if (ctx.severity === AuditSeverity.CRITICAL) {
-      this.handleSentryReporting(ctx, exception, request);
+      safeCaptureSentryException(
+        {
+          exception,
+          request,
+          errorCode: ctx.errorCode,
+          eventType: ctx.eventType,
+          fingerprint: ctx.fingerprint,
+        },
+        this.logger,
+      );
     }
 
     this.auditLogProvider.auditRequest(
@@ -128,28 +136,6 @@ export class AuthExceptionFilter implements ExceptionFilter {
       error: ctx.errorCode,
       timestamp: new Date().toISOString(),
     });
-  }
-
-  private handleSentryReporting(
-    ctx: AuthErrorContext,
-    exception: UnauthorizedException,
-    request: Request,
-  ) {
-    try {
-      captureSentryException({
-        exception,
-        request,
-        errorCode: ctx.errorCode,
-        level: ctx.severity === AuditSeverity.CRITICAL ? 'error' : 'warning',
-        eventType: ctx.eventType,
-        fingerprint: ctx.fingerprint ?? [ctx.eventType, ctx.errorCode],
-      });
-    } catch (error) {
-      this.logger.error(
-        'Failed to capture Sentry exception',
-        error instanceof Error ? error.stack : String(error),
-      );
-    }
   }
 
   private getClientMessage(exceptionResponse: UnauthorizedExceptionResponse): string {
