@@ -9,13 +9,13 @@ import {
 } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
+import { AuditEventType, AuditSeverity } from '@prisma-client';
 import { Request, Response } from 'express';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
-import { captureSentryException } from '@/common/utils/captureSentryException';
+import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
 import { safeStringify } from '@/common/utils/safeStringify';
-import { AuditEventType, AuditSeverity } from '@/generated/prisma';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface HttpExceptionResponse {
@@ -153,19 +153,15 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
 
     this.logger.error(`Unhandled ${status} at ${method} ${path}: ${message}`, errorStack);
 
-    try {
-      captureSentryException({
+    safeCaptureSentryException(
+      {
         exception,
         request,
         errorCode,
         eventType: AuditEventType.INTERNAL_SERVER_ERROR,
-      });
-    } catch (error) {
-      this.logger.error(
-        'Failed to capture Sentry exception',
-        error instanceof Error ? error.stack : String(error),
-      );
-    }
+      },
+      this.logger,
+    );
 
     this.auditLogProvider.auditRequest(
       {

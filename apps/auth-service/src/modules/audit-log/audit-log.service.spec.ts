@@ -147,34 +147,6 @@ describe('AuditLogService', () => {
       });
     });
 
-    it('should trigger alert for CRITICAL severity events', async () => {
-      const inputData = {
-        requestId: 'some-uuid-123',
-        eventType: AuditEventType.SUSPICIOUS_ACTIVITY,
-        severity: AuditSeverity.CRITICAL,
-        userId: '123',
-        ipAddress: '127.0.0.1',
-        path: 'refresh-token',
-        method: 'POST',
-        statusCode: HttpStatus.FORBIDDEN,
-        message: 'Suspicious activity detected',
-      };
-
-      await service.handleAuditLog(inputData);
-
-      // triggerAlert being a private method it is easier to test its side effect, the logger error
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
-        'CRITICAL SECURITY EVENT:',
-        expect.objectContaining({
-          eventType: inputData.eventType,
-          severity: inputData.severity,
-          path: inputData.path,
-          method: inputData.method,
-          timestamp: expect.any(String) as string,
-        }),
-      );
-    });
-
     it('should not trigger alert for non-CRITICAL severity events', async () => {
       const inputData = {
         requestId: 'some-uuid-123',

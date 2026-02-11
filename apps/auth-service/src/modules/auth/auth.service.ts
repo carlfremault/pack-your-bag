@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
 
 import { AuditEventType, Prisma, TokenType } from '@prisma-client';
 import bcrypt from 'bcrypt';
@@ -30,6 +29,7 @@ import { VerificationTokenService } from '@/modules/verification-token/verificat
 import { AuthForgotPasswordDto } from './dto/auth-forgot-password';
 import { AuthResetPasswordDto } from './dto/auth-reset-password';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { AuthEventProvider } from './auth-event.provider';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +41,6 @@ export class AuthService {
   private readonly accessTokenExpiresIn: number;
   private readonly refreshTokenExpiresIn: number;
   private readonly passwordResetTokenExpiresInMS: number;
-  private readonly frontendUrl: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -49,7 +48,7 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly verificationTokenService: VerificationTokenService,
     private readonly userService: UserService,
-    private readonly mailerService: MailerService,
+    private readonly authEventProvider: AuthEventProvider,
   ) {
     this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
@@ -66,7 +65,6 @@ export class AuthService {
     this.passwordResetTokenExpiresInMS = this.configService.getOrThrow<number>(
       'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
     );
-    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
   }
 
   async register(body: AuthCredentialsDto): Promise<AuthResponseDto> {
@@ -204,21 +202,11 @@ export class AuthService {
       },
     );
 
-    const resetLink = `${this.frontendUrl}/reset-password?token=${resetToken}`;
-
-    try {
-      await this.mailerService.sendMail({
-        to: user.email,
-        subject: 'Password Reset Request',
-        text: `Reset your password here: ${resetLink}`,
-        html: `<p>Click here to reset your password: <a href="${resetLink}">Reset Link</a></p>`,
-      });
-    } catch (error) {
-      this.logger.error('Failed to send password reset request email', {
-        userId: user.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
+    this.authEventProvider.emitPasswordResetRequested({
+      userId: user.id,
+      email: user.email,
+      resetToken,
+    });
 
     return;
   }
@@ -246,24 +234,13 @@ export class AuthService {
 
     await this.userService.resetPasswordWithToken(resetRecord.id, resetRecord.userId, password);
 
-    const resetTime = new Date().toLocaleString();
+    this.authEventProvider.emitPasswordResetConfirmed({
+      userId: user.id,
+      email: user.email,
+      resetTimestamp: new Date(),
+    });
 
-    try {
-      await this.mailerService.sendMail({
-        to: user.email,
-        subject: 'Password Reset Confirmation',
-        text: `Your password was successfully reset on ${resetTime}. If you did not make this change, please contact support immediately.`,
-        html: `
-        <p>Your password was successfully reset on ${resetTime}.</p>
-        <p><strong>If you did not make this change, please contact support immediately.</strong></p>
-      `,
-      });
-    } catch (error) {
-      this.logger.error('Failed to send password reset confirmation email', {
-        userId: user.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
+    return;
   }
 
   // Helper functions

@@ -91,8 +91,9 @@ const validationSchema = Joi.object({
   AUTH_MAIL_IGNORE_TLS: Joi.boolean().required(),
   AUTH_MAIL_USER: Joi.string().optional().allow(''),
   AUTH_MAIL_PASS: Joi.string().optional().allow(''),
-
   AUTH_MAIL_FROM: Joi.string().required(),
+  AUTH_MAIL_MAX_RETRIES: Joi.number().min(0).max(10).default(3),
+  AUTH_MAIL_RETRY_DELAY_MS: Joi.number().min(100).max(60000).default(1000),
 });
 
 @Module({

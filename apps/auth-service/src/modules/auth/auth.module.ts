@@ -14,6 +14,8 @@ import { VerificationTokenModule } from '@/modules/verification-token/verificati
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthEmailListener } from './auth-email.listener';
+import { AuthEventProvider } from './auth-event.provider';
 
 @Module({
   imports: [
@@ -48,6 +50,14 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthStrategy, JwtRefreshStrategy, CustomThrottlerGuard, BffGuard],
+  providers: [
+    AuthService,
+    AuthEmailListener,
+    AuthEventProvider,
+    JwtAuthStrategy,
+    JwtRefreshStrategy,
+    CustomThrottlerGuard,
+    BffGuard,
+  ],
 })
 export class AuthModule {}
