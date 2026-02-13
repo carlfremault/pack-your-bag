@@ -103,7 +103,7 @@ export class AuthEmailListener {
         lastError = error;
         const errorMessage = error instanceof Error ? error.message : String(error);
 
-        if (errorMessage.includes('Invalid addresses') || errorMessage.includes('550')) {
+        if (this.isFatalEmailError(error)) {
           this.logger.warn(
             `Fatal email error detected for ${errorContext.emailType}, aborting retries: ${errorMessage}`,
           );
@@ -120,6 +120,28 @@ export class AuthEmailListener {
     }
 
     this.processError(lastError, errorContext);
+  }
+
+  private isFatalEmailError(error: unknown): boolean {
+    const err = error as {
+      responseCode?: number;
+      message?: string;
+    };
+
+    if (err.responseCode && err.responseCode >= 500 && err.responseCode < 600) {
+      return true;
+    }
+
+    const message = (err.message || '').toLowerCase();
+    const permanentFailures = [
+      'invalid address',
+      'user unknown',
+      'mailbox unavailable',
+      'recipient rejected',
+      'does not exist',
+    ];
+
+    return permanentFailures.some((pattern) => message.includes(pattern));
   }
 
   private delay(ms: number): Promise<void> {
