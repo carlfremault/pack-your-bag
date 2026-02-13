@@ -103,6 +103,7 @@ describe('AuditLogService', () => {
         method: 'POST',
         statusCode: HttpStatus.OK,
         message: 'User registered successfully',
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
@@ -158,6 +159,7 @@ describe('AuditLogService', () => {
         method: 'POST',
         statusCode: HttpStatus.OK,
         message: 'User logged in',
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
@@ -179,6 +181,7 @@ describe('AuditLogService', () => {
         method: 'POST',
         statusCode: HttpStatus.OK,
         message: 'User registered successfully',
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
@@ -198,6 +201,7 @@ describe('AuditLogService', () => {
         statusCode: HttpStatus.OK,
         message: 'User registered successfully',
         metadata: { customField: 'value', requestId: 'req-123' },
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
