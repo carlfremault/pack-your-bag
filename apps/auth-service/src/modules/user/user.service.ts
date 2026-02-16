@@ -50,6 +50,10 @@ export class UserService {
     );
   }
 
+  // ============================================
+  // BASIC CRUD OPERATIONS
+  // ============================================
+
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({
       data,
@@ -60,7 +64,7 @@ export class UserService {
     where: Prisma.UserWhereUniqueInput,
     tx?: Prisma.TransactionClient,
   ): Promise<User | null> {
-    const prisma = tx || this.prisma;
+    const prisma = tx ?? this.prisma;
 
     return prisma.user.findUnique({
       where,
@@ -78,7 +82,7 @@ export class UserService {
     data: Prisma.UserUpdateInput,
     tx?: Prisma.TransactionClient,
   ): Promise<User> {
-    const prisma = tx || this.prisma;
+    const prisma = tx ?? this.prisma;
 
     return prisma.user.update({
       where,
@@ -86,34 +90,16 @@ export class UserService {
     });
   }
 
+  // ============================================
+  // PASSWORD MANAGEMENT
+  // ============================================
+
   async updatePassword(userId: string, body: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = body;
 
     return this.prisma.$transaction(async (tx) => {
       return this.updatePasswordInternal(userId, currentPassword, newPassword, tx);
     });
-  }
-
-  private async updatePasswordInternal(
-    userId: string,
-    currentPassword: string,
-    newPassword: string,
-    tx: Prisma.TransactionClient,
-  ): Promise<User> {
-    if (currentPassword === newPassword) {
-      throw new BadRequestException('New password and current password cannot be the same');
-    }
-
-    const user = await this.getUser({ id: userId }, tx);
-    if (!user) throw new NotFoundException('User not found');
-    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      throw new BadRequestException('Current password does not match');
-    }
-
-    return this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
   }
 
   async resetPasswordWithToken(
@@ -143,12 +129,34 @@ export class UserService {
     });
   }
 
+  private async updatePasswordInternal(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<User> {
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('New password and current password cannot be the same');
+    }
+
+    const user = await this.getUser({ id: userId }, tx);
+    if (!user) throw new NotFoundException('User not found');
+    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new BadRequestException('Current password does not match');
+    }
+
+    return this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
+  }
+
   private async updatePasswordAndRevokeTokens(
     userId: string,
     newPassword: string,
     tx?: Prisma.TransactionClient,
   ): Promise<User> {
-    const prisma = tx || this.prisma;
+    const prisma = tx ?? this.prisma;
     const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
 
     const updatedUser = await prisma.user.update({
@@ -159,6 +167,10 @@ export class UserService {
     await this.refreshTokenService.revokeManyTokens({ userId }, prisma);
     return updatedUser;
   }
+
+  // ============================================
+  // ACCOUNT DELETION
+  // ============================================
 
   async softDeleteUser(userId: string, body: DeleteUserDto): Promise<void> {
     const { password, locale = DEFAULT_LOCALE } = body;

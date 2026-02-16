@@ -63,6 +63,7 @@ describe('Password Reset Flow (E2E)', () => {
       // Wait for async event processing
       await ctx.authHelpers.sleep(100);
 
+      // Clear mailpit as a mail was sent for the account deletion
       await ctx.clearMailpit();
 
       const response = await ctx.authHelpers.forgotPassword({ email: deletedUser.email });
