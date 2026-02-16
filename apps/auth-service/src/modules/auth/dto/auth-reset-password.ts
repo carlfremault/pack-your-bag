@@ -27,6 +27,6 @@ export class AuthResetPasswordDto {
   @IsOptional()
   @IsString()
   @MaxLength(10)
-  @Matches(LOCALE_REGEX, { message: 'Locale must be a valid format (e.g., en, en-US)' })
+  @Matches(LOCALE_REGEX, { message: 'Locale must be a valid format (e.g., en, en-GB)' })
   readonly locale?: string;
 }
