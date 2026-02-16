@@ -9,6 +9,7 @@ import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { AuthForgotPasswordDto } from '@/modules/auth/dto/auth-forgot-password';
 import { AuthResetPasswordDto } from '@/modules/auth/dto/auth-reset-password';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
+import { CancelDeletionDto } from '@/modules/user/dto/cancel-deletion.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
 export class AuthHelpers {
@@ -137,6 +138,14 @@ export class AuthHelpers {
   async resetPassword(body: AuthResetPasswordDto, expectedStatus = HttpStatus.NO_CONTENT) {
     return request(this.app.getHttpServer())
       .post('/auth/reset-password')
+      .send(body)
+      .set('x-bff-secret', this.bffSecret)
+      .expect(expectedStatus);
+  }
+
+  async cancelAccountDeletion(body: CancelDeletionDto, expectedStatus = HttpStatus.NO_CONTENT) {
+    return request(this.app.getHttpServer())
+      .post('/user/cancel-deletion')
       .send(body)
       .set('x-bff-secret', this.bffSecret)
       .expect(expectedStatus);

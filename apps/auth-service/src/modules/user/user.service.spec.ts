@@ -2,7 +2,7 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from '@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { User } from '@prisma-client';
+import { TokenType, User } from '@prisma-client';
 import bcrypt from 'bcrypt';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 
@@ -13,6 +13,7 @@ import { VerificationTokenService } from '@/modules/verification-token/verificat
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { UserService } from './user.service';
+import { UserEventProvider } from './user-event.provider';
 
 vi.mock('bcrypt');
 
@@ -61,6 +62,14 @@ describe('UserService', () => {
     anonymizeAuditLogs: vi.fn(),
   };
 
+  const mockVerificationTokenService = {
+    upsertVerificationToken: vi.fn(),
+  };
+
+  const mockUserEventProvider = {
+    emitAccountDeletionRequested: vi.fn(),
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -71,7 +80,8 @@ describe('UserService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
-        { provide: VerificationTokenService, useValue: {} },
+        { provide: VerificationTokenService, useValue: mockVerificationTokenService },
+        { provide: UserEventProvider, useValue: mockUserEventProvider },
       ],
     }).compile();
 
@@ -145,8 +155,13 @@ describe('UserService', () => {
     const userId = 'uuid-123';
     const body = { password: 'validPassword123' };
 
-    it("should revoke a user's tokens and soft delete the user", async () => {
-      const mockUser = { password: body.password, isDeleted: false } as User;
+    it("should revoke a user's tokens, soft delete the user, create a verification token and emit an event", async () => {
+      const mockUser = {
+        id: userId,
+        email: 'test@testemail.com',
+        password: body.password,
+        isDeleted: false,
+      } as User;
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
 
       await service.softDeleteUser(userId, body);
@@ -162,6 +177,20 @@ describe('UserService', () => {
         where: { id: userId },
         data: { isDeleted: true, deletedAt: expect.any(Date) as Date },
       });
+      expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
+        userId,
+        expect.any(String) as string,
+        expect.any(Date) as Date,
+        TokenType.ACCOUNT_DELETION_CANCELLATION,
+        mockPrismaService,
+      );
+      expect(mockUserEventProvider.emitAccountDeletionRequested).toHaveBeenCalled();
+      expect(mockUserEventProvider.emitAccountDeletionRequested).toHaveBeenCalledWith({
+        userId,
+        cancellationToken: expect.any(String) as string,
+        email: mockUser.email,
+        cancellationDate: expect.any(String) as string,
+      });
     });
 
     it('should throw an UnauthorizedException if the user is not found', async () => {
@@ -170,6 +199,7 @@ describe('UserService', () => {
         new UnauthorizedException('Access Denied'),
       );
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+      expect(mockUserEventProvider.emitAccountDeletionRequested).not.toHaveBeenCalled();
     });
 
     it('should throw an AccountDeletedException if the user is already scheduled for deletion', async () => {
@@ -177,6 +207,7 @@ describe('UserService', () => {
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
       await expect(service.softDeleteUser(userId, body)).rejects.toThrow(AccountDeletedException);
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+      expect(mockUserEventProvider.emitAccountDeletionRequested).not.toHaveBeenCalled();
     });
 
     it('should throw an UnauthorizedException if the password is incorrect', async () => {
@@ -185,6 +216,7 @@ describe('UserService', () => {
       mockedCompare.mockResolvedValue(false as never);
       await expect(service.softDeleteUser(userId, body)).rejects.toThrow(UnauthorizedException);
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
+      expect(mockUserEventProvider.emitAccountDeletionRequested).not.toHaveBeenCalled();
     });
   });
 

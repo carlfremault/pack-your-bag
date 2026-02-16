@@ -9,6 +9,7 @@ import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { AuditEventType } from '@/generated/prisma';
 
+import { CancelDeletionDto } from './dto/cancel-deletion.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
 import { UserService } from './user.service';
 
@@ -27,5 +28,14 @@ export class UserController {
     @CurrentUser('userId') userId: string,
   ): Promise<void> {
     return this.userService.softDeleteUser(userId, body);
+  }
+
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.CANCEL_ACCOUNT_DELETION, ttl: THROTTLE_TTL_MS } })
+  @Post('cancel-deletion')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @AuditLog(AuditEventType.CANCEL_ACCOUNT_DELETION)
+  async cancelAccountDeletion(@Body() body: CancelDeletionDto): Promise<void> {
+    return this.userService.cancelAccountDeletion(body);
   }
 }

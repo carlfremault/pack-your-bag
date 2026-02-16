@@ -72,6 +72,7 @@ model VerificationToken {
 
 enum TokenType {
   PASSWORD_RESET
+  ACCOUNT_DELETION_CANCELLATION
 
   @@schema("app_auth")
 }
@@ -141,6 +142,7 @@ enum AuditEventType {
   HTTP_ERROR
   PASSWORD_FORGOTTEN
   PASSWORD_RESET
+  CANCEL_ACCOUNT_DELETION
   
   @@schema("app_auth")
 }

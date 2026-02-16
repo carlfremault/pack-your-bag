@@ -4,16 +4,26 @@ import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthStrategy } from '@/common/strategies/jwt-auth.strategy';
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
+import { EmailModule } from '@/modules/email/email.module';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
 import { VerificationTokenModule } from '@/modules/verification-token/verification-token.module';
 
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { UserEmailListener } from './user-email.listener';
+import { UserEventProvider } from './user-event.provider';
 
 @Module({
-  imports: [AuditLogModule, RefreshTokenModule, VerificationTokenModule],
+  imports: [AuditLogModule, EmailModule, RefreshTokenModule, VerificationTokenModule],
   controllers: [UserController],
-  providers: [UserService, JwtAuthStrategy, CustomThrottlerGuard, BffGuard],
+  providers: [
+    UserService,
+    UserEventProvider,
+    UserEmailListener,
+    JwtAuthStrategy,
+    CustomThrottlerGuard,
+    BffGuard,
+  ],
   exports: [UserService],
 })
 export class UserModule {}

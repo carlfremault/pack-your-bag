@@ -457,24 +457,10 @@ describe('AuthService', () => {
       });
 
       expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
-        {
-          userId_type: {
-            userId: 'user-123',
-            type: TokenType.PASSWORD_RESET,
-          },
-        },
-        {
-          token: 'hashed_token',
-          expiresAt: expect.any(Date) as Date,
-          used: false,
-        },
-        {
-          id: expect.any(String) as string,
-          token: 'hashed_token',
-          type: TokenType.PASSWORD_RESET,
-          user: { connect: { id: 'user-123' } },
-          expiresAt: expect.any(Date) as Date,
-        },
+        'user-123',
+        'hashed_token',
+        expect.any(Date) as Date,
+        TokenType.PASSWORD_RESET,
       );
 
       expect(mockAuthEventProvider.emitPasswordResetRequested).toHaveBeenCalledWith({
@@ -524,13 +510,10 @@ describe('AuthService', () => {
 
       expect(mockedCreateHash).toHaveBeenCalledWith('sha256');
       expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          token: 'hashed_token',
-        }),
-        expect.objectContaining({
-          token: 'hashed_token',
-        }),
+        'user-123',
+        'hashed_token',
+        expect.any(Date) as Date,
+        TokenType.PASSWORD_RESET,
       );
 
       expect(mockAuthEventProvider.emitPasswordResetRequested).toHaveBeenCalledWith(
@@ -560,13 +543,11 @@ describe('AuthService', () => {
       await service.forgotPassword(dto);
       const afterTime = Date.now();
 
-      const upsertCall = mockVerificationTokenService.upsertVerificationToken.mock.calls[0];
-      if (!upsertCall) {
+      const firstCall = mockVerificationTokenService.upsertVerificationToken.mock.calls[0];
+      if (!firstCall) {
         throw new Error('upsertVerificationToken was not called');
       }
-      const { expiresAt } = upsertCall[1] as {
-        expiresAt: Date;
-      };
+      const expiresAt = firstCall[2] as Date;
 
       const expectedMinExpiry = beforeTime + passwordResetTokenExpiresInMS;
       const expectedMaxExpiry = afterTime + passwordResetTokenExpiresInMS;
@@ -638,7 +619,7 @@ describe('AuthService', () => {
       expect(mockAuthEventProvider.emitPasswordResetConfirmed).toHaveBeenCalledWith({
         userId: 'user-123',
         email: 'testemail@test.com',
-        resetTimestamp: expect.any(Date) as Date,
+        resetTimestamp: expect.any(String) as string,
       });
     });
 
