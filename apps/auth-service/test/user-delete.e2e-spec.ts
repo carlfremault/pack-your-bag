@@ -2,7 +2,8 @@ import { HttpStatus } from '@nestjs/common';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { AuditEventType } from '@/generated/prisma';
+import { MS_PER_DAY } from '@/common/constants/auth.constants';
+import { AuditEventType, TokenType } from '@/generated/prisma';
 
 import {
   createAndHardDeleteUser,
@@ -10,6 +11,10 @@ import {
   createExpiredSoftDeletedUser,
   createNotYetExpiredSoftDeletedUser,
   createUserWithMultipleTokens,
+  generateAndStoreVerificationToken,
+  generateVerificationTokenAndDeleteUser,
+  getMailpitMessage,
+  getMailpitMessages,
 } from './fixtures/auth.fixtures';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
@@ -26,10 +31,11 @@ describe('User Deletion (e2e)', () => {
 
   afterAll(async () => {
     await ctx?.close();
+    await ctx?.clearMailpit();
   });
 
-  describe('Soft deletion', () => {
-    it('should soft delete user and revoke all tokens', async () => {
+  describe('softDeleteUser', () => {
+    it('should soft delete user, revoke all tokens, and send deletion confirmation email', async () => {
       const { user, access_token } = await createUserWithMultipleTokens(ctx);
 
       await ctx.authHelpers.deleteUser({
@@ -44,6 +50,17 @@ describe('User Deletion (e2e)', () => {
 
       expect(deletedUser?.isDeleted).toBe(true);
       expect(tokens).toHaveLength(0);
+
+      // Wait for async event processing
+      await ctx.authHelpers.sleep(100);
+
+      // Email should have been sent
+      const messages = await getMailpitMessages(ctx);
+      const email = messages.find((m) => m.To[0]?.Address === user.email);
+
+      expect(email).toMatchObject({
+        Subject: 'Account Deletion Request',
+      });
     });
 
     it('should prevent login after soft deletion', async () => {
@@ -156,7 +173,169 @@ describe('User Deletion (e2e)', () => {
     });
   });
 
-  describe('Hard deletion', () => {
+  describe('cancelAccountDeletion', () => {
+    it('should cancel account softDeletion with valid token', async () => {
+      const expiresAt = new Date(Date.now() + ctx.userDeleteRetentionPeriod * MS_PER_DAY);
+      const { user, token } = await generateAndStoreVerificationToken({
+        ctx,
+        type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+        expiresAt,
+      });
+
+      await ctx.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
+      });
+
+      await ctx.authHelpers.cancelAccountDeletion({
+        token,
+        currentPassword: ctx.authHelpers.defaultUser.password,
+        newPassword: 'newValidPassword456',
+      });
+
+      const updatedUser = await ctx.prisma.user.findUnique({ where: { id: user.id } });
+      expect(updatedUser).not.toBeNull();
+      expect(updatedUser?.isDeleted).toBe(false);
+      expect(updatedUser?.deletedAt).toBeNull();
+      const updatedToken = await ctx.prisma.verificationToken.findUnique({
+        where: {
+          userId_type: {
+            userId: user.id,
+            type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+          },
+        },
+      });
+      expect(updatedToken).not.toBeNull();
+      expect(updatedToken?.used).toBe(true);
+    });
+
+    it('should reject expired token', async () => {
+      const expiresAt = new Date(Date.now() - 1000); // Expired
+      const { token } = await generateAndStoreVerificationToken({
+        ctx,
+        type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+        expiresAt,
+      });
+
+      await ctx.authHelpers.cancelAccountDeletion(
+        {
+          token,
+          currentPassword: ctx.authHelpers.defaultUser.password,
+          newPassword: 'newValidPassword456',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it('should reject invalid token', async () => {
+      await ctx.authHelpers.cancelAccountDeletion(
+        {
+          token: 'invalid-token',
+          currentPassword: ctx.authHelpers.defaultUser.password,
+          newPassword: 'newValidPassword456',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it('should reject used token', async () => {
+      const { user, token } = await generateVerificationTokenAndDeleteUser(ctx);
+
+      // Mark token as used
+      await ctx.prisma.verificationToken.update({
+        where: {
+          userId_type: {
+            userId: user.id,
+            type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+          },
+        },
+        data: {
+          used: true,
+        },
+      });
+
+      await ctx.authHelpers.cancelAccountDeletion(
+        {
+          token,
+          currentPassword: ctx.authHelpers.defaultUser.password,
+          newPassword: 'newValidPassword456',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it('should reject wrong current password', async () => {
+      const { token } = await generateVerificationTokenAndDeleteUser(ctx);
+
+      await ctx.authHelpers.cancelAccountDeletion(
+        {
+          token,
+          currentPassword: 'invalid-password',
+          newPassword: 'newValidPassword456',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it('should reject invalid new password', async () => {
+      const { token } = await generateVerificationTokenAndDeleteUser(ctx);
+
+      await ctx.authHelpers.cancelAccountDeletion(
+        {
+          token,
+          currentPassword: ctx.authHelpers.defaultUser.password,
+          newPassword: 'invalidpassword',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+  });
+
+  describe('softDeletion and restoration - complete flow', () => {
+    it('should be possible to cancel account soft deletion by using the token from the cancellation email', async () => {
+      const { user } = await createNotYetExpiredSoftDeletedUser(ctx);
+
+      // Wait for async event processing
+      await ctx.authHelpers.sleep(100);
+
+      // Extract token from email
+      const requestMessages = await getMailpitMessages(ctx);
+      const summary = requestMessages.find(
+        (m) => m.To[0]?.Address === user.email && m.Subject === 'Account Deletion Request',
+      );
+      if (!summary) throw new Error('Email not found');
+
+      const requestEmail = await getMailpitMessage(ctx, summary.ID);
+      if (!requestEmail) throw new Error('Email not found');
+
+      const body = requestEmail.HTML || requestEmail.Text || '';
+      // Token is sent in url parameter, format .../cancel-deletion?token=token
+      const match = body.match(/token=([^"&\s>]+)/);
+      const token = match ? match[1] : null;
+
+      if (!token) {
+        throw new Error('Could not extract token from email');
+      }
+
+      // Cancel account deletion
+      await ctx.authHelpers.cancelAccountDeletion({
+        token,
+        currentPassword: ctx.authHelpers.defaultUser.password,
+        newPassword: 'newValidPassword456',
+      });
+
+      const updatedUser = await ctx.prisma.user.findUnique({ where: { id: user.id } });
+      expect(updatedUser?.isDeleted).toBe(false);
+      expect(updatedUser?.deletedAt).toBeNull();
+    });
+  });
+
+  describe('hardDeleteUsers', () => {
     it('should hard delete user, delete all tokens, and anonymize audit logs', async () => {
       const { user } = await createExpiredSoftDeletedUser(ctx);
       await ctx.tasksService.cleanupDeletedUsers();

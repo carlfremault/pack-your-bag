@@ -12,7 +12,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { v7 as uuidv7 } from 'uuid';
 
-import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
+import { AUTH_DEFAULT_USER_ROLE_ID, DEFAULT_LOCALE } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import {
   InvalidSessionException,
@@ -20,6 +20,8 @@ import {
 } from '@/common/exceptions/unauthorized.exceptions';
 import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
+import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
+import { generateToken } from '@/common/utils/generateToken';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
@@ -177,29 +179,14 @@ export class AuthService {
       return;
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const { token: resetToken, hashedToken: hashedResetToken } = generateToken();
     const expiresAt = new Date(Date.now() + this.passwordResetTokenExpiresInMS);
 
     await this.verificationTokenService.upsertVerificationToken(
-      {
-        userId_type: {
-          userId: user.id,
-          type: TokenType.PASSWORD_RESET,
-        },
-      },
-      {
-        token: hashedResetToken,
-        expiresAt,
-        used: false,
-      },
-      {
-        id: uuidv7(),
-        token: hashedResetToken,
-        type: TokenType.PASSWORD_RESET,
-        user: { connect: { id: user.id } },
-        expiresAt,
-      },
+      user.id,
+      hashedResetToken,
+      expiresAt,
+      TokenType.PASSWORD_RESET,
     );
 
     this.authEventProvider.emitPasswordResetRequested({
@@ -212,7 +199,7 @@ export class AuthService {
   }
 
   async resetPassword(body: AuthResetPasswordDto): Promise<void> {
-    const { token, password } = body;
+    const { token, password, locale = DEFAULT_LOCALE } = body;
     const hash = crypto.createHash('sha256').update(token).digest('hex');
 
     const resetRecord = await this.verificationTokenService.getVerificationToken({
@@ -237,7 +224,7 @@ export class AuthService {
     this.authEventProvider.emitPasswordResetConfirmed({
       userId: user.id,
       email: user.email,
-      resetTimestamp: new Date(),
+      resetTimestamp: formatLocaleDate(new Date(), locale),
     });
 
     return;

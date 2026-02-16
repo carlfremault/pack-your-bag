@@ -13,7 +13,7 @@ export interface PasswordResetRequestedEvent {
 export interface PasswordResetConfirmedEvent {
   userId: string;
   email: string;
-  resetTimestamp: Date;
+  resetTimestamp: string;
 }
 
 @Injectable()

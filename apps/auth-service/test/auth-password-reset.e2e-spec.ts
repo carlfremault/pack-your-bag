@@ -60,6 +60,10 @@ describe('Password Reset Flow (E2E)', () => {
 
     it('should return 204 for non-existent user without creating token', async () => {
       const { user: deletedUser } = await createAndHardDeleteUser(ctx);
+      // Wait for async event processing
+      await ctx.authHelpers.sleep(100);
+
+      await ctx.clearMailpit();
 
       const response = await ctx.authHelpers.forgotPassword({ email: deletedUser.email });
 

@@ -1,8 +1,7 @@
-import crypto from 'crypto';
 import { IntegrationTestContext } from 'test/helpers/setup.helpers';
-import { v7 as uuidv7 } from 'uuid';
 
 import { MS_PER_DAY } from '@/common/constants/auth.constants';
+import { generateToken } from '@/common/utils/generateToken';
 import { TokenType, User } from '@/generated/prisma';
 
 export interface MailpitMessage {
@@ -89,29 +88,25 @@ export const generateAndStoreVerificationToken = async ({
   expiresAt: Date;
 }): Promise<{ user: User; token: string }> => {
   const { user } = await createAuthenticatedUser(ctx);
-  const token = crypto.randomBytes(32).toString('hex');
-  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  const { token, hashedToken } = generateToken();
 
-  await ctx.verificationTokenService.upsertVerificationToken(
-    {
-      userId_type: {
-        userId: user.id,
-        type,
-      },
-    },
-    {
-      token: hashedToken,
-      expiresAt,
-      used: false,
-    },
-    {
-      id: uuidv7(),
-      token: hashedToken,
-      type,
-      user: { connect: { id: user.id } },
-      expiresAt,
-    },
-  );
+  await ctx.verificationTokenService.upsertVerificationToken(user.id, hashedToken, expiresAt, type);
+
+  return { user, token };
+};
+
+export const generateVerificationTokenAndDeleteUser = async (ctx: IntegrationTestContext) => {
+  const expiresAt = new Date(Date.now() + ctx.userDeleteRetentionPeriod * MS_PER_DAY);
+  const { user, token } = await generateAndStoreVerificationToken({
+    ctx,
+    type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+    expiresAt,
+  });
+
+  await ctx.prisma.user.update({
+    where: { id: user.id },
+    data: { isDeleted: true, deletedAt: new Date() },
+  });
 
   return { user, token };
 };
