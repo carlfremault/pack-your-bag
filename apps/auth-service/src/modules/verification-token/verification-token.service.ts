@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { Prisma, TokenType, VerificationToken } from '@prisma-client';
 import { v7 as uuidv7 } from 'uuid';
@@ -55,5 +55,17 @@ export class VerificationTokenService {
       where: { id: tokenId },
       data: { used: true },
     });
+  }
+
+  async deleteVerificationTokens(
+    where: Prisma.VerificationTokenWhereInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.BatchPayload> {
+    if (!where || Object.keys(where).length === 0) {
+      throw new BadRequestException('A filter must be provided for bulk token deletion.');
+    }
+    const prisma = tx ?? this.prisma;
+    const result = await prisma.verificationToken.deleteMany({ where });
+    return result;
   }
 }
