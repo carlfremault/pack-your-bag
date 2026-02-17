@@ -143,7 +143,7 @@ describe('AuditLogService', () => {
 
       expect(mockPrismaService.auditLog.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          deviceInfo: { error: 'Parsing failed' },
+          deviceInfo: null,
         }) as object,
       });
     });

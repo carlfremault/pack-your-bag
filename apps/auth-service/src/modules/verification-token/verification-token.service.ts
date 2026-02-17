@@ -49,14 +49,6 @@ export class VerificationTokenService {
     return prisma.verificationToken.findUnique(params);
   }
 
-  async markTokenAsUsed(tokenId: string, tx?: Prisma.TransactionClient): Promise<void> {
-    const prisma = tx ?? this.prisma;
-    await prisma.verificationToken.update({
-      where: { id: tokenId },
-      data: { used: true },
-    });
-  }
-
   async deleteVerificationTokens(
     where: Prisma.VerificationTokenWhereInput,
     tx?: Prisma.TransactionClient,
@@ -67,5 +59,13 @@ export class VerificationTokenService {
     const prisma = tx ?? this.prisma;
     const result = await prisma.verificationToken.deleteMany({ where });
     return result;
+  }
+
+  async markTokenAsUsed(tokenId: string, tx?: Prisma.TransactionClient): Promise<void> {
+    const prisma = tx ?? this.prisma;
+    await prisma.verificationToken.update({
+      where: { id: tokenId },
+      data: { used: true },
+    });
   }
 }

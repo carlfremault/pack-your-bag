@@ -22,14 +22,14 @@ import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';
-import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
-import { AuthForgotPasswordDto } from './dto/auth-forgot-password';
-import { AuthResetPasswordDto } from './dto/auth-reset-password';
+import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
+import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthEventProvider } from './auth-event.provider';
 
@@ -68,6 +68,10 @@ export class AuthService {
       'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
     );
   }
+
+  // ============================================
+  // BASIC ROUTE HANDLERS
+  // ============================================
 
   async register(body: AuthCredentialsDto): Promise<AuthResponseDto> {
     const { email, password } = body;
@@ -163,13 +167,9 @@ export class AuthService {
     });
   }
 
-  async updatePasswordAndReauthenticate(
-    userId: string,
-    body: UpdatePasswordDto,
-  ): Promise<AuthResponseDto> {
-    const user = await this.userService.updatePassword(userId, body);
-    return this.issueRefreshToken(user.id, user.roleId);
-  }
+  // ============================================
+  // PASSWORD MANAGEMENT
+  // ============================================
 
   async forgotPassword(body: AuthForgotPasswordDto): Promise<void> {
     const { email } = body;
@@ -194,8 +194,6 @@ export class AuthService {
       email: user.email,
       resetToken,
     });
-
-    return;
   }
 
   async resetPassword(body: AuthResetPasswordDto): Promise<void> {
@@ -226,11 +224,20 @@ export class AuthService {
       email: user.email,
       resetTimestamp: formatLocaleDate(new Date(), locale),
     });
-
-    return;
   }
 
-  // Helper functions
+  async updatePasswordAndReauthenticate(
+    userId: string,
+    body: UpdatePasswordDto,
+  ): Promise<AuthResponseDto> {
+    const user = await this.userService.updatePassword(userId, body); // Revokes tokens as well
+    return this.issueRefreshToken(user.id, user.roleId);
+  }
+
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+
   private async issueRefreshToken(
     userId: string,
     roleId: number,

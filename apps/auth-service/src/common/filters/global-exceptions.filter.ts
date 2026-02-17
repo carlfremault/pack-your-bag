@@ -120,6 +120,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     }
   }
 
+  // ============================================
+  // AUDIT HANDLERS
+  // ============================================
+
   private auditRateLimitExceeded(request: Request, exception: unknown, errorCode: string): void {
     const { path, method } = request;
     const tracker = this.isThrottlerExceptionWithTracker(exception) ? exception.tracker : undefined;
@@ -292,6 +296,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       request,
     );
   }
+
+  // ============================================
+  // HELPER METHODS
+  // ============================================
 
   private isServerError(status: HttpStatus): boolean {
     const statusCode = status as number;

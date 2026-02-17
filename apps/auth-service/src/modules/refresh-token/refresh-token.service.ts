@@ -25,6 +25,10 @@ export class RefreshTokenService {
     );
   }
 
+  // ============================================
+  // BASIC CRUD OPERATIONS
+  // ============================================
+
   async createRefreshToken(data: Prisma.RefreshTokenCreateInput): Promise<{ id: string }> {
     return this.prisma.refreshToken.create({ data, select: { id: true } });
   }
@@ -36,6 +40,10 @@ export class RefreshTokenService {
   async getLatestRefreshToken(where: Prisma.RefreshTokenWhereInput): Promise<RefreshToken | null> {
     return this.prisma.refreshToken.findFirst({ where, orderBy: { createdAt: 'desc' } });
   }
+
+  // ============================================
+  // TOKEN MANAGEMENT
+  // ============================================
 
   async rotateRefreshToken(
     oldTokenId: string,

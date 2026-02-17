@@ -19,7 +19,7 @@ import {
 import { anonymizeEmail } from '@/common/utils/anonymizeEmail';
 import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
-import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 
 interface UnauthorizedExceptionResponse {
   message: string | string[];

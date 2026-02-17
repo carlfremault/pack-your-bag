@@ -23,11 +23,11 @@ import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { AuditEventType } from '@/generated/prisma';
-import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 
-import { AuthForgotPasswordDto } from './dto/auth-forgot-password';
-import { AuthResetPasswordDto } from './dto/auth-reset-password';
+import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
+import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
 

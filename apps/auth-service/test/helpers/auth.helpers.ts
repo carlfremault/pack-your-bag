@@ -5,9 +5,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { Prisma, TokenType } from '@/generated/prisma';
-import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
-import { AuthForgotPasswordDto } from '@/modules/auth/dto/auth-forgot-password';
-import { AuthResetPasswordDto } from '@/modules/auth/dto/auth-reset-password';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
+import { AuthForgotPasswordDto } from '@/modules/auth/dto/auth-forgot-password.dto';
+import { AuthResetPasswordDto } from '@/modules/auth/dto/auth-reset-password.dto';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 import { CancelDeletionDto } from '@/modules/user/dto/cancel-deletion.dto';
 import { PrismaService } from '@/prisma/prisma.service';
