@@ -33,6 +33,11 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthEventProvider } from './auth-event.provider';
 
+interface RefreshTokenResult {
+  data: AuthResponseDto;
+  auditOverride?: AuditEventType;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name, { timestamp: true });
@@ -109,7 +114,7 @@ export class AuthService {
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
-  async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<AuthResponseDto> {
+  async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<RefreshTokenResult> {
     const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
     const user = await this.userService.getUser({ id: userId, isDeleted: false });
     if (!user) {
@@ -141,16 +146,17 @@ export class AuthService {
         userId,
         storedToken,
       );
-      return this.generateJwtResponse(
+      const data = await this.generateJwtResponse(
         userId,
         user.roleId,
         newerValidToken.id,
         newerValidToken.family,
-        AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       );
+
+      return { data, auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION };
     }
 
-    return this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId);
+    return { data: await this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId) };
   }
 
   async logout(user: RefreshTokenUser): Promise<void> {
@@ -287,7 +293,6 @@ export class AuthService {
     roleId: number,
     tokenId: string,
     tokenFamilyId: string,
-    auditOverride?: AuditEventType,
   ): Promise<AuthResponseDto> {
     const payload = {
       sub: userId,
@@ -316,7 +321,6 @@ export class AuthService {
         token_type: 'Bearer',
         expires_in: this.accessTokenExpiresIn,
         user: { id: userId, role: roleId },
-        ...(auditOverride && { auditOverride }),
       };
     } catch (error) {
       this.logger.error('JWT Signing Failed:', {

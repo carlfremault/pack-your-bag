@@ -263,11 +263,13 @@ describe('AuthService', () => {
       expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
 
       expect(result).toEqual({
-        access_token: 'mock-jwt-token',
-        refresh_token: 'mock-jwt-token',
-        token_type: 'Bearer',
-        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        data: {
+          access_token: 'mock-jwt-token',
+          refresh_token: 'mock-jwt-token',
+          token_type: 'Bearer',
+          expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+          user: { id: mockUser.id, role: mockUser.roleId },
+        },
       });
     });
 
@@ -392,11 +394,13 @@ describe('AuthService', () => {
         mockRevokedToken,
       );
       expect(result).toEqual({
-        access_token: 'mock-jwt-token',
-        refresh_token: 'mock-jwt-token',
-        token_type: 'Bearer',
-        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        data: {
+          access_token: 'mock-jwt-token',
+          refresh_token: 'mock-jwt-token',
+          token_type: 'Bearer',
+          expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+          user: { id: mockUser.id, role: mockUser.roleId },
+        },
         auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       });
     });

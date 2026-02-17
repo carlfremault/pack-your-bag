@@ -66,12 +66,12 @@ export class AuthController {
     @CurrentUser()
     user: RefreshTokenUser,
   ) {
-    const result = await this.authService.refreshToken(user);
+    const { data, auditOverride } = await this.authService.refreshToken(user);
     // auditOverride can be used to customize the audit log success event
-    if (result.auditOverride) {
-      req.auditOverride = result.auditOverride;
+    if (auditOverride) {
+      req.auditOverride = auditOverride;
     }
-    return result;
+    return data;
   }
 
   @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
