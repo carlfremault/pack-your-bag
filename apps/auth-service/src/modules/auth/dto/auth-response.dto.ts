@@ -1,5 +1,4 @@
-import { AuditEventType } from '@prisma-client';
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 
 export class AuthResponseDto {
   @Expose()
@@ -16,7 +15,4 @@ export class AuthResponseDto {
 
   @Expose()
   readonly user: { id: string; role: number };
-
-  @Exclude()
-  readonly auditOverride?: AuditEventType;
 }
