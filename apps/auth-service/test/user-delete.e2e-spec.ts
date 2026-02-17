@@ -194,8 +194,7 @@ describe('User Deletion (e2e)', () => {
 
       await ctx.authHelpers.cancelAccountDeletion({
         token,
-        currentPassword: ctx.authHelpers.defaultUser.password,
-        newPassword: 'newValidPassword456',
+        password: ctx.authHelpers.defaultUser.password,
       });
 
       const updatedUser = await ctx.prisma.user.findUnique({ where: { id: user.id } });
@@ -225,8 +224,7 @@ describe('User Deletion (e2e)', () => {
       await ctx.authHelpers.cancelAccountDeletion(
         {
           token,
-          currentPassword: ctx.authHelpers.defaultUser.password,
-          newPassword: 'newValidPassword456',
+          password: ctx.authHelpers.defaultUser.password,
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -236,8 +234,7 @@ describe('User Deletion (e2e)', () => {
       await ctx.authHelpers.cancelAccountDeletion(
         {
           token: 'invalid-token',
-          currentPassword: ctx.authHelpers.defaultUser.password,
-          newPassword: 'newValidPassword456',
+          password: ctx.authHelpers.defaultUser.password,
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -262,34 +259,19 @@ describe('User Deletion (e2e)', () => {
       await ctx.authHelpers.cancelAccountDeletion(
         {
           token,
-          currentPassword: ctx.authHelpers.defaultUser.password,
-          newPassword: 'newValidPassword456',
+          password: ctx.authHelpers.defaultUser.password,
         },
         HttpStatus.BAD_REQUEST,
       );
     });
 
-    it('should reject wrong current password', async () => {
+    it('should reject wrong password', async () => {
       const { token } = await generateVerificationTokenAndDeleteUser(ctx);
 
       await ctx.authHelpers.cancelAccountDeletion(
         {
           token,
-          currentPassword: 'invalid-password',
-          newPassword: 'newValidPassword456',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    });
-
-    it('should reject invalid new password', async () => {
-      const { token } = await generateVerificationTokenAndDeleteUser(ctx);
-
-      await ctx.authHelpers.cancelAccountDeletion(
-        {
-          token,
-          currentPassword: ctx.authHelpers.defaultUser.password,
-          newPassword: 'invalidpassword',
+          password: 'invalid-password',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -325,8 +307,7 @@ describe('User Deletion (e2e)', () => {
       // Cancel account deletion
       await ctx.authHelpers.cancelAccountDeletion({
         token,
-        currentPassword: ctx.authHelpers.defaultUser.password,
-        newPassword: 'newValidPassword456',
+        password: ctx.authHelpers.defaultUser.password,
       });
 
       const updatedUser = await ctx.prisma.user.findUnique({ where: { id: user.id } });

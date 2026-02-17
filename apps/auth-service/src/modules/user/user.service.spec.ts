@@ -4,8 +4,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { TokenType, User } from '@prisma-client';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 
+import { MS_PER_DAY } from '@/common/constants/auth.constants';
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
@@ -16,10 +19,11 @@ import { UserService } from './user.service';
 import { UserEventProvider } from './user-event.provider';
 
 vi.mock('bcrypt');
+vi.mock('crypto');
 
 const MOCK_CONFIG = {
   AUTH_BCRYPT_SALT_ROUNDS: 4,
-  AUTH_USER_DELETE_RETENTION_DAYS: 30,
+  AUTH_USER_DELETE_RETENTION_DAYS: 7,
 };
 
 describe('UserService', () => {
@@ -28,6 +32,8 @@ describe('UserService', () => {
   let mockedPrismaUser: Mocked<PrismaService['user']>;
   const mockedCompare = vi.mocked(bcrypt.compare);
   const mockedHash = vi.mocked(bcrypt.hash);
+  const mockedCreateHash = vi.mocked(crypto.createHash);
+  const mockedRandomBytes = vi.mocked(crypto.randomBytes);
 
   const mockConfigService = {
     getOrThrow: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
@@ -64,6 +70,8 @@ describe('UserService', () => {
 
   const mockVerificationTokenService = {
     upsertVerificationToken: vi.fn(),
+    getVerificationToken: vi.fn(),
+    markTokenAsUsed: vi.fn(),
   };
 
   const mockUserEventProvider = {
@@ -91,6 +99,15 @@ describe('UserService', () => {
 
     mockedCompare.mockResolvedValue(true as never);
     mockedHash.mockResolvedValue('new-hashed-val' as never);
+
+    const expectedRawToken = Buffer.from('a'.repeat(64), 'hex').toString('hex');
+
+    const mockHashInstance = {
+      update: vi.fn().mockReturnThis(),
+      digest: vi.fn().mockReturnValue('hashed_token'),
+    };
+    mockedCreateHash.mockReturnValue(mockHashInstance as unknown as crypto.Hash);
+    mockedRandomBytes.mockImplementation(() => expectedRawToken);
   });
 
   it('should be defined', () => {
@@ -203,7 +220,12 @@ describe('UserService', () => {
     });
 
     it('should throw an AccountDeletedException if the user is already scheduled for deletion', async () => {
-      const mockUser = { isDeleted: true, deletedAt: new Date() } as User;
+      const mockUser = {
+        id: 'user-123',
+        password: 'hashed_password',
+        isDeleted: true,
+        deletedAt: new Date(),
+      } as User;
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
       await expect(service.softDeleteUser(userId, body)).rejects.toThrow(AccountDeletedException);
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
@@ -217,6 +239,88 @@ describe('UserService', () => {
       await expect(service.softDeleteUser(userId, body)).rejects.toThrow(UnauthorizedException);
       expect(mockPrismaService.$transaction).not.toHaveBeenCalled();
       expect(mockUserEventProvider.emitAccountDeletionRequested).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cancelAccountDeletion', () => {
+    const dto = { token: 'token-123', password: 'validPassword123' };
+    const mockRetentionPeriod = mockConfigService.getOrThrow(
+      'AUTH_USER_DELETE_RETENTION_DAYS',
+    ) as number;
+
+    const mockUser = { isDeleted: true, deletedAt: new Date() } as User;
+    const mockResetRecord = {
+      id: 'token-123',
+      userId: 'user-123',
+      token: 'hashed_token',
+      type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+      expiresAt: new Date(Date.now() + mockRetentionPeriod * MS_PER_DAY),
+      used: false,
+    };
+
+    it('should cancel a user account deletion', async () => {
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
+      mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
+
+      await service.cancelAccountDeletion(dto);
+
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
+      expect(mockVerificationTokenService.getVerificationToken).toHaveBeenCalledWith(
+        {
+          where: {
+            token: 'hashed_token',
+            type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+            used: false,
+          },
+        },
+        mockPrismaService,
+      );
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'user-123', isDeleted: true },
+      });
+      expect(mockedCompare).toHaveBeenCalledWith(dto.password, mockUser.password);
+      expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: { isDeleted: false, deletedAt: null },
+      });
+      expect(mockVerificationTokenService.markTokenAsUsed).toHaveBeenCalledWith(
+        mockResetRecord.id,
+        mockPrismaService,
+      );
+    });
+
+    it('should throw InvalidTokenException if token is not found or already used', async () => {
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(null);
+
+      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if token has expired', async () => {
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue({
+        ...mockResetRecord,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if user does not exist or is not marked as deleted', async () => {
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
+      mockedPrismaUser.findUnique.mockResolvedValue(null);
+
+      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if the password does not match', async () => {
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
+      mockedPrismaUser.findUnique.mockResolvedValue({
+        id: 'user-123',
+        password: 'hashed_password',
+      } as User);
+
+      mockedCompare.mockResolvedValueOnce(false as never);
+
+      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
     });
   });
 
