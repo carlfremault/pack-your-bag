@@ -49,23 +49,6 @@ export class AuditLogService {
     }
   }
 
-  private parseDeviceInfo(userAgent: string | null) {
-    if (!userAgent) return null;
-
-    try {
-      const parser = new UAParser(userAgent);
-      const res = parser.getResult();
-
-      return {
-        browser: res.browser.name || 'Unknown',
-        os: res.os.name || 'Unknown',
-        device: res.device.type || 'desktop',
-      };
-    } catch {
-      return { error: 'Parsing failed' };
-    }
-  }
-
   async anonymizeAuditLogs(
     where: Prisma.AuditLogWhereInput,
     tx?: Prisma.TransactionClient,
@@ -127,5 +110,31 @@ export class AuditLogService {
     }
 
     return this.prisma.auditLog.deleteMany({ where });
+  }
+
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+
+  private parseDeviceInfo(userAgent: string | null): {
+    browser: string;
+    os: string;
+    device: string;
+  } | null {
+    if (!userAgent) return null;
+
+    try {
+      const parser = new UAParser(userAgent);
+      const res = parser.getResult();
+
+      return {
+        browser: res.browser.name || 'Unknown',
+        os: res.os.name || 'Unknown',
+        device: res.device.type || 'desktop',
+      };
+    } catch (error) {
+      this.logger.warn('Failed to parse user agent', { userAgent, error });
+      return null;
+    }
   }
 }

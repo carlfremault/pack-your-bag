@@ -72,6 +72,10 @@ export class EmailService {
     this.processError(lastError, errorContext);
   }
 
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+
   private isFatalEmailError(error: unknown): boolean {
     const err = error as {
       responseCode?: number;

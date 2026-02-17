@@ -7,6 +7,7 @@ import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
 import { TasksService } from './tasks.service';
 
@@ -22,8 +23,12 @@ describe('TasksService', () => {
   let service: TasksService;
 
   const mockConfigService = {
-    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
-      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    getOrThrow: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
+      if (value === undefined && defaultValue === undefined) {
+        throw new Error(`Configuration key "${key}" does not exist`);
+      }
+      return (value ?? defaultValue) as T;
     }),
   };
 
@@ -33,6 +38,10 @@ describe('TasksService', () => {
         TasksService,
         {
           provide: RefreshTokenService,
+          useValue: {},
+        },
+        {
+          provide: VerificationTokenService,
           useValue: {},
         },
         {

@@ -98,7 +98,20 @@ export class UserService {
     const { currentPassword, newPassword } = body;
 
     return this.prisma.$transaction(async (tx) => {
-      return this.updatePasswordInternal(userId, currentPassword, newPassword, tx);
+      if (currentPassword === newPassword) {
+        throw new BadRequestException('New password and current password cannot be the same');
+      }
+
+      const user = await this.getUser({ id: userId }, tx);
+      if (!user) throw new NotFoundException('User not found');
+      DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        throw new BadRequestException('Current password does not match');
+      }
+
+      return this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
     });
   }
 
@@ -127,28 +140,6 @@ export class UserService {
       await this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
       await this.verificationTokenService.markTokenAsUsed(tokenId, tx);
     });
-  }
-
-  private async updatePasswordInternal(
-    userId: string,
-    currentPassword: string,
-    newPassword: string,
-    tx: Prisma.TransactionClient,
-  ): Promise<User> {
-    if (currentPassword === newPassword) {
-      throw new BadRequestException('New password and current password cannot be the same');
-    }
-
-    const user = await this.getUser({ id: userId }, tx);
-    if (!user) throw new NotFoundException('User not found');
-    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      throw new BadRequestException('Current password does not match');
-    }
-
-    return this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
   }
 
   private async updatePasswordAndRevokeTokens(
