@@ -220,7 +220,7 @@ export class UserService {
   }
 
   async cancelAccountDeletion(body: CancelDeletionDto): Promise<void> {
-    const { token, currentPassword, newPassword } = body;
+    const { token, password } = body;
     const hash = crypto.createHash('sha256').update(token).digest('hex');
 
     return this.prisma.$transaction(async (tx) => {
@@ -239,13 +239,17 @@ export class UserService {
         throw new InvalidTokenException();
       }
 
-      const user = await this.getUser({ id: resetRecord.userId }, tx);
+      const user = await this.getUser({ id: resetRecord.userId, isDeleted: true }, tx);
       if (!user) {
         throw new InvalidTokenException();
       }
 
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new InvalidTokenException();
+      }
+
       await this.updateUser({ id: user.id }, { isDeleted: false, deletedAt: null }, tx);
-      await this.updatePasswordInternal(user.id, currentPassword, newPassword, tx);
       await this.verificationTokenService.markTokenAsUsed(resetRecord.id, tx);
     });
   }
