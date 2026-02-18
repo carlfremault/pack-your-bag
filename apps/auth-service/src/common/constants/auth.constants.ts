@@ -11,6 +11,7 @@ export const PASSWORD_MAX_LENGTH_MESSAGE = `Password must not exceed ${PASSWORD_
 export const AUTH_DEFAULT_USER_ROLE_ID = 1; // "user"
 export const DEFAULT_LOCALE = 'en-GB';
 export const LOCALE_REGEX = /^[a-z]{2}(-[A-Z]{2})?$/;
+export const LOCALE_MESSAGE = 'Locale must be a valid format (e.g., en, en-GB)';
 
 // Throttling
 export const THROTTLE_TTL_MS = 60000;

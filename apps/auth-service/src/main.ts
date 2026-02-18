@@ -2,6 +2,7 @@ import './instrument';
 
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
@@ -103,6 +104,29 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization', 'x-bff-secret'],
   });
+
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle('Auth Service')
+    .setDescription('Auth Service API description')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'refresh-token')
+    .addApiKey(
+      {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-bff-secret',
+        description:
+          'Shared secret between BFF and auth service. All requests (except /health) rejected without it.',
+      },
+      'bff-secret',
+    )
+    .build();
+  if (!isProduction) {
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, documentFactory);
+  }
 
   // Graceful shutdown
   app.enableShutdownHooks();

@@ -63,6 +63,11 @@
       "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
       "env": ["AUTH_*"]
     },
+    "openapi": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.ts", "scripts/generate-spec.ts"],
+      "outputs": ["openapi.json"]
+    },
     "transit": {
       "dependsOn": ["^transit"]
     }

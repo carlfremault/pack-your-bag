@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
@@ -11,6 +13,7 @@ import {
 } from '@/common/constants/auth.constants';
 
 export class AuthCredentialsDto {
+  @ApiProperty({ example: 'john.doe@example.com', format: 'email' })
   @IsNotEmpty()
   @IsString()
   @IsEmail()
@@ -19,6 +22,7 @@ export class AuthCredentialsDto {
   )
   readonly email: string;
 
+  @ApiProperty({ example: 'v4l1dPassw0rd', pattern: PASSWORD_REGEX.source })
   @IsNotEmpty()
   @IsString()
   @Matches(PASSWORD_REGEX, {
