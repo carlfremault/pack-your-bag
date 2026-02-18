@@ -15,7 +15,7 @@ export class AuthResponseDto {
   @Expose()
   readonly token_type: string = 'Bearer';
 
-  @ApiProperty({ description: 'Acces token expiration time in seconds' })
+  @ApiProperty({ description: 'Access token expiration time in seconds' })
   @Expose()
   readonly expires_in: number;
 

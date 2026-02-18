@@ -39,6 +39,11 @@
             "description": "Rate limit exceeded."
           }
         },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
         "summary": "Register a new user and issue tokens",
         "tags": [
           "auth"
@@ -83,6 +88,11 @@
             "description": "Rate limit exceeded."
           }
         },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
         "summary": "Authenticate a user and issue tokens",
         "tags": [
           "auth"
@@ -116,6 +126,9 @@
         },
         "security": [
           {
+            "bff-secret": []
+          },
+          {
             "refresh-token": []
           }
         ],
@@ -145,6 +158,9 @@
         },
         "security": [
           {
+            "bff-secret": []
+          },
+          {
             "refresh-token": []
           }
         ],
@@ -173,6 +189,9 @@
           }
         },
         "security": [
+          {
+            "bff-secret": []
+          },
           {
             "access-token": []
           }
@@ -223,6 +242,9 @@
         },
         "security": [
           {
+            "bff-secret": []
+          },
+          {
             "access-token": []
           }
         ],
@@ -260,6 +282,11 @@
             "description": "Rate limit exceeded."
           }
         },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
         "summary": "Request a password reset email",
         "tags": [
           "auth"
@@ -294,6 +321,11 @@
             "description": "Rate limit exceeded."
           }
         },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
         "summary": "Reset password using a token from the reset email",
         "tags": [
           "auth"
@@ -329,6 +361,9 @@
           }
         },
         "security": [
+          {
+            "bff-secret": []
+          },
           {
             "access-token": []
           }
@@ -367,6 +402,11 @@
             "description": "Rate limit exceeded."
           }
         },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
         "summary": "Cancel account deletion using a token from the deletion confirmation email",
         "tags": [
           "user"
@@ -553,6 +593,12 @@
   "servers": [],
   "components": {
     "securitySchemes": {
+      "bff-secret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-bff-secret",
+        "description": "Shared secret between BFF and auth service. All requests (except /health) rejected without it."
+      },
       "access-token": {
         "scheme": "bearer",
         "bearerFormat": "JWT",
@@ -598,11 +644,11 @@
           "token_type": {
             "type": "string",
             "description": "Token type",
-            "example": "access"
+            "example": "Bearer"
           },
           "expires_in": {
             "type": "number",
-            "description": "Token expiration time"
+            "description": "Access token expiration time in seconds"
           },
           "user": {
             "type": "object",
