@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AUTH_EVENTS } from '@/common/constants/auth.constants';
+import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 
 import { AuthEventProvider } from './auth-event.provider';
 
@@ -87,7 +88,7 @@ describe('AuthEventProvider', () => {
       const eventData = {
         userId: 'user-123',
         email: 'testemail@test.com',
-        resetTimestamp: new Date('2024-01-15T10:30:00Z'),
+        resetTimestamp: formatLocaleDate(new Date(), 'en-GB'),
       };
 
       authEventProvider.emitPasswordResetConfirmed(eventData);
@@ -105,7 +106,7 @@ describe('AuthEventProvider', () => {
       const eventData = {
         userId: 'user-123',
         email: 'testemail@test.com',
-        resetTimestamp: new Date(),
+        resetTimestamp: formatLocaleDate(new Date(), 'en-GB'),
       };
 
       authEventProvider.emitPasswordResetConfirmed(eventData);
@@ -121,7 +122,7 @@ describe('AuthEventProvider', () => {
       const eventData = {
         userId: 'user-123',
         email: 'testemail@test.com',
-        resetTimestamp: new Date(),
+        resetTimestamp: formatLocaleDate(new Date(), 'en-GB'),
       };
 
       mockEventEmitter.emit.mockImplementation(() => {
