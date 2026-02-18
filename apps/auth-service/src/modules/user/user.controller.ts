@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
@@ -15,11 +15,7 @@ import { DeleteUserDto } from './dto/delete-user.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
-@ApiHeader({
-  name: 'x-bff-secret',
-  required: true,
-  description: 'Shared secret between BFF and auth service. All requests rejected without it.',
-})
+@ApiSecurity('bff-secret')
 @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
 @ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('user')

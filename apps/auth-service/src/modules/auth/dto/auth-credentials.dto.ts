@@ -13,7 +13,7 @@ import {
 } from '@/common/constants/auth.constants';
 
 export class AuthCredentialsDto {
-  @ApiProperty({ example: 'john.doe@example.com' })
+  @ApiProperty({ example: 'john.doe@example.com', format: 'email' })
   @IsNotEmpty()
   @IsString()
   @IsEmail()

@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import type { Request } from 'express';
@@ -33,11 +33,7 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
-@ApiHeader({
-  name: 'x-bff-secret',
-  required: true,
-  description: 'Shared secret between BFF and auth service. All requests rejected without it.',
-})
+@ApiSecurity('bff-secret')
 @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
 @ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('auth')
@@ -47,7 +43,11 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user and issue tokens' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: AuthResponseDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: AuthResponseDto,
+    description: 'User registered.',
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Email already in use.' })
   @UseGuards(CustomThrottlerGuard)
@@ -60,7 +60,7 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Authenticate a user and issue tokens' })
-  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto })
+  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto, description: 'User logged in.' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid email or password.' })
   @UseGuards(CustomThrottlerGuard)
@@ -75,7 +75,7 @@ export class AuthController {
   @Post('refresh-token')
   @ApiBearerAuth('refresh-token')
   @ApiOperation({ summary: 'Rotate refresh token and issue new access token' })
-  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto })
+  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto, description: 'Tokens refreshed.' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or expired refresh token.',
@@ -130,7 +130,7 @@ export class AuthController {
   @Patch('update-password')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update password and re-issue tokens (invalidates all other sessions)' })
-  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto })
+  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto, description: 'Password updated.' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired access token.' })
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)

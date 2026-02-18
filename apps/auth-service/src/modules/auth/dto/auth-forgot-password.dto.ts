@@ -4,7 +4,7 @@ import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class AuthForgotPasswordDto {
-  @ApiProperty({ example: 'john.doe@example.com' })
+  @ApiProperty({ example: 'john.doe@example.com', format: 'email' })
   @IsNotEmpty()
   @IsString()
   @IsEmail()

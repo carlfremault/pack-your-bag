@@ -112,6 +112,16 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'refresh-token')
+    .addApiKey(
+      {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-bff-secret',
+        description:
+          'Shared secret between BFF and auth service. All requests (except /health) rejected without it.',
+      },
+      'bff-secret',
+    )
     .build();
   if (!isProduction) {
     const documentFactory = () => SwaggerModule.createDocument(app, config);
