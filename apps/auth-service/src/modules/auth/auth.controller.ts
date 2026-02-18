@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import type { Request } from 'express';
@@ -31,23 +32,39 @@ import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
 
+@ApiTags('auth')
+@ApiHeader({
+  name: 'x-bff-secret',
+  required: true,
+  description: 'Shared secret between BFF and auth service. All requests rejected without it.',
+})
+@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
+@ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('auth')
 @UseGuards(BffGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('register')
+  @ApiOperation({ summary: 'Register a new user and issue tokens' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: AuthResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
+  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Email already in use.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.REGISTER, ttl: THROTTLE_TTL_MS } })
-  @Post('register')
   @Serialize(AuthResponseDto)
   @AuditLog(AuditEventType.USER_REGISTERED)
   async register(@Body() body: AuthCredentialsDto) {
     return this.authService.register(body);
   }
 
+  @Post('login')
+  @ApiOperation({ summary: 'Authenticate a user and issue tokens' })
+  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid email or password.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_TTL_MS } })
-  @Post('login')
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
   @AuditLog(AuditEventType.USER_LOGIN_SUCCESS)
@@ -55,9 +72,16 @@ export class AuthController {
     return this.authService.login(body);
   }
 
+  @Post('refresh-token')
+  @ApiBearerAuth('refresh-token')
+  @ApiOperation({ summary: 'Rotate refresh token and issue new access token' })
+  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired refresh token.',
+  })
   @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.REFRESH_TOKEN, ttl: THROTTLE_TTL_MS } })
-  @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
   @AuditLog(AuditEventType.TOKEN_REFRESHED)
@@ -74,45 +98,74 @@ export class AuthController {
     return data;
   }
 
+  @Delete('logout')
+  @ApiBearerAuth('refresh-token')
+  @ApiOperation({ summary: 'Revoke the current refresh token family (single device logout)' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Logged out successfully.' })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired refresh token.',
+  })
   @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT, ttl: THROTTLE_TTL_MS } })
-  @Delete('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog(AuditEventType.USER_LOGOUT)
   async logout(@CurrentUser() user: RefreshTokenUser) {
     return this.authService.logout(user);
   }
 
+  @Delete('logout-all')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Revoke all refresh tokens for the user (all devices logout)' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'All sessions revoked.' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired access token.' })
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT_ALL_DEVICES, ttl: THROTTLE_TTL_MS } })
-  @Delete('logout-all')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog(AuditEventType.USER_LOGOUT_ALL_DEVICES)
   async logoutAllDevices(@CurrentUser('userId') userId: string) {
     return this.authService.logoutAllDevices(userId);
   }
 
+  @Patch('update-password')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update password and re-issue tokens (invalidates all other sessions)' })
+  @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired access token.' })
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.UPDATE_PASSWORD, ttl: THROTTLE_TTL_MS } })
-  @Patch('update-password')
   @Serialize(AuthResponseDto)
   @AuditLog(AuditEventType.PASSWORD_CHANGED)
   async updatePassword(@CurrentUser('userId') userId: string, @Body() body: UpdatePasswordDto) {
     return this.authService.updatePasswordAndReauthenticate(userId, body);
   }
 
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request a password reset email' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description:
+      'Reset email sent if the address is registered. Response is identical either way to prevent user enumeration.',
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.FORGOT_PASSWORD, ttl: THROTTLE_TTL_MS } })
-  @Post('forgot-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog(AuditEventType.PASSWORD_FORGOTTEN)
   async forgotPassword(@Body() body: AuthForgotPasswordDto) {
     return this.authService.forgotPassword(body);
   }
 
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using a token from the reset email' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Password reset successfully.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Token invalid, expired, or already used.',
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.RESET_PASSWORD, ttl: THROTTLE_TTL_MS } })
-  @Post('reset-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog(AuditEventType.PASSWORD_RESET)
   async resetPassword(@Body() body: AuthResetPasswordDto) {

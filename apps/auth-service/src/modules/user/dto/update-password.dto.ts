@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 import {
@@ -10,10 +12,12 @@ import {
 } from '@/common/constants/auth.constants';
 
 export class UpdatePasswordDto {
+  @ApiProperty({ example: 'v4l1dPassw0rd' })
   @IsNotEmpty()
   @IsString()
   readonly currentPassword: string;
 
+  @ApiProperty({ example: '4n0th3rP4ssw0rd', pattern: PASSWORD_REGEX.source })
   @IsNotEmpty()
   @IsString()
   @Matches(PASSWORD_REGEX, {
