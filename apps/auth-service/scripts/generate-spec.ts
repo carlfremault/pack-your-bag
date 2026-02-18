@@ -5,26 +5,19 @@ import path from 'path';
 expand(dotenv.config({ path: path.resolve(__dirname, '../../../.env') }));
 
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 
 import * as fs from 'fs';
 
-import { AppModule } from '../src/app.module';
+import { AppModule } from '@/app.module';
+import { swaggerConfig } from '@/common/helpers/swagger-config';
 
 async function generateSpec() {
   const app = await NestFactory.create(AppModule, { logger: false });
 
-  const config = new DocumentBuilder()
-    .setTitle('Auth Service')
-    .setDescription('Auth Service API description')
-    .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'refresh-token')
-    .build();
-
   let exitCode = 0;
   try {
-    const document = SwaggerModule.createDocument(app, config);
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
     fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
     console.log('✅ OpenAPI spec generated at ./openapi.json');
   } catch (err) {
