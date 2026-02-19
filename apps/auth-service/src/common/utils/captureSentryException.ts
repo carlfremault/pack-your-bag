@@ -4,7 +4,7 @@ import { AuditEventType } from '@prisma-client';
 import * as Sentry from '@sentry/nestjs';
 import { Request } from 'express';
 
-interface SentryReportContext {
+export interface SentryReportContext {
   exception: unknown;
   request: Request | null;
   errorCode: string;

@@ -217,7 +217,12 @@ export interface components {
       /** @description Access token expiration time in seconds */
       expires_in: number;
       /** @description User information */
-      user: Record<string, never>;
+      user: {
+        /** @description User ID */
+        id?: string;
+        /** @description User role */
+        role?: number;
+      };
     };
     UpdatePasswordDto: {
       /** @example v4l1dPassw0rd */
@@ -237,13 +242,19 @@ export interface components {
       token: string;
       /** @example v4l1dPassw0rd */
       password: string;
-      /** @example fr-FR */
+      /**
+       * @description User locale, to enable date localization in email templates
+       * @example fr-FR
+       */
       locale: string;
     };
     DeleteUserDto: {
       /** @example v4l1dPassw0rd */
       password: string;
-      /** @example fr-FR */
+      /**
+       * @description User locale, to enable date localization in email templates
+       * @example fr-FR
+       */
       locale: string;
     };
     CancelDeletionDto: {

@@ -18,6 +18,7 @@ export class TasksService {
   private readonly errorWarnLogsRetentionDays: number;
   private readonly criticalLogsRetentionDays: number;
   private readonly deletedUsersRetentionDays: number;
+  private readonly verificationTokenRetentionDays: number;
 
   constructor(
     private readonly refreshTokenService: RefreshTokenService,
@@ -39,6 +40,9 @@ export class TasksService {
     );
     this.deletedUsersRetentionDays = this.configService.getOrThrow(
       'AUTH_USER_DELETE_RETENTION_DAYS',
+    );
+    this.verificationTokenRetentionDays = this.configService.getOrThrow(
+      'AUTH_VERIFICATION_TOKEN_RETENTION_DAYS',
     );
   }
 
@@ -199,12 +203,16 @@ export class TasksService {
   async cleanupVerificationTokens() {
     this.logger.log('Starting cleanup of expired/used verification tokens');
 
+    const verificationTokenCutoff = new Date(
+      Date.now() - this.verificationTokenRetentionDays * MS_PER_DAY,
+    );
+
     try {
       const result = await this.verificationTokenService.deleteVerificationTokens({
-        OR: [{ expiresAt: { lt: new Date(Date.now() - 1 * MS_PER_DAY) } }, { used: true }],
+        OR: [{ expiresAt: { lt: verificationTokenCutoff } }, { used: true }],
       });
 
-      const auditMessage = `Cleaned up ${result.count} expired/used verification token${result.count === 1 ? '' : 's'}.`;
+      const auditMessage = `Cleaned up ${result.count} expired/used verification token${result.count === 1 ? '' : 's'}. Cutoff: ${verificationTokenCutoff.toISOString()}`;
       this.logger.log(auditMessage);
 
       this.auditLogProvider.auditRequest({
@@ -212,7 +220,7 @@ export class TasksService {
         severity: AuditSeverity.INFO,
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
-        metadata: { count: result.count },
+        metadata: { count: result.count, cutoff: verificationTokenCutoff.toISOString() },
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

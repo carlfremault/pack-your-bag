@@ -38,8 +38,10 @@ export class EmailService {
     errorContext: EmailErrorContext,
   ): Promise<void> {
     let lastError: unknown;
+    let actualAttempts = 0;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      actualAttempts = attempt;
       try {
         await this.mailerService.sendMail(mailOptions);
 
@@ -69,7 +71,7 @@ export class EmailService {
       }
     }
 
-    this.processError(lastError, errorContext);
+    this.processError(lastError, errorContext, actualAttempts);
   }
 
   // ============================================
@@ -102,11 +104,11 @@ export class EmailService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private processError(error: unknown, errorContext: EmailErrorContext): void {
+  private processError(error: unknown, errorContext: EmailErrorContext, attempts: number): void {
     const { userId, emailType, metadata } = errorContext;
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
-    const auditMessage = `Failed to send ${errorContext.emailType} email after ${this.maxRetries} attempts: ${errorMessage}`;
+    const auditMessage = `Failed to send ${errorContext.emailType} email after ${attempts} attempts: ${errorMessage}`;
 
     this.logger.error(auditMessage, errorStack);
 
@@ -131,7 +133,7 @@ export class EmailService {
       metadata: {
         errorMessage,
         emailType: emailType,
-        attempts: this.maxRetries,
+        attempts,
         ...(metadata && typeof metadata === 'object' ? metadata : {}),
       },
       userId,

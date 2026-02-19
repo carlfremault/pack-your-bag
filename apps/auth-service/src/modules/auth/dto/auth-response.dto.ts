@@ -19,7 +19,14 @@ export class AuthResponseDto {
   @Expose()
   readonly expires_in: number;
 
-  @ApiProperty({ description: 'User information' })
+  @ApiProperty({
+    description: 'User information',
+    type: 'object',
+    properties: {
+      id: { type: 'string', description: 'User ID' },
+      role: { type: 'number', description: 'User role' },
+    },
+  })
   @Expose()
   readonly user: { id: string; role: number };
 }

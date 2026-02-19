@@ -1,8 +1,12 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
+import {
+  ApiBffAndAccessSecurity,
+  ApiBffSecurity,
+} from '@/common/decorators/api-security.decorator';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { BffGuard } from '@/common/guards/bff.guard';
@@ -15,7 +19,6 @@ import { DeleteUserDto } from './dto/delete-user.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
-@ApiSecurity('bff-secret')
 @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
 @ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('user')
@@ -24,7 +27,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('delete')
-  @ApiBearerAuth('access-token')
+  @ApiBffAndAccessSecurity()
   @ApiOperation({
     summary: 'Request account deletion — account is permanently removed after a grace period',
   })
@@ -42,6 +45,7 @@ export class UserController {
   }
 
   @Post('cancel-deletion')
+  @ApiBffSecurity()
   @ApiOperation({
     summary: 'Cancel account deletion using a token from the deletion confirmation email',
   })

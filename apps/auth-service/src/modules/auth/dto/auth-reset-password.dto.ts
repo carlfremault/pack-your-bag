@@ -29,7 +29,10 @@ export class AuthResetPasswordDto {
   @MaxLength(PASSWORD_MAX_LENGTH, { message: PASSWORD_MAX_LENGTH_MESSAGE })
   readonly password: string;
 
-  @ApiProperty({ example: 'fr-FR' })
+  @ApiProperty({
+    example: 'fr-FR',
+    description: 'User locale, to enable date localization in email templates',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(10)

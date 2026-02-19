@@ -97,11 +97,11 @@ export class UserService {
   async updatePassword(userId: string, body: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = body;
 
-    return this.prisma.$transaction(async (tx) => {
-      if (currentPassword === newPassword) {
-        throw new BadRequestException('New password and current password cannot be the same');
-      }
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('New password and current password cannot be the same');
+    }
 
+    return this.prisma.$transaction(async (tx) => {
       const user = await this.getUser({ id: userId }, tx);
       if (!user) throw new NotFoundException('User not found');
       DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);

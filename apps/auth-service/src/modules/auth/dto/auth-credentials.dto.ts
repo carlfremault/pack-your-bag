@@ -4,6 +4,7 @@ import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 import {
+  EMAIL_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MAX_LENGTH_MESSAGE,
   PASSWORD_MESSAGE,
@@ -17,6 +18,7 @@ export class AuthCredentialsDto {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
+  @MaxLength(EMAIL_MAX_LENGTH)
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim().toLowerCase() : value,
   )

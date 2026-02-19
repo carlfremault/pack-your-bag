@@ -487,7 +487,7 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return silently for deleted or non-existent user (timing-safe)', async () => {
+    it('should return silently for deleted or non-existent user', async () => {
       const dto = { email: 'nonexistent@test.com' };
 
       mockUserService.getUser.mockResolvedValue(null);

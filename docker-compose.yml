@@ -49,10 +49,6 @@ volumes:
     name: pack-your-bag-node-modules-v24
   pack-your-bag-extensions-v24:
     name: pack-your-bag-extensions-v24
-  pack-your-bag-node-modules:
-    name: pack-your-bag-node-modules
-  pack-your-bag-extensions:
-    name: pack-your-bag-extensions
   postgres-data:
     name: postgres-data
   postgres-run:

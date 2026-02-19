@@ -95,7 +95,9 @@ export const generateAndStoreVerificationToken = async ({
   return { user, token };
 };
 
-export const generateVerificationTokenAndDeleteUser = async (ctx: IntegrationTestContext) => {
+export const generateVerificationTokenAndDeleteUser = async (
+  ctx: IntegrationTestContext,
+): Promise<{ user: User; token: string }> => {
   const expiresAt = new Date(Date.now() + ctx.userDeleteRetentionPeriod * MS_PER_DAY);
   const { user, token } = await generateAndStoreVerificationToken({
     ctx,
