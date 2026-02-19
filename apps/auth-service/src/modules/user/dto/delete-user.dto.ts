@@ -10,7 +10,10 @@ export class DeleteUserDto {
   @IsString()
   readonly password: string;
 
-  @ApiProperty({ example: 'fr-FR' })
+  @ApiProperty({
+    example: 'fr-FR',
+    description: 'User locale, to enable date localization in email templates',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(10)

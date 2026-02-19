@@ -286,6 +286,7 @@ Daily cron jobs clean up expired data with configurable retention periods:
 - **Refresh Tokens:** Expired tokens deleted immediately; revoked tokens after 14 days.
 - **Audit Logs:** INFO (30 days), WARN/ERROR (60 days), CRITICAL (90 days).
 - **Deleted Users:** Final deletion and log anonymization after 30-day grace period.
+- **Verification Tokens:** Expired tokens deleted after 1 day, used tokens deleted immediately.
 
 ##### Testing & Quality Assurance
 

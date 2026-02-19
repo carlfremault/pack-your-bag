@@ -63,8 +63,8 @@ export class VerificationTokenService {
 
   async markTokenAsUsed(tokenId: string, tx?: Prisma.TransactionClient): Promise<void> {
     const prisma = tx ?? this.prisma;
-    await prisma.verificationToken.update({
-      where: { id: tokenId },
+    await prisma.verificationToken.updateMany({
+      where: { id: tokenId, used: false },
       data: { used: true },
     });
   }

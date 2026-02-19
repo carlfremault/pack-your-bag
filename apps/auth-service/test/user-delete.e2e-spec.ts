@@ -30,8 +30,8 @@ describe('User Deletion (e2e)', () => {
   });
 
   afterAll(async () => {
-    await ctx?.close();
     await ctx?.clearMailpit();
+    await ctx?.close();
   });
 
   describe('softDeleteUser', () => {

@@ -65,7 +65,8 @@ const validationSchema = Joi.object({
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
   AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: Joi.number().default(30000),
   AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS: Joi.number().min(1).default(14),
-  AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: Joi.number().default(3600000),
+  AUTH_VERIFICATION_TOKEN_RETENTION_DAYS: Joi.number().min(1).default(1),
+  AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: Joi.number().default(900000),
 
   // Logging
   AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
@@ -121,8 +122,8 @@ const validationSchema = Joi.object({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         transport: {
-          host: config.get('AUTH_MAIL_HOST', 'mailpit'),
-          port: config.get<number>('AUTH_MAIL_PORT', 1025),
+          host: config.get<string>('AUTH_MAIL_HOST'),
+          port: config.get<number>('AUTH_MAIL_PORT'),
           secure: config.get('AUTH_MAIL_SECURE'),
           ignoreTLS: config.get('AUTH_MAIL_IGNORE_TLS'),
           auth: config.get('AUTH_MAIL_USER')

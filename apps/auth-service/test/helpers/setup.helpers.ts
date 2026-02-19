@@ -74,8 +74,8 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
   const resetDb = async () => {
     await prisma.auditLog.deleteMany();
     await prisma.refreshToken.deleteMany();
-    await prisma.user.deleteMany();
     await prisma.verificationToken.deleteMany();
+    await prisma.user.deleteMany();
   };
 
   const clearMailpit = async () => {

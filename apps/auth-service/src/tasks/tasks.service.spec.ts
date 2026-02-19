@@ -20,6 +20,7 @@ const MOCK_CONFIG = {
   AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: 60,
   AUDIT_LOG_CRITICAL_RETENTION_DAYS: 90,
   AUTH_USER_DELETE_RETENTION_DAYS: 30,
+  AUTH_VERIFICATION_TOKEN_RETENTION_DAYS: 1,
 } as const;
 
 describe('TasksService', () => {
@@ -119,9 +120,13 @@ describe('TasksService', () => {
   describe('cleanupAuditLogs', () => {
     it('should call deleteAuditLogs with correct cutoffs', async () => {
       const now = new Date().getTime();
-      const infoDays = MOCK_CONFIG.AUDIT_LOG_INFO_RETENTION_DAYS;
-      const errorDays = MOCK_CONFIG.AUDIT_LOG_ERROR_WARN_RETENTION_DAYS;
-      const criticalDays = MOCK_CONFIG.AUDIT_LOG_CRITICAL_RETENTION_DAYS;
+      const infoCutoff = mockConfigService.getOrThrow('AUDIT_LOG_INFO_RETENTION_DAYS') as number;
+      const errorCutoff = mockConfigService.getOrThrow(
+        'AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
+      ) as number;
+      const criticalCutoff = mockConfigService.getOrThrow(
+        'AUDIT_LOG_CRITICAL_RETENTION_DAYS',
+      ) as number;
 
       mockAuditLogService.deleteAuditLogs.mockResolvedValue({ count: 10 });
 
@@ -132,15 +137,15 @@ describe('TasksService', () => {
           OR: expect.arrayContaining([
             {
               severity: AuditSeverity.INFO,
-              createdAt: { lt: new Date(now - infoDays * MS_PER_DAY) },
+              createdAt: { lt: new Date(now - infoCutoff * MS_PER_DAY) },
             },
             {
               severity: { in: [AuditSeverity.WARN, AuditSeverity.ERROR] },
-              createdAt: { lt: new Date(now - errorDays * MS_PER_DAY) },
+              createdAt: { lt: new Date(now - errorCutoff * MS_PER_DAY) },
             },
             {
               severity: AuditSeverity.CRITICAL,
-              createdAt: { lt: new Date(now - criticalDays * MS_PER_DAY) },
+              createdAt: { lt: new Date(now - criticalCutoff * MS_PER_DAY) },
             },
           ]) as object[],
         }),
@@ -148,9 +153,9 @@ describe('TasksService', () => {
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
           metadata: expect.objectContaining({
-            infoCutoff: new Date(now - infoDays * MS_PER_DAY).toISOString(),
-            errorWarnCutoff: new Date(now - errorDays * MS_PER_DAY).toISOString(),
-            criticalCutoff: new Date(now - criticalDays * MS_PER_DAY).toISOString(),
+            infoCutoff: new Date(now - infoCutoff * MS_PER_DAY).toISOString(),
+            errorWarnCutoff: new Date(now - errorCutoff * MS_PER_DAY).toISOString(),
+            criticalCutoff: new Date(now - criticalCutoff * MS_PER_DAY).toISOString(),
           }) as object,
         }),
       );
@@ -253,13 +258,14 @@ describe('TasksService', () => {
   describe('cleanupVerificationTokens', () => {
     it('should successfully clean up verification tokens and audit the result', async () => {
       const now = new Date().getTime();
+      const cutoff = new Date(now - 1 * MS_PER_DAY);
       mockVerificationTokenService.deleteVerificationTokens.mockResolvedValue({ count: 10 });
 
       await service.cleanupVerificationTokens();
 
       expect(mockVerificationTokenService.deleteVerificationTokens).toHaveBeenCalledWith(
         expect.objectContaining({
-          OR: [{ expiresAt: { lt: new Date(now - 1 * MS_PER_DAY) } }, { used: true }],
+          OR: [{ expiresAt: { lt: cutoff } }, { used: true }],
         }),
       );
 
@@ -269,9 +275,9 @@ describe('TasksService', () => {
           severity: AuditSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining(
-            'Cleaned up 10 expired/used verification tokens',
+            `Cleaned up 10 expired/used verification tokens. Cutoff: ${cutoff.toISOString()}`,
           ) as string,
-          metadata: { count: 10 },
+          metadata: { count: 10, cutoff: cutoff.toISOString() },
         }),
       );
     });

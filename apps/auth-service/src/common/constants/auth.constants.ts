@@ -29,7 +29,7 @@ export const THROTTLE_LIMITS = {
   CANCEL_ACCOUNT_DELETION: 3,
 } as const;
 
-// Mailing
+// Events
 export const AUTH_EVENTS = {
   AUDIT_LOG: 'audit.log',
   PASSWORD_RESET_REQUESTED: 'password.reset_requested',
@@ -39,3 +39,4 @@ export const AUTH_EVENTS = {
 
 // Various
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
+export const EMAIL_MAX_LENGTH = 254;

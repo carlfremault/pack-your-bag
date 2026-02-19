@@ -159,7 +159,7 @@ describe('CustomThrottlerGuard', () => {
     });
 
     it('should accept valid email at boundary (254 chars)', async () => {
-      const validEmail = 'a'.repeat(240) + '@example.com'; // 253 chars total
+      const validEmail = 'a'.repeat(242) + '@example.com'; // 254 chars total
       const req = createMockRequest({
         path: '/auth/login',
         ip: '10.0.0.7',

@@ -15,5 +15,5 @@ export const formatLocaleDate = (date: Date, locale: string = 'en-GB'): string =
   return new Intl.DateTimeFormat(locale, {
     dateStyle: 'full',
     timeStyle: 'short',
-  }).format(date);
+  }).format(dateObj);
 };

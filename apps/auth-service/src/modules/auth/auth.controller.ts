@@ -9,12 +9,17 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import type { Request } from 'express';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
+import {
+  ApiBffAndAccessSecurity,
+  ApiBffAndRefreshSecurity,
+  ApiBffSecurity,
+} from '@/common/decorators/api-security.decorator';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { BffGuard } from '@/common/guards/bff.guard';
@@ -33,7 +38,6 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
-@ApiSecurity('bff-secret')
 @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
 @ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('auth')
@@ -42,6 +46,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @ApiBffSecurity()
   @ApiOperation({ summary: 'Register a new user and issue tokens' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -59,6 +64,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiBffSecurity()
   @ApiOperation({ summary: 'Authenticate a user and issue tokens' })
   @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto, description: 'User logged in.' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
@@ -73,7 +79,7 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  @ApiBearerAuth('refresh-token')
+  @ApiBffAndRefreshSecurity()
   @ApiOperation({ summary: 'Rotate refresh token and issue new access token' })
   @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto, description: 'Tokens refreshed.' })
   @ApiResponse({
@@ -99,7 +105,7 @@ export class AuthController {
   }
 
   @Delete('logout')
-  @ApiBearerAuth('refresh-token')
+  @ApiBffAndRefreshSecurity()
   @ApiOperation({ summary: 'Revoke the current refresh token family (single device logout)' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Logged out successfully.' })
   @ApiResponse({
@@ -115,7 +121,7 @@ export class AuthController {
   }
 
   @Delete('logout-all')
-  @ApiBearerAuth('access-token')
+  @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Revoke all refresh tokens for the user (all devices logout)' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'All sessions revoked.' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired access token.' })
@@ -128,7 +134,7 @@ export class AuthController {
   }
 
   @Patch('update-password')
-  @ApiBearerAuth('access-token')
+  @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update password and re-issue tokens (invalidates all other sessions)' })
   @ApiResponse({ status: HttpStatus.OK, type: AuthResponseDto, description: 'Password updated.' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed.' })
@@ -142,6 +148,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @ApiBffSecurity()
   @ApiOperation({ summary: 'Request a password reset email' })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
@@ -158,6 +165,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @ApiBffSecurity()
   @ApiOperation({ summary: 'Reset password using a token from the reset email' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Password reset successfully.' })
   @ApiResponse({

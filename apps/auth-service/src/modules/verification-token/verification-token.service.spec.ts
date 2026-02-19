@@ -15,7 +15,7 @@ describe('VerificationTokenService', () => {
     upsert: vi.fn(),
     findUnique: vi.fn(),
     deleteMany: vi.fn(),
-    update: vi.fn(),
+    updateMany: vi.fn(),
   };
 
   const mockPrismaService = {
@@ -158,28 +158,28 @@ describe('VerificationTokenService', () => {
 
   describe('markTokenAsUsed', () => {
     it('should call verificationToken.update with used: true for the given token id', async () => {
-      mockVerificationToken.update.mockResolvedValue({});
+      mockVerificationToken.updateMany.mockResolvedValue({});
 
       await service.markTokenAsUsed('token-1');
 
-      expect(mockVerificationToken.update).toHaveBeenCalledWith({
-        where: { id: 'token-1' },
+      expect(mockVerificationToken.updateMany).toHaveBeenCalledWith({
+        where: { id: 'token-1', used: false },
         data: { used: true },
       });
     });
 
     it('should use the provided transaction client instead of the injected prisma', async () => {
       const txUpdate = vi.fn().mockResolvedValue({});
-      const tx = { verificationToken: { update: txUpdate } } as never;
+      const tx = { verificationToken: { updateMany: txUpdate } } as never;
 
       await service.markTokenAsUsed('token-1', tx);
 
       expect(txUpdate).toHaveBeenCalled();
-      expect(mockVerificationToken.update).not.toHaveBeenCalled();
+      expect(mockVerificationToken.updateMany).not.toHaveBeenCalled();
     });
 
     it('should return void regardless of what Prisma resolves with', async () => {
-      mockVerificationToken.update.mockResolvedValue({ id: 'token-1', used: true });
+      mockVerificationToken.updateMany.mockResolvedValue({ id: 'token-1', used: true });
 
       const result = await service.markTokenAsUsed('token-1');
 

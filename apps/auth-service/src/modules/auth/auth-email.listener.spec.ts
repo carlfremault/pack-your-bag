@@ -20,7 +20,7 @@ describe('AuthEmailListener', () => {
   let authEmailListener: AuthEmailListener;
 
   const mockConfigService = {
-    getOrThrow: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+    getOrThrow: vi.fn(<T>(key: string, defaultValue?: T): T => {
       const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
       if (value === undefined && defaultValue === undefined) {
         throw new Error(`Configuration key "${key}" does not exist`);

@@ -40,7 +40,7 @@ export class AuditLogProvider extends BaseEventProvider {
     }
 
     const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request;
-    const userAgent = headers && getUserAgentFromHeaders(headers);
+    const userAgent = headers ? getUserAgentFromHeaders(headers) : null;
 
     this.safeEmit(AUTH_EVENTS.AUDIT_LOG, {
       ...data,

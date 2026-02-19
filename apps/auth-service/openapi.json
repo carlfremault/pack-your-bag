@@ -126,9 +126,7 @@
         },
         "security": [
           {
-            "bff-secret": []
-          },
-          {
+            "bff-secret": [],
             "refresh-token": []
           }
         ],
@@ -158,9 +156,7 @@
         },
         "security": [
           {
-            "bff-secret": []
-          },
-          {
+            "bff-secret": [],
             "refresh-token": []
           }
         ],
@@ -190,9 +186,7 @@
         },
         "security": [
           {
-            "bff-secret": []
-          },
-          {
+            "bff-secret": [],
             "access-token": []
           }
         ],
@@ -242,9 +236,7 @@
         },
         "security": [
           {
-            "bff-secret": []
-          },
-          {
+            "bff-secret": [],
             "access-token": []
           }
         ],
@@ -362,9 +354,7 @@
         },
         "security": [
           {
-            "bff-secret": []
-          },
-          {
+            "bff-secret": [],
             "access-token": []
           }
         ],
@@ -652,7 +642,17 @@
           },
           "user": {
             "type": "object",
-            "description": "User information"
+            "description": "User information",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "User ID"
+              },
+              "role": {
+                "type": "number",
+                "description": "User role"
+              }
+            }
           }
         },
         "required": [
@@ -708,7 +708,8 @@
           },
           "locale": {
             "type": "string",
-            "example": "fr-FR"
+            "example": "fr-FR",
+            "description": "User locale, to enable date localization in email templates"
           }
         },
         "required": [
@@ -726,7 +727,8 @@
           },
           "locale": {
             "type": "string",
-            "example": "fr-FR"
+            "example": "fr-FR",
+            "description": "User locale, to enable date localization in email templates"
           }
         },
         "required": [
