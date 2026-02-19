@@ -8,17 +8,23 @@ import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthStrategy } from '@/common/strategies/jwt-auth.strategy';
 import { JwtRefreshStrategy } from '@/common/strategies/jwt-refresh.strategy';
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
+import { EmailModule } from '@/modules/email/email.module';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
 import { UserModule } from '@/modules/user/user.module';
+import { VerificationTokenModule } from '@/modules/verification-token/verification-token.module';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthEmailListener } from './auth-email.listener';
+import { AuthEventProvider } from './auth-event.provider';
 
 @Module({
   imports: [
     AuditLogModule,
     UserModule,
+    EmailModule,
     RefreshTokenModule,
+    VerificationTokenModule,
     PassportModule,
     JwtModule.registerAsync({
       global: true,
@@ -46,6 +52,14 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthStrategy, JwtRefreshStrategy, CustomThrottlerGuard, BffGuard],
+  providers: [
+    AuthService,
+    AuthEmailListener,
+    AuthEventProvider,
+    JwtAuthStrategy,
+    JwtRefreshStrategy,
+    CustomThrottlerGuard,
+    BffGuard,
+  ],
 })
 export class AuthModule {}

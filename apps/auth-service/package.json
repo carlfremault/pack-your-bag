@@ -14,9 +14,11 @@
     "migrate": "prisma migrate dev",
     "status": "prisma migrate status",
     "generate": "prisma generate",
-    "seed": "prisma db seed"
+    "seed": "prisma db seed",
+    "openapi": "ts-node --files -r tsconfig-paths/register scripts/generate-spec.ts"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -26,6 +28,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.1.0",
+    "@nestjs/swagger": "^11.2.6",
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.2.0",
@@ -38,6 +41,7 @@
     "dotenv": "^17.2.3",
     "helmet": "^8.1.0",
     "joi": "^18.0.2",
+    "nodemailer": "^8.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
@@ -55,6 +59,7 @@
     "@types/bcrypt": "^6",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.7",
+    "@types/nodemailer": "^7.0.9",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.2",
     "source-map-support": "^0.5.21",

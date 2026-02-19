@@ -20,7 +20,9 @@
     "db:migrate:prod": "turbo run migrate --filter=product-service",
     "db:status:auth": "turbo run status --filter=auth-service",
     "db:generate:auth": "turbo run generate --filter=auth-service",
-    "db:seed:auth": "turbo run seed --filter=auth-service"
+    "db:seed:auth": "turbo run seed --filter=auth-service",
+    "openapi:auth": "turbo run openapi --filter=auth-service",
+    "generate:auth-client": "yarn workspace @repo/auth-client generate"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

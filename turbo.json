@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET"],
+  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET", "FRONTEND_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -62,6 +62,11 @@
       "dependsOn": ["generate"],
       "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
       "env": ["AUTH_*"]
+    },
+    "openapi": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.ts", "scripts/generate-spec.ts"],
+      "outputs": ["openapi.json"]
     },
     "transit": {
       "dependsOn": ["^transit"]

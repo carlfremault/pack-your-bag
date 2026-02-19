@@ -40,7 +40,12 @@ export class AuditInterceptor implements NestInterceptor {
         const userId = user?.userId || data?.user?.id || null;
         const eventType: AuditEventType = auditOverride || defaultEvent;
 
-        if (!userId && eventType !== AuditEventType.USER_REGISTERED) {
+        const unauthenticatedEvents = [
+          AuditEventType.PASSWORD_FORGOTTEN,
+          AuditEventType.PASSWORD_RESET,
+        ] as AuditEventType[];
+
+        if (!userId && !unauthenticatedEvents.includes(eventType)) {
           this.logger.warn(`Could not resolve userId for audit event: ${eventType}`);
         }
 

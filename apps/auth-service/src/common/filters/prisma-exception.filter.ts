@@ -96,7 +96,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     // Standard case: Duplicate entry (User Error)
     const fieldList = fields.join(', ');
     const userMessage = fields.length
-      ? `${capitalizeFirstLetter(fieldList)} already exists.`
+      ? `${capitalizeFirstLetter(fieldList)} already exist${fields.length > 1 ? '' : 's'}.`
       : 'Record already exists.';
 
     return {

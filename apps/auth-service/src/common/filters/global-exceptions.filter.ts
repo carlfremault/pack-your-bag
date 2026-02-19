@@ -9,14 +9,14 @@ import {
 } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
+import { AuditEventType, AuditSeverity } from '@prisma-client';
 import { Request, Response } from 'express';
 
-import { captureSentryException } from '@/common/utils/captureSentryException';
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
+import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
 import { safeStringify } from '@/common/utils/safeStringify';
-import { AuditEventType, AuditSeverity } from '@/generated/prisma';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
-
-import { AccountDeletedException } from '../exceptions/forbidden.exceptions';
 
 interface HttpExceptionResponse {
   statusCode: number;
@@ -90,6 +90,12 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       return;
     }
 
+    // 400 Invalid token attempts (password reset, etc.)
+    if (exception instanceof InvalidTokenException) {
+      this.auditInvalidToken(request, exception, errorCode);
+      return;
+    }
+
     // 400 Validation errors
     if (status === HttpStatus.BAD_REQUEST && this.isValidationError(exception)) {
       this.auditValidationError(request, exception, errorCode, clientMessage);
@@ -113,6 +119,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       return;
     }
   }
+
+  // ============================================
+  // AUDIT HANDLERS
+  // ============================================
 
   private auditRateLimitExceeded(request: Request, exception: unknown, errorCode: string): void {
     const { path, method } = request;
@@ -147,19 +157,15 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
 
     this.logger.error(`Unhandled ${status} at ${method} ${path}: ${message}`, errorStack);
 
-    try {
-      captureSentryException({
+    safeCaptureSentryException(
+      {
         exception,
         request,
         errorCode,
         eventType: AuditEventType.INTERNAL_SERVER_ERROR,
-      });
-    } catch (error) {
-      this.logger.error(
-        'Failed to capture Sentry exception',
-        error instanceof Error ? error.stack : String(error),
-      );
-    }
+      },
+      this.logger,
+    );
 
     this.auditLogProvider.auditRequest(
       {
@@ -203,6 +209,28 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
         eventType: AuditEventType.AUTHORIZATION_FAILED,
         severity: AuditSeverity.WARN,
         statusCode: HttpStatus.FORBIDDEN,
+        errorCode,
+        message,
+      },
+      request,
+    );
+  }
+
+  private auditInvalidToken(
+    request: Request,
+    exception: InvalidTokenException,
+    errorCode: string,
+  ): void {
+    const { path, method } = request;
+    const message = typeof exception.cause === 'string' ? exception.cause : exception.message;
+
+    this.logger.warn(`Invalid token attempt at ${method} ${path}: ${message}`);
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.INVALID_TOKEN,
+        severity: AuditSeverity.WARN,
+        statusCode: HttpStatus.BAD_REQUEST,
         errorCode,
         message,
       },
@@ -268,6 +296,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       request,
     );
   }
+
+  // ============================================
+  // HELPER METHODS
+  // ============================================
 
   private isServerError(status: HttpStatus): boolean {
     const statusCode = status as number;

@@ -7,23 +7,36 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { AuditEventType, Prisma } from '@prisma-client';
+import { AuditEventType, Prisma, TokenType } from '@prisma-client';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { v7 as uuidv7 } from 'uuid';
 
-import { AUTH_DEFAULT_USER_ROLE_ID } from '@/common/constants/auth.constants';
+import { AUTH_DEFAULT_USER_ROLE_ID, DEFAULT_LOCALE } from '@/common/constants/auth.constants';
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/unauthorized.exceptions';
 import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
-import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
+import { generateToken } from '@/common/utils/generateToken';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
+import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
+import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { AuthEventProvider } from './auth-event.provider';
+
+interface RefreshTokenResult {
+  data: AuthResponseDto;
+  auditOverride?: AuditEventType;
+}
 
 @Injectable()
 export class AuthService {
@@ -34,29 +47,36 @@ export class AuthService {
   private readonly deletedUserRetentionDays: number;
   private readonly accessTokenExpiresIn: number;
   private readonly refreshTokenExpiresIn: number;
+  private readonly passwordResetTokenExpiresInMS: number;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly verificationTokenService: VerificationTokenService,
     private readonly userService: UserService,
+    private readonly authEventProvider: AuthEventProvider,
   ) {
-    this.bcryptSaltRounds = this.configService.get<number>('AUTH_BCRYPT_SALT_ROUNDS', 10);
+    this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
     this.dummyHash = bcrypt.hashSync('dummy_password_for_timing', this.bcryptSaltRounds);
-    this.deletedUserRetentionDays = this.configService.get<number>(
+    this.deletedUserRetentionDays = this.configService.getOrThrow<number>(
       'AUTH_USER_DELETE_RETENTION_DAYS',
-      30,
     );
-    this.accessTokenExpiresIn = this.configService.get<number>(
+    this.accessTokenExpiresIn = this.configService.getOrThrow<number>(
       'AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS',
-      900,
     );
-    this.refreshTokenExpiresIn = this.configService.get<number>(
+    this.refreshTokenExpiresIn = this.configService.getOrThrow<number>(
       'AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS',
-      604800,
+    );
+    this.passwordResetTokenExpiresInMS = this.configService.getOrThrow<number>(
+      'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
     );
   }
+
+  // ============================================
+  // BASIC ROUTE HANDLERS
+  // ============================================
 
   async register(body: AuthCredentialsDto): Promise<AuthResponseDto> {
     const { email, password } = body;
@@ -94,7 +114,7 @@ export class AuthService {
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
-  async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<AuthResponseDto> {
+  async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<RefreshTokenResult> {
     const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
     const user = await this.userService.getUser({ id: userId, isDeleted: false });
     if (!user) {
@@ -126,16 +146,17 @@ export class AuthService {
         userId,
         storedToken,
       );
-      return this.generateJwtResponse(
+      const data = await this.generateJwtResponse(
         userId,
         user.roleId,
         newerValidToken.id,
         newerValidToken.family,
-        AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       );
+
+      return { data, auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION };
     }
 
-    return this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId);
+    return { data: await this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId) };
   }
 
   async logout(user: RefreshTokenUser): Promise<void> {
@@ -152,15 +173,77 @@ export class AuthService {
     });
   }
 
+  // ============================================
+  // PASSWORD MANAGEMENT
+  // ============================================
+
+  async forgotPassword(body: AuthForgotPasswordDto): Promise<void> {
+    const { email } = body;
+    const user = await this.userService.getUser({ email: email.toLowerCase(), isDeleted: false });
+
+    if (!user) {
+      return;
+    }
+
+    const { token: resetToken, hashedToken: hashedResetToken } = generateToken();
+    const expiresAt = new Date(Date.now() + this.passwordResetTokenExpiresInMS);
+
+    await this.verificationTokenService.upsertVerificationToken(
+      user.id,
+      hashedResetToken,
+      expiresAt,
+      TokenType.PASSWORD_RESET,
+    );
+
+    this.authEventProvider.emitPasswordResetRequested({
+      userId: user.id,
+      email: user.email,
+      resetToken,
+    });
+  }
+
+  async resetPassword(body: AuthResetPasswordDto): Promise<void> {
+    const { token, password, locale = DEFAULT_LOCALE } = body;
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const resetRecord = await this.verificationTokenService.getVerificationToken({
+      where: {
+        token: hash,
+        type: TokenType.PASSWORD_RESET,
+        used: false,
+      },
+    });
+
+    if (!resetRecord || resetRecord.expiresAt < new Date()) {
+      throw new InvalidTokenException();
+    }
+
+    const user = await this.userService.getUser({ id: resetRecord.userId });
+    if (!user || user.isDeleted) {
+      throw new InvalidTokenException();
+    }
+
+    await this.userService.resetPasswordWithToken(resetRecord.id, resetRecord.userId, password);
+
+    this.authEventProvider.emitPasswordResetConfirmed({
+      userId: user.id,
+      email: user.email,
+      resetTimestamp: formatLocaleDate(new Date(), locale),
+    });
+  }
+
   async updatePasswordAndReauthenticate(
     userId: string,
     body: UpdatePasswordDto,
   ): Promise<AuthResponseDto> {
-    const user = await this.userService.updatePassword(userId, body);
+    const user = await this.userService.updatePassword(userId, body); // Revokes tokens as well
     return this.issueRefreshToken(user.id, user.roleId);
   }
 
-  // Helper functions
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+
   private async issueRefreshToken(
     userId: string,
     roleId: number,
@@ -210,7 +293,6 @@ export class AuthService {
     roleId: number,
     tokenId: string,
     tokenFamilyId: string,
-    auditOverride?: AuditEventType,
   ): Promise<AuthResponseDto> {
     const payload = {
       sub: userId,
@@ -239,7 +321,6 @@ export class AuthService {
         token_type: 'Bearer',
         expires_in: this.accessTokenExpiresIn,
         user: { id: userId, role: roleId },
-        ...(auditOverride && { auditOverride }),
       };
     } catch (error) {
       this.logger.error('JWT Signing Failed:', {

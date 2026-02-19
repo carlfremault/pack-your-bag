@@ -2,9 +2,12 @@ import './instrument';
 
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { SwaggerModule } from '@nestjs/swagger';
 
 import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+
+import { swaggerConfig } from '@/common/helpers/swagger-config';
 
 import { AppModule } from './app.module';
 
@@ -103,6 +106,12 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization', 'x-bff-secret'],
   });
+
+  // Swagger
+  if (!isProduction) {
+    const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api', app, documentFactory);
+  }
 
   // Graceful shutdown
   app.enableShutdownHooks();

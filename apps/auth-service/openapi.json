@@ -1,0 +1,758 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentialsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "409": {
+            "description": "Email already in use."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Register a new user and issue tokens",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentialsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Invalid email or password."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Authenticate a user and issue tokens",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh-token": {
+      "post": {
+        "operationId": "AuthController_refreshToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Tokens refreshed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "refresh-token": []
+          }
+        ],
+        "summary": "Rotate refresh token and issue new access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "delete": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Logged out successfully."
+          },
+          "401": {
+            "description": "Invalid or expired refresh token."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "refresh-token": []
+          }
+        ],
+        "summary": "Revoke the current refresh token family (single device logout)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout-all": {
+      "delete": {
+        "operationId": "AuthController_logoutAllDevices",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "All sessions revoked."
+          },
+          "401": {
+            "description": "Invalid or expired access token."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Revoke all refresh tokens for the user (all devices logout)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/update-password": {
+      "patch": {
+        "operationId": "AuthController_updatePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Invalid or expired access token."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Update password and re-issue tokens (invalidates all other sessions)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Reset email sent if the address is registered. Response is identical either way to prevent user enumeration."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Request a password reset email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Password reset successfully."
+          },
+          "400": {
+            "description": "Token invalid, expired, or already used."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Reset password using a token from the reset email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/user/delete": {
+      "post": {
+        "operationId": "UserController_deleteUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "User deleted."
+          },
+          "401": {
+            "description": "Invalid password."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Request account deletion — account is permanently removed after a grace period",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/user/cancel-deletion": {
+      "post": {
+        "operationId": "UserController_cancelAccountDeletion",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDeletionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Account deletion cancelled."
+          },
+          "400": {
+            "description": "Token invalid, expired, or already used."
+          },
+          "403": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Cancel account deletion using a token from the deletion confirmation email",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check service health (database, disk, memory)",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Auth Service",
+    "description": "Auth Service API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bff-secret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-bff-secret",
+        "description": "Shared secret between BFF and auth service. All requests (except /health) rejected without it."
+      },
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "refresh-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "AuthCredentialsDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "example": "v4l1dPassw0rd",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT Access token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "JWT Refresh token"
+          },
+          "token_type": {
+            "type": "string",
+            "description": "Token type",
+            "example": "Bearer"
+          },
+          "expires_in": {
+            "type": "number",
+            "description": "Access token expiration time in seconds"
+          },
+          "user": {
+            "type": "object",
+            "description": "User information",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "User ID"
+              },
+              "role": {
+                "type": "number",
+                "description": "User role"
+              }
+            }
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "token_type",
+          "expires_in",
+          "user"
+        ]
+      },
+      "UpdatePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "v4l1dPassw0rd"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "4n0th3rP4ssw0rd",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "AuthForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "AuthResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a"
+          },
+          "password": {
+            "type": "string",
+            "example": "v4l1dPassw0rd",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+          },
+          "locale": {
+            "type": "string",
+            "example": "fr-FR",
+            "description": "User locale, to enable date localization in email templates"
+          }
+        },
+        "required": [
+          "token",
+          "password",
+          "locale"
+        ]
+      },
+      "DeleteUserDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "v4l1dPassw0rd"
+          },
+          "locale": {
+            "type": "string",
+            "example": "fr-FR",
+            "description": "User locale, to enable date localization in email templates"
+          }
+        },
+        "required": [
+          "password",
+          "locale"
+        ]
+      },
+      "CancelDeletionDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a"
+          },
+          "password": {
+            "type": "string",
+            "example": "v4l1dPassw0rd"
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ]
+      }
+    }
+  }
+}

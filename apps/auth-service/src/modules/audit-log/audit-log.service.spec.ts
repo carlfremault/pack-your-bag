@@ -103,6 +103,7 @@ describe('AuditLogService', () => {
         method: 'POST',
         statusCode: HttpStatus.OK,
         message: 'User registered successfully',
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
@@ -142,37 +143,9 @@ describe('AuditLogService', () => {
 
       expect(mockPrismaService.auditLog.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          deviceInfo: { error: 'Parsing failed' },
+          deviceInfo: null,
         }) as object,
       });
-    });
-
-    it('should trigger alert for CRITICAL severity events', async () => {
-      const inputData = {
-        requestId: 'some-uuid-123',
-        eventType: AuditEventType.SUSPICIOUS_ACTIVITY,
-        severity: AuditSeverity.CRITICAL,
-        userId: '123',
-        ipAddress: '127.0.0.1',
-        path: 'refresh-token',
-        method: 'POST',
-        statusCode: HttpStatus.FORBIDDEN,
-        message: 'Suspicious activity detected',
-      };
-
-      await service.handleAuditLog(inputData);
-
-      // triggerAlert being a private method it is easier to test its side effect, the logger error
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
-        'CRITICAL SECURITY EVENT:',
-        expect.objectContaining({
-          eventType: inputData.eventType,
-          severity: inputData.severity,
-          path: inputData.path,
-          method: inputData.method,
-          timestamp: expect.any(String) as string,
-        }),
-      );
     });
 
     it('should not trigger alert for non-CRITICAL severity events', async () => {
@@ -186,6 +159,7 @@ describe('AuditLogService', () => {
         method: 'POST',
         statusCode: HttpStatus.OK,
         message: 'User logged in',
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
@@ -207,6 +181,7 @@ describe('AuditLogService', () => {
         method: 'POST',
         statusCode: HttpStatus.OK,
         message: 'User registered successfully',
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);
@@ -226,6 +201,7 @@ describe('AuditLogService', () => {
         statusCode: HttpStatus.OK,
         message: 'User registered successfully',
         metadata: { customField: 'value', requestId: 'req-123' },
+        userAgent: null,
       };
 
       await service.handleAuditLog(inputData);

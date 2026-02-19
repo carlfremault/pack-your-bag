@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   DiskHealthIndicator,
   HealthCheck,
@@ -11,6 +12,11 @@ import {
 
 import { PrismaService } from '@/prisma/prisma.service';
 
+@ApiTags('health')
+@ApiResponse({
+  status: 503,
+  description: 'One or more health indicators failed (database, disk, or memory).',
+})
 @Controller('health')
 export class HealthController {
   private readonly storagePath: string;
@@ -28,6 +34,8 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
+  @ApiOperation({ summary: 'Check service health (database, disk, memory)' })
+  @ApiResponse({ status: 200, description: 'All health indicators passing.' })
   check(): Promise<HealthCheckResult> {
     return this.health.check([
       () => this.db.pingCheck('database', this.prisma),

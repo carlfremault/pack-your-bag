@@ -4,25 +4,32 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MS_PER_DAY } from '@/common/constants/auth.constants';
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/unauthorized.exceptions';
-import { AuditEventType } from '@/generated/prisma';
+import { AuditEventType, TokenType } from '@/generated/prisma';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
 import { AuthService } from './auth.service';
+import { AuthEventProvider } from './auth-event.provider';
 
 const MOCK_CONFIG = {
   AUTH_BCRYPT_SALT_ROUNDS: 4,
-  AUTH_DEFAULT_USER_ROLE_ID: 1,
+  AUTH_USER_DELETE_RETENTION_DAYS: 1,
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: 1234,
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: 4321,
+  AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: 5678,
 } as const;
+
+vi.mock('crypto');
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -30,10 +37,14 @@ describe('AuthService', () => {
   let loggerWarnSpy: ReturnType<typeof vi.spyOn>;
   let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
 
+  const mockedRandomBytes = vi.mocked(crypto.randomBytes);
+  const mockedCreateHash = vi.mocked(crypto.createHash);
+
   const mockUserService = {
     createUser: vi.fn(),
     getUser: vi.fn(),
     updatePassword: vi.fn(),
+    resetPasswordWithToken: vi.fn(),
   };
 
   const mockJwtService = {
@@ -47,22 +58,35 @@ describe('AuthService', () => {
     handleRevokedTokenRequest: vi.fn(),
   };
 
+  const mockVerificationTokenService = {
+    upsertVerificationToken: vi.fn(),
+    getVerificationToken: vi.fn(),
+  };
+
+  const mockAuthEventProvider = {
+    emitPasswordResetRequested: vi.fn(),
+    emitPasswordResetConfirmed: vi.fn(),
+  };
+
   const mockConfigService = {
-    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
-      return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
+    getOrThrow: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+      const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
+      if (value === undefined && defaultValue === undefined) {
+        throw new Error(`Configuration key "${key}" does not exist`);
+      }
+      return (value ?? defaultValue) as T;
     }),
   };
 
   beforeAll(async () => {
     hashedPassword = await bcrypt.hash(
       'validPassword123',
-      mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS') as number,
+      mockConfigService.getOrThrow('AUTH_BCRYPT_SALT_ROUNDS') as number,
     );
   });
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    vi.setSystemTime(new Date('2026-01-01'));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -70,7 +94,9 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
+        { provide: VerificationTokenService, useValue: mockVerificationTokenService },
         { provide: UserService, useValue: mockUserService },
+        { provide: AuthEventProvider, useValue: mockAuthEventProvider },
       ],
     }).compile();
 
@@ -126,7 +152,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -160,7 +186,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });
@@ -184,7 +210,7 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if password does not match', async () => {
       const wrongHashedPassword = await bcrypt.hash(
         'differentPassword',
-        mockConfigService.get('AUTH_BCRYPT_SALT_ROUNDS') as number,
+        mockConfigService.getOrThrow('AUTH_BCRYPT_SALT_ROUNDS') as number,
       );
       mockUserService.getUser.mockResolvedValue({ ...mockUser, password: wrongHashedPassword });
 
@@ -237,11 +263,13 @@ describe('AuthService', () => {
       expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
 
       expect(result).toEqual({
-        access_token: 'mock-jwt-token',
-        refresh_token: 'mock-jwt-token',
-        token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        data: {
+          access_token: 'mock-jwt-token',
+          refresh_token: 'mock-jwt-token',
+          token_type: 'Bearer',
+          expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+          user: { id: mockUser.id, role: mockUser.roleId },
+        },
       });
     });
 
@@ -366,11 +394,13 @@ describe('AuthService', () => {
         mockRevokedToken,
       );
       expect(result).toEqual({
-        access_token: 'mock-jwt-token',
-        refresh_token: 'mock-jwt-token',
-        token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        data: {
+          access_token: 'mock-jwt-token',
+          refresh_token: 'mock-jwt-token',
+          token_type: 'Bearer',
+          expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+          user: { id: mockUser.id, role: mockUser.roleId },
+        },
         auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
       });
     });
@@ -390,9 +420,307 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
+    });
+  });
+
+  describe('forgotPassword', () => {
+    const expectedRawToken = Buffer.from('a'.repeat(64), 'hex').toString('hex');
+
+    beforeEach(() => {
+      mockedRandomBytes.mockImplementation(() => expectedRawToken);
+
+      const mockHashInstance = {
+        update: vi.fn().mockReturnThis(),
+        digest: vi.fn().mockReturnValue('hashed_token'),
+      };
+      mockedCreateHash.mockReturnValue(mockHashInstance as unknown as crypto.Hash);
+    });
+
+    it('should create reset token and emit event for existing user', async () => {
+      const dto = { email: 'testemail@test.com' };
+
+      const mockUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isDeleted: false,
+      };
+
+      mockUserService.getUser.mockResolvedValue(mockUser);
+      mockVerificationTokenService.upsertVerificationToken.mockResolvedValue(undefined);
+
+      await service.forgotPassword(dto);
+
+      expect(mockUserService.getUser).toHaveBeenCalledWith({
+        email: 'testemail@test.com',
+        isDeleted: false,
+      });
+
+      expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
+        'user-123',
+        'hashed_token',
+        expect.any(Date) as Date,
+        TokenType.PASSWORD_RESET,
+      );
+
+      expect(mockAuthEventProvider.emitPasswordResetRequested).toHaveBeenCalledWith({
+        userId: mockUser.id,
+        email: mockUser.email,
+        resetToken: expect.any(String) as string,
+      });
+    });
+
+    it('should normalize email to lowercase', async () => {
+      const dto = { email: 'TestEMAIL@Test.COM' };
+
+      mockUserService.getUser.mockResolvedValue(null);
+
+      await service.forgotPassword(dto);
+
+      expect(mockUserService.getUser).toHaveBeenCalledWith({
+        email: 'testemail@test.com',
+        isDeleted: false,
+      });
+    });
+
+    it('should return silently for deleted or non-existent user', async () => {
+      const dto = { email: 'nonexistent@test.com' };
+
+      mockUserService.getUser.mockResolvedValue(null);
+
+      await expect(service.forgotPassword(dto)).resolves.toBeUndefined();
+
+      expect(mockVerificationTokenService.upsertVerificationToken).not.toHaveBeenCalled();
+      expect(mockAuthEventProvider.emitPasswordResetRequested).not.toHaveBeenCalled();
+    });
+
+    it('should hash the reset token before storing', async () => {
+      const dto = { email: 'testemail@test.com' };
+      const mockUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isDeleted: false,
+      };
+
+      mockUserService.getUser.mockResolvedValue(mockUser);
+
+      await service.forgotPassword(dto);
+
+      expect(mockedCreateHash).toHaveBeenCalledWith('sha256');
+      expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
+        'user-123',
+        'hashed_token',
+        expect.any(Date) as Date,
+        TokenType.PASSWORD_RESET,
+      );
+
+      expect(mockAuthEventProvider.emitPasswordResetRequested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resetToken: expectedRawToken,
+        }),
+      );
+    });
+
+    it('should set correct expiration time', async () => {
+      const passwordResetTokenExpiresInMS = mockConfigService.getOrThrow(
+        'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
+      ) as number;
+      const dto = { email: 'testemail@test.com' };
+
+      const mockUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isDeleted: false,
+      };
+
+      mockUserService.getUser.mockResolvedValue(mockUser);
+
+      const beforeTime = Date.now();
+      await service.forgotPassword(dto);
+      const afterTime = Date.now();
+
+      const firstCall = mockVerificationTokenService.upsertVerificationToken.mock.calls[0];
+      if (!firstCall) {
+        throw new Error('upsertVerificationToken was not called');
+      }
+      const expiresAt = firstCall[2] as Date;
+
+      const expectedMinExpiry = beforeTime + passwordResetTokenExpiresInMS;
+      const expectedMaxExpiry = afterTime + passwordResetTokenExpiresInMS;
+
+      expect(expiresAt.getTime()).toBeGreaterThanOrEqual(expectedMinExpiry);
+      expect(expiresAt.getTime()).toBeLessThanOrEqual(expectedMaxExpiry);
+    });
+  });
+
+  describe('resetPassword', () => {
+    beforeEach(() => {
+      const mockHashInstance = {
+        update: vi.fn().mockReturnThis(),
+        digest: vi.fn().mockReturnValue('hashed_token'),
+      };
+      mockedCreateHash.mockReturnValue(mockHashInstance as unknown as crypto.Hash);
+    });
+
+    it('should reset password with valid token', async () => {
+      const passwordResetTokenExpiresInMS = mockConfigService.getOrThrow(
+        'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
+      ) as number;
+      const dto = {
+        token: 'valid_reset_token',
+        password: 'validPassword123',
+      };
+
+      const mockResetRecord = {
+        id: 'token-123',
+        userId: 'user-123',
+        token: 'hashed_token',
+        type: TokenType.PASSWORD_RESET,
+        expiresAt: new Date(Date.now() + passwordResetTokenExpiresInMS),
+        used: false,
+      };
+
+      const mockUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'old_hashed_password',
+        roleId: 1,
+        isDeleted: false,
+      };
+
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
+      mockUserService.getUser.mockResolvedValue(mockUser);
+      mockUserService.resetPasswordWithToken.mockResolvedValue(undefined);
+
+      await service.resetPassword(dto);
+
+      expect(mockedCreateHash).toHaveBeenCalledWith('sha256');
+
+      expect(mockVerificationTokenService.getVerificationToken).toHaveBeenCalledWith({
+        where: {
+          token: 'hashed_token',
+          type: TokenType.PASSWORD_RESET,
+          used: false,
+        },
+      });
+
+      expect(mockUserService.getUser).toHaveBeenCalledWith({ id: 'user-123' });
+
+      expect(mockUserService.resetPasswordWithToken).toHaveBeenCalledWith(
+        'token-123',
+        'user-123',
+        'validPassword123',
+      );
+
+      expect(mockAuthEventProvider.emitPasswordResetConfirmed).toHaveBeenCalledWith({
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        resetTimestamp: expect.any(String) as string,
+      });
+    });
+
+    it('should throw InvalidTokenException for non-existent token', async () => {
+      const dto = {
+        token: 'invalid_token',
+        password: 'validPassword123',
+      };
+
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(null);
+
+      await expect(service.resetPassword(dto)).rejects.toThrow(InvalidTokenException);
+
+      expect(mockUserService.resetPasswordWithToken).not.toHaveBeenCalled();
+      expect(mockAuthEventProvider.emitPasswordResetConfirmed).not.toHaveBeenCalled();
+    });
+
+    it('should throw InvalidTokenException for expired token', async () => {
+      const dto = {
+        token: 'expired_token',
+        password: 'validPassword123',
+      };
+
+      const mockExpiredRecord = {
+        id: 'token-123',
+        userId: 'user-123',
+        token: 'hashed_token',
+        type: TokenType.PASSWORD_RESET,
+        expiresAt: new Date(Date.now() - 1000),
+        used: false,
+      };
+
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockExpiredRecord);
+
+      await expect(service.resetPassword(dto)).rejects.toThrow(InvalidTokenException);
+
+      expect(mockUserService.resetPasswordWithToken).not.toHaveBeenCalled();
+      expect(mockAuthEventProvider.emitPasswordResetConfirmed).not.toHaveBeenCalled();
+    });
+
+    it('should throw InvalidTokenException if user does not exist', async () => {
+      const dto = {
+        token: 'valid_token',
+        password: 'validPassword123',
+      };
+
+      const mockResetRecord = {
+        id: 'token-123',
+        userId: 'user-123',
+        token: 'hashed_token',
+        type: TokenType.PASSWORD_RESET,
+        expiresAt: new Date(Date.now() + 3600000),
+        used: false,
+      };
+
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
+      mockUserService.getUser.mockResolvedValue(null);
+
+      await expect(service.resetPassword(dto)).rejects.toThrow(InvalidTokenException);
+
+      expect(mockUserService.resetPasswordWithToken).not.toHaveBeenCalled();
+      expect(mockAuthEventProvider.emitPasswordResetConfirmed).not.toHaveBeenCalled();
+    });
+
+    it('should throw InvalidTokenException if user is deleted', async () => {
+      const passwordResetTokenExpiresInMS = mockConfigService.getOrThrow(
+        'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
+      ) as number;
+      const dto = {
+        token: 'valid_token',
+        password: 'validPassword123',
+      };
+
+      const mockResetRecord = {
+        id: 'token-123',
+        userId: 'user-123',
+        token: 'hashed_token',
+        type: TokenType.PASSWORD_RESET,
+        expiresAt: new Date(Date.now() + passwordResetTokenExpiresInMS),
+        used: false,
+      };
+
+      const mockDeletedUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isDeleted: true,
+      };
+
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
+      mockUserService.getUser.mockResolvedValue(mockDeletedUser);
+
+      await expect(service.resetPassword(dto)).rejects.toThrow(InvalidTokenException);
+
+      expect(mockUserService.resetPasswordWithToken).not.toHaveBeenCalled();
+      expect(mockAuthEventProvider.emitPasswordResetConfirmed).not.toHaveBeenCalled();
     });
   });
 
@@ -428,7 +756,7 @@ describe('AuthService', () => {
           family: expect.any(String) as string,
         }),
         expect.objectContaining({
-          expiresIn: mockConfigService.get('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS'),
+          expiresIn: mockConfigService.getOrThrow('AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS'),
         }),
       );
 
@@ -436,7 +764,7 @@ describe('AuthService', () => {
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
-        expires_in: mockConfigService.get('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
         user: { id: mockUser.id, role: mockUser.roleId },
       });
     });

@@ -203,6 +203,7 @@ The schema defines relationships between Users, Roles, and RefreshTokens to supp
 - **UUID v7 identifiers** for time-ordered database performance while maintaining global uniqueness.
 - **Decoupled AuditLog table** (no foreign keys) to preserve log immutability even after user deletion.
 - **Salted password hashes** to ensure no plaintext credentials exist in the database.
+- **VerificationToken table** for time-limited, single-use tokens supporting password reset and account deletion workflows.
 
 <p align="center">
     <br>
@@ -218,6 +219,7 @@ After generating the service with the NestJS CLI, I aligned it with the monorepo
 - **Configuration Alignment:** Extended shared TypeScript and ESLint packages to ensure consistent linting and compiler settings across microservices.
 - **Vitest Migration:** Replaced the default Jest setup with Vitest for better monorepo performance and native ESM support.
 - **Turborepo Integration:** Added the service to the Turborepo pipeline, enabling root-level commands (`dev`, `build`, `test`) to manage all workspace packages.
+- **API Documentation & Type Safety:** Integrated Swagger with full endpoint annotations. Generated an OpenAPI spec to automatically create a typed HTTP client as a shared monorepo package, ensuring type-safe API consumption across services.
 
 To avoid repeating this manual configuration, the service was cloned twice to bootstrap the Product and User Data Services (Phases 2-3).
 
@@ -256,6 +258,12 @@ To handle edge cases like concurrent requests and reuse attacks, I designed the 
     <i>Refresh token decision flow visualizing the scenarios above</i>
 </p>
 
+##### Account Lifecycle & Recovery
+
+- **Forgot Password:** Implements a time-limited password reset flow using hashed verification tokens (15-minute expiration). Prevents user enumeration by returning generic success messages regardless of email existence.
+- **Account Deletion:** Supports GDPR-compliant user deletion with a 30-day grace period. Users receive a verification token via email to cancel deletion before final anonymization of audit logs and hard deletion of user data.
+- **Email Notifications:** Implemented email delivery for password reset and account deletion flows using Nodemailer with server-side template rendering.
+
 ##### Network Security
 
 - **BFF Guard (Service-to-Service):** To protect internal microservices from direct access in cloud environments where dynamic IP allocation prevents traditional IP whitelisting, I implemented a shared-secret header requirement. Any request bypassing the Next.js BFF is immediately rejected.
@@ -278,6 +286,7 @@ Daily cron jobs clean up expired data with configurable retention periods:
 - **Refresh Tokens:** Expired tokens deleted immediately; revoked tokens after 14 days.
 - **Audit Logs:** INFO (30 days), WARN/ERROR (60 days), CRITICAL (90 days).
 - **Deleted Users:** Final deletion and log anonymization after 30-day grace period.
+- **Verification Tokens:** Expired tokens deleted after 1 day, used tokens deleted immediately.
 
 ##### Testing & Quality Assurance
 

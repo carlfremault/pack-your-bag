@@ -4,9 +4,12 @@ import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
-import { Prisma } from '@/generated/prisma';
-import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials';
+import { Prisma, TokenType } from '@/generated/prisma';
+import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
+import { AuthForgotPasswordDto } from '@/modules/auth/dto/auth-forgot-password.dto';
+import { AuthResetPasswordDto } from '@/modules/auth/dto/auth-reset-password.dto';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
+import { CancelDeletionDto } from '@/modules/user/dto/cancel-deletion.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
 export class AuthHelpers {
@@ -124,6 +127,30 @@ export class AuthHelpers {
     return req.expect(expectedStatus);
   }
 
+  async forgotPassword(body: AuthForgotPasswordDto, expectedStatus = HttpStatus.NO_CONTENT) {
+    return request(this.app.getHttpServer())
+      .post('/auth/forgot-password')
+      .send(body)
+      .set('x-bff-secret', this.bffSecret)
+      .expect(expectedStatus);
+  }
+
+  async resetPassword(body: AuthResetPasswordDto, expectedStatus = HttpStatus.NO_CONTENT) {
+    return request(this.app.getHttpServer())
+      .post('/auth/reset-password')
+      .send(body)
+      .set('x-bff-secret', this.bffSecret)
+      .expect(expectedStatus);
+  }
+
+  async cancelAccountDeletion(body: CancelDeletionDto, expectedStatus = HttpStatus.NO_CONTENT) {
+    return request(this.app.getHttpServer())
+      .post('/user/cancel-deletion')
+      .send(body)
+      .set('x-bff-secret', this.bffSecret)
+      .expect(expectedStatus);
+  }
+
   async waitForLogs(where: Prisma.AuditLogWhereInput, maxAttempts = 20) {
     for (let i = 0; i < maxAttempts; i++) {
       const logs = await this.prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' } });
@@ -140,6 +167,17 @@ export class AuthHelpers {
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
     throw new Error(`Audit log not found for conditions: ${JSON.stringify(where)}`);
+  }
+
+  async findPasswordResetTokenForUserId(userId: string) {
+    return this.prisma.verificationToken.findUnique({
+      where: {
+        userId_type: {
+          userId: userId,
+          type: TokenType.PASSWORD_RESET,
+        },
+      },
+    });
   }
 
   async sleep(ms: number) {

@@ -6,16 +6,24 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { Prisma, User } from '@prisma-client';
+import { Prisma, TokenType, User } from '@prisma-client';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
+import { DEFAULT_LOCALE, MS_PER_DAY } from '@/common/constants/auth.constants';
+import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
+import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
+import { generateToken } from '@/common/utils/generateToken';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
+import { CancelDeletionDto } from './dto/cancel-deletion.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserEventProvider } from './user-event.provider';
 
 interface UserDeletionResult {
   deletedUsers: number;
@@ -33,6 +41,8 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly auditLogService: AuditLogService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly verificationTokenService: VerificationTokenService,
+    private readonly userEventProvider: UserEventProvider,
   ) {
     this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
     this.deletedUserRetentionDays = this.configService.getOrThrow<number>(
@@ -40,14 +50,23 @@ export class UserService {
     );
   }
 
+  // ============================================
+  // BASIC CRUD OPERATIONS
+  // ============================================
+
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({
       data,
     });
   }
 
-  async getUser(where: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  async getUser(
+    where: Prisma.UserWhereUniqueInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User | null> {
+    const prisma = tx ?? this.prisma;
+
+    return prisma.user.findUnique({
       where,
     });
   }
@@ -58,6 +77,23 @@ export class UserService {
     });
   }
 
+  async updateUser(
+    where: Prisma.UserWhereUniqueInput,
+    data: Prisma.UserUpdateInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User> {
+    const prisma = tx ?? this.prisma;
+
+    return prisma.user.update({
+      where,
+      data,
+    });
+  }
+
+  // ============================================
+  // PASSWORD MANAGEMENT
+  // ============================================
+
   async updatePassword(userId: string, body: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = body;
 
@@ -65,33 +101,70 @@ export class UserService {
       throw new BadRequestException('New password and current password cannot be the same');
     }
 
-    const user = await this.getUser({ id: userId });
-    if (!user) throw new NotFoundException('User not found');
-
-    DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      throw new BadRequestException('Current password does not match');
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
     return this.prisma.$transaction(async (tx) => {
-      // Update Password
-      const updatedUser = await tx.user.update({
-        where: { id: userId },
-        data: { password: hashedPassword },
-      });
+      const user = await this.getUser({ id: userId }, tx);
+      if (!user) throw new NotFoundException('User not found');
+      DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
 
-      // Revoke all active tokens for this user
-      await this.refreshTokenService.revokeManyTokens({ userId }, tx);
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        throw new BadRequestException('Current password does not match');
+      }
 
-      return updatedUser;
+      return this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
     });
   }
 
+  async resetPasswordWithToken(
+    tokenId: string,
+    userId: string,
+    newPassword: string,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      // Verify token ownership again within the transaction to prevent TOCTOU issues (Time-of-check to Time-of-use).
+      const token = await this.verificationTokenService.getVerificationToken(
+        {
+          where: {
+            id: tokenId,
+            userId: userId,
+            type: TokenType.PASSWORD_RESET,
+            used: false,
+          },
+        },
+        tx,
+      );
+
+      if (!token || token.expiresAt < new Date()) {
+        throw new InvalidTokenException();
+      }
+      await this.updatePasswordAndRevokeTokens(userId, newPassword, tx);
+      await this.verificationTokenService.markTokenAsUsed(tokenId, tx);
+    });
+  }
+
+  private async updatePasswordAndRevokeTokens(
+    userId: string,
+    newPassword: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User> {
+    const prisma = tx ?? this.prisma;
+    const hashedPassword = await bcrypt.hash(newPassword, this.bcryptSaltRounds);
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    await this.refreshTokenService.revokeManyTokens({ userId }, prisma);
+    return updatedUser;
+  }
+
+  // ============================================
+  // ACCOUNT DELETION
+  // ============================================
+
   async softDeleteUser(userId: string, body: DeleteUserDto): Promise<void> {
-    const { password } = body;
+    const { password, locale = DEFAULT_LOCALE } = body;
 
     const user = await this.getUser({ id: userId });
     if (!user) {
@@ -105,6 +178,10 @@ export class UserService {
       throw new UnauthorizedException('Invalid password');
     }
 
+    const { token: cxlToken, hashedToken: hashedCancellationToken } = generateToken();
+    const expiresAt = new Date(Date.now() + this.deletedUserRetentionDays * MS_PER_DAY);
+
+    let eventData;
     await this.prisma.$transaction(async (tx) => {
       await this.refreshTokenService.revokeManyTokens({ userId }, tx);
       await tx.user.update({
@@ -114,6 +191,57 @@ export class UserService {
           deletedAt: new Date(),
         },
       });
+      await this.verificationTokenService.upsertVerificationToken(
+        user.id,
+        hashedCancellationToken,
+        expiresAt,
+        TokenType.ACCOUNT_DELETION_CANCELLATION,
+        tx,
+      );
+
+      eventData = {
+        userId,
+        cancellationToken: cxlToken,
+        email: user.email,
+        cancellationDate: formatLocaleDate(expiresAt, locale),
+      };
+    });
+
+    if (eventData) this.userEventProvider.emitAccountDeletionRequested(eventData);
+  }
+
+  async cancelAccountDeletion(body: CancelDeletionDto): Promise<void> {
+    const { token, password } = body;
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+
+    return this.prisma.$transaction(async (tx) => {
+      const resetRecord = await this.verificationTokenService.getVerificationToken(
+        {
+          where: {
+            token: hash,
+            type: TokenType.ACCOUNT_DELETION_CANCELLATION,
+            used: false,
+          },
+        },
+        tx,
+      );
+
+      if (!resetRecord || resetRecord.expiresAt < new Date()) {
+        throw new InvalidTokenException();
+      }
+
+      const user = await this.getUser({ id: resetRecord.userId, isDeleted: true }, tx);
+      if (!user) {
+        throw new InvalidTokenException();
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new InvalidTokenException();
+      }
+
+      await this.updateUser({ id: user.id }, { isDeleted: false, deletedAt: null }, tx);
+      await this.verificationTokenService.markTokenAsUsed(resetRecord.id, tx);
     });
   }
 

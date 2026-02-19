@@ -8,6 +8,7 @@ import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
+import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
 @Injectable()
 export class TasksService {
@@ -17,37 +18,35 @@ export class TasksService {
   private readonly errorWarnLogsRetentionDays: number;
   private readonly criticalLogsRetentionDays: number;
   private readonly deletedUsersRetentionDays: number;
+  private readonly verificationTokenRetentionDays: number;
 
   constructor(
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly verificationTokenService: VerificationTokenService,
     private readonly auditLogProvider: AuditLogProvider,
     private readonly auditLogService: AuditLogService,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {
-    this.refreshTokenRetentionDays = this.configService.get<number>(
+    this.refreshTokenRetentionDays = this.configService.getOrThrow(
       'AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS',
-      14,
     );
-    this.infoLogsRetentionDays = this.configService.get<number>(
-      'AUDIT_LOG_INFO_RETENTION_DAYS',
-      30,
-    );
-    this.errorWarnLogsRetentionDays = this.configService.get<number>(
+    this.infoLogsRetentionDays = this.configService.getOrThrow('AUDIT_LOG_INFO_RETENTION_DAYS');
+    this.errorWarnLogsRetentionDays = this.configService.getOrThrow(
       'AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
-      60,
     );
-    this.criticalLogsRetentionDays = this.configService.get<number>(
+    this.criticalLogsRetentionDays = this.configService.getOrThrow(
       'AUDIT_LOG_CRITICAL_RETENTION_DAYS',
-      90,
     );
-    this.deletedUsersRetentionDays = this.configService.get<number>(
+    this.deletedUsersRetentionDays = this.configService.getOrThrow(
       'AUTH_USER_DELETE_RETENTION_DAYS',
-      30,
+    );
+    this.verificationTokenRetentionDays = this.configService.getOrThrow(
+      'AUTH_VERIFICATION_TOKEN_RETENTION_DAYS',
     );
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanupExpiredRefreshTokens() {
     this.logger.log('Starting cleanup of expired refresh tokens');
 
@@ -84,12 +83,12 @@ export class TasksService {
         eventType: AuditEventType.SCHEDULED_TASK,
         severity: AuditSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Token cleanup failed: ${errorMessage}`,
+        message: `Refresh token cleanup failed: ${errorMessage}`,
       });
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async cleanupAuditLogs() {
     this.logger.log('Starting cleanup of audit logs');
 
@@ -146,7 +145,7 @@ export class TasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async cleanupDeletedUsers() {
     this.logger.log('Starting cleanup of deleted users');
 
@@ -196,6 +195,47 @@ export class TasksService {
         severity: AuditSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Deleted users cleanup failed: ${errorMessage}`,
+      });
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async cleanupVerificationTokens() {
+    this.logger.log('Starting cleanup of expired/used verification tokens');
+
+    const verificationTokenCutoff = new Date(
+      Date.now() - this.verificationTokenRetentionDays * MS_PER_DAY,
+    );
+
+    try {
+      const result = await this.verificationTokenService.deleteVerificationTokens({
+        OR: [{ expiresAt: { lt: verificationTokenCutoff } }, { used: true }],
+      });
+
+      const auditMessage = `Cleaned up ${result.count} expired/used verification token${result.count === 1 ? '' : 's'}. Cutoff: ${verificationTokenCutoff.toISOString()}`;
+      this.logger.log(auditMessage);
+
+      this.auditLogProvider.auditRequest({
+        eventType: AuditEventType.SCHEDULED_TASK,
+        severity: AuditSeverity.INFO,
+        statusCode: HttpStatus.NO_CONTENT,
+        message: auditMessage,
+        metadata: { count: result.count, cutoff: verificationTokenCutoff.toISOString() },
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        `Failed to cleanup expired verification tokens: ${errorMessage}`,
+        errorStack,
+      );
+
+      this.auditLogProvider.auditRequest({
+        eventType: AuditEventType.SCHEDULED_TASK,
+        severity: AuditSeverity.ERROR,
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Verification token cleanup failed: ${errorMessage}`,
       });
     }
   }
