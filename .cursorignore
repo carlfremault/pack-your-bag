@@ -1,0 +1,19 @@
+# Ignore environment variables
+.env
+.env.test
+
+# Ignore all node_modules everywhere
+**/node_modules/
+
+# Ignore all build outputs
+**/.turbo/
+**/dist/
+**/build/
+**/.next/
+
+# Ignore IDE specific files
+.vscode/
+
+# Ignore all generated files
+**/generated/
+**/src/generated/prisma/

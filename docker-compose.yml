@@ -47,8 +47,10 @@ volumes:
     name: pack-your-bag-cache
   pack-your-bag-node-modules-v24:
     name: pack-your-bag-node-modules-v24
-  pack-your-bag-extensions-v24:
-    name: pack-your-bag-extensions-v24
+  # pack-your-bag-extensions-v24: # VSCode extensions
+  #    name: pack-your-bag-extensions-v24
+  pack-your-bag-cursor-extensions:
+    name: pack-your-bag-cursor-extensions
   postgres-data:
     name: postgres-data
   postgres-run:
