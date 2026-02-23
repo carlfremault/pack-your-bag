@@ -2938,7 +2938,6 @@ __metadata:
     "@prisma/adapter-pg": "npm:^7.2.0"
     "@prisma/client": "npm:^7.2.0"
     dotenv: "npm:^17.2.3"
-    pg: "npm:^8.16.3"
     prisma: "npm:^7.2.0"
   languageName: unknown
   linkType: soft
