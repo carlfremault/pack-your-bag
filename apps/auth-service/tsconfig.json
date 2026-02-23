@@ -4,8 +4,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "paths": {
-      "@/*": ["./src/*"],
-      "@prisma-client": ["./src/generated/prisma"]
+      "@/*": ["./src/*"]
     },
     "noEmit": false,
     "types": ["node"]

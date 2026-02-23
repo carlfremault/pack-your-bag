@@ -1,7 +1,8 @@
 import { HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@prisma-client';
+import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';

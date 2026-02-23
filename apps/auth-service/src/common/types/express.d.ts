@@ -1,5 +1,4 @@
-import { AuditEventType } from '@prisma-client';
-import { User as PrismaUser } from '@prisma-client';
+import { AuditEventType, User as PrismaUser } from '@repo/db';
 
 declare global {
   namespace Express {

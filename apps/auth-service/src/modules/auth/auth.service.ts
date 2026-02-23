@@ -7,7 +7,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { AuditEventType, Prisma, TokenType } from '@prisma-client';
+import { AuditEventType, Prisma, TokenType } from '@repo/db';
+
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { v7 as uuidv7 } from 'uuid';

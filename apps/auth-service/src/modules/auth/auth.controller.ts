@@ -12,6 +12,8 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
+import { AuditEventType } from '@repo/db';
+
 import type { Request } from 'express';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
@@ -28,7 +30,6 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
-import { AuditEventType } from '@/generated/prisma';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 

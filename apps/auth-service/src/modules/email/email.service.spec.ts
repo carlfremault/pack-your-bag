@@ -2,10 +2,11 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
 
+import { AuditEventType, AuditSeverity } from '@repo/db';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
-import { AuditEventType, AuditSeverity } from '@/generated/prisma';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { EmailService } from '@/modules/email/email.service';
 

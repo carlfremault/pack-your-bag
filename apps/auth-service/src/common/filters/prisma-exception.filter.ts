@@ -7,7 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@prisma-client';
+import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+
 import { Request, Response } from 'express';
 
 import capitalizeFirstLetter from '@/common/utils/capitalizeFirstLetter';

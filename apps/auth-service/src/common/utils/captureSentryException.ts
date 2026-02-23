@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 
-import { AuditEventType } from '@prisma-client';
+import { AuditEventType } from '@repo/db';
+
 import * as Sentry from '@sentry/nestjs';
 import { Request } from 'express';
 

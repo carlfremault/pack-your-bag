@@ -2,6 +2,8 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
+import { AuditEventType } from '@repo/db';
+
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import {
   ApiBffAndAccessSecurity,
@@ -12,7 +14,6 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
-import { AuditEventType } from '@/generated/prisma';
 
 import { CancelDeletionDto } from './dto/cancel-deletion.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';

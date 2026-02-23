@@ -1,9 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { TokenType } from '@repo/db';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TokenType } from '@/generated/prisma';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { VerificationTokenService } from './verification-token.service';

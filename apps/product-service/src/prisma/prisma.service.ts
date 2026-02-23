@@ -12,13 +12,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly pool: Pool;
 
   constructor(configService: ConfigService) {
-    const connectionString = configService.getOrThrow<string>('AUTH_URL');
+    const connectionString = configService.getOrThrow<string>('PRODUCT_URL');
 
     const poolInstance = new Pool({
       connectionString,
-      max: configService.get<number>('AUTH_DB_POOL_MAX', 20),
-      idleTimeoutMillis: configService.get<number>('AUTH_DB_IDLE_TIMEOUT', 30000),
-      connectionTimeoutMillis: configService.get<number>('AUTH_DB_CONN_TIMEOUT', 5000),
+      max: configService.get<number>('PRODUCT_DB_POOL_MAX', 20),
+      idleTimeoutMillis: configService.get<number>('PRODUCT_DB_IDLE_TIMEOUT', 30000),
+      connectionTimeoutMillis: configService.get<number>('PRODUCT_DB_CONN_TIMEOUT', 5000),
     });
 
     const adapter = new PrismaPg(poolInstance);
@@ -30,9 +30,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleInit() {
     try {
       await this.$connect();
-      this.logger.log('✅ Auth database connection established successfully');
+      this.logger.log('✅ Product database connection established successfully');
     } catch (err) {
-      this.logger.error('❌ Auth service failed to connect to the database on init', err);
+      this.logger.error('❌ Product service failed to connect to the database on init', err);
       throw err;
     }
   }

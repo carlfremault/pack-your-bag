@@ -11,7 +11,8 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerException } from '@nestjs/throttler';
 
-import { AuditEventType, AuditSeverity } from '@prisma-client';
+import { AuditEventType, AuditSeverity } from '@repo/db';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';

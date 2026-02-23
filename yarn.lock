@@ -2931,6 +2931,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@repo/db@workspace:*, @repo/db@workspace:packages/db":
+  version: 0.0.0-use.local
+  resolution: "@repo/db@workspace:packages/db"
+  dependencies:
+    "@prisma/adapter-pg": "npm:^7.2.0"
+    "@prisma/client": "npm:^7.2.0"
+    dotenv: "npm:^17.2.3"
+    prisma: "npm:^7.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@repo/eslint-config@npm:*, @repo/eslint-config@workspace:*, @repo/eslint-config@workspace:packages/eslint-config":
   version: 0.0.0-use.local
   resolution: "@repo/eslint-config@workspace:packages/eslint-config"
@@ -5318,7 +5329,7 @@ __metadata:
     "@nestjs/testing": "npm:^11.0.1"
     "@nestjs/throttler": "npm:^6.5.0"
     "@prisma/adapter-pg": "npm:^7.2.0"
-    "@prisma/client": "npm:^7.2.0"
+    "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/typescript-config": "workspace:*"
     "@repo/vitest-config": "workspace:*"
@@ -12530,6 +12541,8 @@ __metadata:
     "@nestjs/platform-express": "npm:^11.0.1"
     "@nestjs/schematics": "npm:^11.0.0"
     "@nestjs/testing": "npm:^11.0.1"
+    "@prisma/adapter-pg": "npm:^7.2.0"
+    "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/typescript-config": "workspace:*"
     "@repo/vitest-config": "workspace:*"

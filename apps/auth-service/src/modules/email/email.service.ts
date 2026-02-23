@@ -2,8 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 
+import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+
 import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
-import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
 
 import { AuditLogProvider } from '../audit-log/audit-log.provider';
 

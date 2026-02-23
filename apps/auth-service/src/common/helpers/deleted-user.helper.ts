@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 
-import { User } from '@/generated/prisma';
+import { User } from '@repo/db';
 
 import { MS_PER_DAY } from '../constants/auth.constants';
 import { AccountDeletedException } from '../exceptions/forbidden.exceptions';

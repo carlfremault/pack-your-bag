@@ -1,10 +1,17 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET", "FRONTEND_URL"],
+  "globalEnv": [
+    "NODE_ENV",
+    "TRUST_PROXY",
+    "BFF_SHARED_SECRET",
+    "FRONTEND_URL",
+    "AUTH_URL",
+    "PRODUCT_URL"
+  ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": ["AUTH_*", "RSA_*"]
@@ -16,15 +23,16 @@
       "dependsOn": ["^check-types"]
     },
     "dev": {
+      "dependsOn": ["^generate"],
       "cache": false,
       "persistent": true,
       "env": ["AUTH_*", "RSA_*"]
     },
     "test:setup": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["transit", "^generate"],
       "env": ["AUTH_*", "RSA_*"],
       "cache": true,
-      "inputs": ["prisma/schema.prisma", "prisma/seed.ts"]
+      "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
       "dependsOn": ["test:setup"],
@@ -43,19 +51,23 @@
     "migrate": {
       "cache": false,
       "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
-      "env": ["AUTH_URL"]
+      "env": ["AUTH_URL", "PRODUCT_URL"]
     },
     "status": {
       "cache": false,
       "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
-      "env": ["AUTH_URL"]
+      "env": ["AUTH_URL", "PRODUCT_URL"]
     },
     "generate": {
-      "cache": true,
-      "dependsOn": ["migrate"],
+      "cache": false,
       "inputs": ["prisma/schema.prisma"],
-      "outputs": ["src/generated/prisma/**"],
-      "env": ["AUTH_URL"]
+      "outputs": ["generated/prisma/**"]
+    },
+
+    "deploy": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["AUTH_URL", "PRODUCT_URL"]
     },
     "seed": {
       "cache": false,

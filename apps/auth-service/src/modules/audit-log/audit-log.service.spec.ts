@@ -1,7 +1,8 @@
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity, Prisma, User } from '@prisma-client';
+import { AuditEventType, AuditSeverity, Prisma, User } from '@repo/db';
+
 import { UAParser } from 'ua-parser-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

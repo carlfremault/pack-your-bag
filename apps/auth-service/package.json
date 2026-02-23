@@ -8,13 +8,8 @@
     "start": "nest start",
     "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
-    "test:setup": "node -e \"if(process.env.NODE_ENV!=='test')throw new Error('Must set NODE_ENV=test')\" && prisma db push --accept-data-loss && prisma db seed",
     "test": "vitest run",
     "test:watch": "vitest --watch --no-coverage",
-    "migrate": "prisma migrate dev",
-    "status": "prisma migrate status",
-    "generate": "prisma generate",
-    "seed": "prisma db seed",
     "openapi": "ts-node --files -r tsconfig-paths/register scripts/generate-spec.ts"
   },
   "dependencies": {
@@ -32,7 +27,7 @@
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@repo/db": "workspace:*",
     "@sentry/nestjs": "^10.37.0",
     "axios": "^1.13.3",
     "bcrypt": "^6.0.0",

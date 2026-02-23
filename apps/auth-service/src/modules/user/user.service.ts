@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { Prisma, TokenType, User } from '@prisma-client';
+import { Prisma, TokenType, User } from '@repo/db';
+
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 

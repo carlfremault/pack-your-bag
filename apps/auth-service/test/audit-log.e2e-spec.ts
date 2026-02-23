@@ -1,8 +1,9 @@
 import { HttpStatus } from '@nestjs/common';
 
+import { AuditEventType, AuditSeverity } from '@repo/db';
+
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { AuditEventType, AuditSeverity } from '@/generated/prisma';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
 
 import { createAuthenticatedUser, waitForGracePeriod } from './fixtures/auth.fixtures';
