@@ -1,12 +1,16 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["app_auth"]
+  schemas  = ["app_auth", "app_product"]
 }
+
+// ============================================
+// Auth Schema (app_auth)
+// ============================================
 
 model Role {
   id        Int       @default(autoincrement()) @id
@@ -155,3 +159,8 @@ enum AuditSeverity {
   
   @@schema("app_auth")
 }
+
+// ============================================
+// Product Schema (app_product)
+// ============================================
+// Add your product models here

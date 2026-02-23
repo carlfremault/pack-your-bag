@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 
-import { User } from '@prisma-client';
+import { User } from '@repo/db';
 
 import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 

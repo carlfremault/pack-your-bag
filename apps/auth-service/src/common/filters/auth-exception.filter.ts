@@ -7,7 +7,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity } from '@prisma-client';
+import { AuditEventType, AuditSeverity } from '@repo/db';
+
 import { Request, Response } from 'express';
 
 import {

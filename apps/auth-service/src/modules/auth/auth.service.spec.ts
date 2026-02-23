@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { AuditEventType, TokenType } from '@repo/db';
+
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -13,7 +15,6 @@ import {
   InvalidSessionException,
   SessionExpiredException,
 } from '@/common/exceptions/unauthorized.exceptions';
-import { AuditEventType, TokenType } from '@/generated/prisma';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';

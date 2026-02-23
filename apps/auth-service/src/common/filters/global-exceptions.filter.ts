@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
-import { AuditEventType, AuditSeverity } from '@prisma-client';
+import { AuditEventType, AuditSeverity } from '@repo/db';
+
 import { Request, Response } from 'express';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';

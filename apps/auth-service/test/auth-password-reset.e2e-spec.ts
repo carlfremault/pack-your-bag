@@ -1,9 +1,9 @@
 import { HttpStatus } from '@nestjs/common';
 
+import { TokenType } from '@repo/db';
+
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-
-import { TokenType } from '@/generated/prisma';
 
 import {
   createAndHardDeleteUser,
