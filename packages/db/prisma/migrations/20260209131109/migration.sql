@@ -5,13 +5,13 @@
 
 */
 -- AlterEnum
-ALTER TYPE "AuditEventType" ADD VALUE 'FORGOT_PASSWORD';
+ALTER TYPE "app_auth"."AuditEventType" ADD VALUE 'FORGOT_PASSWORD';
 
 -- DropForeignKey
-ALTER TABLE "VerificationToken" DROP CONSTRAINT "VerificationToken_userId_fkey";
+ALTER TABLE "app_auth"."VerificationToken" DROP CONSTRAINT "VerificationToken_userId_fkey";
 
 -- DropTable
-DROP TABLE "VerificationToken";
+DROP TABLE "app_auth"."VerificationToken";
 
 -- DropEnum
-DROP TYPE "TokenType";
+DROP TYPE "app_auth"."TokenType";

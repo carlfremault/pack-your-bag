@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "AuditLog" DROP COLUMN "userAgent";
+ALTER TABLE "app_auth"."AuditLog" DROP COLUMN "userAgent";

@@ -1,5 +1,8 @@
+CREATE SCHEMA IF NOT EXISTS "app_auth";
+CREATE SCHEMA IF NOT EXISTS "app_product";
+
 -- CreateTable
-CREATE TABLE "Role" (
+CREATE TABLE "app_auth"."Role" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
 
@@ -7,7 +10,7 @@ CREATE TABLE "Role" (
 );
 
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE "app_auth"."User" (
     "id" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -19,7 +22,7 @@ CREATE TABLE "User" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "User_email_key" ON "app_auth"."User"("email");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "app_auth"."User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "app_auth"."Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

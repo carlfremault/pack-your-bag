@@ -5,4 +5,4 @@
 
 */
 -- CreateIndex
-CREATE UNIQUE INDEX "Role_title_key" ON "Role"("title");
+CREATE UNIQUE INDEX "Role_title_key" ON "app_auth"."Role"("title");

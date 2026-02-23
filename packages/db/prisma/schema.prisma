@@ -163,4 +163,118 @@ enum AuditSeverity {
 // ============================================
 // Product Schema (app_product)
 // ============================================
-// Add your product models here
+
+
+model Category {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  colorCode   String?
+  userId      String
+  items       Item[]
+
+  @@schema("app_product")
+}
+
+model Item {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  weight      Float?
+  userId      String
+  
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId  String    @db.Uuid
+
+  // Join table relations
+  itemLists   ItemList[]
+  itemPacks   ItemPack[]
+
+  @@schema("app_product")
+}
+
+model List {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  colorCode   String?
+  userId      String
+
+  // Join table relations
+  items       ItemList[]
+  listPacks   ListPack[]
+
+  @@schema("app_product")
+}
+
+model Pack {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  colorCode   String?
+  userId      String
+
+  // Join table relations
+  items       ItemPack[]
+  lists       ListPack[]
+  trips       Trip[]
+
+  @@schema("app_product")
+}
+
+model Trip {
+  id      String    @id @db.Uuid
+  name    String
+  date    DateTime
+  remarks String?
+
+  pack    Pack      @relation(fields: [packId], references: [id], onDelete: Restrict)
+  packId  String    @db.Uuid
+
+  @@schema("app_product")
+}
+
+// --- Join Tables (Associative Entities) ---
+
+model ItemList {
+  id       String     @id @db.Uuid
+  quantity Int        @default(1)
+  
+  item     Item       @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  itemId   String     @db.Uuid
+  
+  list     List       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId   String     @db.Uuid
+
+  @@unique([itemId, listId])
+  @@schema("app_product")
+}
+
+model ItemPack {
+  id       String   @id @db.Uuid
+  quantity Int      @default(1)
+  
+  item     Item     @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  itemId   String   @db.Uuid
+  
+  pack     Pack     @relation(fields: [packId], references: [id], onDelete: Cascade)
+  packId   String   @db.Uuid
+
+  @@unique([itemId, packId])
+  @@schema("app_product")
+}
+
+model ListPack {
+  id       String   @id @db.Uuid
+  quantity Int      @default(1)
+  
+  list     List     @relation(fields: [listId], references: [id], onDelete: Restrict)
+  listId   String   @db.Uuid
+  
+  pack     Pack     @relation(fields: [packId], references: [id], onDelete: Cascade)
+  packId   String   @db.Uuid
+
+  @@unique([listId, packId])
+  @@schema("app_product")
+}
+

@@ -1,2 +1,2 @@
 -- AlterEnum
-ALTER TYPE "AuditEventType" ADD VALUE 'SCHEDULED_TASK';
+ALTER TYPE "app_auth"."AuditEventType" ADD VALUE 'SCHEDULED_TASK';

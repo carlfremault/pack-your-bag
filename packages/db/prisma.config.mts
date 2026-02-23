@@ -2,12 +2,13 @@ import { defineConfig } from 'prisma/config';
 
 import 'dotenv/config';
 
-// For migrations, we need to use AUTH_URL as the default connection
-// Individual services will use their own connection strings when instantiating PrismaClient
-const databaseUrl = process.env['AUTH_URL'];
+// Migrations must run as a user that can create/modify both app_auth and app_product.
+const databaseUrl = process.env['ADMIN_URL'];
 
 if (!databaseUrl) {
-  throw new Error('AUTH_URL environment variable is required for migrations');
+  throw new Error(
+    'ADMIN_URL environment variable is required for migrations (must have USAGE/CREATE on app_auth and app_product)',
+  );
 }
 
 export default defineConfig({

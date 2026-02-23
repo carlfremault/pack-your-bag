@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "RefreshToken" (
+CREATE TABLE "app_auth"."RefreshToken" (
     "id" UUID NOT NULL,
     "family" UUID NOT NULL,
     "isRevoked" BOOLEAN NOT NULL DEFAULT false,
@@ -13,13 +13,13 @@ CREATE TABLE "RefreshToken" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RefreshToken_replacedById_key" ON "RefreshToken"("replacedById");
+CREATE UNIQUE INDEX "RefreshToken_replacedById_key" ON "app_auth"."RefreshToken"("replacedById");
 
 -- CreateIndex
-CREATE INDEX "RefreshToken_family_idx" ON "RefreshToken"("family");
+CREATE INDEX "RefreshToken_family_idx" ON "app_auth"."RefreshToken"("family");
 
 -- AddForeignKey
-ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "app_auth"."RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app_auth"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_replacedById_fkey" FOREIGN KEY ("replacedById") REFERENCES "RefreshToken"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "app_auth"."RefreshToken" ADD CONSTRAINT "RefreshToken_replacedById_fkey" FOREIGN KEY ("replacedById") REFERENCES "app_auth"."RefreshToken"("id") ON DELETE SET NULL ON UPDATE CASCADE;
