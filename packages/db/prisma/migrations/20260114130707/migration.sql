@@ -1,17 +1,17 @@
 -- CreateEnum
-CREATE TYPE "AuditEventType" AS ENUM ('USER_REGISTERED', 'USER_LOGIN_SUCCESS', 'USER_LOGIN_FAILED', 'TOKEN_REFRESHED', 'TOKEN_REFRESHED_RACE_CONDITION', 'TOKEN_REUSE_DETECTED', 'SESSION_EXPIRED', 'INVALID_SESSION', 'SUSPICIOUS_ACTIVITY', 'USER_LOGOUT', 'USER_LOGOUT_ALL_DEVICES', 'PASSWORD_CHANGED');
+CREATE TYPE "app_auth"."AuditEventType" AS ENUM ('USER_REGISTERED', 'USER_LOGIN_SUCCESS', 'USER_LOGIN_FAILED', 'TOKEN_REFRESHED', 'TOKEN_REFRESHED_RACE_CONDITION', 'TOKEN_REUSE_DETECTED', 'SESSION_EXPIRED', 'INVALID_SESSION', 'SUSPICIOUS_ACTIVITY', 'USER_LOGOUT', 'USER_LOGOUT_ALL_DEVICES', 'PASSWORD_CHANGED');
 
 -- CreateEnum
-CREATE TYPE "AuditSeverity" AS ENUM ('INFO', 'WARN', 'ERROR', 'CRITICAL');
+CREATE TYPE "app_auth"."AuditSeverity" AS ENUM ('INFO', 'WARN', 'ERROR', 'CRITICAL');
 
 -- AlterTable
-ALTER TABLE "RefreshToken" ALTER COLUMN "expiresAt" SET DEFAULT NOW() + INTERVAL '7 days';
+ALTER TABLE "app_auth"."RefreshToken" ALTER COLUMN "expiresAt" SET DEFAULT NOW() + INTERVAL '7 days';
 
 -- CreateTable
-CREATE TABLE "AuditLog" (
+CREATE TABLE "app_auth"."AuditLog" (
     "id" UUID NOT NULL,
-    "eventType" "AuditEventType" NOT NULL,
-    "severity" "AuditSeverity" NOT NULL,
+    "eventType" "app_auth"."AuditEventType" NOT NULL,
+    "severity" "app_auth"."AuditSeverity" NOT NULL,
     "userId" UUID,
     "ipAddress" TEXT,
     "userAgent" TEXT,
@@ -28,13 +28,13 @@ CREATE TABLE "AuditLog" (
 );
 
 -- CreateIndex
-CREATE INDEX "AuditLog_userId_idx" ON "AuditLog"("userId");
+CREATE INDEX "AuditLog_userId_idx" ON "app_auth"."AuditLog"("userId");
 
 -- CreateIndex
-CREATE INDEX "AuditLog_eventType_idx" ON "AuditLog"("eventType");
+CREATE INDEX "AuditLog_eventType_idx" ON "app_auth"."AuditLog"("eventType");
 
 -- CreateIndex
-CREATE INDEX "AuditLog_severity_idx" ON "AuditLog"("severity");
+CREATE INDEX "AuditLog_severity_idx" ON "app_auth"."AuditLog"("severity");
 
 -- CreateIndex
-CREATE INDEX "AuditLog_createdAt_idx" ON "AuditLog"("createdAt");
+CREATE INDEX "AuditLog_createdAt_idx" ON "app_auth"."AuditLog"("createdAt");

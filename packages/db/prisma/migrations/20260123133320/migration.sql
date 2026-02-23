@@ -1,2 +1,2 @@
 -- AlterEnum
-ALTER TYPE "AuditEventType" ADD VALUE 'BFF_SECRET_MISMATCH';
+ALTER TYPE "app_auth"."AuditEventType" ADD VALUE 'BFF_SECRET_MISMATCH';

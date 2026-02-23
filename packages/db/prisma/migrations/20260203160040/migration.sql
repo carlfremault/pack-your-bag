@@ -5,5 +5,5 @@
 
 */
 -- AlterTable
-ALTER TABLE "AuditLog" DROP COLUMN "message",
+ALTER TABLE "app_auth"."AuditLog" DROP COLUMN "message",
 ADD COLUMN     "message" JSONB NOT NULL;

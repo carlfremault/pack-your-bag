@@ -1,14 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": [
-    "NODE_ENV",
-    "TRUST_PROXY",
-    "BFF_SHARED_SECRET",
-    "FRONTEND_URL",
-    "AUTH_URL",
-    "PRODUCT_URL"
-  ],
+  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET", "FRONTEND_URL", "ADMIN_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "^generate"],
@@ -50,8 +43,7 @@
     },
     "migrate": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
-      "env": ["AUTH_URL", "PRODUCT_URL"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
     },
     "status": {
       "cache": false,
@@ -60,7 +52,7 @@
     },
     "generate": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma"],
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
       "outputs": ["generated/prisma/**"]
     },
 

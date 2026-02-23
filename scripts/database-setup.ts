@@ -105,6 +105,14 @@ async function setup() {
     await client.query(`REVOKE ALL ON SCHEMA ${prodSchema} FROM ${authUser};`);
     await client.query(`REVOKE ALL ON SCHEMA ${authSchema} FROM ${prodUser};`);
 
+    // Allow the migration user (ADMIN_URL / current connection) to run Prisma migrations
+    // in both schemas. Requires superuser or schema owner; works when ADMIN_URL is postgres.
+    const {
+      rows: [{ current_user: migrationUser }],
+    } = await client.query<{ current_user: string }>('SELECT current_user');
+    await client.query(`GRANT USAGE, CREATE ON SCHEMA ${authSchema} TO "${migrationUser}"`);
+    await client.query(`GRANT USAGE, CREATE ON SCHEMA ${prodSchema} TO "${migrationUser}"`);
+
     console.log('✅ Schemas and Users configured successfully');
   } catch (err) {
     console.error('❌ Database setup failed:', err);

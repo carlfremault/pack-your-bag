@@ -1,2 +1,2 @@
 -- AlterEnum
-ALTER TYPE "AuditEventType" ADD VALUE 'HTTP_ERROR';
+ALTER TYPE "app_auth"."AuditEventType" ADD VALUE 'HTTP_ERROR';
