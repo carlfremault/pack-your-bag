@@ -7,7 +7,7 @@
       "dependsOn": ["^build", "^generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["AUTH_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -19,7 +19,7 @@
       "dependsOn": ["^generate"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
     },
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
@@ -29,13 +29,13 @@
     },
     "test": {
       "dependsOn": ["test:setup"],
-      "env": ["AUTH_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
     },
     "test:watch": {
       "dependsOn": ["test:setup"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
     },
     "test:browser": {
       "cache": false,

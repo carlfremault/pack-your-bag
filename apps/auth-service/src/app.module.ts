@@ -61,6 +61,9 @@ const validationSchema = Joi.object({
   RSA_PRIVATE_KEY_B64: Joi.string().base64().required().messages({
     'string.base64': 'RSA_PRIVATE_KEY_B64 must be a valid base64 encoded string',
   }),
+  RSA_PUBLIC_KEY_B64: Joi.string().base64().required().messages({
+    'string.base64': 'RSA_PUBLIC_KEY_B64 must be a valid base64 encoded string',
+  }),
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(900),
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
   AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: Joi.number().default(30000),
