@@ -8,7 +8,7 @@ declare global {
       tokenFamilyId?: string;
     }
     interface Request {
-      id: string; // populated by request-ID middleware
+      id?: string; // populated by request-ID middleware; check before use
       user?: User;
       auditOverride?: AuditEventType;
     }

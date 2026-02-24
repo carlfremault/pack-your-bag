@@ -5,11 +5,24 @@ import { ThrottlerException, ThrottlerGuard, ThrottlerStorage } from '@nestjs/th
 
 import { Request } from 'express';
 
-import { anonymizeEmail } from '@/common/utils/anonymizeEmail';
-import anonymizeIp from '@/common/utils/anonymizeIp';
+import { THROTTLE_BY_EMAIL_KEY } from '../decorators/throttle-email.decorator';
+import { anonymizeEmail } from '../utils/anonymizeEmail';
+import { anonymizeIp } from '../utils/anonymizeIp';
 
+/**
+ * Custom throttler guard that masks user IDs and email addresses in the tracker.
+ *
+ * Trust proxy needs to be configured correctly in the consuming app's main.ts for req.ip to be populated correctly.
+ *
+ * @example
+ * {
+ *   app.set('trust proxy', 1);
+ * }
+ */
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
+  private currentContext: ExecutionContext;
+
   constructor(
     options: ThrottlerModuleOptions,
     storageService: ThrottlerStorage,
@@ -27,7 +40,12 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
 
     const ip = this.getClientIp(req);
 
-    if (req.path === '/auth/login' && this.isLoginBody(req.body)) {
+    const shouldThrottleByEmail = this.reflector.getAllAndOverride<boolean>(THROTTLE_BY_EMAIL_KEY, [
+      this.currentContext.getHandler(),
+      this.currentContext.getClass(),
+    ]);
+
+    if (shouldThrottleByEmail && this.isLoginBody(req.body)) {
       return `ip-email:${ip}:${req.body.email.toLowerCase()}`;
     }
 
@@ -35,6 +53,8 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.currentContext = context;
+
     try {
       return await super.canActivate(context);
     } catch (error) {

@@ -28,16 +28,33 @@ function createMockRequest(overrides?: {
   };
 }
 
+function createMockExecutionContext(overrides?: Partial<ExecutionContext>): ExecutionContext {
+  return {
+    getHandler: () => ({}),
+    getClass: () => ({}),
+    switchToHttp: () => ({
+      getRequest: () => createMockRequest(),
+      getResponse: () => ({}),
+      getNext: () => ({}),
+    }),
+    ...overrides,
+  } as ExecutionContext;
+}
+
 describe('CustomThrottlerGuard', () => {
   let guard: CustomThrottlerGuard;
   let guardWithProtected: GuardWithProtectedMethods;
 
   const mockThrottlerOptions = { throttlers: [] };
   const mockThrottlerStorage = {} as ThrottlerStorage;
-  const mockReflector = {} as Reflector;
+  const getAllAndOverrideMock = vi.fn().mockReturnValue(false);
+  const mockReflector = {
+    getAllAndOverride: getAllAndOverrideMock,
+  } as unknown as Reflector;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    getAllAndOverrideMock.mockReturnValue(false);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,6 +68,8 @@ describe('CustomThrottlerGuard', () => {
 
     guard = module.get<CustomThrottlerGuard>(CustomThrottlerGuard);
     guardWithProtected = guard as GuardWithProtectedMethods;
+    (guard as unknown as { currentContext: ExecutionContext }).currentContext =
+      createMockExecutionContext();
   });
 
   it('should be defined', () => {
@@ -66,7 +85,8 @@ describe('CustomThrottlerGuard', () => {
       expect(tracker).toBe('user:user-abc-123');
     });
 
-    it('should return ip-email tracker for login requests with valid email', async () => {
+    it('should return ip-email tracker when ThrottleByEmail is set and body has valid email', async () => {
+      getAllAndOverrideMock.mockReturnValue(true);
       const req = createMockRequest({
         path: '/auth/login',
         ip: '10.0.0.5',
@@ -79,7 +99,8 @@ describe('CustomThrottlerGuard', () => {
       expect(tracker).toBe('ip-email:10.0.0.5:test@example.com');
     });
 
-    it('should return ip-only tracker for login requests with invalid body', async () => {
+    it('should return ip-only tracker when ThrottleByEmail is set but body has no valid email', async () => {
+      getAllAndOverrideMock.mockReturnValue(true);
       const req = createMockRequest({
         path: '/auth/login',
         ip: '10.0.0.6',
@@ -91,11 +112,12 @@ describe('CustomThrottlerGuard', () => {
       expect(tracker).toBe('ip:10.0.0.6');
     });
 
-    it('should return ip-only tracker for non-login requests', async () => {
+    it('should return ip-only tracker when ThrottleByEmail is not set (even with email in body)', async () => {
+      getAllAndOverrideMock.mockReturnValue(false);
       const req = createMockRequest({
         path: '/api/users',
         ip: '172.16.0.1',
-        body: { email: 'test@example.com' }, // even with email in body
+        body: { email: 'test@example.com' },
       }) as Request;
 
       const tracker = await guardWithProtected.getTracker(req);
@@ -114,6 +136,10 @@ describe('CustomThrottlerGuard', () => {
   });
 
   describe('isLoginBody validation', () => {
+    beforeEach(() => {
+      getAllAndOverrideMock.mockReturnValue(true);
+    });
+
     it('should reject null body', async () => {
       const req = createMockRequest({ path: '/auth/login', body: null }) as Request;
 
@@ -159,7 +185,8 @@ describe('CustomThrottlerGuard', () => {
     });
 
     it('should accept valid email at boundary (254 chars)', async () => {
-      const validEmail = 'a'.repeat(242) + '@example.com'; // 254 chars total
+      getAllAndOverrideMock.mockReturnValue(true);
+      const validEmail = 'a'.repeat(242) + '@example.com'; // 254 chars (guard uses length < 255)
       const req = createMockRequest({
         path: '/auth/login',
         ip: '10.0.0.7',
@@ -168,7 +195,7 @@ describe('CustomThrottlerGuard', () => {
 
       const tracker = await guardWithProtected.getTracker(req);
 
-      expect(tracker).toBe(`ip-email:10.0.0.7:${validEmail.toLowerCase()}`);
+      expect(tracker).toBe(`ip-email:10.0.0.7:${validEmail}`);
     });
   });
 
@@ -195,6 +222,7 @@ describe('CustomThrottlerGuard', () => {
 
     it('should mask ip-email tracker with anonymized IP and email', async () => {
       expect.assertions(1);
+      getAllAndOverrideMock.mockReturnValue(true);
 
       const context = {
         switchToHttp: () => ({

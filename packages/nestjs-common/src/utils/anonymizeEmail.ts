@@ -8,6 +8,7 @@
  * @returns The anonymized email
  */
 export function anonymizeEmail(email: string): string {
+  email = email.trim();
   if (!email || !email.includes('@')) return 'invalid-email';
 
   const atIndex = email.indexOf('@');
@@ -16,7 +17,7 @@ export function anonymizeEmail(email: string): string {
 
   if (!localPart || !domain || domain.includes('@')) return 'invalid-email';
 
-  if (localPart.length <= 2) {
+  if (localPart.length <= 3) {
     return `${localPart[0]}***@${domain}`;
   }
 
