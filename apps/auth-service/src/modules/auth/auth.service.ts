@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { AuditEventType, Prisma, TokenType } from '@repo/db';
+import { DeletedUserHelper, InvalidSessionException } from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -15,11 +16,7 @@ import { v7 as uuidv7 } from 'uuid';
 
 import { AUTH_DEFAULT_USER_ROLE_ID, DEFAULT_LOCALE } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import {
-  InvalidSessionException,
-  SessionExpiredException,
-} from '@/common/exceptions/unauthorized.exceptions';
-import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
+import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';

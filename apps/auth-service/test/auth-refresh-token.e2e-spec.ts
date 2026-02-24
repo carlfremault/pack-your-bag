@@ -447,6 +447,7 @@ describe('Auth Refresh Token (e2e)', () => {
       );
 
       expect(response.body).toMatchObject({
+        statusCode: HttpStatus.UNAUTHORIZED,
         error: 'INVALID_SESSION',
         message: 'Access Denied',
       });

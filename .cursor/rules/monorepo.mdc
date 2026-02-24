@@ -38,7 +38,4 @@ You are working in a Turborepo monorepo using Yarn 4 (Berry).
 
 ## Project Context
 
-- This is a "Pack Your Bag" application.
-- ALWAYS refer to the `README.md` in the root for the project's high-level goals
 - PostgreSQL is the primary database (managed via Docker Compose). It is used for the Auth Service and Product Service microservices. Each service talks to a separate schema: `app_auth` and `app_product` respectively. These schemas are completely separate and have their own users and password. You can reference `scripts/database-setup.ts` for Postgres configuration.
-- MongoDB is not yet implemented but will be used for the User Data Service microservice.

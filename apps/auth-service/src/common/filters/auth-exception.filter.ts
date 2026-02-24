@@ -8,12 +8,12 @@ import {
 } from '@nestjs/common';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
+import { InvalidSessionException } from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
 
 import {
   BffAuthenticationException,
-  InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';

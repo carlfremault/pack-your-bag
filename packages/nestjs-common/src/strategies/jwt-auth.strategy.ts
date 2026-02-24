@@ -6,9 +6,8 @@ import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { InvalidSessionException } from '@/common/exceptions/unauthorized.exceptions';
-
-import { JwtPayload } from './dto/jwt-payload.dto';
+import { JwtPayload, JwtTokenType } from '../dto/jwt-payload.dto';
+import { InvalidSessionException } from '../exceptions/unauthorized.exceptions';
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
@@ -30,7 +29,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
     const dto = plainToInstance(JwtPayload, payload, { excludeExtraneousValues: true });
     const errors = validateSync(dto);
 
-    if (errors.length > 0 || dto.type !== 'access') {
+    if (errors.length > 0 || dto.type !== JwtTokenType.Access) {
       throw new InvalidSessionException('Invalid access token payload');
     }
     return { userId: dto.sub, roleId: dto.role };

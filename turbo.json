@@ -16,7 +16,7 @@
       "dependsOn": ["^check-types"]
     },
     "dev": {
-      "dependsOn": ["^generate"],
+      "dependsOn": ["^build", "^generate"],
       "cache": false,
       "persistent": true,
       "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]

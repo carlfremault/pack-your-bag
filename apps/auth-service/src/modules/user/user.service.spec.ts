@@ -3,14 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { TokenType, User } from '@repo/db';
+import { AccountDeletedException, MS_PER_DAY } from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 
-import { MS_PER_DAY } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';

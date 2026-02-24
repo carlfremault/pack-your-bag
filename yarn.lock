@@ -2964,6 +2964,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@repo/nestjs-common@workspace:*, @repo/nestjs-common@workspace:packages/nestjs-common":
+  version: 0.0.0-use.local
+  resolution: "@repo/nestjs-common@workspace:packages/nestjs-common"
+  dependencies:
+    "@repo/db": "workspace:*"
+    "@repo/eslint-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*"
+    "@types/node": "npm:^22.10.7"
+    "@types/passport-jwt": "npm:^4.0.1"
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.14.3"
+    typescript: "npm:^5.9.3"
+  peerDependencies:
+    "@nestjs/common": ^11.0.1
+    "@nestjs/config": ^4.0.2
+    "@nestjs/passport": ^11.0.5
+    passport: ^0.7.0
+    passport-jwt: ^4.0.1
+    reflect-metadata: ^0.2.2
+  languageName: unknown
+  linkType: soft
+
 "@repo/typescript-config@npm:*, @repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"
@@ -5331,6 +5353,7 @@ __metadata:
     "@prisma/adapter-pg": "npm:^7.2.0"
     "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
+    "@repo/nestjs-common": "workspace:*"
     "@repo/typescript-config": "workspace:*"
     "@repo/vitest-config": "workspace:*"
     "@sentry/nestjs": "npm:^10.37.0"
