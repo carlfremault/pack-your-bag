@@ -13,7 +13,14 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { AuditEventType } from '@repo/db';
-import { BffGuard, JwtAuthGuard, THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@repo/nestjs-common';
+import {
+  BffGuard,
+  CustomThrottlerGuard,
+  JwtAuthGuard,
+  THROTTLE_LIMITS,
+  THROTTLE_TTL_MS,
+  ThrottleByEmail,
+} from '@repo/nestjs-common';
 
 import type { Request } from 'express';
 
@@ -24,7 +31,6 @@ import {
 } from '@/common/decorators/api-security.decorator';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
@@ -70,6 +76,7 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid email or password.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_TTL_MS } })
+  @ThrottleByEmail()
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
   @AuditLog(AuditEventType.USER_LOGIN_SUCCESS)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import anonymizeIp from './anonymizeIp';
+import { anonymizeIp } from './anonymizeIp';
 
 describe('anonymizeIp', () => {
   describe('missing or empty input', () => {

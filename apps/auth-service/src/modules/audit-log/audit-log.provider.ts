@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { anonymizeIp } from '@repo/nestjs-common';
 
 import { Request } from 'express';
 
 import { AUTH_EVENTS } from '@/common/constants/auth.constants';
 import { BaseEventProvider } from '@/common/providers/base-event.provider';
-import anonymizeIp from '@/common/utils/anonymizeIp';
 import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 
 interface AuditRequestInput {

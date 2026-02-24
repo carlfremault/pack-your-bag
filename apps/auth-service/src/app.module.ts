@@ -6,7 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 
-import { BffGuardModule, JwtAuthModule } from '@repo/nestjs-common';
+import { BffGuardModule, CustomThrottlerModule, JwtAuthModule } from '@repo/nestjs-common';
 
 import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
@@ -123,6 +123,13 @@ const validationSchema = Joi.object({
         },
       ],
     }),
+    PrismaModule,
+    BffGuardModule,
+    CustomThrottlerModule,
+    JwtAuthModule,
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
+    SentryModule.forRoot(),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -143,17 +150,11 @@ const validationSchema = Joi.object({
         },
       }),
     }),
-    EventEmitterModule.forRoot(),
-    ScheduleModule.forRoot(),
-    SentryModule.forRoot(),
-    PrismaModule,
+    AuditLogModule,
     AuthModule,
     UserModule,
-    AuditLogModule,
     HealthModule,
     TasksModule,
-    JwtAuthModule,
-    BffGuardModule,
   ],
   providers: [
     {

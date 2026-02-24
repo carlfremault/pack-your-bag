@@ -8,7 +8,11 @@ import {
 } from '@nestjs/common';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
-import { BffAuthenticationException, InvalidSessionException } from '@repo/nestjs-common';
+import {
+  anonymizeEmail,
+  BffAuthenticationException,
+  InvalidSessionException,
+} from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
 
@@ -16,7 +20,6 @@ import {
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';
-import { anonymizeEmail } from '@/common/utils/anonymizeEmail';
 import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';

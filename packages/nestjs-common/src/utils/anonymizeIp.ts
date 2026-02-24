@@ -6,7 +6,7 @@
  * @param ip - The IP address to anonymize
  * @returns The anonymized IP
  */
-export default function anonymizeIp(ip?: string): string {
+export function anonymizeIp(ip?: string): string {
   if (!ip) return '0.0.0.0';
 
   // Handle IPv4-mapped IPv6 (e.g. ::ffff:192.168.1.1)
@@ -33,7 +33,7 @@ export default function anonymizeIp(ip?: string): string {
     return '::';
   }
 
-  return ip;
+  return '0.0.0.0'; // Unknown format — return safe default rather than leaking raw value
 }
 
 /**

@@ -25,7 +25,7 @@ describe('anonymizeEmail', () => {
     });
   });
 
-  describe('short local parts (length <= 2)', () => {
+  describe('short local parts (length <= 3)', () => {
     it('should show only the first character for a 1-char local part', () => {
       expect(anonymizeEmail('a@example.com')).toBe('a***@example.com');
     });
@@ -33,11 +33,14 @@ describe('anonymizeEmail', () => {
     it('should show only the first character for a 2-char local part', () => {
       expect(anonymizeEmail('ab@example.com')).toBe('a***@example.com');
     });
+    it('should show only the first character for a 3-char local part', () => {
+      expect(anonymizeEmail('abc@example.com')).toBe('a***@example.com');
+    });
   });
 
-  describe('standard local parts (length > 2)', () => {
-    it('should show first 2 chars, ***, last char for a 3-char local part', () => {
-      expect(anonymizeEmail('abc@example.com')).toBe('ab***c@example.com');
+  describe('standard local parts (length > 3)', () => {
+    it('should show first 2 chars, ***, last char for a 4-char local part', () => {
+      expect(anonymizeEmail('abcd@example.com')).toBe('ab***d@example.com');
     });
 
     it('should correctly anonymize a typical email', () => {
