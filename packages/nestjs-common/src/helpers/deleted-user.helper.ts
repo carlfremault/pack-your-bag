@@ -2,8 +2,10 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { User } from '@repo/db';
 
-import { MS_PER_DAY } from '../constants/auth.constants';
+import { MS_PER_DAY } from '../constants/common.constants';
 import { AccountDeletedException } from '../exceptions/forbidden.exceptions';
+
+const INVALID_ACCOUNT_STATE_MSG = 'Account is in an invalid state. Please contact support.';
 
 export class DeletedUserHelper {
   static checkDeletedUser(user: User, retentionDays: number): void {
@@ -12,7 +14,13 @@ export class DeletedUserHelper {
     }
 
     if (!user.deletedAt) {
-      throw new ForbiddenException('Account is in an invalid state. Please contact support.');
+      throw new ForbiddenException(INVALID_ACCOUNT_STATE_MSG);
+    }
+
+    const deletedAtDate =
+      user.deletedAt instanceof Date ? user.deletedAt : new Date(user.deletedAt);
+    if (isNaN(deletedAtDate.getTime())) {
+      throw new ForbiddenException(INVALID_ACCOUNT_STATE_MSG);
     }
 
     const daysRemaining = calculateDaysRemaining(user.deletedAt, retentionDays);

@@ -10,7 +10,12 @@ export class AccountDeletedException extends ForbiddenException {
 
     super(
       { message, error: 'ACCOUNT_DELETED' },
-      { cause: `Account deleted, ${daysRemaining} days remaining` },
+      {
+        cause:
+          daysRemaining <= 0
+            ? 'Account deleted, deletion in progress'
+            : `Account deleted, ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`,
+      },
     );
     this.name = 'AccountDeletedException';
   }

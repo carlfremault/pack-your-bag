@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { User } from '@repo/db';
 
-import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
+import { DeletedUserHelper } from '../helpers/deleted-user.helper';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -16,7 +16,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
   handleRequest<TUser = User>(err: Error | null, user: TUser | false): TUser {
     if (err || !user) {
-      throw err || new UnauthorizedException('Access Denied');
+      throw err ?? new UnauthorizedException('Access Denied');
     }
 
     DeletedUserHelper.checkDeletedUser(user as unknown as User, this.retentionDays);

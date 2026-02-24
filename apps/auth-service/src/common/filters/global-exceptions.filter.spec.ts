@@ -12,11 +12,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerException } from '@nestjs/throttler';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AccountDeletedException } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import { AccountDeletedException } from '@/common/exceptions/forbidden.exceptions';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 import { GlobalExceptionsFilter } from './global-exceptions.filter';
@@ -221,14 +221,14 @@ describe('GlobalExceptionsFilter', () => {
       );
     });
 
-    it('should include "0 days remaining" in the audit message when daysRemaining is 0', () => {
+    it('should include "deletion in progress" in the audit message when daysRemaining is 0', () => {
       const { host } = createMockHost();
 
       filter.catch(new AccountDeletedException(0), host as never);
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Account deleted, 0 days remaining',
+          message: 'Account deleted, deletion in progress',
         }),
         expect.anything(),
       );

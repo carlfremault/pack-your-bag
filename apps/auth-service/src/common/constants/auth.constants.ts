@@ -38,5 +38,4 @@ export const AUTH_EVENTS = {
 } as const;
 
 // Various
-export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 export const EMAIL_MAX_LENGTH = 254;

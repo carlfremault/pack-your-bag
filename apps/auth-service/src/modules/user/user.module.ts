@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 
 import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
-import { JwtAuthStrategy } from '@/common/strategies/jwt-auth.strategy';
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
 import { EmailModule } from '@/modules/email/email.module';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
@@ -16,14 +15,7 @@ import { UserEventProvider } from './user-event.provider';
 @Module({
   imports: [AuditLogModule, EmailModule, RefreshTokenModule, VerificationTokenModule],
   controllers: [UserController],
-  providers: [
-    UserService,
-    UserEventProvider,
-    UserEmailListener,
-    JwtAuthStrategy,
-    CustomThrottlerGuard,
-    BffGuard,
-  ],
+  providers: [UserService, UserEventProvider, UserEmailListener, CustomThrottlerGuard, BffGuard],
   exports: [UserService],
 })
 export class UserModule {}

@@ -3,6 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { AuditEventType } from '@repo/db';
+import { JwtAuthGuard } from '@repo/nestjs-common';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import {
@@ -13,7 +14,6 @@ import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
-import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 import { CancelDeletionDto } from './dto/cancel-deletion.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';

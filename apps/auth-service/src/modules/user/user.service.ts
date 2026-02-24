@@ -7,13 +7,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 import { Prisma, TokenType, User } from '@repo/db';
+import { DeletedUserHelper, MS_PER_DAY } from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-import { DEFAULT_LOCALE, MS_PER_DAY } from '@/common/constants/auth.constants';
+import { DEFAULT_LOCALE } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import { DeletedUserHelper } from '@/common/helpers/deleted-user.helper';
 import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
