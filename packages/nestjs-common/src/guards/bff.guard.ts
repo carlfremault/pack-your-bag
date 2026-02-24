@@ -11,9 +11,19 @@ import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'crypto';
 import { Request } from 'express';
 
-import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
-import { BffAuthenticationException } from '@/common/exceptions/unauthorized.exceptions';
+import { THROTTLE_LIMITS } from '../constants/common.constants';
+import { BffAuthenticationException } from '../exceptions/unauthorized.exceptions';
 
+/**
+ * Protects the API from unauthorized access.
+ *
+ * Trust proxy needs to be configured correctly in the consuming app's main.ts for request.ip to be populated correctly.
+ *
+ * @example
+ * {
+ *   app.set('trust proxy', 1);
+ * }
+ */
 @Injectable()
 export class BffGuard implements CanActivate, OnModuleDestroy {
   private readonly logger = new Logger(BffGuard.name);
@@ -28,9 +38,7 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-    }
+    clearInterval(this.cleanupInterval);
   }
 
   canActivate(context: ExecutionContext): boolean {
@@ -52,7 +60,8 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
       }
     }
 
-    const providedSecret = request.headers['x-bff-secret'] as string;
+    const rawHeader = request.headers['x-bff-secret'];
+    const providedSecret = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
 
     if (!this.bffSecret) {
       this.logger.error('BFF_SHARED_SECRET not configured');
@@ -88,6 +97,7 @@ export class BffGuard implements CanActivate, OnModuleDestroy {
       });
     } else {
       current.count++;
+      current.resetAt = Date.now() + this.LOCKOUT_DURATION_MS;
       this.logger.warn('Failed BFF auth attempt', { ip, attempts: current.count });
     }
   }

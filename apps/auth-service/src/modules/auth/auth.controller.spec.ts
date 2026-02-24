@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { JwtAuthGuard } from '@repo/nestjs-common';
+import { BffGuard, JwtAuthGuard } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 
 import { AuthController } from './auth.controller';

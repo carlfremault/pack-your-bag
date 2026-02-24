@@ -13,11 +13,10 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { AuditEventType } from '@repo/db';
-import { JwtAuthGuard } from '@repo/nestjs-common';
+import { BffGuard, JwtAuthGuard, THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@repo/nestjs-common';
 
 import type { Request } from 'express';
 
-import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import {
   ApiBffAndAccessSecurity,
   ApiBffAndRefreshSecurity,
@@ -25,7 +24,6 @@ import {
 } from '@/common/decorators/api-security.decorator';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';

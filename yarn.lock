@@ -2971,11 +2971,13 @@ __metadata:
     "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/typescript-config": "workspace:*"
+    "@repo/vitest-config": "workspace:*"
     "@types/node": "npm:^22.10.7"
     "@types/passport-jwt": "npm:^4.0.1"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.3"
     typescript: "npm:^5.9.3"
+    vitest: "npm:^4.0.14"
   peerDependencies:
     "@nestjs/common": ^11.0.1
     "@nestjs/config": ^4.0.2

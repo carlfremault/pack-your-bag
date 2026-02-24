@@ -6,7 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 
-import { JwtAuthModule } from '@repo/nestjs-common';
+import { BffGuardModule, JwtAuthModule } from '@repo/nestjs-common';
 
 import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
@@ -153,6 +153,7 @@ const validationSchema = Joi.object({
     HealthModule,
     TasksModule,
     JwtAuthModule,
+    BffGuardModule,
   ],
   providers: [
     {

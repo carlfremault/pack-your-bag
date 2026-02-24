@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 
-import { BffGuard } from '@/common/guards/bff.guard';
 import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
 import { EmailModule } from '@/modules/email/email.module';
@@ -15,7 +14,7 @@ import { UserEventProvider } from './user-event.provider';
 @Module({
   imports: [AuditLogModule, EmailModule, RefreshTokenModule, VerificationTokenModule],
   controllers: [UserController],
-  providers: [UserService, UserEventProvider, UserEmailListener, CustomThrottlerGuard, BffGuard],
+  providers: [UserService, UserEventProvider, UserEmailListener, CustomThrottlerGuard],
   exports: [UserService],
 })
 export class UserModule {}
