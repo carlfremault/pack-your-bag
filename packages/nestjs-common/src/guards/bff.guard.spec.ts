@@ -4,8 +4,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
-import { BffAuthenticationException } from '@/common/exceptions/unauthorized.exceptions';
+import { THROTTLE_LIMITS } from '../constants/common.constants';
+import { BffAuthenticationException } from '../exceptions/unauthorized.exceptions';
 
 import { BffGuard } from './bff.guard';
 
@@ -33,11 +33,21 @@ function createMockContext(options: {
   } as never;
 }
 
+function exhaustLockoutThreshold(guard: BffGuard, ctx: ExecutionContext): void {
+  for (let i = 0; i < THROTTLE_LIMITS.BFF_GUARD; i++) {
+    try {
+      guard.canActivate(ctx);
+    } catch {
+      // expected authentication failures
+    }
+  }
+}
+
 describe('BffGuard', () => {
   let guard: BffGuard;
-
+  let bffSecret: string;
   const mockConfigService = {
-    get: vi.fn(<T = number>(key: string, defaultValue?: T): T => {
+    get: vi.fn(<T = string>(key: string, defaultValue?: T): T => {
       return (MOCK_CONFIG[key as keyof typeof MOCK_CONFIG] ?? defaultValue) as T;
     }),
   };
@@ -49,6 +59,7 @@ describe('BffGuard', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [BffGuard, { provide: ConfigService, useValue: mockConfigService }],
     }).compile();
+    bffSecret = mockConfigService.get('BFF_SHARED_SECRET') as string;
 
     guard = module.get<BffGuard>(BffGuard);
   });
@@ -121,14 +132,7 @@ describe('BffGuard', () => {
       const ip = '10.0.0.2';
       const context = createMockContext({ ip, bffSecret: 'wrong' });
 
-      // Make THROTTLE_LIMITS.BFF_GUARD failed attempts
-      for (let i = 0; i < THROTTLE_LIMITS.BFF_GUARD; i++) {
-        try {
-          guard.canActivate(context);
-        } catch {
-          // expected
-        }
-      }
+      exhaustLockoutThreshold(guard, context);
 
       // Next attempt should trigger lockout
       expect(() => guard.canActivate(context)).toThrow(
@@ -145,8 +149,6 @@ describe('BffGuard', () => {
   });
 
   describe('correct secret', () => {
-    const bffSecret = mockConfigService.get('BFF_SHARED_SECRET') as string;
-
     it('should return true when the correct secret is provided', () => {
       const context = createMockContext({ bffSecret });
 
@@ -190,14 +192,7 @@ describe('BffGuard', () => {
       const ip = '10.0.0.4';
       const context = createMockContext({ ip, bffSecret: 'wrong' });
 
-      // Exhaust the limit
-      for (let i = 0; i < THROTTLE_LIMITS.BFF_GUARD; i++) {
-        try {
-          guard.canActivate(context);
-        } catch {
-          // expected
-        }
-      }
+      exhaustLockoutThreshold(guard, context);
 
       // Next attempt triggers lockout message
       expect(() => guard.canActivate(context)).toThrow(
@@ -209,14 +204,7 @@ describe('BffGuard', () => {
       const ip = '10.0.0.5';
       const failContext = createMockContext({ ip, bffSecret: 'wrong' });
 
-      // Trigger lockout
-      for (let i = 0; i < THROTTLE_LIMITS.BFF_GUARD; i++) {
-        try {
-          guard.canActivate(failContext);
-        } catch {
-          // expected
-        }
-      }
+      exhaustLockoutThreshold(guard, failContext);
 
       // Try with correct secret while still locked out
       const successContext = createMockContext({ ip, bffSecret });
@@ -229,14 +217,7 @@ describe('BffGuard', () => {
       const ip = '10.0.0.6';
       const context = createMockContext({ ip, bffSecret: 'wrong' });
 
-      // Trigger lockout
-      for (let i = 0; i < THROTTLE_LIMITS.BFF_GUARD; i++) {
-        try {
-          guard.canActivate(context);
-        } catch {
-          // expected
-        }
-      }
+      exhaustLockoutThreshold(guard, context);
 
       // Verify locked out
       expect(() => guard.canActivate(context)).toThrow(
@@ -265,13 +246,7 @@ describe('BffGuard', () => {
       }
 
       // Verify it's recorded (we can infer by attempting again and seeing count increment)
-      for (let i = 1; i < THROTTLE_LIMITS.BFF_GUARD; i++) {
-        try {
-          guard.canActivate(context);
-        } catch {
-          // expected
-        }
-      }
+      exhaustLockoutThreshold(guard, context);
 
       // Should now be locked out
       expect(() => guard.canActivate(context)).toThrow(

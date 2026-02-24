@@ -18,14 +18,3 @@ export class SessionExpiredException extends UnauthorizedException {
     this.name = 'SessionExpiredException';
   }
 }
-
-// Used when: request without x-bff-secret header is received
-export class BffAuthenticationException extends UnauthorizedException {
-  constructor(internalDetails?: string) {
-    super(
-      { message: 'Unauthorized', error: 'UNAUTHORIZED' },
-      { cause: internalDetails || 'Unauthorized' },
-    );
-    this.name = 'BffAuthenticationException';
-  }
-}

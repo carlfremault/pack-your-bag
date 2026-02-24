@@ -13,22 +13,6 @@ export const DEFAULT_LOCALE = 'en-GB';
 export const LOCALE_REGEX = /^[a-z]{2}(-[A-Z]{2})?$/;
 export const LOCALE_MESSAGE = 'Locale must be a valid format (e.g., en, en-GB)';
 
-// Throttling
-export const THROTTLE_TTL_MS = 60000;
-export const THROTTLE_LIMITS = {
-  BFF_GUARD: 10,
-  REGISTER: 5,
-  LOGIN: 10,
-  REFRESH_TOKEN: 5,
-  LOGOUT: 10,
-  LOGOUT_ALL_DEVICES: 10,
-  UPDATE_PASSWORD: 3,
-  DELETE_USER: 3,
-  FORGOT_PASSWORD: 3,
-  RESET_PASSWORD: 3,
-  CANCEL_ACCOUNT_DELETION: 3,
-} as const;
-
 // Events
 export const AUTH_EVENTS = {
   AUDIT_LOG: 'audit.log',
