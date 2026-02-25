@@ -8,6 +8,7 @@ export * from './guards/bff.guard';
 export * from './guards/custom-throttler.guard';
 export * from './guards/jwt-auth.guard';
 export * from './helpers/deleted-user.helper';
+export * from './openapi/generate-spec';
 export * from './utils/anonymizeEmail';
 export * from './utils/anonymizeIp';
 export * from './bff-guard.module';

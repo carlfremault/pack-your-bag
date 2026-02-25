@@ -22,7 +22,9 @@
     "db:deploy": "turbo run deploy --filter=@repo/db",
     "db:seed": "turbo run seed --filter=@repo/db",
     "openapi:auth": "turbo run openapi --filter=auth-service",
-    "generate:auth-client": "yarn workspace @repo/auth-client generate"
+    "openapi:product": "turbo run openapi --filter=product-service",
+    "generate:auth-client": "yarn workspace @repo/auth-client generate",
+    "generate:product-client": "yarn workspace @repo/product-client generate"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
