@@ -5,6 +5,7 @@ import { Throttle } from '@nestjs/throttler';
 import { AuditEventType } from '@repo/db';
 import {
   BffGuard,
+  CurrentUser,
   CustomThrottlerGuard,
   JwtAuthGuard,
   THROTTLE_LIMITS,
@@ -16,7 +17,6 @@ import {
   ApiBffSecurity,
 } from '@/common/decorators/api-security.decorator';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 import { CancelDeletionDto } from './dto/cancel-deletion.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
