@@ -13,6 +13,6 @@ import { AppModule } from '@/app.module';
 import { swaggerConfig } from '@/common/helpers/swagger-config';
 
 generateSpec(AppModule, swaggerConfig).catch((err) => {
-  console.error('Unhandled error during Auth Service openapi spec generation:', err);
+  console.error('Unhandled error during Product Service openapi spec generation:', err);
   process.exit(1);
 });

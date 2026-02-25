@@ -1,28 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 
 import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 
-// TODO: same as auth service, move this to the shared NestJS package when done
-const swaggerConfig = new DocumentBuilder()
-  .setTitle('Product Service')
-  .setDescription('Product Service API description')
-  .setVersion('1.0')
-  .addApiKey(
-    {
-      type: 'apiKey',
-      in: 'header',
-      name: 'x-bff-secret',
-      description:
-        'Shared secret between BFF and auth service. All requests (except /health) rejected without it.',
-    },
-    'bff-secret',
-  )
-  .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
-  .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'refresh-token')
-  .build();
+import { swaggerConfig } from '@/common/helpers/swagger-config';
 
 import { AppModule } from './app.module';
 async function bootstrap() {
