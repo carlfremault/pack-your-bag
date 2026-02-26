@@ -6,7 +6,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 
-import { BffGuardModule, CustomThrottlerModule, JwtAuthModule } from '@repo/nestjs-common';
+import {
+  BffGuardModule,
+  CustomThrottlerModule,
+  JwtAuthModule,
+  RequestIdMiddleware,
+} from '@repo/nestjs-common';
 
 import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
@@ -16,7 +21,6 @@ import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';

@@ -3,8 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
-
-import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
+import { safeCaptureSentryException } from '@repo/nestjs-common';
 
 import { AuditLogProvider } from '../audit-log/audit-log.provider';
 
