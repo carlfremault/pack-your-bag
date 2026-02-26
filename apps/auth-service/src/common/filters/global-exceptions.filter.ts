@@ -10,12 +10,11 @@ import {
 import { ThrottlerException } from '@nestjs/throttler';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
-import { AccountDeletedException } from '@repo/nestjs-common';
+import { AccountDeletedException, safeCaptureSentryException } from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import { safeCaptureSentryException } from '@/common/utils/captureSentryException';
 import { safeStringify } from '@/common/utils/safeStringify';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
