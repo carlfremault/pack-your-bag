@@ -21,5 +21,21 @@ export const AUTH_EVENTS = {
   ACCOUNT_DELETION_REQUESTED: 'account.deletion_requested',
 } as const;
 
+// Throttling
+export const THROTTLE_TTL_MS = 60000;
+export const THROTTLE_LIMITS = {
+  BFF_GUARD: 10,
+  REGISTER: 5,
+  LOGIN: 10,
+  REFRESH_TOKEN: 5,
+  LOGOUT: 5,
+  LOGOUT_ALL_DEVICES: 3,
+  UPDATE_PASSWORD: 3,
+  DELETE_USER: 3,
+  FORGOT_PASSWORD: 3,
+  RESET_PASSWORD: 3,
+  CANCEL_ACCOUNT_DELETION: 3,
+} as const;
+
 // Various
 export const EMAIL_MAX_LENGTH = 254;

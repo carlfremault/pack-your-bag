@@ -3,15 +3,9 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { AuditEventType } from '@repo/db';
-import {
-  BffGuard,
-  CurrentUser,
-  CustomThrottlerGuard,
-  JwtAuthGuard,
-  THROTTLE_LIMITS,
-  THROTTLE_TTL_MS,
-} from '@repo/nestjs-common';
+import { BffGuard, CurrentUser, CustomThrottlerGuard, JwtAuthGuard } from '@repo/nestjs-common';
 
+import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import {
   ApiBffAndAccessSecurity,
   ApiBffSecurity,
