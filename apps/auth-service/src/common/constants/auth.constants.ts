@@ -24,7 +24,6 @@ export const AUTH_EVENTS = {
 // Throttling
 export const THROTTLE_TTL_MS = 60000;
 export const THROTTLE_LIMITS = {
-  BFF_GUARD: 10,
   REGISTER: 5,
   LOGIN: 10,
   REFRESH_TOKEN: 5,
