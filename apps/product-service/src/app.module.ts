@@ -1,7 +1,9 @@
 import { Module, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 
+import type { Request } from 'express';
 import Joi from 'joi';
 
 import { PrismaModule } from './prisma/prisma.module';
@@ -56,6 +58,21 @@ const validationSchema = Joi.object({
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get('PRODUCT_THROTTLE_TTL', 60000),
+          limit: config.get('PRODUCT_THROTTLE_LIMIT', 100),
+          skipIf: (context) => {
+            const isTestEnv = config.get('NODE_ENV') === 'test';
+            if (!isTestEnv) return false;
+            const req = context.switchToHttp().getRequest<Request>();
+            return !req.headers['x-force-throttling'];
+          },
+        },
+      ],
     }),
     PrismaModule,
   ],
