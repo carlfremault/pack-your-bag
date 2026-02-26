@@ -4,7 +4,7 @@ export * from './decorators/throttle-email.decorator';
 export * from './dto/jwt-payload.dto';
 export * from './exceptions/forbidden.exceptions';
 export * from './exceptions/unauthorized.exceptions';
-export * from './filters/base-exception.filter';
+export * from './filters/base-exceptions.filter';
 export * from './guards/bff.guard';
 export * from './guards/custom-throttler.guard';
 export * from './guards/jwt-auth.guard';

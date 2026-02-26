@@ -10,7 +10,7 @@ import { ThrottlerException } from '@nestjs/throttler';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BaseGlobalExceptionsFilter } from './base-exception.filter';
+import { BaseGlobalExceptionsFilter } from './base-exceptions.filter';
 
 type HandleAuditingArgs = [
   exception: unknown,
