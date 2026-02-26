@@ -1,5 +1,3 @@
-import { THROTTLE_LIMITS as COMMON_THROTTLE_LIMITS } from '@repo/nestjs-common';
-
 // Password
 export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 export const PASSWORD_MESSAGE =
@@ -26,7 +24,7 @@ export const AUTH_EVENTS = {
 // Throttling
 export const THROTTLE_TTL_MS = 60000;
 export const THROTTLE_LIMITS = {
-  ...COMMON_THROTTLE_LIMITS,
+  BFF_GUARD: 10,
   REGISTER: 5,
   LOGIN: 10,
   REFRESH_TOKEN: 5,
