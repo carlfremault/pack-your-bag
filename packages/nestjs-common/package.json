@@ -23,6 +23,7 @@
     "class-validator": "^0.14.3"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.0.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/vitest-config": "workspace:*",

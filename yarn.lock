@@ -2968,6 +2968,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@repo/nestjs-common@workspace:packages/nestjs-common"
   dependencies:
+    "@nestjs/testing": "npm:^11.0.1"
     "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/typescript-config": "workspace:*"

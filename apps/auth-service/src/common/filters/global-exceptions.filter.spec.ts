@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  HttpException,
   HttpStatus,
   NotFoundException,
   UnauthorizedException,
@@ -66,8 +65,8 @@ describe('GlobalExceptionsFilter', () => {
     expect(filter).toBeDefined();
   });
 
-  describe('response shape', () => {
-    it('should always return statusCode, message, error, and timestamp', () => {
+  describe('response shape (integration with base filter)', () => {
+    it('should return statusCode, message, error, and timestamp for a typical exception', () => {
       const { host, mockStatus, mockJson } = createMockHost();
 
       filter.catch(new NotFoundException('Not here'), host as never);
@@ -79,27 +78,6 @@ describe('GlobalExceptionsFilter', () => {
           message: 'Not here',
           error: 'Not Found',
           timestamp: expect.any(String) as string,
-        }),
-      );
-    });
-
-    it('should respond 500 for a plain non-HttpException error', () => {
-      const { host, mockStatus } = createMockHost();
-
-      filter.catch(new Error('something exploded'), host as never);
-
-      expect(mockStatus).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-    });
-
-    it('should respond 500 for a thrown non-Error value', () => {
-      const { host, mockStatus, mockJson } = createMockHost();
-
-      filter.catch('just a string', host as never);
-
-      expect(mockStatus).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-      expect(mockJson).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'An unexpected error occurred',
         }),
       );
     });
@@ -378,36 +356,6 @@ describe('GlobalExceptionsFilter', () => {
           severity: AuditSeverity.WARN,
         }),
         expect.anything(),
-      );
-    });
-  });
-
-  describe('getExceptionResponse edge cases', () => {
-    it('should handle HttpException with a plain string response', () => {
-      const { host, mockJson } = createMockHost();
-
-      const exception = new HttpException('Plain string message', HttpStatus.BAD_GATEWAY);
-
-      filter.catch(exception, host as never);
-
-      expect(mockJson).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'Plain string message',
-        }),
-      );
-    });
-
-    it('should fall back to "An error occurred" for unexpected response object format', () => {
-      const { host, mockJson } = createMockHost();
-      // Craft an HttpException whose getResponse() returns an object without a message key
-      const exception = new HttpException({ noMessageHere: true } as never, HttpStatus.CONFLICT);
-
-      filter.catch(exception, host as never);
-
-      expect(mockJson).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: 'An error occurred',
-        }),
       );
     });
   });
