@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
+import { JwtAuthModule } from '@repo/nestjs-common';
+
 import type { Request } from 'express';
 import Joi from 'joi';
 
@@ -75,6 +77,7 @@ const validationSchema = Joi.object({
       ],
     }),
     PrismaModule,
+    JwtAuthModule,
   ],
   controllers: [AppController],
   providers: [

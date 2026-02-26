@@ -1,9 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
-import { THROTTLE_LIMITS } from '@repo/nestjs-common';
 
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
+import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
 
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 

@@ -18,13 +18,12 @@ import {
   CurrentUser,
   CustomThrottlerGuard,
   JwtAuthGuard,
-  THROTTLE_LIMITS,
-  THROTTLE_TTL_MS,
   ThrottleByEmail,
 } from '@repo/nestjs-common';
 
 import type { Request } from 'express';
 
+import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import {
   ApiBffAndAccessSecurity,
   ApiBffAndRefreshSecurity,
