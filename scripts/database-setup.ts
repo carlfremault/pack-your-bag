@@ -113,6 +113,39 @@ async function setup() {
     await client.query(`GRANT USAGE, CREATE ON SCHEMA ${authSchema} TO "${migrationUser}"`);
     await client.query(`GRANT USAGE, CREATE ON SCHEMA ${prodSchema} TO "${migrationUser}"`);
 
+    // Grant app users access to existing tables/sequences in their schemas (tables are created
+    // by the migration user, so app users need explicit grants). Idempotent — safe to run every time.
+    await client.query(`GRANT USAGE ON SCHEMA ${authSchema} TO ${authUser}`);
+    await client.query(
+      `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${authSchema} TO ${authUser}`,
+    );
+    await client.query(
+      `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ${authSchema} TO ${authUser}`,
+    );
+
+    await client.query(`GRANT USAGE ON SCHEMA ${prodSchema} TO ${prodUser}`);
+    await client.query(
+      `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${prodSchema} TO ${prodUser}`,
+    );
+    await client.query(
+      `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ${prodSchema} TO ${prodUser}`,
+    );
+
+    // Default privileges: future tables/sequences created by the migration user in these schemas
+    // will automatically grant the app users the same rights (e.g. after running new migrations).
+    await client.query(
+      `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${authSchema} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${authUser}`,
+    );
+    await client.query(
+      `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${authSchema} GRANT USAGE, SELECT ON SEQUENCES TO ${authUser}`,
+    );
+    await client.query(
+      `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${prodSchema} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${prodUser}`,
+    );
+    await client.query(
+      `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${prodSchema} GRANT USAGE, SELECT ON SEQUENCES TO ${prodUser}`,
+    );
+
     console.log('✅ Schemas and Users configured successfully');
   } catch (err) {
     console.error('❌ Database setup failed:', err);
