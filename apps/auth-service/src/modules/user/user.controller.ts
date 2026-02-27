@@ -3,13 +3,16 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { AuditEventType } from '@repo/db';
-import { BffGuard, CurrentUser, CustomThrottlerGuard, JwtAuthGuard } from '@repo/nestjs-common';
-
-import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import {
   ApiBffAndAccessSecurity,
   ApiBffSecurity,
-} from '@/common/decorators/api-security.decorator';
+  BffGuard,
+  CurrentUser,
+  CustomThrottlerGuard,
+  JwtAuthGuard,
+} from '@repo/nestjs-common';
+
+import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 
 import { CancelDeletionDto } from './dto/cancel-deletion.dto';

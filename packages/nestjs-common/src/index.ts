@@ -1,6 +1,7 @@
 export * from './constants/common.constants';
 export * from './decorators/current-user.decorator';
 export * from './decorators/throttle-email.decorator';
+export * from './decorators/api-security.decorator';
 export * from './dto/jwt-payload.dto';
 export * from './exceptions/forbidden.exceptions';
 export * from './exceptions/unauthorized.exceptions';
