@@ -23,19 +23,19 @@
     },
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
-      "env": ["AUTH_*", "RSA_*"],
+      "env": ["AUTH_*", "RSA_*", "ADMIN_TEST_URL"],
       "cache": true,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
       "dependsOn": ["test:setup"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "ADMIN_TEST_URL"]
     },
     "test:watch": {
       "dependsOn": ["test:setup"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "ADMIN_TEST_URL"]
     },
     "test:browser": {
       "cache": false,

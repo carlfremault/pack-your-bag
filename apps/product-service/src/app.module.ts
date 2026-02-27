@@ -1,16 +1,15 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
-import { JwtAuthModule } from '@repo/nestjs-common';
+import { JwtAuthModule, RequestIdMiddleware } from '@repo/nestjs-common';
 
 import type { Request } from 'express';
 import Joi from 'joi';
 
+import { ItemModule } from './modules/item/item.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 const validationSchema = Joi.object({
   // Environment
@@ -78,10 +77,9 @@ const validationSchema = Joi.object({
     }),
     PrismaModule,
     JwtAuthModule,
+    ItemModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
@@ -92,4 +90,8 @@ const validationSchema = Joi.object({
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}

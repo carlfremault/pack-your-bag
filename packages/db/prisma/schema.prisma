@@ -170,9 +170,10 @@ model Category {
   name        String
   description String?
   colorCode   String?
-  userId      String
+  userId      String    @db.Uuid
   items       Item[]
 
+  @@index([userId])
   @@schema("app_product")
 }
 
@@ -181,15 +182,16 @@ model Item {
   name        String
   description String?
   weight      Float?
-  userId      String
+  userId      String    @db.Uuid
   
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId  String    @db.Uuid
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  String?    @db.Uuid
 
   // Join table relations
   itemLists   ItemList[]
   itemPacks   ItemPack[]
 
+  @@index([userId])
   @@schema("app_product")
 }
 
@@ -198,12 +200,13 @@ model List {
   name        String
   description String?
   colorCode   String?
-  userId      String
+  userId      String    @db.Uuid
 
   // Join table relations
   items       ItemList[]
   listPacks   ListPack[]
 
+  @@index([userId])
   @@schema("app_product")
 }
 
@@ -212,13 +215,14 @@ model Pack {
   name        String
   description String?
   colorCode   String?
-  userId      String
+  userId      String    @db.Uuid
 
   // Join table relations
   items       ItemPack[]
   lists       ListPack[]
   trips       Trip[]
 
+  @@index([userId])
   @@schema("app_product")
 }
 
@@ -227,10 +231,12 @@ model Trip {
   name    String
   date    DateTime
   remarks String?
+  userId  String    @db.Uuid
 
-  pack    Pack      @relation(fields: [packId], references: [id], onDelete: Restrict)
-  packId  String    @db.Uuid
+  pack    Pack?      @relation(fields: [packId], references: [id], onDelete: SetNull)
+  packId  String?    @db.Uuid
 
+  @@index([userId])
   @@schema("app_product")
 }
 

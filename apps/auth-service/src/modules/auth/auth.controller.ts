@@ -14,6 +14,9 @@ import { Throttle } from '@nestjs/throttler';
 
 import { AuditEventType } from '@repo/db';
 import {
+  ApiBffAndAccessSecurity,
+  ApiBffAndRefreshSecurity,
+  ApiBffSecurity,
   BffGuard,
   CurrentUser,
   CustomThrottlerGuard,
@@ -24,11 +27,6 @@ import {
 import type { Request } from 'express';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
-import {
-  ApiBffAndAccessSecurity,
-  ApiBffAndRefreshSecurity,
-  ApiBffSecurity,
-} from '@/common/decorators/api-security.decorator';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';

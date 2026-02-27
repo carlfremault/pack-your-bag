@@ -10,6 +10,16 @@
       "localRoot": "${workspaceFolder}/apps/auth-service",
       "remoteRoot": "/workspaces/pack-your-bag/apps/auth-service",
       "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Debug: Product Service",
+      "port": 9230,
+      "restart": true,
+      "localRoot": "${workspaceFolder}/apps/product-service",
+      "remoteRoot": "/workspaces/pack-your-bag/apps/product-service",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
