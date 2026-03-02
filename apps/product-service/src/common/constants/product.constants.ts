@@ -23,4 +23,12 @@ export const THROTTLE_LIMITS = {
     DELETE: 5,
     GET_DELETE_IMPACT: 5,
   },
+  LISTS: {
+    GET_ALL: 60,
+    GET: 20,
+    POST: 10,
+    PATCH: 20,
+    DELETE: 5,
+    GET_DELETE_IMPACT: 5,
+  },
 } as const;
