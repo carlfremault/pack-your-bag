@@ -30,10 +30,16 @@ export class ItemService {
     });
   }
 
-  async getItem(where: Prisma.ItemWhereUniqueInput): Promise<Item | null> {
-    return this.prisma.item.findUnique({
+  async getItem(where: Prisma.ItemWhereUniqueInput): Promise<Item> {
+    const result = await this.prisma.item.findUnique({
       where,
     });
+
+    if (!result) {
+      throw new NotFoundException('Item not found');
+    }
+
+    return result;
   }
 
   async createItem(item: CreateItemDto, userId: string): Promise<Item> {
@@ -79,17 +85,6 @@ export class ItemService {
     });
   }
 
-  async deleteItem(id: string, userId: string, tx: Prisma.TransactionClient): Promise<Item> {
-    const storedItem = await tx.item.findUnique({ where: { id, userId } });
-    if (!storedItem) {
-      throw new NotFoundException('Item not found');
-    }
-
-    return tx.item.delete({
-      where: { id, userId },
-    });
-  }
-
   // ============================================
   // ITEM MANAGEMENT
   // ============================================
@@ -101,55 +96,48 @@ export class ItemService {
         throw new NotFoundException('Item not found');
       }
 
-      await tx.itemList.deleteMany({
-        where: {
-          itemId: id,
-        },
-      });
-      await tx.itemPack.deleteMany({
-        where: {
-          itemId: id,
-        },
-      });
-      await this.deleteItem(id, userId, tx);
+      await Promise.all([
+        tx.itemList.deleteMany({ where: { itemId: id } }),
+        tx.itemPack.deleteMany({ where: { itemId: id } }),
+      ]);
+
+      await tx.item.delete({ where: { id, userId } });
     });
   }
 
   async getItemDeleteImpact(id: string, userId: string): Promise<ItemDeleteImpact> {
-    return this.prisma.$transaction(async (tx) => {
-      const item = await tx.item.findUnique({ where: { id, userId } });
-      if (!item) {
-        throw new NotFoundException('Item not found');
-      }
+    const item = await this.prisma.item.findUnique({ where: { id, userId } });
+    if (!item) {
+      throw new NotFoundException('Item not found');
+    }
 
-      const [lists, packs] = await Promise.all([
-        tx.list.findMany({
-          where: {
-            items: {
-              some: { itemId: id },
-            },
+    const [lists, packs] = await Promise.all([
+      this.prisma.list.findMany({
+        where: {
+          items: {
+            some: { itemId: id },
           },
-        }),
-        tx.pack.findMany({
-          where: {
-            items: {
-              some: { itemId: id },
-            },
+        },
+      }),
+      this.prisma.pack.findMany({
+        where: {
+          items: {
+            some: { itemId: id },
           },
-        }),
-      ]);
+        },
+      }),
+    ]);
 
-      let trips: Trip[] = [];
-      const packIds = packs.map((pack) => pack.id);
-      if (packIds.length > 0) {
-        trips = await tx.trip.findMany({
-          where: {
-            packId: { in: packIds },
-          },
-        });
-      }
+    let trips: Trip[] = [];
+    const packIds = packs.map((pack) => pack.id);
+    if (packIds.length > 0) {
+      trips = await this.prisma.trip.findMany({
+        where: {
+          packId: { in: packIds },
+        },
+      });
+    }
 
-      return { item, lists, packs, trips };
-    });
+    return { item, lists, packs, trips };
   }
 }
