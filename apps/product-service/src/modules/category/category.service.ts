@@ -75,6 +75,7 @@ export class CategoryService {
         throw new NotFoundException('Category not found');
       }
 
+      // Item uses SetNull, so handled automatically by the DB.
       return tx.category.delete({
         where: { id, userId },
       });
