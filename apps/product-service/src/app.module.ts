@@ -11,6 +11,7 @@ import Joi from 'joi';
 import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
 import { ListModule } from './modules/list/list.module';
+import { PackModule } from './modules/pack/pack.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 const validationSchema = Joi.object({
@@ -82,6 +83,7 @@ const validationSchema = Joi.object({
     ItemModule,
     CategoryModule,
     ListModule,
+    PackModule,
   ],
   providers: [
     {
