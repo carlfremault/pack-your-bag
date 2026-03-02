@@ -2,6 +2,7 @@
 export const NAME_MAX_LENGTH = 128;
 export const DESCRIPTION_MAX_LENGTH = 1000;
 export const COLOR_CODE_MAX_LENGTH = 64; // TODO: decide on color code implementation. Custom strings or rgb/hex/etc.
+export const REMARKS_MAX_LENGTH = 1000;
 
 // Throttling
 const DEFAULT_RESOURCE_THROTTLE = {
@@ -20,4 +21,5 @@ export const THROTTLE_LIMITS = {
   CATEGORIES: DEFAULT_RESOURCE_THROTTLE,
   LISTS: DEFAULT_RESOURCE_THROTTLE,
   PACKS: DEFAULT_RESOURCE_THROTTLE,
+  TRIPS: DEFAULT_RESOURCE_THROTTLE,
 } as const;
