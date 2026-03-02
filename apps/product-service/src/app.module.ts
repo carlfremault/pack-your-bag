@@ -8,6 +8,7 @@ import { JwtAuthModule, RequestIdMiddleware } from '@repo/nestjs-common';
 import type { Request } from 'express';
 import Joi from 'joi';
 
+import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -78,6 +79,7 @@ const validationSchema = Joi.object({
     PrismaModule,
     JwtAuthModule,
     ItemModule,
+    CategoryModule,
   ],
   providers: [
     {

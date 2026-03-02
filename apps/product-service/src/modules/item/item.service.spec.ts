@@ -114,6 +114,7 @@ describe('ItemService', () => {
 
       await service.updateItem(id, dto as never, userId);
 
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(mockPrismaService.item.findUnique).toHaveBeenCalledWith({
         where: { id, userId },
       });
@@ -212,7 +213,6 @@ describe('ItemService', () => {
 
       const result = await service.getItemDeleteImpact(itemId, userId);
 
-      expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(mockPrismaService.item.findUnique).toHaveBeenCalledWith({
         where: { id: itemId, userId },
       });

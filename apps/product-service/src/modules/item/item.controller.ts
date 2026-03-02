@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -27,8 +28,11 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemDeleteImpact, ItemService } from './item.service';
 
 @ApiTags('item')
-@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
-@ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
+@ApiResponse({
+  status: HttpStatus.TOO_MANY_REQUESTS,
+  description: 'ThrottlerException: Too Many Requests.',
+})
 @Controller('item')
 @UseGuards(BffGuard, JwtAuthGuard)
 export class ItemController {
@@ -54,10 +58,15 @@ export class ItemController {
     status: HttpStatus.OK,
     description: 'Item deletion impact retrieved successfully.',
   })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (uuid v7 is expected)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Item not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.GET_DELETE_IMPACT, ttl: THROTTLE_TTL_MS } })
   async getItemDeleteImpact(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
   ): Promise<ItemDeleteImpact> {
     return this.itemService.getItemDeleteImpact(id, userId);
@@ -67,9 +76,17 @@ export class ItemController {
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get an item by ID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Item retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (uuid v7 is expected)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Item not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.GET, ttl: THROTTLE_TTL_MS } })
-  async getItem(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+  async getItem(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @CurrentUser('userId') userId: string,
+  ) {
     return this.itemService.getItem({ id, userId });
   }
 
@@ -87,10 +104,15 @@ export class ItemController {
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update an item by ID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Item updated successfully.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (uuid v7 is expected)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Item not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.PATCH, ttl: THROTTLE_TTL_MS } })
   async updateItem(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() item: UpdateItemDto,
     @CurrentUser('userId') userId: string,
   ) {
@@ -101,9 +123,17 @@ export class ItemController {
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Delete an item by ID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Item deleted successfully.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (uuid v7 is expected)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Item not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.DELETE, ttl: THROTTLE_TTL_MS } })
-  async deleteItem(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+  async deleteItem(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @CurrentUser('userId') userId: string,
+  ) {
     return this.itemService.handleItemDeletion(id, userId);
   }
 }
