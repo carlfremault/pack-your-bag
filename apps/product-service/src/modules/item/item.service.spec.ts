@@ -203,7 +203,7 @@ describe('ItemService', () => {
   });
 
   describe('getItemDeleteImpact', () => {
-    it('should call getItem with the correct params', async () => {
+    it('should return the item, lists, packs, and trips', async () => {
       const itemId = '123';
       const userId = 'user-1';
       mockPrismaService.item.findUnique.mockResolvedValue({ id: itemId, userId });

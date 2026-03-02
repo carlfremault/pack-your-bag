@@ -94,6 +94,10 @@ export class ItemController {
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create an item' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Item created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (dto)',
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.POST, ttl: THROTTLE_TTL_MS } })
   async createItem(@Body() item: CreateItemDto, @CurrentUser('userId') userId: string) {
@@ -106,7 +110,7 @@ export class ItemController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Item updated successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Validation failed (uuid v7 is expected)',
+    description: 'Validation failed (invalid UUID v7 format or invalid body).',
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Item not found.' })
   @UseGuards(CustomThrottlerGuard)

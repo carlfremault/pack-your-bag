@@ -96,6 +96,7 @@ export class ItemService {
         throw new NotFoundException('Item not found');
       }
 
+      // Both ItemList and ItemPack use Restrict on item deletion, so records must be manually removed first.
       await Promise.all([
         tx.itemList.deleteMany({ where: { itemId: id } }),
         tx.itemPack.deleteMany({ where: { itemId: id } }),

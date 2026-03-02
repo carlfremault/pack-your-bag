@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { Category, Item } from '@repo/db';
+import { Category } from '@repo/db';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

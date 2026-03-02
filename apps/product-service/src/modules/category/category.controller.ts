@@ -96,6 +96,10 @@ export class CategoryController {
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create a category' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Category created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (dto)',
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.CATEGORIES.POST, ttl: THROTTLE_TTL_MS } })
   async createCategory(@Body() category: CreateCategoryDto, @CurrentUser('userId') userId: string) {
@@ -108,7 +112,7 @@ export class CategoryController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Category updated successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Validation failed (uuid v7 is expected)',
+    description: 'Validation failed (invalid UUID v7 format or invalid body).',
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Category not found.' })
   @UseGuards(CustomThrottlerGuard)
