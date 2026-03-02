@@ -229,7 +229,7 @@ model Pack {
 model Trip {
   id      String    @id @db.Uuid
   name    String
-  date    DateTime
+  date    DateTime?
   remarks String?
   userId  String    @db.Uuid
 

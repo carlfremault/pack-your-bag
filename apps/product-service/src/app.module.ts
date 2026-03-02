@@ -12,6 +12,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
 import { ListModule } from './modules/list/list.module';
 import { PackModule } from './modules/pack/pack.module';
+import { TripModule } from './modules/trip/trip.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 const validationSchema = Joi.object({
@@ -84,6 +85,7 @@ const validationSchema = Joi.object({
     CategoryModule,
     ListModule,
     PackModule,
+    TripModule,
   ],
   providers: [
     {
