@@ -57,11 +57,10 @@ export class ItemPackController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Item removed from pack successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Validation failed (invalid UUID v7 format or invalid body).',
+    description: 'Validation failed (invalid UUID v7 format).',
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_PACK.REMOVE, ttl: THROTTLE_TTL_MS } })
-  @HttpCode(HttpStatus.OK)
   async removeItemFromPack(
     @Param('itemId', new ParseUUIDPipe({ version: '7' })) itemId: string,
     @Param('packId', new ParseUUIDPipe({ version: '7' })) packId: string,

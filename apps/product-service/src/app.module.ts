@@ -13,6 +13,7 @@ import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
 import { ItemPackModule } from './modules/item-pack/item-pack.module';
 import { ListModule } from './modules/list/list.module';
+import { ListPackModule } from './modules/list-pack/list-pack.module';
 import { PackModule } from './modules/pack/pack.module';
 import { TripModule } from './modules/trip/trip.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -90,6 +91,7 @@ const validationSchema = Joi.object({
     TripModule,
     ItemListModule,
     ItemPackModule,
+    ListPackModule,
   ],
   providers: [
     {
