@@ -45,7 +45,7 @@ export class ItemListController {
     description: 'Validation failed (dto)',
   })
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_LISTS.UPSERT, ttl: THROTTLE_TTL_MS } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_LIST.UPSERT, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async upsertItemOnList(
     @Body() upsertItemOnListDto: UpsertItemOnListDto,
@@ -63,7 +63,7 @@ export class ItemListController {
     description: 'Validation failed (invalid UUID v7 format or invalid body).',
   })
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_LISTS.REMOVE, ttl: THROTTLE_TTL_MS } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_LIST.REMOVE, ttl: THROTTLE_TTL_MS } })
   async removeItemFromList(
     @Param('itemId', new ParseUUIDPipe({ version: '7' })) itemId: string,
     @Param('listId', new ParseUUIDPipe({ version: '7' })) listId: string,

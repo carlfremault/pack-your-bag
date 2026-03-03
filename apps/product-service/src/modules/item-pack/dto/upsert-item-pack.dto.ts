@@ -1,13 +1,13 @@
 import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsUUID } from 'class-validator';
 
-export class UpsertItemOnListDto {
+export class UpsertItemInPackDto {
   @IsUUID()
   @IsNotEmpty()
   itemId: string;
 
   @IsUUID()
   @IsNotEmpty()
-  listId: string;
+  packId: string;
 
   @IsNumber()
   @IsInt()

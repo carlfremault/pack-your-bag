@@ -14,6 +14,14 @@ export interface PackDeleteImpact {
   trips: Trip[];
 }
 
+type PackWithItemCount = Prisma.PackGetPayload<{
+  include: { _count: { select: { items: true } } };
+}>;
+
+type PackWithItems = Prisma.PackGetPayload<{
+  include: { items: true };
+}>;
+
 @Injectable()
 export class PackService {
   constructor(private readonly prisma: PrismaService) {}
@@ -22,12 +30,19 @@ export class PackService {
   // BASIC CRUD OPERATIONS
   // ============================================
 
-  async getPacks(where: Prisma.PackWhereInput): Promise<Pack[]> {
-    return this.prisma.pack.findMany({ where });
+  async getPacks(where: Prisma.PackWhereInput): Promise<PackWithItemCount[]> {
+    return this.prisma.pack.findMany({
+      where,
+      include: {
+        _count: {
+          select: { items: true },
+        },
+      },
+    });
   }
 
-  async getPack(where: Prisma.PackWhereUniqueInput): Promise<Pack> {
-    const result = await this.prisma.pack.findUnique({ where });
+  async getPack(where: Prisma.PackWhereUniqueInput): Promise<PackWithItems> {
+    const result = await this.prisma.pack.findUnique({ where, include: { items: true } });
 
     if (!result) {
       throw new NotFoundException('Pack not found');
