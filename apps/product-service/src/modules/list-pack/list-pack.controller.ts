@@ -22,53 +22,53 @@ import {
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
-import { UpsertItemOnListDto } from './dto/upsert-item-list.dto';
-import { ItemListService } from './item-list.service';
+import { UpsertListInPackDto } from './dto/upsert-list-pack.dto';
+import { ListPackService } from './list-pack.service';
 
-@ApiTags('item-list')
+@ApiTags('list-pack')
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 @ApiResponse({
   status: HttpStatus.TOO_MANY_REQUESTS,
   description: 'ThrottlerException: Too Many Requests.',
 })
-@Controller('item-list')
+@Controller('list-pack')
 @UseGuards(BffGuard, JwtAuthGuard)
-export class ItemListController {
-  constructor(private readonly itemListService: ItemListService) {}
+export class ListPackController {
+  constructor(private readonly listPackService: ListPackService) {}
 
   @Post()
   @ApiBffAndAccessSecurity()
-  @ApiOperation({ summary: 'Upsert an item to a list' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item upserted to list successfully.' })
+  @ApiOperation({ summary: 'Upsert a list to a pack' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'List upserted to pack successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (dto)',
   })
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_LIST.UPSERT, ttl: THROTTLE_TTL_MS } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LIST_PACK.UPSERT, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.OK)
-  async upsertItemOnList(
-    @Body() upsertItemOnListDto: UpsertItemOnListDto,
+  async upsertListInPack(
+    @Body() upsertListInPackDto: UpsertListInPackDto,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.itemListService.upsertItemOnList(upsertItemOnListDto, userId);
+    return this.listPackService.upsertListInPack(upsertListInPackDto, userId);
   }
 
-  @Delete(':itemId/:listId')
+  @Delete(':listId/:packId')
   @ApiBffAndAccessSecurity()
-  @ApiOperation({ summary: 'Remove an item from a list' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item removed from list successfully.' })
+  @ApiOperation({ summary: 'Remove a list from a pack' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'List removed from pack successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format).',
   })
   @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_LIST.REMOVE, ttl: THROTTLE_TTL_MS } })
-  async removeItemFromList(
-    @Param('itemId', new ParseUUIDPipe({ version: '7' })) itemId: string,
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LIST_PACK.REMOVE, ttl: THROTTLE_TTL_MS } })
+  async removeListFromPack(
     @Param('listId', new ParseUUIDPipe({ version: '7' })) listId: string,
+    @Param('packId', new ParseUUIDPipe({ version: '7' })) packId: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.itemListService.removeItemFromList(itemId, listId, userId);
+    return this.listPackService.removeListFromPack(listId, packId, userId);
   }
 }
