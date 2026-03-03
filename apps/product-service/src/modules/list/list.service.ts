@@ -24,11 +24,18 @@ export class ListService {
   // ============================================
 
   async getLists(where: Prisma.ListWhereInput): Promise<List[]> {
-    return this.prisma.list.findMany({ where });
+    return this.prisma.list.findMany({
+      where,
+      include: {
+        _count: {
+          select: { items: true },
+        },
+      },
+    });
   }
 
   async getList(where: Prisma.ListWhereUniqueInput): Promise<List> {
-    const result = await this.prisma.list.findUnique({ where });
+    const result = await this.prisma.list.findUnique({ where, include: { items: true } });
 
     if (!result) {
       throw new NotFoundException('List not found');
