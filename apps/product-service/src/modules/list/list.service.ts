@@ -15,6 +15,14 @@ export interface ListDeleteImpact {
   trips: Trip[];
 }
 
+type ListWithItemCount = Prisma.ListGetPayload<{
+  include: { _count: { select: { items: true } } };
+}>;
+
+type ListWithItems = Prisma.ListGetPayload<{
+  include: { items: true };
+}>;
+
 @Injectable()
 export class ListService {
   constructor(private readonly prisma: PrismaService) {}
@@ -23,7 +31,7 @@ export class ListService {
   // BASIC CRUD OPERATIONS
   // ============================================
 
-  async getLists(where: Prisma.ListWhereInput): Promise<List[]> {
+  async getLists(where: Prisma.ListWhereInput): Promise<ListWithItemCount[]> {
     return this.prisma.list.findMany({
       where,
       include: {
@@ -34,7 +42,7 @@ export class ListService {
     });
   }
 
-  async getList(where: Prisma.ListWhereUniqueInput): Promise<List> {
+  async getList(where: Prisma.ListWhereUniqueInput): Promise<ListWithItems> {
     const result = await this.prisma.list.findUnique({ where, include: { items: true } });
 
     if (!result) {
