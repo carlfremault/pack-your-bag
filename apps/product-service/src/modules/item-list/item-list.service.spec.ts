@@ -62,7 +62,6 @@ describe('ItemListService', () => {
       mockPrismaService.itemList.upsert.mockResolvedValue({
         id: 'mocked-uuid',
         ...upsertItemOnListDto,
-        userId,
       });
 
       const result = await service.upsertItemOnList(upsertItemOnListDto, userId);
@@ -84,7 +83,6 @@ describe('ItemListService', () => {
         itemId: '123',
         listId: '456',
         quantity: 1,
-        userId: 'user-1',
       });
     });
 

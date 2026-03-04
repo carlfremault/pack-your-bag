@@ -1,27 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { List, Pack, Prisma, Trip } from '@repo/db';
+import { Prisma, Trip } from '@repo/db';
 
+import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
+import { PackResponseDto } from '../pack/dto/pack-response.dto';
+import { TripResponseDto } from '../trip/dto/trip-response.dto';
+
 import { CreateListDto } from './dto/create-list.dto';
+import { ListResponseDto, ListSummaryResponseDto } from './dto/list-response.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 
 export interface ListDeleteImpact {
-  list: List;
-  packs: Pack[];
-  trips: Trip[];
+  list: ListSummaryResponseDto;
+  packs: PackResponseDto[];
+  trips: TripResponseDto[];
 }
-
-type ListWithItemCount = Prisma.ListGetPayload<{
-  include: { _count: { select: { items: true } } };
-}>;
-
-type ListWithItems = Prisma.ListGetPayload<{
-  include: { items: true };
-}>;
 
 @Injectable()
 export class ListService {
@@ -31,8 +28,8 @@ export class ListService {
   // BASIC CRUD OPERATIONS
   // ============================================
 
-  async getLists(where: Prisma.ListWhereInput): Promise<ListWithItemCount[]> {
-    return this.prisma.list.findMany({
+  async getLists(where: Prisma.ListWhereInput): Promise<ListSummaryResponseDto[]> {
+    const result = await this.prisma.list.findMany({
       where,
       include: {
         _count: {
@@ -40,19 +37,24 @@ export class ListService {
         },
       },
     });
+
+    return plainToInstance(ListSummaryResponseDto, result);
   }
 
-  async getList(where: Prisma.ListWhereUniqueInput): Promise<ListWithItems> {
-    const result = await this.prisma.list.findUnique({ where, include: { items: true } });
+  async getList(where: Prisma.ListWhereUniqueInput): Promise<ListResponseDto> {
+    const result = await this.prisma.list.findUnique({
+      where,
+      include: { items: { include: { item: { include: { category: true } } } } },
+    });
 
     if (!result) {
       throw new NotFoundException('List not found');
     }
 
-    return result;
+    return plainToInstance(ListResponseDto, result);
   }
 
-  async createList(list: CreateListDto, userId: string): Promise<List> {
+  async createList(list: CreateListDto, userId: string): Promise<ListResponseDto> {
     const uuid = uuidv7();
 
     const data: Prisma.ListCreateInput = {
@@ -61,17 +63,21 @@ export class ListService {
       userId: userId,
     };
 
-    return this.prisma.list.create({ data });
+    const result = await this.prisma.list.create({ data });
+
+    return plainToInstance(ListResponseDto, result);
   }
 
-  async updateList(id: string, list: UpdateListDto, userId: string): Promise<List> {
+  async updateList(id: string, list: UpdateListDto, userId: string): Promise<ListResponseDto> {
     return this.prisma.$transaction(async (tx) => {
       const storedList = await tx.list.findUnique({ where: { id, userId } });
       if (!storedList) {
         throw new NotFoundException('List not found');
       }
 
-      return tx.list.update({ where: { id, userId }, data: list });
+      const result = await tx.list.update({ where: { id, userId }, data: list });
+
+      return plainToInstance(ListResponseDto, result);
     });
   }
 
@@ -94,7 +100,14 @@ export class ListService {
   }
 
   async getListDeleteImpact(id: string, userId: string): Promise<ListDeleteImpact> {
-    const list = await this.prisma.list.findUnique({ where: { id, userId } });
+    const list = await this.prisma.list.findUnique({
+      where: { id, userId },
+      include: {
+        _count: {
+          select: { items: true },
+        },
+      },
+    });
     if (!list) {
       throw new NotFoundException('List not found');
     }
@@ -117,6 +130,10 @@ export class ListService {
       });
     }
 
-    return { list, packs, trips };
+    return {
+      list: plainToInstance(ListSummaryResponseDto, list),
+      packs: plainToInstance(PackResponseDto, packs),
+      trips: plainToInstance(TripResponseDto, trips),
+    };
   }
 }

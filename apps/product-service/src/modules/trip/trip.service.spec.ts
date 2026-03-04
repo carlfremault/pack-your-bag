@@ -182,4 +182,25 @@ describe('TripService', () => {
       expect(mockPrismaService.trip.delete).not.toHaveBeenCalled();
     });
   });
+
+  describe('response mapping', () => {
+    it('should map the trip data to corresponding response dto', async () => {
+      const id = 'trip-1';
+      const userId = 'user-1';
+      const testDate = new Date();
+      const trip = { id, name: 'Test Trip', date: testDate, remarks: 'Test Remarks', userId };
+
+      mockPrismaService.trip.findUnique.mockResolvedValue(trip);
+
+      const result = await service.getTrip({ id, userId });
+
+      expect(result).toMatchObject({
+        id,
+        name: 'Test Trip',
+        date: testDate,
+        remarks: 'Test Remarks',
+        pack: undefined,
+      });
+    });
+  });
 });

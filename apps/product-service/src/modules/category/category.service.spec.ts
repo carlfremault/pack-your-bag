@@ -62,7 +62,6 @@ describe('CategoryService', () => {
         name: 'Test Category',
         description: 'Test Description',
         colorCode: '#000000',
-        userId: 'user-1',
       });
       expect(capturedData.id).toBeDefined();
       expect(typeof capturedData.id).toBe('string');
@@ -156,9 +155,9 @@ describe('CategoryService', () => {
         where: { categoryId: id },
       });
 
-      expect(result).toEqual({
-        category: { id, userId },
-        items: [{ id: 'item-1', userId }],
+      expect(result).toMatchObject({
+        category: { id },
+        items: [{ id: 'item-1' }],
       });
     });
 
@@ -170,6 +169,36 @@ describe('CategoryService', () => {
       await expect(service.getCategoryDeleteImpact(id, userId)).rejects.toThrow(
         'Category not found',
       );
+    });
+  });
+
+  describe('response mapping', () => {
+    it('should map the category and items to corresponding response dtos', async () => {
+      const userId = 'user-1';
+      const category = {
+        id: 'category-1',
+        name: 'Test Category',
+        description: 'Test Description',
+        colorCode: '#000000',
+        userId,
+      };
+      const items = [
+        { id: 'item-1', name: 'Test Item', description: 'Test Description', weight: 1, userId },
+      ];
+      mockPrismaService.item.findMany.mockResolvedValue(items);
+      mockPrismaService.category.findUnique.mockResolvedValue(category);
+
+      const result = await service.getCategoryDeleteImpact(category.id, userId);
+
+      expect(result).toMatchObject({
+        category: {
+          id: 'category-1',
+          name: 'Test Category',
+          description: 'Test Description',
+          colorCode: '#000000',
+        },
+        items: [{ id: 'item-1', name: 'Test Item', description: 'Test Description', weight: 1 }],
+      });
     });
   });
 });

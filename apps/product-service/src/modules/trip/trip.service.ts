@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Prisma, Trip } from '@repo/db';
+import { Prisma } from '@repo/db';
 
+import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { CreateTripDto } from './dto/create-trip.dto';
+import { TripResponseDto } from './dto/trip-response.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
 
 @Injectable()
@@ -17,21 +19,22 @@ export class TripService {
   // BASIC CRUD OPERATIONS
   // ============================================
 
-  async getTrips(where: Prisma.TripWhereInput): Promise<Trip[]> {
-    return this.prisma.trip.findMany({ where });
+  async getTrips(where: Prisma.TripWhereInput): Promise<TripResponseDto[]> {
+    const result = await this.prisma.trip.findMany({ where, include: { pack: true } });
+    return plainToInstance(TripResponseDto, result);
   }
 
-  async getTrip(where: Prisma.TripWhereUniqueInput): Promise<Trip> {
-    const result = await this.prisma.trip.findUnique({ where });
+  async getTrip(where: Prisma.TripWhereUniqueInput): Promise<TripResponseDto> {
+    const result = await this.prisma.trip.findUnique({ where, include: { pack: true } });
 
     if (!result) {
       throw new NotFoundException('Trip not found');
     }
 
-    return result;
+    return plainToInstance(TripResponseDto, result);
   }
 
-  async createTrip(trip: CreateTripDto, userId: string): Promise<Trip> {
+  async createTrip(trip: CreateTripDto, userId: string): Promise<TripResponseDto> {
     const uuid = uuidv7();
 
     const { packId, ...rest } = trip;
@@ -47,10 +50,12 @@ export class TripService {
       }),
     };
 
-    return this.prisma.trip.create({ data });
+    const result = await this.prisma.trip.create({ data, include: { pack: true } });
+
+    return plainToInstance(TripResponseDto, result);
   }
 
-  async updateTrip(id: string, trip: UpdateTripDto, userId: string): Promise<Trip> {
+  async updateTrip(id: string, trip: UpdateTripDto, userId: string): Promise<TripResponseDto> {
     return this.prisma.$transaction(async (tx) => {
       const storedTrip = await tx.trip.findUnique({ where: { id, userId } });
       if (!storedTrip) {
@@ -66,7 +71,9 @@ export class TripService {
         }),
       };
 
-      return tx.trip.update({ where: { id, userId }, data });
+      const result = await tx.trip.update({ where: { id, userId }, data, include: { pack: true } });
+
+      return plainToInstance(TripResponseDto, result);
     });
   }
 

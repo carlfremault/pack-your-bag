@@ -1,19 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Item, List, Pack, Prisma, Trip } from '@repo/db';
+import { Prisma, Trip } from '@repo/db';
 
+import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
+import { ItemResponseDto } from '@/common/dto/item-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
+
+import { ListResponseDto } from '../list/dto/list-response.dto';
+import { PackResponseDto } from '../pack/dto/pack-response.dto';
+import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 
 export interface ItemDeleteImpact {
-  item: Item;
-  lists: List[];
-  packs: Pack[];
-  trips: Trip[];
+  item: ItemResponseDto;
+  lists: ListResponseDto[];
+  packs: PackResponseDto[];
+  trips: TripResponseDto[];
 }
 
 @Injectable()
@@ -24,25 +30,29 @@ export class ItemService {
   // BASIC CRUD OPERATIONS
   // ============================================
 
-  async getItems(where: Prisma.ItemWhereInput): Promise<Item[]> {
-    return this.prisma.item.findMany({
+  async getItems(where: Prisma.ItemWhereInput): Promise<ItemResponseDto[]> {
+    const result = await this.prisma.item.findMany({
       where,
+      include: { category: true },
     });
+
+    return plainToInstance(ItemResponseDto, result);
   }
 
-  async getItem(where: Prisma.ItemWhereUniqueInput): Promise<Item> {
+  async getItem(where: Prisma.ItemWhereUniqueInput): Promise<ItemResponseDto> {
     const result = await this.prisma.item.findUnique({
       where,
+      include: { category: true },
     });
 
     if (!result) {
       throw new NotFoundException('Item not found');
     }
 
-    return result;
+    return plainToInstance(ItemResponseDto, result);
   }
 
-  async createItem(item: CreateItemDto, userId: string): Promise<Item> {
+  async createItem(item: CreateItemDto, userId: string): Promise<ItemResponseDto> {
     const uuid = uuidv7();
     const { categoryId, ...rest } = item;
 
@@ -57,12 +67,15 @@ export class ItemService {
       }),
     };
 
-    return this.prisma.item.create({
+    const result = await this.prisma.item.create({
       data,
+      include: { category: true },
     });
+
+    return plainToInstance(ItemResponseDto, result);
   }
 
-  async updateItem(id: string, item: UpdateItemDto, userId: string): Promise<Item> {
+  async updateItem(id: string, item: UpdateItemDto, userId: string): Promise<ItemResponseDto> {
     return this.prisma.$transaction(async (tx) => {
       const storedItem = await tx.item.findUnique({ where: { id, userId } });
       if (!storedItem) {
@@ -77,11 +90,13 @@ export class ItemService {
           category: categoryId ? { connect: { id: categoryId } } : { disconnect: true },
         }),
       };
-
-      return tx.item.update({
+      const result = await tx.item.update({
         where: { id, userId },
         data,
+        include: { category: true },
       });
+
+      return plainToInstance(ItemResponseDto, result);
     });
   }
 
@@ -139,6 +154,11 @@ export class ItemService {
       });
     }
 
-    return { item, lists, packs, trips };
+    return {
+      item: plainToInstance(ItemResponseDto, item),
+      lists: plainToInstance(ListResponseDto, lists),
+      packs: plainToInstance(PackResponseDto, packs),
+      trips: plainToInstance(TripResponseDto, trips),
+    };
   }
 }
