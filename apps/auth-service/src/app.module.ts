@@ -86,7 +86,7 @@ const validationSchema = Joi.object({
   AUTH_USER_DELETE_RETENTION_DAYS: Joi.number().min(1).default(30),
 
   // Sentry
-  AUTH_SENTRY_DSN: Joi.string()
+  SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
       is: Joi.valid('production', 'development'),
@@ -108,6 +108,7 @@ const validationSchema = Joi.object({
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
@@ -133,7 +134,6 @@ const validationSchema = Joi.object({
     JwtAuthModule,
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
-    SentryModule.forRoot(),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
