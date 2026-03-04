@@ -1,3 +1,3 @@
 import { initSentry } from '@repo/nestjs-common';
 
-initSentry('auth-service');
+initSentry('product-service');

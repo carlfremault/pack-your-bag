@@ -1,13 +1,15 @@
 import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import { JwtAuthModule, RequestIdMiddleware } from '@repo/nestjs-common';
 
+import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
 import Joi from 'joi';
 
+import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
@@ -51,8 +53,7 @@ const validationSchema = Joi.object({
   }),
 
   // Sentry
-  // TODO: same as auth service, Sentry should go to shared package
-  AUTH_SENTRY_DSN: Joi.string()
+  SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
       is: Joi.valid('production', 'development'),
@@ -63,6 +64,7 @@ const validationSchema = Joi.object({
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
@@ -101,6 +103,10 @@ const validationSchema = Joi.object({
         forbidNonWhitelisted: true,
         transform: true,
       }),
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionsFilter,
     },
   ],
 })

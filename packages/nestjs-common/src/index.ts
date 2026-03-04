@@ -15,6 +15,7 @@ export * from './openapi/generate-spec';
 export * from './utils/anonymizeEmail';
 export * from './utils/anonymizeIp';
 export * from './utils/captureSentryException';
+export * from './utils/initSentry';
 export * from './utils/safeStringify';
 export * from './bff-guard.module';
 export * from './custom-throttler.module';
