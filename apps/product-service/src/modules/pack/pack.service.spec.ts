@@ -147,14 +147,19 @@ describe('PackService', () => {
 
       expect(mockPrismaService.pack.findUnique).toHaveBeenCalledWith({
         where: { id, userId },
+        include: {
+          _count: {
+            select: { items: true, lists: true },
+          },
+        },
       });
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
         where: { packId: id },
       });
 
-      expect(result).toEqual({
-        pack: { id, userId },
-        trips: [{ id: 'trip-1', userId }],
+      expect(result).toMatchObject({
+        pack: { id },
+        trips: [{ id: 'trip-1' }],
       });
     });
 
@@ -178,9 +183,34 @@ describe('PackService', () => {
         where: { packId: id },
       });
 
-      expect(result).toEqual({
-        pack: { id, userId },
+      expect(result).toMatchObject({
+        pack: { id },
         trips: [],
+      });
+    });
+  });
+
+  describe('response mapping', () => {
+    it('should map the pack and trips to corresponding response dtos', async () => {
+      const id = 'pack-1';
+      const userId = 'user-1';
+      const date = new Date();
+      const pack = {
+        id,
+        name: 'Test Pack',
+        description: 'Test Description',
+        colorCode: '#000000',
+        userId,
+      };
+      const trips = [{ id: 'trip-1', name: 'Test Trip', date, remarks: 'Test Remarks', userId }];
+      mockPrismaService.pack.findUnique.mockResolvedValue(pack);
+      mockPrismaService.trip.findMany.mockResolvedValue(trips);
+
+      const result = await service.getPackDeleteImpact(id, userId);
+
+      expect(result).toMatchObject({
+        pack: { id, name: 'Test Pack', description: 'Test Description', colorCode: '#000000' },
+        trips: [{ id: 'trip-1', name: 'Test Trip', date, remarks: 'Test Remarks' }],
       });
     });
   });

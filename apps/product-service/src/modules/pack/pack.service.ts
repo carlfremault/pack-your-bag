@@ -1,26 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Pack, Prisma, Trip } from '@repo/db';
+import { Prisma } from '@repo/db';
 
+import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
+import { TripResponseDto } from '../trip/dto/trip-response.dto';
+
 import { CreatePackDto } from './dto/create-pack.dto';
+import { PackResponseDto, PackSummaryResponseDto } from './dto/pack-response.dto';
 import { UpdatePackDto } from './dto/update-pack.dto';
 
 export interface PackDeleteImpact {
-  pack: Pack;
-  trips: Trip[];
+  pack: PackSummaryResponseDto;
+  trips: TripResponseDto[];
 }
-
-type PackWithItemAndListCount = Prisma.PackGetPayload<{
-  include: { _count: { select: { items: true; lists: true } } };
-}>;
-
-type PackWithItemsAndLists = Prisma.PackGetPayload<{
-  include: { items: true; lists: true };
-}>;
 
 @Injectable()
 export class PackService {
@@ -30,8 +26,8 @@ export class PackService {
   // BASIC CRUD OPERATIONS
   // ============================================
 
-  async getPacks(where: Prisma.PackWhereInput): Promise<PackWithItemAndListCount[]> {
-    return this.prisma.pack.findMany({
+  async getPacks(where: Prisma.PackWhereInput): Promise<PackSummaryResponseDto[]> {
+    const result = await this.prisma.pack.findMany({
       where,
       include: {
         _count: {
@@ -39,22 +35,31 @@ export class PackService {
         },
       },
     });
+
+    return plainToInstance(PackSummaryResponseDto, result);
   }
 
-  async getPack(where: Prisma.PackWhereUniqueInput): Promise<PackWithItemsAndLists> {
+  async getPack(where: Prisma.PackWhereUniqueInput): Promise<PackResponseDto> {
     const result = await this.prisma.pack.findUnique({
       where,
-      include: { items: true, lists: true },
+      include: {
+        items: { include: { item: { include: { category: true } } } },
+        lists: {
+          include: {
+            list: { include: { items: { include: { item: { include: { category: true } } } } } },
+          },
+        },
+      },
     });
 
     if (!result) {
       throw new NotFoundException('Pack not found');
     }
 
-    return result;
+    return plainToInstance(PackResponseDto, result);
   }
 
-  async createPack(pack: CreatePackDto, userId: string): Promise<Pack> {
+  async createPack(pack: CreatePackDto, userId: string): Promise<PackResponseDto> {
     const uuid = uuidv7();
 
     const data: Prisma.PackCreateInput = {
@@ -63,17 +68,21 @@ export class PackService {
       userId: userId,
     };
 
-    return this.prisma.pack.create({ data });
+    const result = await this.prisma.pack.create({ data });
+
+    return plainToInstance(PackResponseDto, result);
   }
 
-  async updatePack(id: string, pack: UpdatePackDto, userId: string): Promise<Pack> {
+  async updatePack(id: string, pack: UpdatePackDto, userId: string): Promise<PackResponseDto> {
     return this.prisma.$transaction(async (tx) => {
       const storedPack = await tx.pack.findUnique({ where: { id, userId } });
       if (!storedPack) {
         throw new NotFoundException('Pack not found');
       }
 
-      return tx.pack.update({ where: { id, userId }, data: pack });
+      const result = await tx.pack.update({ where: { id, userId }, data: pack });
+
+      return plainToInstance(PackResponseDto, result);
     });
   }
 
@@ -95,13 +104,23 @@ export class PackService {
   // ============================================
 
   async getPackDeleteImpact(id: string, userId: string): Promise<PackDeleteImpact> {
-    const pack = await this.prisma.pack.findUnique({ where: { id, userId } });
+    const pack = await this.prisma.pack.findUnique({
+      where: { id, userId },
+      include: {
+        _count: {
+          select: { items: true, lists: true },
+        },
+      },
+    });
     if (!pack) {
       throw new NotFoundException('Pack not found');
     }
 
     const trips = await this.prisma.trip.findMany({ where: { packId: id } });
 
-    return { pack, trips };
+    return {
+      pack: plainToInstance(PackSummaryResponseDto, pack),
+      trips: plainToInstance(TripResponseDto, trips),
+    };
   }
 }
