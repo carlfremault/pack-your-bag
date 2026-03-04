@@ -10,6 +10,7 @@ import type { Request } from 'express';
 import Joi from 'joi';
 
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
@@ -107,6 +108,10 @@ const validationSchema = Joi.object({
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: PrismaExceptionFilter,
     },
   ],
 })
