@@ -13,6 +13,7 @@ export * from './guards/jwt-auth.guard';
 export * from './helpers/deleted-user.helper';
 export * from './middleware/request-id.middleware';
 export * from './openapi/generate-spec';
+export * from './testing/jwt-test.helper';
 export * from './utils/anonymizeEmail';
 export * from './utils/anonymizeIp';
 export * from './utils/capitalizeFirstLetter';

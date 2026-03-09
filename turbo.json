@@ -35,11 +35,11 @@
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
-      "dependsOn": ["test:setup"],
+      "dependsOn": ["test:setup", "^build"],
       "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "ADMIN_TEST_URL"]
     },
     "test:watch": {
-      "dependsOn": ["test:setup"],
+      "dependsOn": ["test:setup", "^build"],
       "cache": false,
       "persistent": true,
       "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "ADMIN_TEST_URL"]
