@@ -14,6 +14,14 @@ export class CategoryHelpers {
     private readonly bffSecret: string,
   ) {}
 
+  get defaultCategoryDto() {
+    return {
+      name: 'Test Category',
+      description: 'Test Description',
+      colorCode: '#000000',
+    };
+  }
+
   async createCategory(options: {
     payload: Partial<CreateCategoryDto> | null;
     accessToken: string;

@@ -12,6 +12,11 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { AuthHelpers } from './auth.helpers';
 import { CategoryHelpers } from './category.helpers';
 import { ItemHelpers } from './item.helpers';
+import { ItemListHelpers } from './item-list.helpers';
+import { ItemPackHelpers } from './item-pack.helpers';
+import { ListHelpers } from './list.helpers';
+import { PackHelpers } from './pack.helpers';
+import { TripHelpers } from './trip.helpers';
 
 export interface IntegrationTestContext {
   app: INestApplication<App>;
@@ -20,6 +25,11 @@ export interface IntegrationTestContext {
   authHelpers: AuthHelpers;
   categoryHelpers: CategoryHelpers;
   itemHelpers: ItemHelpers;
+  listHelpers: ListHelpers;
+  packHelpers: PackHelpers;
+  tripHelpers: TripHelpers;
+  itemListHelpers: ItemListHelpers;
+  itemPackHelpers: ItemPackHelpers;
   bffSecret: string;
   resetDb: () => Promise<void>;
   close: () => Promise<void>;
@@ -41,10 +51,19 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
   const authHelpers = new AuthHelpers(jwtTestHelper);
   const categoryHelpers = new CategoryHelpers(app, bffSecret);
   const itemHelpers = new ItemHelpers(app, bffSecret);
+  const listHelpers = new ListHelpers(app, bffSecret);
+  const packHelpers = new PackHelpers(app, bffSecret);
+  const tripHelpers = new TripHelpers(app, bffSecret);
+
+  const itemListHelpers = new ItemListHelpers(app, bffSecret);
+  const itemPackHelpers = new ItemPackHelpers(app, bffSecret);
 
   await app.init();
 
   const resetDb = async () => {
+    await prisma.itemList.deleteMany();
+    await prisma.itemPack.deleteMany();
+    await prisma.item.deleteMany();
     await prisma.category.deleteMany();
   };
 
@@ -60,6 +79,11 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     authHelpers,
     categoryHelpers,
     itemHelpers,
+    listHelpers,
+    packHelpers,
+    tripHelpers,
+    itemListHelpers,
+    itemPackHelpers,
     bffSecret,
     resetDb,
     close,
