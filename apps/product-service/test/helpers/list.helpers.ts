@@ -5,6 +5,8 @@ import { App } from 'supertest/types';
 
 import { CreateListDto } from '@/modules/list/dto/create-list.dto';
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
+import { UpdateListDto } from '@/modules/list/dto/update-list.dto';
+import { ListDeleteImpact } from '@/modules/list/list.service';
 
 export class ListHelpers {
   constructor(
@@ -32,6 +34,81 @@ export class ListHelpers {
     const req = request(this.app.getHttpServer())
       .post('/list')
       .send(payload ?? undefined) // For testing invalid payloads
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async getList(options: { id: string; accessToken: string; expectedStatus?: number }): Promise<{
+    body: ListResponseDto;
+  }> {
+    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .get(`/list/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async getLists(options: { accessToken: string; expectedStatus?: number }): Promise<{
+    body: ListResponseDto[];
+  }> {
+    const { accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .get('/list')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async updateList(options: {
+    id: string;
+    payload: Partial<UpdateListDto> | null;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: ListResponseDto;
+  }> {
+    const { id, payload, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .patch(`/list/${id}`)
+      .send(payload ?? undefined) // For testing invalid payloads
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async deleteList(options: { id: string; accessToken: string; expectedStatus?: number }): Promise<{
+    body: ListResponseDto;
+  }> {
+    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .delete(`/list/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async getListDeleteImpact(options: {
+    id: string;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: ListDeleteImpact;
+  }> {
+    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .get(`/list/${id}/delete-impact`)
       .set('Authorization', `Bearer ${accessToken}`)
       .set('x-bff-secret', this.bffSecret);
 

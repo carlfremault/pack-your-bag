@@ -35,11 +35,15 @@ function createMockHost() {
 
 describe('PrismaExceptionFilter', () => {
   let filter: PrismaExceptionFilter;
+  let errorLogSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     filter = new PrismaExceptionFilter();
+
+    // Suppress console output from the filter's logger during tests
+    errorLogSpy = vi.spyOn(filter['logger'], 'error').mockImplementation(() => {});
   });
 
   it('should be defined', () => {
@@ -49,12 +53,11 @@ describe('PrismaExceptionFilter', () => {
   describe('logging', () => {
     it('should log an error for a P2002 conflict', () => {
       const { host } = createMockHost();
-      const loggerSpy = vi.spyOn(filter['logger'], 'error');
       const exception = createPrismaError('P2002', { target: ['email'] });
 
       filter.catch(exception, host as never);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
+      expect(errorLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Data Integrity Error') as string,
         exception.stack,
       );
@@ -62,12 +65,11 @@ describe('PrismaExceptionFilter', () => {
 
     it('should log an error for a P2025 not found', () => {
       const { host } = createMockHost();
-      const loggerSpy = vi.spyOn(filter['logger'], 'error');
       const exception = createPrismaError('P2025', { modelName: 'User', operation: 'findUnique' });
 
       filter.catch(exception, host as never);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
+      expect(errorLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Data Integrity Error') as string,
         exception.stack,
       );
@@ -75,12 +77,11 @@ describe('PrismaExceptionFilter', () => {
 
     it('should include the auditMessage in the log', () => {
       const { host } = createMockHost();
-      const loggerSpy = vi.spyOn(filter['logger'], 'error');
       const exception = createPrismaError('P2002', { target: ['email'] });
 
       filter.catch(exception, host as never);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
+      expect(errorLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('email') as string,
         exception.stack,
       );

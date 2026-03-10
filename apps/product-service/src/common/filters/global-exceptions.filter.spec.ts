@@ -47,6 +47,8 @@ function createMockHost(overrides?: { request?: object }) {
 
 describe('GlobalExceptionsFilter', () => {
   let filter: GlobalExceptionsFilter;
+  let errorLogSpy: ReturnType<typeof vi.spyOn>;
+  let warnLogSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -56,6 +58,10 @@ describe('GlobalExceptionsFilter', () => {
     }).compile();
 
     filter = module.get<GlobalExceptionsFilter>(GlobalExceptionsFilter);
+
+    // Suppress console output from the filter's logger during tests
+    errorLogSpy = vi.spyOn(filter['logger'], 'error').mockImplementation(() => {});
+    warnLogSpy = vi.spyOn(filter['logger'], 'warn').mockImplementation(() => {});
   });
 
   it('should be defined', () => {
@@ -83,11 +89,10 @@ describe('GlobalExceptionsFilter', () => {
   describe('ThrottlerException', () => {
     it('should log a warning', () => {
       const { host } = createMockHost();
-      const warnSpy = vi.spyOn(filter['logger'], 'warn');
 
       filter.catch(new ThrottlerException(), host as never);
 
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(warnLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Rate limit exceeded') as string,
       );
     });
@@ -112,11 +117,10 @@ describe('GlobalExceptionsFilter', () => {
   describe('BffAuthenticationException', () => {
     it('should log a warning', () => {
       const { host } = createMockHost();
-      const warnSpy = vi.spyOn(filter['logger'], 'warn');
 
       filter.catch(new BffAuthenticationException('bad secret'), host as never);
 
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(warnLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('BFF authentication exception') as string,
       );
     });
@@ -161,11 +165,10 @@ describe('GlobalExceptionsFilter', () => {
   describe('5xx - Internal Server Error', () => {
     it('should log an error with the exception message', () => {
       const { host } = createMockHost();
-      const errorSpy = vi.spyOn(filter['logger'], 'error');
 
       filter.catch(new Error('db crash'), host as never);
 
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(errorLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('db crash') as string,
         expect.anything(),
       );
@@ -173,11 +176,10 @@ describe('GlobalExceptionsFilter', () => {
 
     it('should log "Unknown error" for non-Error thrown values', () => {
       const { host } = createMockHost();
-      const errorSpy = vi.spyOn(filter['logger'], 'error');
 
       filter.catch({ weird: 'object' }, host as never);
 
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(errorLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unknown error') as string,
         expect.anything(),
       );
@@ -223,11 +225,10 @@ describe('GlobalExceptionsFilter', () => {
   describe('401 - Unauthorized', () => {
     it('should log a warning', () => {
       const { host } = createMockHost();
-      const warnSpy = vi.spyOn(filter['logger'], 'warn');
 
       filter.catch(new UnauthorizedException(), host as never);
 
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Unauthorized') as string);
+      expect(warnLogSpy).toHaveBeenCalledWith(expect.stringContaining('Unauthorized') as string);
     });
 
     it('should NOT call safeCaptureSentryException', () => {
@@ -242,11 +243,10 @@ describe('GlobalExceptionsFilter', () => {
   describe('403 - Forbidden', () => {
     it('should log a warning', () => {
       const { host } = createMockHost();
-      const warnSpy = vi.spyOn(filter['logger'], 'warn');
 
       filter.catch(new ForbiddenException(), host as never);
 
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Forbidden') as string);
+      expect(warnLogSpy).toHaveBeenCalledWith(expect.stringContaining('Forbidden') as string);
     });
 
     it('should NOT call safeCaptureSentryException', () => {
@@ -261,13 +261,11 @@ describe('GlobalExceptionsFilter', () => {
   describe('404 - Not Found', () => {
     it('should NOT log anything', () => {
       const { host } = createMockHost();
-      const warnSpy = vi.spyOn(filter['logger'], 'warn');
-      const errorSpy = vi.spyOn(filter['logger'], 'error');
 
       filter.catch(new NotFoundException(), host as never);
 
-      expect(warnSpy).not.toHaveBeenCalled();
-      expect(errorSpy).not.toHaveBeenCalled();
+      expect(warnLogSpy).not.toHaveBeenCalled();
+      expect(errorLogSpy).not.toHaveBeenCalled();
     });
 
     it('should NOT call safeCaptureSentryException', () => {

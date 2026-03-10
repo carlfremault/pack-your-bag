@@ -15,6 +15,7 @@ import { ItemHelpers } from './item.helpers';
 import { ItemListHelpers } from './item-list.helpers';
 import { ItemPackHelpers } from './item-pack.helpers';
 import { ListHelpers } from './list.helpers';
+import { ListPackHelpers } from './list-pack.helpers';
 import { PackHelpers } from './pack.helpers';
 import { TripHelpers } from './trip.helpers';
 
@@ -30,6 +31,7 @@ export interface IntegrationTestContext {
   tripHelpers: TripHelpers;
   itemListHelpers: ItemListHelpers;
   itemPackHelpers: ItemPackHelpers;
+  listPackHelpers: ListPackHelpers;
   bffSecret: string;
   resetDb: () => Promise<void>;
   close: () => Promise<void>;
@@ -57,6 +59,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
 
   const itemListHelpers = new ItemListHelpers(app, bffSecret);
   const itemPackHelpers = new ItemPackHelpers(app, bffSecret);
+  const listPackHelpers = new ListPackHelpers(app, bffSecret);
 
   await app.init();
 
@@ -65,6 +68,8 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     await prisma.itemPack.deleteMany();
     await prisma.item.deleteMany();
     await prisma.category.deleteMany();
+    await prisma.listPack.deleteMany();
+    await prisma.list.deleteMany();
   };
 
   const close = async () => {
@@ -84,6 +89,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     tripHelpers,
     itemListHelpers,
     itemPackHelpers,
+    listPackHelpers,
     bffSecret,
     resetDb,
     close,
