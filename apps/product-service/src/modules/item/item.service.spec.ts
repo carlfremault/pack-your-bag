@@ -20,6 +20,9 @@ describe('ItemService', () => {
       update: vi.fn(),
       delete: vi.fn(),
     },
+    category: {
+      findUnique: vi.fn(),
+    },
     itemList: {
       deleteMany: vi.fn(),
     },
@@ -61,6 +64,7 @@ describe('ItemService', () => {
       const userId = 'user-1';
       const dto = { name: 'Shoes', description: 'Comfy', weight: 200 };
       let capturedData: Record<string, unknown> = {};
+
       mockPrismaService.item.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
           capturedData = args.data;
@@ -70,6 +74,7 @@ describe('ItemService', () => {
 
       await service.createItem(dto as never, userId);
 
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(capturedData).toMatchObject({
         name: 'Shoes',
         description: 'Comfy',
@@ -84,6 +89,7 @@ describe('ItemService', () => {
       const userId = 'user-1';
       const dto = { name: 'Hat', categoryId: 'cat-1' };
       let capturedData: Record<string, unknown> = {};
+      mockPrismaService.category.findUnique.mockResolvedValue({ id: 'cat-1', userId });
       mockPrismaService.item.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
           capturedData = args.data;
@@ -214,6 +220,7 @@ describe('ItemService', () => {
 
       expect(mockPrismaService.item.findUnique).toHaveBeenCalledWith({
         where: { id: itemId, userId },
+        include: { category: true },
       });
       expect(mockPrismaService.list.findMany).toHaveBeenCalledWith({
         where: { items: { some: { itemId } } },

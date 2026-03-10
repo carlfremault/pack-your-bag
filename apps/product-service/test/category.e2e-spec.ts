@@ -3,6 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
 
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
@@ -10,6 +11,7 @@ import { createIntegrationContext, IntegrationTestContext } from './helpers/setu
 describe('Category (e2e)', () => {
   let ctx: IntegrationTestContext;
   let validAccessToken: string;
+  let categoryDto: CreateCategoryDto;
 
   const userId = uuidv7();
   const categoryId = uuidv7(); // This is the category id that will be used in "not found" tests
@@ -17,6 +19,7 @@ describe('Category (e2e)', () => {
   beforeAll(async () => {
     ctx = await createIntegrationContext();
     validAccessToken = ctx.authHelpers.getValidAccessToken(userId);
+    categoryDto = ctx.categoryHelpers.defaultCategoryDto;
   });
 
   beforeEach(async () => {
@@ -27,30 +30,24 @@ describe('Category (e2e)', () => {
     await ctx?.close();
   });
 
-  const baseDto = {
-    name: 'Test Category',
-    description: 'Test Description',
-    colorCode: '#000000',
-  };
-
   describe('Category - /category (POST)', () => {
     it('should create a category', async () => {
       const { body } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
       expect(body).toMatchObject({
         id: expect.any(String) as string,
-        name: baseDto.name,
-        description: baseDto.description,
-        colorCode: baseDto.colorCode,
+        name: categoryDto.name,
+        description: categoryDto.description,
+        colorCode: categoryDto.colorCode,
       });
     });
 
     it('should return 401 if the user is not authenticated', async () => {
       const { body } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: '',
         expectedStatus: HttpStatus.UNAUTHORIZED,
       });
@@ -93,7 +90,7 @@ describe('Category (e2e)', () => {
   describe('Category - /category/:id (GET)', () => {
     it('should return a category', async () => {
       const { body } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
@@ -104,9 +101,9 @@ describe('Category (e2e)', () => {
 
       expect(category).toMatchObject({
         id: body.id,
-        name: baseDto.name,
-        description: baseDto.description,
-        colorCode: baseDto.colorCode,
+        name: categoryDto.name,
+        description: categoryDto.description,
+        colorCode: categoryDto.colorCode,
       });
     });
 
@@ -136,7 +133,7 @@ describe('Category (e2e)', () => {
 
     it('should return 404 if the category belongs to another user', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const userId2 = uuidv7();
@@ -169,11 +166,11 @@ describe('Category (e2e)', () => {
   describe('Category - /category (GET)', () => {
     it('should return all categories', async () => {
       const { body: category1 } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const { body: category2 } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
@@ -210,7 +207,7 @@ describe('Category (e2e)', () => {
   describe('Category - /category/:id (PATCH)', () => {
     it('should update a category (multiple fields)', async () => {
       const { body } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
@@ -220,9 +217,9 @@ describe('Category (e2e)', () => {
       });
 
       expect(createdCategory).toMatchObject({
-        name: baseDto.name,
-        description: baseDto.description,
-        colorCode: baseDto.colorCode,
+        name: categoryDto.name,
+        description: categoryDto.description,
+        colorCode: categoryDto.colorCode,
       });
 
       await ctx.categoryHelpers.updateCategory({
@@ -249,7 +246,7 @@ describe('Category (e2e)', () => {
 
     it('should update a category (single field)', async () => {
       const { body } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
@@ -259,9 +256,9 @@ describe('Category (e2e)', () => {
       });
 
       expect(createdCategory).toMatchObject({
-        name: baseDto.name,
-        description: baseDto.description,
-        colorCode: baseDto.colorCode,
+        name: categoryDto.name,
+        description: categoryDto.description,
+        colorCode: categoryDto.colorCode,
       });
 
       await ctx.categoryHelpers.updateCategory({
@@ -279,15 +276,15 @@ describe('Category (e2e)', () => {
 
       expect(updatedCategory).toMatchObject({
         name: 'Updated Category',
-        description: baseDto.description,
-        colorCode: baseDto.colorCode,
+        description: categoryDto.description,
+        colorCode: categoryDto.colorCode,
       });
     });
 
     it('should return 401 if the user is not authenticated', async () => {
       const { body } = await ctx.categoryHelpers.updateCategory({
         id: categoryId,
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: '',
         expectedStatus: HttpStatus.UNAUTHORIZED,
       });
@@ -300,7 +297,7 @@ describe('Category (e2e)', () => {
     it('should return 404 if the category is not found', async () => {
       const { body } = await ctx.categoryHelpers.updateCategory({
         id: categoryId,
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
@@ -312,7 +309,7 @@ describe('Category (e2e)', () => {
 
     it('should return 404 if the category belongs to another user', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const userId2 = uuidv7();
@@ -320,7 +317,7 @@ describe('Category (e2e)', () => {
 
       const { body } = await ctx.categoryHelpers.updateCategory({
         id: category.id,
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken2,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
@@ -333,7 +330,7 @@ describe('Category (e2e)', () => {
     it('should return 400 if the id is not a valid uuid v7', async () => {
       const { body } = await ctx.categoryHelpers.updateCategory({
         id: 'invalid-id',
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });
@@ -345,7 +342,7 @@ describe('Category (e2e)', () => {
 
     it('should return 400 if the payload is invalid', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const { body } = await ctx.categoryHelpers.updateCategory({
@@ -364,7 +361,7 @@ describe('Category (e2e)', () => {
   describe('Category - /category/:id (DELETE)', () => {
     it('should delete a category', async () => {
       const { body } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
@@ -374,9 +371,9 @@ describe('Category (e2e)', () => {
       });
 
       expect(createdCategory).toMatchObject({
-        name: baseDto.name,
-        description: baseDto.description,
-        colorCode: baseDto.colorCode,
+        name: categoryDto.name,
+        description: categoryDto.description,
+        colorCode: categoryDto.colorCode,
       });
 
       await ctx.categoryHelpers.deleteCategory({
@@ -421,7 +418,7 @@ describe('Category (e2e)', () => {
 
     it('should return 404 if the category belongs to another user', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const userId2 = uuidv7();
@@ -453,7 +450,7 @@ describe('Category (e2e)', () => {
   describe('Category - /category/:id/delete-impact (GET)', () => {
     it('should return the delete impact of a category (with items)', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const { body: item } = await ctx.itemHelpers.createItem({
@@ -474,9 +471,9 @@ describe('Category (e2e)', () => {
       expect(impact).toMatchObject({
         category: {
           id: category.id,
-          name: baseDto.name,
-          description: baseDto.description,
-          colorCode: baseDto.colorCode,
+          name: categoryDto.name,
+          description: categoryDto.description,
+          colorCode: categoryDto.colorCode,
         },
         items: [
           { id: item.id, name: item.name, description: item.description, weight: item.weight },
@@ -486,7 +483,7 @@ describe('Category (e2e)', () => {
 
     it('should return the delete impact of a category (no items)', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
 
@@ -498,9 +495,9 @@ describe('Category (e2e)', () => {
       expect(impact).toMatchObject({
         category: {
           id: category.id,
-          name: baseDto.name,
-          description: baseDto.description,
-          colorCode: baseDto.colorCode,
+          name: categoryDto.name,
+          description: categoryDto.description,
+          colorCode: categoryDto.colorCode,
         },
         items: [],
       });
@@ -532,7 +529,7 @@ describe('Category (e2e)', () => {
 
     it('should return 404 if the category belongs to another user', async () => {
       const { body: category } = await ctx.categoryHelpers.createCategory({
-        payload: baseDto,
+        payload: categoryDto,
         accessToken: validAccessToken,
       });
       const userId2 = uuidv7();

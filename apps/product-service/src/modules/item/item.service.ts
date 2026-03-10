@@ -53,26 +53,35 @@ export class ItemService {
   }
 
   async createItem(item: CreateItemDto, userId: string): Promise<ItemResponseDto> {
-    const uuid = uuidv7();
-    const { categoryId, ...rest } = item;
+    return this.prisma.$transaction(async (tx) => {
+      const uuid = uuidv7();
+      const { categoryId, ...rest } = item;
 
-    const data: Prisma.ItemCreateInput = {
-      ...rest,
-      id: uuid,
-      userId: userId,
-      ...(categoryId && {
-        category: {
-          connect: { id: categoryId },
-        },
-      }),
-    };
+      if (categoryId) {
+        const category = await tx.category.findUnique({ where: { id: categoryId, userId } });
+        if (!category) {
+          throw new NotFoundException('Category not found');
+        }
+      }
 
-    const result = await this.prisma.item.create({
-      data,
-      include: { category: true },
+      const data: Prisma.ItemCreateInput = {
+        ...rest,
+        id: uuid,
+        userId: userId,
+        ...(categoryId && {
+          category: {
+            connect: { id: categoryId },
+          },
+        }),
+      };
+
+      const result = await tx.item.create({
+        data,
+        include: { category: true },
+      });
+
+      return plainToInstance(ItemResponseDto, result);
     });
-
-    return plainToInstance(ItemResponseDto, result);
   }
 
   async updateItem(id: string, item: UpdateItemDto, userId: string): Promise<ItemResponseDto> {
@@ -83,6 +92,13 @@ export class ItemService {
       }
 
       const { categoryId, ...rest } = item;
+
+      if (categoryId) {
+        const category = await tx.category.findUnique({ where: { id: categoryId, userId } });
+        if (!category) {
+          throw new NotFoundException('Category not found');
+        }
+      }
 
       const data: Prisma.ItemUpdateInput = {
         ...rest,
@@ -122,7 +138,10 @@ export class ItemService {
   }
 
   async getItemDeleteImpact(id: string, userId: string): Promise<ItemDeleteImpact> {
-    const item = await this.prisma.item.findUnique({ where: { id, userId } });
+    const item = await this.prisma.item.findUnique({
+      where: { id, userId },
+      include: { category: true },
+    });
     if (!item) {
       throw new NotFoundException('Item not found');
     }
