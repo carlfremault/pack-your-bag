@@ -20,6 +20,9 @@ describe('TripService', () => {
       update: vi.fn(),
       delete: vi.fn(),
     },
+    pack: {
+      findUnique: vi.fn(),
+    },
     $transaction: vi.fn((callback: (tx: typeof mockPrismaService) => Promise<Trip>) => {
       return callback(mockPrismaService);
     }),
@@ -47,6 +50,7 @@ describe('TripService', () => {
       const date = new Date();
       const dto = { name: 'Trip 1', date, remarks: 'Remarks' };
       let capturedData: Record<string, unknown> = {};
+
       mockPrismaService.trip.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
           capturedData = args.data;
@@ -56,6 +60,7 @@ describe('TripService', () => {
 
       await service.createTrip(dto as never, userId);
 
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(capturedData).toMatchObject({
         name: 'Trip 1',
         date,
@@ -71,6 +76,7 @@ describe('TripService', () => {
       const userId = 'user-1';
       const dto = { name: 'Trip 1', packId: 'pack-1' };
       let capturedData: Record<string, unknown> = {};
+      mockPrismaService.pack.findUnique.mockResolvedValue({ id: 'pack-1', userId });
       mockPrismaService.trip.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
           capturedData = args.data;
@@ -79,6 +85,10 @@ describe('TripService', () => {
       );
 
       await service.createTrip(dto as never, userId);
+
+      expect(mockPrismaService.pack.findUnique).toHaveBeenCalledWith({
+        where: { id: 'pack-1', userId },
+      });
       expect(capturedData.pack).toEqual({ connect: { id: 'pack-1' } });
     });
   });
@@ -122,6 +132,9 @@ describe('TripService', () => {
 
       await service.updateTrip(id, dto as never, userId);
 
+      expect(mockPrismaService.pack.findUnique).toHaveBeenCalledWith({
+        where: { id: 'pack-1', userId },
+      });
       expect(capturedData.pack).toEqual({ connect: { id: 'pack-1' } });
     });
 
