@@ -30,4 +30,22 @@ export class ListPackHelpers {
 
     return req.expect(expectedStatus);
   }
+
+  async removeListFromPack(options: {
+    listId: string;
+    packId: string;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: ListPack;
+  }> {
+    const { listId, packId, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .delete(`/list-pack/${listId}/${packId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
 }
