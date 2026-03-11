@@ -70,6 +70,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     await prisma.category.deleteMany();
     await prisma.listPack.deleteMany();
     await prisma.list.deleteMany();
+    await prisma.pack.deleteMany();
   };
 
   const close = async () => {
