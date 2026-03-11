@@ -30,4 +30,22 @@ export class ItemPackHelpers {
 
     return req.expect(expectedStatus);
   }
+
+  async removeItemFromPack(options: {
+    itemId: string;
+    packId: string;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: ItemPack;
+  }> {
+    const { itemId, packId, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .delete(`/item-pack/${itemId}/${packId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
 }
