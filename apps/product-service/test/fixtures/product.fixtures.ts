@@ -89,6 +89,31 @@ export const createItemInPack = async (ctx: IntegrationTestContext, accessToken:
   return { item, pack, itemPack };
 };
 
+export const createMultipleItemsInPackWithQuantity = async (
+  ctx: IntegrationTestContext,
+  accessToken: string,
+  quantity: number,
+) => {
+  const [{ body: item1 }, { body: item2 }, { body: pack }] = await Promise.all([
+    ctx.itemHelpers.createItem({ payload: ctx.itemHelpers.defaultItemDto, accessToken }),
+    ctx.itemHelpers.createItem({ payload: ctx.itemHelpers.defaultItemDto, accessToken }),
+    ctx.packHelpers.createPack({ payload: ctx.packHelpers.defaultPackDto, accessToken }),
+  ]);
+
+  const [{ body: itemPack1 }, { body: itemPack2 }] = await Promise.all([
+    ctx.itemPackHelpers.upsertItemPack({
+      payload: { itemId: item1.id, packId: pack.id, quantity },
+      accessToken,
+    }),
+    ctx.itemPackHelpers.upsertItemPack({
+      payload: { itemId: item2.id, packId: pack.id, quantity },
+      accessToken,
+    }),
+  ]);
+
+  return { item1, item2, pack, itemPack1, itemPack2 };
+};
+
 export const createItemInMultiplePacks = async (
   ctx: IntegrationTestContext,
   accessToken: string,
@@ -135,6 +160,27 @@ export const createItemOnListAndInPack = async (
   ]);
 
   return { item, list, pack, itemList, itemPack };
+};
+
+export const createItemAndListInPack = async (ctx: IntegrationTestContext, accessToken: string) => {
+  const [{ body: item }, { body: list }, { body: pack }] = await Promise.all([
+    ctx.itemHelpers.createItem({ payload: ctx.itemHelpers.defaultItemDto, accessToken }),
+    ctx.listHelpers.createList({ payload: ctx.listHelpers.defaultListDto, accessToken }),
+    ctx.packHelpers.createPack({ payload: ctx.packHelpers.defaultPackDto, accessToken }),
+  ]);
+
+  const [{ body: itemPack }, { body: listPack }] = await Promise.all([
+    ctx.itemPackHelpers.upsertItemPack({
+      payload: { itemId: item.id, packId: pack.id, quantity: 1 },
+      accessToken,
+    }),
+    ctx.listPackHelpers.upsertListInPack({
+      payload: { listId: list.id, packId: pack.id, quantity: 1 },
+      accessToken,
+    }),
+  ]);
+
+  return { item, list, pack, itemPack, listPack };
 };
 
 export const createItemInPackInTrip = async (ctx: IntegrationTestContext, accessToken: string) => {
@@ -293,4 +339,100 @@ export const createListInMultiplePacksInMultipleTrips = async (
     ]);
 
   return { list, pack1, pack2, trip1: updatedTrip1, trip2: updatedTrip2, listPack1, listPack2 };
+};
+
+export const createMultipleListsInPackWithQuantity = async (
+  ctx: IntegrationTestContext,
+  accessToken: string,
+  quantity: number,
+) => {
+  const [{ body: list1 }, { body: list2 }, { body: pack }] = await Promise.all([
+    ctx.listHelpers.createList({ payload: ctx.listHelpers.defaultListDto, accessToken }),
+    ctx.listHelpers.createList({ payload: ctx.listHelpers.defaultListDto, accessToken }),
+    ctx.packHelpers.createPack({ payload: ctx.packHelpers.defaultPackDto, accessToken }),
+  ]);
+
+  const [{ body: listPack1 }, { body: listPack2 }] = await Promise.all([
+    ctx.listPackHelpers.upsertListInPack({
+      payload: { listId: list1.id, packId: pack.id, quantity },
+      accessToken,
+    }),
+    ctx.listPackHelpers.upsertListInPack({
+      payload: { listId: list2.id, packId: pack.id, quantity },
+      accessToken,
+    }),
+  ]);
+
+  return { list1, list2, pack, listPack1, listPack2 };
+};
+
+export const createPackUsedInTrip = async (ctx: IntegrationTestContext, accessToken: string) => {
+  const [{ body: pack }, { body: trip }] = await Promise.all([
+    ctx.packHelpers.createPack({ payload: ctx.packHelpers.defaultPackDto, accessToken }),
+    ctx.tripHelpers.createTrip({ payload: ctx.tripHelpers.defaultTripDto, accessToken }),
+  ]);
+
+  const { body: updatedTrip } = await ctx.tripHelpers.updateTrip({
+    id: trip.id,
+    payload: { packId: pack.id },
+    accessToken,
+  });
+
+  return { pack, trip: updatedTrip };
+};
+
+export const createItemAndListInPackInTrip = async (
+  ctx: IntegrationTestContext,
+  accessToken: string,
+) => {
+  const [{ body: item }, { body: list }, { body: pack }, { body: trip }] = await Promise.all([
+    ctx.itemHelpers.createItem({ payload: ctx.itemHelpers.defaultItemDto, accessToken }),
+    ctx.listHelpers.createList({ payload: ctx.listHelpers.defaultListDto, accessToken }),
+    ctx.packHelpers.createPack({ payload: ctx.packHelpers.defaultPackDto, accessToken }),
+    ctx.tripHelpers.createTrip({ payload: ctx.tripHelpers.defaultTripDto, accessToken }),
+  ]);
+
+  const [{ body: itemPack }, { body: listPack }, { body: updatedTrip }] = await Promise.all([
+    ctx.itemPackHelpers.upsertItemPack({
+      payload: { itemId: item.id, packId: pack.id, quantity: 1 },
+      accessToken,
+    }),
+    ctx.listPackHelpers.upsertListInPack({
+      payload: { listId: list.id, packId: pack.id, quantity: 1 },
+      accessToken,
+    }),
+    ctx.tripHelpers.updateTrip({
+      id: trip.id,
+      payload: { packId: pack.id },
+      accessToken,
+    }),
+  ]);
+
+  return { item, list, pack, trip: updatedTrip, itemPack, listPack };
+};
+
+export const createPackUsedInMultipleTrips = async (
+  ctx: IntegrationTestContext,
+  accessToken: string,
+) => {
+  const [{ body: pack }, { body: trip1 }, { body: trip2 }] = await Promise.all([
+    ctx.packHelpers.createPack({ payload: ctx.packHelpers.defaultPackDto, accessToken }),
+    ctx.tripHelpers.createTrip({ payload: ctx.tripHelpers.defaultTripDto, accessToken }),
+    ctx.tripHelpers.createTrip({ payload: ctx.tripHelpers.defaultTripDto, accessToken }),
+  ]);
+
+  const [{ body: updatedTrip1 }, { body: updatedTrip2 }] = await Promise.all([
+    ctx.tripHelpers.updateTrip({
+      id: trip1.id,
+      payload: { packId: pack.id },
+      accessToken,
+    }),
+    ctx.tripHelpers.updateTrip({
+      id: trip2.id,
+      payload: { packId: pack.id },
+      accessToken,
+    }),
+  ]);
+
+  return { pack, trip1: updatedTrip1, trip2: updatedTrip2 };
 };

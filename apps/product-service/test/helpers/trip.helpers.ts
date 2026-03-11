@@ -39,6 +39,19 @@ export class TripHelpers {
     return req.expect(expectedStatus);
   }
 
+  async getTrip(options: { id: string; accessToken: string; expectedStatus?: number }): Promise<{
+    body: TripResponseDto;
+  }> {
+    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .get(`/trip/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
   async updateTrip(options: {
     id: string;
     payload: Partial<UpdateTripDto> | null;
