@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
-describe('ItemList (e2e)', () => {
+describe('ItemPack (e2e)', () => {
   let ctx: IntegrationTestContext;
   let validAccessToken: string;
 
@@ -23,115 +23,115 @@ describe('ItemList (e2e)', () => {
     await ctx?.close();
   });
 
-  describe('ItemList - /item-list (POST)', () => {
-    it('should upsert an item on a list (create path)', async () => {
+  describe('ItemPack - /item-pack (POST)', () => {
+    it('should upsert an item in a pack (create path)', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: list.id, quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 1 },
         accessToken: validAccessToken,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         quantity: 1,
       });
     });
 
-    it('should upsert an item on a list (update path)', async () => {
+    it('should upsert an item in a pack (update path)', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: list.id, quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 1 },
         accessToken: validAccessToken,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         quantity: 1,
       });
 
-      const { body: updatedItemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: list.id, quantity: 2 },
+      const { body: updatedItemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 2 },
         accessToken: validAccessToken,
       });
 
-      expect(updatedItemList).toMatchObject({
+      expect(updatedItemPack).toMatchObject({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         quantity: 2,
       });
     });
 
     it('should return 404 if the item is not found', async () => {
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: uuidv7(), listId: list.id, quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: uuidv7(), packId: pack.id, quantity: 1 },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         error: 'Not Found',
       });
     });
 
-    it('should return 404 if the list is not found', async () => {
+    it('should return 404 if the pack is not found', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: uuidv7(), quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: uuidv7(), quantity: 1 },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         error: 'Not Found',
       });
     });
 
-    it('should return 404 if item and list do not belong to the same user', async () => {
+    it('should return 404 if the item and pack do not belong to the same user', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
       const userId2 = uuidv7();
       const validAccessToken2 = ctx.authHelpers.getValidAccessToken(userId2);
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken2,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: list.id, quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 1 },
         accessToken: validAccessToken2,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         error: 'Not Found',
       });
     });
@@ -141,77 +141,77 @@ describe('ItemList (e2e)', () => {
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: list.id, quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 1 },
         accessToken: '',
         expectedStatus: HttpStatus.UNAUTHORIZED,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         error: 'Unauthorized',
       });
     });
 
     it('should return 400 if the payload is invalid', async () => {
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body: itemList } = await ctx.itemListHelpers.upsertItemOnList({
-        payload: { listId: list.id, quantity: 1 },
+      const { body: itemPack } = await ctx.itemPackHelpers.upsertItemPack({
+        payload: { packId: pack.id, quantity: 1 },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });
 
-      expect(itemList).toMatchObject({
+      expect(itemPack).toMatchObject({
         error: 'Bad Request',
       });
     });
   });
 
-  describe('ItemList - /item-list (DELETE)', () => {
-    it('should remove an item from a list', async () => {
+  describe('ItemPack - /item-pack (DELETE)', () => {
+    it('should remove an item from a pack', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
-      await ctx.itemListHelpers.upsertItemOnList({
-        payload: { itemId: item.id, listId: list.id, quantity: 1 },
+      await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 1 },
         accessToken: validAccessToken,
       });
 
-      await ctx.itemListHelpers.removeItemFromList({
+      await ctx.itemPackHelpers.removeItemFromPack({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         accessToken: validAccessToken,
       });
 
-      const { body: updatedList } = await ctx.listHelpers.getList({
-        id: list.id,
+      const { body: updatedPack } = await ctx.packHelpers.getPack({
+        id: pack.id,
         accessToken: validAccessToken,
       });
-      expect(updatedList.items).toHaveLength(0);
+      expect(updatedPack.items).toHaveLength(0);
     });
 
     it('should return 404 if the item is not found', async () => {
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body } = await ctx.itemListHelpers.removeItemFromList({
+      const { body } = await ctx.itemPackHelpers.removeItemFromPack({
         itemId: uuidv7(),
-        listId: list.id,
+        packId: pack.id,
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
@@ -219,15 +219,15 @@ describe('ItemList (e2e)', () => {
       expect(body).toMatchObject({ error: 'Not Found' });
     });
 
-    it('should return 404 if the list is not found', async () => {
+    it('should return 404 if the pack is not found', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
 
-      const { body } = await ctx.itemListHelpers.removeItemFromList({
+      const { body } = await ctx.itemPackHelpers.removeItemFromPack({
         itemId: item.id,
-        listId: uuidv7(),
+        packId: uuidv7(),
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
@@ -235,19 +235,19 @@ describe('ItemList (e2e)', () => {
       expect(body).toMatchObject({ error: 'Not Found' });
     });
 
-    it('should return 404 if the item does not belong to the list', async () => {
+    it('should return 404 if the item does not belong to the pack', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body } = await ctx.itemListHelpers.removeItemFromList({
+      const { body } = await ctx.itemPackHelpers.removeItemFromPack({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
@@ -255,21 +255,21 @@ describe('ItemList (e2e)', () => {
       expect(body).toMatchObject({ error: 'Not Found' });
     });
 
-    it('should return 404 if item and list do not belong to the same user', async () => {
+    it('should return 404 if the item and pack do not belong to the same user', async () => {
       const { body: item } = await ctx.itemHelpers.createItem({
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
       const userId2 = uuidv7();
       const validAccessToken2 = ctx.authHelpers.getValidAccessToken(userId2);
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken2,
       });
 
-      const { body } = await ctx.itemListHelpers.removeItemFromList({
+      const { body } = await ctx.itemPackHelpers.removeItemFromPack({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         accessToken: validAccessToken2,
         expectedStatus: HttpStatus.NOT_FOUND,
       });
@@ -282,14 +282,14 @@ describe('ItemList (e2e)', () => {
         payload: ctx.itemHelpers.defaultItemDto,
         accessToken: validAccessToken,
       });
-      const { body: list } = await ctx.listHelpers.createList({
-        payload: ctx.listHelpers.defaultListDto,
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
         accessToken: validAccessToken,
       });
 
-      const { body } = await ctx.itemListHelpers.removeItemFromList({
+      const { body } = await ctx.itemPackHelpers.removeItemFromPack({
         itemId: item.id,
-        listId: list.id,
+        packId: pack.id,
         accessToken: '',
         expectedStatus: HttpStatus.UNAUTHORIZED,
       });
