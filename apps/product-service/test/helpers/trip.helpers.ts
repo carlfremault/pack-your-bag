@@ -52,6 +52,19 @@ export class TripHelpers {
     return req.expect(expectedStatus);
   }
 
+  async getTrips(options: { accessToken: string; expectedStatus?: number }): Promise<{
+    body: TripResponseDto[];
+  }> {
+    const { accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .get('/trip')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
   async updateTrip(options: {
     id: string;
     payload: Partial<UpdateTripDto> | null;
@@ -65,6 +78,19 @@ export class TripHelpers {
     const req = request(this.app.getHttpServer())
       .patch(`/trip/${id}`)
       .send(payload ?? undefined) // For testing invalid payloads
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async deleteTrip(options: { id: string; accessToken: string; expectedStatus?: number }): Promise<{
+    body: TripResponseDto;
+  }> {
+    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+
+    const req = request(this.app.getHttpServer())
+      .delete(`/trip/${id}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .set('x-bff-secret', this.bffSecret);
 

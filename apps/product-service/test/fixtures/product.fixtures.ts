@@ -436,3 +436,16 @@ export const createPackUsedInMultipleTrips = async (
 
   return { pack, trip1: updatedTrip1, trip2: updatedTrip2 };
 };
+
+export const createTripWithPack = async (ctx: IntegrationTestContext, accessToken: string) => {
+  const { body: pack } = await ctx.packHelpers.createPack({
+    payload: ctx.packHelpers.defaultPackDto,
+    accessToken,
+  });
+  const { body: trip } = await ctx.tripHelpers.createTrip({
+    payload: { ...ctx.tripHelpers.defaultTripDto, packId: pack.id },
+    accessToken,
+  });
+
+  return { trip, pack };
+};

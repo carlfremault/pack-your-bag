@@ -35,24 +35,32 @@ export class TripService {
   }
 
   async createTrip(trip: CreateTripDto, userId: string): Promise<TripResponseDto> {
-    const uuid = uuidv7();
+    return this.prisma.$transaction(async (tx) => {
+      const uuid = uuidv7();
+      const { packId, ...rest } = trip;
 
-    const { packId, ...rest } = trip;
+      if (packId) {
+        const pack = await tx.pack.findUnique({ where: { id: packId, userId } });
+        if (!pack) {
+          throw new NotFoundException('Pack not found');
+        }
+      }
 
-    const data: Prisma.TripCreateInput = {
-      ...rest,
-      id: uuid,
-      userId: userId,
-      ...(packId && {
-        pack: {
-          connect: { id: packId },
-        },
-      }),
-    };
+      const data: Prisma.TripCreateInput = {
+        ...rest,
+        id: uuid,
+        userId: userId,
+        ...(packId && {
+          pack: {
+            connect: { id: packId },
+          },
+        }),
+      };
 
-    const result = await this.prisma.trip.create({ data, include: { pack: true } });
+      const result = await tx.trip.create({ data, include: { pack: true } });
 
-    return plainToInstance(TripResponseDto, result);
+      return plainToInstance(TripResponseDto, result);
+    });
   }
 
   async updateTrip(id: string, trip: UpdateTripDto, userId: string): Promise<TripResponseDto> {
@@ -63,6 +71,13 @@ export class TripService {
       }
 
       const { packId, ...rest } = trip;
+
+      if (packId) {
+        const pack = await tx.pack.findUnique({ where: { id: packId, userId } });
+        if (!pack) {
+          throw new NotFoundException('Pack not found');
+        }
+      }
 
       const data: Prisma.TripUpdateInput = {
         ...rest,
