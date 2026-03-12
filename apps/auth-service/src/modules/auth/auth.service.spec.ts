@@ -3,17 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { AuditEventType, TokenType } from '@repo/db';
+import { InvalidSessionException, MS_PER_DAY } from '@repo/nestjs-common';
+
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { MS_PER_DAY } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import {
-  InvalidSessionException,
-  SessionExpiredException,
-} from '@/common/exceptions/unauthorized.exceptions';
-import { AuditEventType, TokenType } from '@/generated/prisma';
+import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';

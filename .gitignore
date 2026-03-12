@@ -29,9 +29,11 @@ coverage
 out/
 build/
 dist/
+*.tsbuildinfo
 
 # Prisma
 **/src/generated/prisma
+packages/db/generated
 
 # Debug
 npm-debug.log*

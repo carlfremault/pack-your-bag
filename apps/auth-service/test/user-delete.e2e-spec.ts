@@ -1,9 +1,9 @@
 import { HttpStatus } from '@nestjs/common';
 
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { AuditEventType, TokenType } from '@repo/db';
+import { MS_PER_DAY } from '@repo/nestjs-common';
 
-import { MS_PER_DAY } from '@/common/constants/auth.constants';
-import { AuditEventType, TokenType } from '@/generated/prisma';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createAndHardDeleteUser,

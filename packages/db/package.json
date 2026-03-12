@@ -1,0 +1,24 @@
+{
+  "name": "@repo/db",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "status": "prisma migrate status",
+    "deploy": "prisma migrate deploy",
+    "seed": "prisma db seed",
+    "test:setup": "node -e \"if(process.env.NODE_ENV!=='test')throw new Error('Must set NODE_ENV=test')\"  && prisma db push --accept-data-loss && prisma generate && prisma db seed"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "prisma": "^7.2.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

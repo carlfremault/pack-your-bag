@@ -2,8 +2,9 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
-import { MS_PER_DAY } from '@/common/constants/auth.constants';
-import { AuditEventType, AuditSeverity, Prisma } from '@/generated/prisma';
+import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { MS_PER_DAY } from '@repo/nestjs-common';
+
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';

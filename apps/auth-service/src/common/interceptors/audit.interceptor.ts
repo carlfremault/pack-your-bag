@@ -1,7 +1,8 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { AuditEventType, AuditSeverity } from '@prisma-client';
+import { AuditEventType, AuditSeverity } from '@repo/db';
+
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';

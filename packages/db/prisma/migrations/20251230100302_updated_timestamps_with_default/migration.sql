@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "app_auth"."Role" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "app_auth"."User" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

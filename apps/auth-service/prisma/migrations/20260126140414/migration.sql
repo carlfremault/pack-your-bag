@@ -1,2 +1,0 @@
--- AlterEnum
-ALTER TYPE "AuditEventType" ADD VALUE 'INTERNAL_SERVER_ERROR';

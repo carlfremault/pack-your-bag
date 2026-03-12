@@ -1,0 +1,29 @@
+import { ApiProperty } from '@nestjs/swagger';
+
+import { Exclude, Expose } from 'class-transformer';
+
+@Exclude()
+export class CategoryResponseDto {
+  @ApiProperty({ description: 'Category uuid', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @Expose()
+  id: string;
+  @ApiProperty({ description: 'Category name', example: 'Category name' })
+  @Expose()
+  name: string;
+  @ApiProperty({
+    description: 'Category description',
+    example: 'Category description',
+    nullable: true,
+    type: String,
+  })
+  @Expose()
+  description: string | null;
+  @ApiProperty({
+    description: 'Category color code',
+    example: '#000000',
+    nullable: true,
+    type: String,
+  })
+  @Expose()
+  colorCode: string | null;
+}

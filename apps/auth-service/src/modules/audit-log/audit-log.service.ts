@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@prisma-client';
+import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+
 import { UAParser } from 'ua-parser-js';
 import { v7 as uuidv7 } from 'uuid';
 

@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { Prisma, RefreshToken } from '@prisma-client';
+import { Prisma, RefreshToken } from '@repo/db';
+import { InvalidSessionException } from '@repo/nestjs-common';
 
 import {
-  InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';

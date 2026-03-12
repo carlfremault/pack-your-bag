@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "app_auth"."AuditEventType" ADD VALUE 'ACCOUNT_DELETION_ACCESS_ATTEMPT';

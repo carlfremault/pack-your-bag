@@ -2,10 +2,11 @@ import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { InvalidSessionException } from '@repo/nestjs-common';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  InvalidSessionException,
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';

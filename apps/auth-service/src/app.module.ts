@@ -6,6 +6,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 
+import {
+  BffGuardModule,
+  CustomThrottlerModule,
+  JwtAuthModule,
+  RequestIdMiddleware,
+} from '@repo/nestjs-common';
+
 import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
 import Joi from 'joi';
@@ -14,7 +21,6 @@ import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
@@ -61,6 +67,9 @@ const validationSchema = Joi.object({
   RSA_PRIVATE_KEY_B64: Joi.string().base64().required().messages({
     'string.base64': 'RSA_PRIVATE_KEY_B64 must be a valid base64 encoded string',
   }),
+  RSA_PUBLIC_KEY_B64: Joi.string().base64().required().messages({
+    'string.base64': 'RSA_PUBLIC_KEY_B64 must be a valid base64 encoded string',
+  }),
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(900),
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: Joi.number().default(604800),
   AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS: Joi.number().default(30000),
@@ -77,7 +86,7 @@ const validationSchema = Joi.object({
   AUTH_USER_DELETE_RETENTION_DAYS: Joi.number().min(1).default(30),
 
   // Sentry
-  AUTH_SENTRY_DSN: Joi.string()
+  SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
       is: Joi.valid('production', 'development'),
@@ -99,6 +108,7 @@ const validationSchema = Joi.object({
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
@@ -118,6 +128,12 @@ const validationSchema = Joi.object({
         },
       ],
     }),
+    PrismaModule,
+    BffGuardModule,
+    CustomThrottlerModule,
+    JwtAuthModule,
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -138,13 +154,9 @@ const validationSchema = Joi.object({
         },
       }),
     }),
-    EventEmitterModule.forRoot(),
-    ScheduleModule.forRoot(),
-    SentryModule.forRoot(),
-    PrismaModule,
+    AuditLogModule,
     AuthModule,
     UserModule,
-    AuditLogModule,
     HealthModule,
     TasksModule,
   ],

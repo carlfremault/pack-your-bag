@@ -1,0 +1,14 @@
+/*
+  Warnings:
+
+  - The values [FORGOT_PASSWORD] on the enum `AuditEventType` will be removed. If these variants are still used in the database, this will fail.
+
+*/
+-- AlterEnum
+BEGIN;
+CREATE TYPE "app_auth"."AuditEventType_new" AS ENUM ('TOKEN_REUSE_DETECTED', 'SUSPICIOUS_ACTIVITY', 'BFF_SECRET_MISMATCH', 'INTERNAL_SERVER_ERROR', 'USER_LOGIN_FAILED', 'INVALID_SESSION', 'INVALID_TOKEN', 'SECURITY_RATE_LIMIT_EXCEEDED', 'VALIDATION_ERROR', 'AUTHORIZATION_FAILED', 'RESOURCE_NOT_FOUND', 'CONFLICT_ERROR', 'USER_REGISTERED', 'USER_LOGIN_SUCCESS', 'USER_DELETED', 'TOKEN_REFRESHED', 'TOKEN_REFRESHED_RACE_CONDITION', 'SESSION_EXPIRED', 'USER_LOGOUT', 'USER_LOGOUT_ALL_DEVICES', 'PASSWORD_CHANGED', 'ACCOUNT_DELETION_ACCESS_ATTEMPT', 'SCHEDULED_TASK', 'HTTP_ERROR', 'PASSWORD_FORGOTTEN', 'PASSWORD_RESET');
+ALTER TABLE "app_auth"."AuditLog" ALTER COLUMN "eventType" TYPE "app_auth"."AuditEventType_new" USING ("eventType"::text::"app_auth"."AuditEventType_new");
+ALTER TYPE "app_auth"."AuditEventType" RENAME TO "AuditEventType_old";
+ALTER TYPE "app_auth"."AuditEventType_new" RENAME TO "AuditEventType";
+DROP TYPE "app_auth"."AuditEventType_old";
+COMMIT;

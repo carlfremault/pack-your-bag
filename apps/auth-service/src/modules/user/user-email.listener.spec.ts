@@ -8,9 +8,13 @@ import { EmailService } from '@/modules/email/email.service';
 
 import { UserEmailListener } from './user-email.listener';
 
-vi.mock('@/common/utils/captureSentryException', () => ({
-  safeCaptureSentryException: vi.fn(),
-}));
+vi.mock('@repo/nestjs-common', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@repo/nestjs-common')>();
+  return {
+    ...actual,
+    safeCaptureSentryException: vi.fn(),
+  };
+});
 
 const MOCK_CONFIG = {
   FRONTEND_URL: 'https://test.com',

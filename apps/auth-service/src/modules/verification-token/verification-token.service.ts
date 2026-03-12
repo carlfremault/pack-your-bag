@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { Prisma, TokenType, VerificationToken } from '@prisma-client';
+import { Prisma, TokenType, VerificationToken } from '@repo/db';
+
 import { v7 as uuidv7 } from 'uuid';
 
 import { PrismaService } from '@/prisma/prisma.service';

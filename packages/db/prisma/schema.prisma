@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["app_auth", "app_product"]
+}
+
+// ============================================
+// Auth Schema (app_auth)
+// ============================================
+
+model Role {
+  id        Int       @default(autoincrement()) @id
+  title     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  users User[]
+
+  @@schema("app_auth")
+}
+
+model User {
+  id                  String    @id @db.Uuid
+  email               String    @unique
+  password            String    // hashed with Bcrypt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @default(now()) @updatedAt
+  role                Role      @relation(fields: [roleId], references: [id])
+  roleId              Int
+  refreshToken        RefreshToken[]
+  verificationToken   VerificationToken[]
+  isDeleted           Boolean   @default(false)
+  deletedAt           DateTime? 
+
+  @@schema("app_auth")
+}
+
+model RefreshToken {
+  id            String          @id @db.Uuid
+  family        String          @db.Uuid
+  isRevoked     Boolean         @default(false)
+  revokedAt     DateTime?
+  expiresAt     DateTime        @default(dbgenerated("(now() + '7 days'::interval)"))
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String          @db.Uuid
+  replacedBy    RefreshToken?   @relation("TokenRotation", fields: [replacedById], references: [id])
+  replacedById  String?         @unique @db.Uuid
+  replaces      RefreshToken?   @relation("TokenRotation")
+
+  @@index([family])
+  @@index([userId])
+  @@index([expiresAt])
+  @@schema("app_auth")
+}
+
+model VerificationToken {
+  id          String      @id @db.Uuid
+  token       String      @unique
+  type        TokenType
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String      @db.Uuid
+  expiresAt   DateTime    
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  used        Boolean     @default(false)
+
+  @@unique([userId, type])
+  @@index([expiresAt])
+  @@schema("app_auth")
+}
+
+enum TokenType {
+  PASSWORD_RESET
+  ACCOUNT_DELETION_CANCELLATION
+
+  @@schema("app_auth")
+}
+
+model AuditLog {
+  id            String      @id @db.Uuid
+  eventType     AuditEventType
+  severity      AuditSeverity
+  createdAt     DateTime    @default(now())
+  message       Json
+  metadata      Json?
+
+  // HTTP Request Context (null for non-HTTP events, e.g. cron jobs)
+  requestId     String?      @db.Uuid
+  path          String?
+  method        String?
+  statusCode    Int?
+  ipAddress     String?
+  deviceInfo    Json?
+
+  // User Context (null for unauthenticated requests or system events)
+  userId        String?     @db.Uuid
+  
+  // Error Context (null for successful operations)
+  errorCode     String?     
+  
+  @@index([userId])
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@index([requestId])
+  @@schema("app_auth")
+}
+
+enum AuditEventType {
+  // CRITICAL
+  TOKEN_REUSE_DETECTED
+  SUSPICIOUS_ACTIVITY
+  BFF_SECRET_MISMATCH
+
+  // ERROR
+  INTERNAL_SERVER_ERROR
+  EMAIL_SEND_FAILED
+
+  // WARN
+  USER_LOGIN_FAILED
+  INVALID_SESSION
+  INVALID_TOKEN
+  SECURITY_RATE_LIMIT_EXCEEDED
+  VALIDATION_ERROR
+  AUTHORIZATION_FAILED
+  RESOURCE_NOT_FOUND
+  CONFLICT_ERROR
+
+  // INFO
+  USER_REGISTERED
+  USER_LOGIN_SUCCESS
+  USER_DELETED
+  TOKEN_REFRESHED
+  TOKEN_REFRESHED_RACE_CONDITION
+  SESSION_EXPIRED
+  USER_LOGOUT
+  USER_LOGOUT_ALL_DEVICES
+  PASSWORD_CHANGED
+  ACCOUNT_DELETION_ACCESS_ATTEMPT
+  SCHEDULED_TASK
+  HTTP_ERROR
+  PASSWORD_FORGOTTEN
+  PASSWORD_RESET
+  CANCEL_ACCOUNT_DELETION
+  
+  @@schema("app_auth")
+}
+
+enum AuditSeverity {
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+  
+  @@schema("app_auth")
+}
+
+// ============================================
+// Product Schema (app_product)
+// ============================================
+
+
+model Category {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  colorCode   String?
+  userId      String    @db.Uuid
+  items       Item[]
+
+  @@index([userId])
+  @@schema("app_product")
+}
+
+model Item {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  weight      Float?
+  userId      String    @db.Uuid
+  
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  String?    @db.Uuid
+
+  // Join table relations
+  itemLists   ItemList[]
+  itemPacks   ItemPack[]
+
+  @@index([userId])
+  @@schema("app_product")
+}
+
+model List {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  colorCode   String?
+  userId      String    @db.Uuid
+
+  // Join table relations
+  items       ItemList[]
+  listPacks   ListPack[]
+
+  @@index([userId])
+  @@schema("app_product")
+}
+
+model Pack {
+  id          String    @id @db.Uuid
+  name        String
+  description String?
+  colorCode   String?
+  userId      String    @db.Uuid
+
+  // Join table relations
+  items       ItemPack[]
+  lists       ListPack[]
+  trips       Trip[]
+
+  @@index([userId])
+  @@schema("app_product")
+}
+
+model Trip {
+  id      String    @id @db.Uuid
+  name    String
+  date    DateTime?
+  remarks String?
+  userId  String    @db.Uuid
+
+  pack    Pack?      @relation(fields: [packId], references: [id], onDelete: SetNull)
+  packId  String?    @db.Uuid
+
+  @@index([userId])
+  @@schema("app_product")
+}
+
+// --- Join Tables (Associative Entities) ---
+
+model ItemList {
+  id       String     @id @db.Uuid
+  quantity Int        @default(1)
+  
+  item     Item       @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  itemId   String     @db.Uuid
+  
+  list     List       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId   String     @db.Uuid
+
+  @@unique([itemId, listId])
+  @@schema("app_product")
+}
+
+model ItemPack {
+  id       String   @id @db.Uuid
+  quantity Int      @default(1)
+  
+  item     Item     @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  itemId   String   @db.Uuid
+  
+  pack     Pack     @relation(fields: [packId], references: [id], onDelete: Cascade)
+  packId   String   @db.Uuid
+
+  @@unique([itemId, packId])
+  @@schema("app_product")
+}
+
+model ListPack {
+  id       String   @id @db.Uuid
+  quantity Int      @default(1)
+  
+  list     List     @relation(fields: [listId], references: [id], onDelete: Restrict)
+  listId   String   @db.Uuid
+  
+  pack     Pack     @relation(fields: [packId], references: [id], onDelete: Cascade)
+  packId   String   @db.Uuid
+
+  @@unique([listId, packId])
+  @@schema("app_product")
+}
+

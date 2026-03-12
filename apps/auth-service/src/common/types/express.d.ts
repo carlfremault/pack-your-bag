@@ -1,15 +1,14 @@
-import { AuditEventType } from '@prisma-client';
-import { User as PrismaUser } from '@prisma-client';
+import { AuditEventType } from '@repo/db';
 
 declare global {
   namespace Express {
-    interface User extends Partial<PrismaUser> {
+    interface User {
       userId: string;
       tokenId?: string;
       tokenFamilyId?: string;
     }
     interface Request {
-      id: string;
+      id: string; // populated by request-ID middleware
       user?: User;
       auditOverride?: AuditEventType;
     }

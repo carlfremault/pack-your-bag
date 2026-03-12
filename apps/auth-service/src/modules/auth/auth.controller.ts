@@ -12,23 +12,25 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
-import type { Request } from 'express';
-
-import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
+import { AuditEventType } from '@repo/db';
 import {
   ApiBffAndAccessSecurity,
   ApiBffAndRefreshSecurity,
   ApiBffSecurity,
-} from '@/common/decorators/api-security.decorator';
+  BffGuard,
+  CurrentUser,
+  CustomThrottlerGuard,
+  JwtAuthGuard,
+  ThrottleByEmail,
+} from '@repo/nestjs-common';
+
+import type { Request } from 'express';
+
+import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/auth.constants';
 import { AuditLog } from '@/common/decorators/audit-log.decorator';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { BffGuard } from '@/common/guards/bff.guard';
-import { CustomThrottlerGuard } from '@/common/guards/custom-throttler.guard';
-import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '@/common/guards/jwt-refresh.guard';
 import { Serialize } from '@/common/interceptors/serialize.interceptor';
 import type { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
-import { AuditEventType } from '@/generated/prisma';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 
@@ -71,6 +73,7 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid email or password.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_TTL_MS } })
+  @ThrottleByEmail()
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
   @AuditLog(AuditEventType.USER_LOGIN_SUCCESS)

@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "app_auth"."AuditEventType" ADD VALUE 'CANCEL_ACCOUNT_DELETION';
+
+-- AlterEnum
+ALTER TYPE "app_auth"."TokenType" ADD VALUE 'ACCOUNT_DELETION_CANCELLATION';

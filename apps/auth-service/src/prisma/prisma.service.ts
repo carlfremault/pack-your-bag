@@ -1,10 +1,10 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { PrismaClient } from '@repo/db';
+
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-
-import { PrismaClient } from '@/generated/prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -22,6 +22,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     });
 
     const adapter = new PrismaPg(poolInstance);
+
     super({ adapter });
     this.pool = poolInstance;
   }
@@ -29,9 +30,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleInit() {
     try {
       await this.$connect();
-      this.logger.log('✅ Database connection established successfully');
+      this.logger.log('✅ Auth database connection established successfully');
     } catch (err) {
-      this.logger.error('❌ Failed to connect to the database on init', err);
+      this.logger.error('❌ Auth service failed to connect to the database on init', err);
       throw err;
     }
   }

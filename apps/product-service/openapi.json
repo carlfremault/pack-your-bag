@@ -1,0 +1,2368 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/item": {
+      "get": {
+        "operationId": "ItemController_getItems",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Items retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get all items",
+        "tags": [
+          "item"
+        ]
+      },
+      "post": {
+        "operationId": "ItemController_createItem",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Create an item",
+        "tags": [
+          "item"
+        ]
+      }
+    },
+    "/item/{id}/delete-impact": {
+      "get": {
+        "operationId": "ItemController_getItemDeleteImpact",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item deletion impact retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDeleteImpactDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Item not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get the impact of deleting an item by ID. Details the lists, packs, and trips that will be affected.",
+        "tags": [
+          "item"
+        ]
+      }
+    },
+    "/item/{id}": {
+      "get": {
+        "operationId": "ItemController_getItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Item not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get an item by ID",
+        "tags": [
+          "item"
+        ]
+      },
+      "patch": {
+        "operationId": "ItemController_updateItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Item not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Update an item by ID",
+        "tags": [
+          "item"
+        ]
+      },
+      "delete": {
+        "operationId": "ItemController_deleteItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item deleted successfully."
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Item not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Delete an item by ID",
+        "tags": [
+          "item"
+        ]
+      }
+    },
+    "/category": {
+      "get": {
+        "operationId": "CategoryController_getCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Categories retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get all categories",
+        "tags": [
+          "category"
+        ]
+      },
+      "post": {
+        "operationId": "CategoryController_createCategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Create a category",
+        "tags": [
+          "category"
+        ]
+      }
+    },
+    "/category/{id}/delete-impact": {
+      "get": {
+        "operationId": "CategoryController_getCategoryDeleteImpact",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deletion impact retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDeleteImpactDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Category not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get the impact of deleting a category by ID. Gives the number of items in the category.",
+        "tags": [
+          "category"
+        ]
+      }
+    },
+    "/category/{id}": {
+      "get": {
+        "operationId": "CategoryController_getCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Category not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get a category by ID",
+        "tags": [
+          "category"
+        ]
+      },
+      "patch": {
+        "operationId": "CategoryController_updateCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Category not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Update a category by ID",
+        "tags": [
+          "category"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoryController_deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully."
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Category not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Delete a category by ID",
+        "tags": [
+          "category"
+        ]
+      }
+    },
+    "/list": {
+      "get": {
+        "operationId": "ListController_getLists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lists retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get all lists",
+        "tags": [
+          "list"
+        ]
+      },
+      "post": {
+        "operationId": "ListController_createList",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "List created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Create a list",
+        "tags": [
+          "list"
+        ]
+      }
+    },
+    "/list/{id}/delete-impact": {
+      "get": {
+        "operationId": "ListController_getListDeleteImpact",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List deletion impact retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDeleteImpactDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "List not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get the impact of deleting a list by ID. Details the packs and trips that will be affected.",
+        "tags": [
+          "list"
+        ]
+      }
+    },
+    "/list/{id}": {
+      "get": {
+        "operationId": "ListController_getList",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "List not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get a list by ID",
+        "tags": [
+          "list"
+        ]
+      },
+      "patch": {
+        "operationId": "ListController_updateList",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateListDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "List not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Update a list by ID",
+        "tags": [
+          "list"
+        ]
+      },
+      "delete": {
+        "operationId": "ListController_deleteList",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List deleted successfully."
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "List not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Delete a list by ID",
+        "tags": [
+          "list"
+        ]
+      }
+    },
+    "/pack": {
+      "get": {
+        "operationId": "PackController_getPacks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Packs retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PackResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get all packs",
+        "tags": [
+          "pack"
+        ]
+      },
+      "post": {
+        "operationId": "PackController_createPack",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pack created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Create a pack",
+        "tags": [
+          "pack"
+        ]
+      }
+    },
+    "/pack/{id}/delete-impact": {
+      "get": {
+        "operationId": "PackController_getPackDeleteImpact",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pack deletion impact retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackDeleteImpactDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Pack not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get the impact of deleting a pack by ID. Details the trips that will be affected.",
+        "tags": [
+          "pack"
+        ]
+      }
+    },
+    "/pack/{id}": {
+      "get": {
+        "operationId": "PackController_getPack",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pack retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Pack not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get a pack by ID",
+        "tags": [
+          "pack"
+        ]
+      },
+      "patch": {
+        "operationId": "PackController_updatePack",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pack updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Pack not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Update a pack by ID",
+        "tags": [
+          "pack"
+        ]
+      },
+      "delete": {
+        "operationId": "PackController_deletePack",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pack deleted successfully."
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Pack not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Delete a pack by ID",
+        "tags": [
+          "pack"
+        ]
+      }
+    },
+    "/trip": {
+      "get": {
+        "operationId": "TripController_getTrips",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Trips retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TripResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get all trips",
+        "tags": [
+          "trip"
+        ]
+      },
+      "post": {
+        "operationId": "TripController_createTrip",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTripDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Trip created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Create a trip",
+        "tags": [
+          "trip"
+        ]
+      }
+    },
+    "/trip/{id}": {
+      "get": {
+        "operationId": "TripController_getTrip",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trip retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Trip not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Get a trip by ID",
+        "tags": [
+          "trip"
+        ]
+      },
+      "patch": {
+        "operationId": "TripController_updateTrip",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTripDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trip updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Trip not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Update a trip by ID",
+        "tags": [
+          "trip"
+        ]
+      },
+      "delete": {
+        "operationId": "TripController_deleteTrip",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trip deleted successfully."
+          },
+          "400": {
+            "description": "Validation failed (uuid v7 is expected)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Trip not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Delete a trip by ID",
+        "tags": [
+          "trip"
+        ]
+      }
+    },
+    "/item-list": {
+      "post": {
+        "operationId": "ItemListController_upsertItemOnList",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertItemOnListDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item upserted to list successfully."
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Upsert an item to a list",
+        "tags": [
+          "item-list"
+        ]
+      }
+    },
+    "/item-list/{itemId}/{listId}": {
+      "delete": {
+        "operationId": "ItemListController_removeItemFromList",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed from list successfully."
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Remove an item from a list",
+        "tags": [
+          "item-list"
+        ]
+      }
+    },
+    "/item-pack": {
+      "post": {
+        "operationId": "ItemPackController_upsertItemInPack",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertItemInPackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item upserted to pack successfully."
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Upsert an item to a pack",
+        "tags": [
+          "item-pack"
+        ]
+      }
+    },
+    "/item-pack/{itemId}/{packId}": {
+      "delete": {
+        "operationId": "ItemPackController_removeItemFromPack",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "packId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed from pack successfully."
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Remove an item from a pack",
+        "tags": [
+          "item-pack"
+        ]
+      }
+    },
+    "/list-pack": {
+      "post": {
+        "operationId": "ListPackController_upsertListInPack",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertListInPackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List upserted to pack successfully."
+          },
+          "400": {
+            "description": "Validation failed (dto)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Upsert a list to a pack",
+        "tags": [
+          "list-pack"
+        ]
+      }
+    },
+    "/list-pack/{listId}/{packId}": {
+      "delete": {
+        "operationId": "ListPackController_removeListFromPack",
+        "parameters": [
+          {
+            "name": "listId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "packId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List removed from pack successfully."
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Remove a list from a pack",
+        "tags": [
+          "list-pack"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Product Service",
+    "description": "Product Service API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bff-secret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-bff-secret",
+        "description": "Shared secret between BFF and product service. All requests (except /health) rejected without it."
+      },
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "CategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Category uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Category name",
+            "example": "Category name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Category description",
+            "example": "Category description",
+            "nullable": true
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Category color code",
+            "example": "#000000",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorCode"
+        ]
+      },
+      "ItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Item name",
+            "example": "Item name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description",
+            "example": "Item description",
+            "nullable": true
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight",
+            "example": 100,
+            "nullable": true
+          },
+          "category": {
+            "description": "Item category",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "weight",
+          "category"
+        ]
+      },
+      "ItemWithQuantityResponseDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          },
+          "item": {
+            "description": "Item",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "quantity",
+          "item"
+        ]
+      },
+      "ListResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name"
+          },
+          "description": {
+            "type": "string",
+            "description": "List description",
+            "example": "List description",
+            "nullable": true
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "List color code",
+            "example": "#000000",
+            "nullable": true
+          },
+          "items": {
+            "description": "Items on list",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemWithQuantityResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorCode"
+        ]
+      },
+      "ListWithQuantityResponseDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "List quantity",
+            "example": 1
+          },
+          "list": {
+            "description": "List",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "quantity",
+          "list"
+        ]
+      },
+      "PackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Pack description",
+            "example": "Pack description",
+            "nullable": true
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Pack color code",
+            "example": "#000000",
+            "nullable": true
+          },
+          "items": {
+            "description": "Items in pack",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemWithQuantityResponseDto"
+            }
+          },
+          "lists": {
+            "description": "Lists in pack",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListWithQuantityResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorCode"
+        ]
+      },
+      "TripResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trip uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trip name",
+            "example": "Trip name"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip date",
+            "example": "2026-01-01T00:00:00.000Z",
+            "nullable": true
+          },
+          "remarks": {
+            "type": "string",
+            "description": "Trip remarks",
+            "example": "Trip remarks",
+            "nullable": true
+          },
+          "pack": {
+            "description": "Pack used in trip",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "date",
+          "remarks",
+          "pack"
+        ]
+      },
+      "ItemDeleteImpactDto": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/ItemResponseDto"
+          },
+          "lists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListResponseDto"
+            }
+          },
+          "packs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackResponseDto"
+            }
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TripResponseDto"
+            }
+          }
+        },
+        "required": [
+          "item",
+          "lists",
+          "packs",
+          "trips"
+        ]
+      },
+      "CreateItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Item name",
+            "example": "Item name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description",
+            "example": "Item description"
+          },
+          "weight": {
+            "type": "number",
+            "description": "Item weight",
+            "example": 100
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Item category uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Item name",
+            "example": "Item name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description",
+            "example": "Item description"
+          },
+          "weight": {
+            "type": "number",
+            "description": "Item weight",
+            "example": 100
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Item category uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        }
+      },
+      "CategoryDeleteImpactDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/CategoryResponseDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemResponseDto"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "items"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Category name",
+            "example": "Category name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Category description",
+            "example": "Category description"
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Category color code",
+            "example": "#000000"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Category name",
+            "example": "Category name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Category description",
+            "example": "Category description"
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Category color code",
+            "example": "#000000"
+          }
+        }
+      },
+      "ListSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name"
+          },
+          "description": {
+            "type": "string",
+            "description": "List description",
+            "example": "List description",
+            "nullable": true
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "List color code",
+            "example": "#000000",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "number",
+            "description": "List item count",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorCode",
+          "itemCount"
+        ]
+      },
+      "ListDeleteImpactDto": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/ListSummaryResponseDto"
+          },
+          "packs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackResponseDto"
+            }
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TripResponseDto"
+            }
+          }
+        },
+        "required": [
+          "list",
+          "packs",
+          "trips"
+        ]
+      },
+      "CreateListDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name"
+          },
+          "description": {
+            "type": "string",
+            "description": "List description",
+            "example": "List description"
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "List color code",
+            "example": "#000000"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateListDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name"
+          },
+          "description": {
+            "type": "string",
+            "description": "List description",
+            "example": "List description"
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "List color code",
+            "example": "#000000"
+          }
+        }
+      },
+      "PackSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Pack description",
+            "example": "Pack description",
+            "nullable": true
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Pack color code",
+            "example": "#000000",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "number",
+            "description": "Pack item count",
+            "example": 1
+          },
+          "listCount": {
+            "type": "number",
+            "description": "Pack list count",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorCode",
+          "itemCount",
+          "listCount"
+        ]
+      },
+      "PackDeleteImpactDto": {
+        "type": "object",
+        "properties": {
+          "pack": {
+            "$ref": "#/components/schemas/PackSummaryResponseDto"
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TripResponseDto"
+            }
+          }
+        },
+        "required": [
+          "pack",
+          "trips"
+        ]
+      },
+      "CreatePackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Pack description",
+            "example": "Pack description"
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Pack color code",
+            "example": "#000000"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdatePackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Pack description",
+            "example": "Pack description"
+          },
+          "colorCode": {
+            "type": "string",
+            "description": "Pack color code",
+            "example": "#000000"
+          }
+        }
+      },
+      "CreateTripDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Trip name",
+            "example": "Trip name"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip date",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "remarks": {
+            "type": "string",
+            "description": "Trip remarks",
+            "example": "Trip remarks"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid associated with the trip",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "packId"
+        ]
+      },
+      "UpdateTripDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Trip name",
+            "example": "Trip name"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip date",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "remarks": {
+            "type": "string",
+            "description": "Trip remarks",
+            "example": "Trip remarks"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid associated with the trip",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "nullable": true
+          }
+        }
+      },
+      "UpsertItemOnListDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "listId": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          }
+        },
+        "required": [
+          "itemId",
+          "listId",
+          "quantity"
+        ]
+      },
+      "UpsertItemInPackDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          }
+        },
+        "required": [
+          "itemId",
+          "packId",
+          "quantity"
+        ]
+      },
+      "UpsertListInPackDto": {
+        "type": "object",
+        "properties": {
+          "listId": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "987fcdeb-51a2-3bc4-d567-890123456789"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "List quantity",
+            "example": 1
+          }
+        },
+        "required": [
+          "listId",
+          "packId",
+          "quantity"
+        ]
+      }
+    }
+  }
+}

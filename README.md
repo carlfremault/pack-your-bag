@@ -20,6 +20,7 @@ Work in Progress - `dev` branch is where the amazing stuff is happening right no
 - [6. Implementation](#6-implementation)
   - [6.1 Phase 0: Development Setup & Foundation](#61-phase-0-development-setup--foundation)
   - [6.2 Phase 1: Identity Provider](#62-phase-1-identity-provider)
+  - [6.3 Phase 2: Resource Server (Product Service)](#63-phase-2-resource-server-product-service)
 
 ## 1. Idea & motivation
 
@@ -291,6 +292,99 @@ Daily cron jobs clean up expired data with configurable retention periods:
 ##### Testing & Quality Assurance
 
 Implemented comprehensive test coverage across unit and integration scenarios using Vitest. This prevented regressions during subsequent feature development, particularly when adding the token family rotation and audit logging systems.
+
+### 6.3 Phase 2: Resource Server (Product Service)
+
+#### 6.3.1 Shared Package Extraction
+
+Before building the Product Service, two pieces of infrastructure were extracted from the Auth Service into shared monorepo packages to avoid duplication and establish a consistent foundation for all downstream services.
+
+##### @repo/db — Shared Database Package
+
+The original Prisma setup lived inside the Auth Service. As the Product Service would share the same PostgreSQL instance (different schema, same host), the entire database layer was moved to a dedicated `db` package: schema definitions, generated Prisma client, migration scripts, and the database seed.
+
+This surfaced a permissions issue that had been dormant in the Auth Service: migrations were running under the Auth Service's database role, which only holds privileges on the `app_auth` schema. That role has no business touching `app_product` tables. The database setup script was corrected to grant each service's role privileges exclusively to its own schema, enforcing the Principle of Least Privilege at the migration level, not just at query time.
+
+##### @repo/nestjs-common — Shared NestJS Package
+
+The Auth Service had accumulated a collection of NestJS infrastructure components that every resource server would need. Rather than copy-pasting them, they were migrated to a shared `nestjs-common` package:
+
+- **Guards:** `BffGuard` (shared-secret enforcement), `JwtAuthGuard` (RS256 token verification), `CustomThrottlerGuard` (user-aware rate limiting)
+- **Strategies:** Passport JWT strategy for access token verification
+- **Decorators:** `@CurrentUser()` for extracting the authenticated user from the request context, `@ApiBffAndAccessSecurity()` for consistent Swagger security annotations
+- **Modules:** `JwtAuthModule`, `CustomThrottlerModule`, `BffGuardModule` — thin NestJS wrappers that register the guards and strategies as providers, making them available to the consuming service's DI container
+- **Exceptions & Filters:** `GlobalExceptionFilter` base class and `PrismaExceptionFilter` base class, both extensible per service
+- **Utilities:** `RequestId` middleware, Sentry initialization helper, Swagger spec generation script, utils and helper functions
+- **Testing helpers:** JWT generation utility for signing test tokens against the service's RSA key pair
+
+#### 6.3.2 Design & Data Modeling
+
+##### Database Schema (ERD)
+
+The Product Service manages all packing-related entities. The schema centers on three primary models — `Item`, `List`, and `Pack` — connected through explicit junction tables that carry their own payload (`quantity`).
+
+- **`Category`** groups items. Optional: items have a nullable FK to category.
+- **`Item`** is the atomic unit. Linked to a category (optional).
+- **`List`** is a reusable collection of items, assembled via the `ItemList` junction table.
+- **`Pack`** is the final compiled list for a specific trip context. Items can be added directly via `ItemPack`, or indirectly by including entire Lists via `ListPack`. Both junction tables carry a `quantity` field.
+- **`Trip`** references a single Pack via a foreign key.
+
+All entities carry a `userId` field. Ownership is enforced at the service layer on every read and write operation.
+
+<p align="center">
+    <br>
+    <img src="assets/product-erd.png" alt="Product Service Entity Relationship Diagram">
+    <br>
+    <i>Product Service Entity Relationship Diagram</i>
+</p>
+
+#### 6.3.3 Service Implementation
+
+The Product Service was bootstrapped by cloning the Auth Service (as noted at the end of Phase 1), which provided the wired-up monorepo configuration and a clean NestJS scaffold. Authentication, throttling, and BFF guard modules were wired in from the `nestjs-common` package.
+
+##### CRUD Operations
+
+All seven modules — `Category`, `Item`, `List`, `Pack`, `Trip`, `ItemList`, `ItemPack`, and `ListPack` — expose standard Create, Read, and Update routes. Responses are shaped using `class-transformer` DTOs (`@Expose()` / `@Exclude()`) to control exactly what reaches the client, including nested relations where relevant (e.g., a List response includes its items and an item count).
+
+Create and Update operations run inside Prisma transactions where multiple checks are required — for example, creating an Item validates that the provided `categoryId` belongs to the same user before connecting it.
+
+**UUID v7 identifiers** are used across all entities, consistent with the Auth Service. IDs are generated in application code (not delegated to the database), and all `id` route parameters are validated with `ParseUUIDPipe({ version: '7' })` before reaching the service layer.
+
+##### Delete & Dependency Resolution
+
+Delete is intentionally not a simple `DELETE /:id`. The dependency graph runs deep: removing a List will cascade through `ListPack` to Packs, and from there to Trips. Removing an Item can affect ItemList, ItemPack, Packs, and Trips. A client cannot reasonably track these implications on its own.
+
+To address this, every deletable entity exposes a `GET /:id/delete-impact` route that traverses the dependency graph and returns all affected records without modifying any data. The client calls this first, presents the consequences to the user, and only proceeds to `DELETE /:id` on confirmation.
+
+For each entity, the delete impact query resolves what the user needs to be informed about before proceeding:
+
+| **Entity deleted** | **Impact reported**                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Category           | Items that will lose their category assignment (`categoryId` nulled, items not deleted)                   |
+| Item               | Lists and Packs containing this item (`Restrict` — delete blocked until removed); Trips using those Packs |
+| List               | Packs containing this List (`Restrict` — delete blocked until removed); Trips using those Packs           |
+| Pack               | Trips that will lose their Pack reference (`packId` nulled, Trips not deleted)                            |
+| Trip               | No downstream impact                                                                                      |
+
+##### Exceptions & Observability
+
+The service extends `nestjs-common`'s base exception classes with a `PrismaExceptionFilter` that maps Prisma error codes (unique constraint violations, foreign key errors, record-not-found) to appropriate HTTP responses. A `GlobalExceptionsFilter` filter catches everything else, ensuring the API never leaks stack traces or internal paths to the client. Sentry is integrated for production error monitoring using the shared utility from `nestjs-common`. Unlike the Auth Service, the Product Service does not implement audit logging for CRUD operations. Error tracking via Sentry is sufficient for observability given the lower compliance requirements.
+
+#### 6.3.4 Testing & Quality Assurance
+
+The Product Service holds the core business logic of the application. A regression here has wider consequences than in the Auth Service, where most flows are independently verifiable. Comprehensive test coverage was a prerequisite before moving on.
+
+**Unit tests** cover all services in isolation, mocking the Prisma layer and verifying that service methods call the correct queries.
+
+**Integration / E2E tests** run against a real database using the same PostgreSQL container available in the Dev Container. Each module has a dedicated test suite:
+
+`category`, `item`, `list`, `pack`, `trip`, `item-list`, `item-pack`, `list-pack`
+
+Tests cover the full CRUD surface including ownership enforcement (a user cannot access another user's resources), not-found handling, invalid UUID rejection, and the delete impact traversal logic. Shared fixtures and helpers keep test setup consistent and readable and avoid boilerplate duplication across suites.
+
+#### 6.3.5 API Documentation & Client Generation
+
+Following the same pattern established in Phase 1, Swagger annotations (`@ApiTags`, `@ApiOperation`, `@ApiResponse`) were applied to all controllers and DTOs. The OpenAPI spec was exported and used to generate a typed HTTP client published in the `product-client` package, giving the future BFF (Next.js) type-safe access to the Product Service API from day one.
 
 ## License
 

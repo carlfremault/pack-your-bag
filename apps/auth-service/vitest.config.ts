@@ -10,7 +10,6 @@ export default mergeConfig(
       setupFiles: ['./test/vitest-setup.ts'],
       coverage: {
         exclude: [
-          '**/generated/**',
           '**/index.ts',
           '**/*.module.ts',
           '**/*.d.ts',
