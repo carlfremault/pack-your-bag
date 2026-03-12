@@ -13,14 +13,8 @@ import { PackResponseDto } from '../pack/dto/pack-response.dto';
 import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
 import { CreateItemDto } from './dto/create-item.dto';
+import { ItemDeleteImpactDto } from './dto/item-delete-impact.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-
-export interface ItemDeleteImpact {
-  item: ItemResponseDto;
-  lists: ListResponseDto[];
-  packs: PackResponseDto[];
-  trips: TripResponseDto[];
-}
 
 @Injectable()
 export class ItemService {
@@ -137,7 +131,7 @@ export class ItemService {
     });
   }
 
-  async getItemDeleteImpact(id: string, userId: string): Promise<ItemDeleteImpact> {
+  async getItemDeleteImpact(id: string, userId: string): Promise<ItemDeleteImpactDto> {
     const item = await this.prisma.item.findUnique({
       where: { id, userId },
       include: { category: true },

@@ -24,6 +24,7 @@ import {
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
 import { CreateTripDto } from './dto/create-trip.dto';
+import { TripResponseDto } from './dto/trip-response.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
 import { TripService } from './trip.service';
 
@@ -41,7 +42,11 @@ export class TripController {
   @Get()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get all trips' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Trips retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Trips retrieved successfully.',
+    type: [TripResponseDto],
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.TRIPS.GET_ALL, ttl: THROTTLE_TTL_MS } })
   async getTrips(@CurrentUser('userId') userId: string) {
@@ -51,7 +56,11 @@ export class TripController {
   @Get(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get a trip by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Trip retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Trip retrieved successfully.',
+    type: TripResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -69,7 +78,11 @@ export class TripController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create a trip' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Trip created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Trip created successfully.',
+    type: TripResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (dto)',
@@ -83,7 +96,11 @@ export class TripController {
   @Patch(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update a trip by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Trip updated successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Trip updated successfully.',
+    type: TripResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format or invalid body).',

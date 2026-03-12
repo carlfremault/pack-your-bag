@@ -1,0 +1,19 @@
+{
+  "name": "@repo/product-client",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "generate": "openapi-typescript ../../apps/product-service/openapi.json -o src/schema.d.ts",
+    "build": "tsc"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.0"
+  }
+}

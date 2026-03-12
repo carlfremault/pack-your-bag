@@ -4,9 +4,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { CreateListDto } from '@/modules/list/dto/create-list.dto';
+import { ListDeleteImpactDto } from '@/modules/list/dto/list-delete-impact.dto';
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
 import { UpdateListDto } from '@/modules/list/dto/update-list.dto';
-import { ListDeleteImpact } from '@/modules/list/list.service';
 
 export class ListHelpers {
   constructor(
@@ -103,7 +103,7 @@ export class ListHelpers {
     accessToken: string;
     expectedStatus?: number;
   }): Promise<{
-    body: ListDeleteImpact;
+    body: ListDeleteImpactDto;
   }> {
     const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
 

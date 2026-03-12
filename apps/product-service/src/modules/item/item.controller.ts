@@ -22,10 +22,12 @@ import {
 } from '@repo/nestjs-common';
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
+import { ItemResponseDto } from '@/common/dto/item-response.dto';
 
 import { CreateItemDto } from './dto/create-item.dto';
+import { ItemDeleteImpactDto } from './dto/item-delete-impact.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { ItemDeleteImpact, ItemService } from './item.service';
+import { ItemService } from './item.service';
 
 @ApiTags('item')
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
@@ -41,7 +43,11 @@ export class ItemController {
   @Get()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get all items' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Items retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Items retrieved successfully.',
+    type: [ItemResponseDto],
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.GET_ALL, ttl: THROTTLE_TTL_MS } })
   async getItems(@CurrentUser('userId') userId: string) {
@@ -57,6 +63,7 @@ export class ItemController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Item deletion impact retrieved successfully.',
+    type: ItemDeleteImpactDto,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -68,14 +75,18 @@ export class ItemController {
   async getItemDeleteImpact(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
-  ): Promise<ItemDeleteImpact> {
+  ): Promise<ItemDeleteImpactDto> {
     return this.itemService.getItemDeleteImpact(id, userId);
   }
 
   @Get(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get an item by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Item retrieved successfully.',
+    type: ItemResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -93,7 +104,11 @@ export class ItemController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create an item' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Item created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Item created successfully.',
+    type: ItemResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (dto)',
@@ -107,7 +122,11 @@ export class ItemController {
   @Patch(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update an item by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item updated successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Item updated successfully.',
+    type: ItemResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format or invalid body).',

@@ -10,13 +10,9 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
 import { CreatePackDto } from './dto/create-pack.dto';
+import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
 import { PackResponseDto, PackSummaryResponseDto } from './dto/pack-response.dto';
 import { UpdatePackDto } from './dto/update-pack.dto';
-
-export interface PackDeleteImpact {
-  pack: PackSummaryResponseDto;
-  trips: TripResponseDto[];
-}
 
 @Injectable()
 export class PackService {
@@ -103,7 +99,7 @@ export class PackService {
   // PACK MANAGEMENT
   // ============================================
 
-  async getPackDeleteImpact(id: string, userId: string): Promise<PackDeleteImpact> {
+  async getPackDeleteImpact(id: string, userId: string): Promise<PackDeleteImpactDto> {
     const pack = await this.prisma.pack.findUnique({
       where: { id, userId },
       include: {
