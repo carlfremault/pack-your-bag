@@ -3,7 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
-import { JwtAuthModule, RequestIdMiddleware } from '@repo/nestjs-common';
+import {
+  BffGuardModule,
+  CustomThrottlerModule,
+  JwtAuthModule,
+  RequestIdMiddleware,
+} from '@repo/nestjs-common';
 
 import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
@@ -86,6 +91,8 @@ const validationSchema = Joi.object({
       ],
     }),
     PrismaModule,
+    BffGuardModule,
+    CustomThrottlerModule,
     JwtAuthModule,
     ItemModule,
     CategoryModule,
