@@ -4,9 +4,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
+import { PackDeleteImpactDto } from '@/modules/pack/dto/pack-delete-impact.dto';
 import { PackResponseDto } from '@/modules/pack/dto/pack-response.dto';
 import { UpdatePackDto } from '@/modules/pack/dto/update-pack.dto';
-import { PackDeleteImpact } from '@/modules/pack/pack.service';
 
 export class PackHelpers {
   constructor(
@@ -103,7 +103,7 @@ export class PackHelpers {
     accessToken: string;
     expectedStatus?: number;
   }): Promise<{
-    body: PackDeleteImpact;
+    body: PackDeleteImpactDto;
   }> {
     const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
 

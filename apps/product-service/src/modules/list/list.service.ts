@@ -11,14 +11,9 @@ import { PackResponseDto } from '../pack/dto/pack-response.dto';
 import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
 import { CreateListDto } from './dto/create-list.dto';
+import { ListDeleteImpactDto } from './dto/list-delete-impact.dto';
 import { ListResponseDto, ListSummaryResponseDto } from './dto/list-response.dto';
 import { UpdateListDto } from './dto/update-list.dto';
-
-export interface ListDeleteImpact {
-  list: ListSummaryResponseDto;
-  packs: PackResponseDto[];
-  trips: TripResponseDto[];
-}
 
 @Injectable()
 export class ListService {
@@ -99,7 +94,7 @@ export class ListService {
     });
   }
 
-  async getListDeleteImpact(id: string, userId: string): Promise<ListDeleteImpact> {
+  async getListDeleteImpact(id: string, userId: string): Promise<ListDeleteImpactDto> {
     const list = await this.prisma.list.findUnique({
       where: { id, userId },
       include: {

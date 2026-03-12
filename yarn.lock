@@ -2992,6 +2992,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@repo/product-client@workspace:packages/product-client":
+  version: 0.0.0-use.local
+  resolution: "@repo/product-client@workspace:packages/product-client"
+  dependencies:
+    openapi-fetch: "npm:^0.13.0"
+    openapi-typescript: "npm:^7.0.0"
+    typescript: "npm:^5.9.3"
+  languageName: unknown
+  linkType: soft
+
 "@repo/typescript-config@npm:*, @repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"

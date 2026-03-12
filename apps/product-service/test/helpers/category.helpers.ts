@@ -3,7 +3,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
-import { CategoryDeleteImpact } from '@/modules/category/category.service';
+import { CategoryDeleteImpactDto } from '@/modules/category/dto/category-delete-impact.dto';
 import { CategoryResponseDto } from '@/modules/category/dto/category-response.dto';
 import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
@@ -111,7 +111,7 @@ export class CategoryHelpers {
     accessToken: string;
     expectedStatus?: number;
   }): Promise<{
-    body: CategoryDeleteImpact;
+    body: CategoryDeleteImpactDto;
   }> {
     const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
 

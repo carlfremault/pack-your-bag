@@ -8,14 +8,10 @@ import { v7 as uuidv7 } from 'uuid';
 import { ItemResponseDto } from '@/common/dto/item-response.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
+import { CategoryDeleteImpactDto } from './dto/category-delete-impact.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-
-export interface CategoryDeleteImpact {
-  category: CategoryResponseDto;
-  items: ItemResponseDto[];
-}
 
 @Injectable()
 export class CategoryService {
@@ -99,7 +95,7 @@ export class CategoryService {
   // CATEGORY MANAGEMENT
   // ============================================
 
-  async getCategoryDeleteImpact(id: string, userId: string): Promise<CategoryDeleteImpact> {
+  async getCategoryDeleteImpact(id: string, userId: string): Promise<CategoryDeleteImpactDto> {
     const category = await this.prisma.category.findUnique({ where: { id, userId } });
     if (!category) {
       throw new NotFoundException('Category not found');

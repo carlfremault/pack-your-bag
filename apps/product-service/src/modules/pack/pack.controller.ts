@@ -24,8 +24,10 @@ import {
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
 import { CreatePackDto } from './dto/create-pack.dto';
+import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
+import { PackResponseDto } from './dto/pack-response.dto';
 import { UpdatePackDto } from './dto/update-pack.dto';
-import { PackDeleteImpact, PackService } from './pack.service';
+import { PackService } from './pack.service';
 
 @ApiTags('pack')
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
@@ -41,7 +43,11 @@ export class PackController {
   @Get()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get all packs' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Packs retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Packs retrieved successfully.',
+    type: [PackResponseDto],
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.GET_ALL, ttl: THROTTLE_TTL_MS } })
   async getPacks(@CurrentUser('userId') userId: string) {
@@ -56,6 +62,7 @@ export class PackController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Pack deletion impact retrieved successfully.',
+    type: PackDeleteImpactDto,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -67,14 +74,18 @@ export class PackController {
   async getPackDeleteImpact(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
-  ): Promise<PackDeleteImpact> {
+  ): Promise<PackDeleteImpactDto> {
     return this.packService.getPackDeleteImpact(id, userId);
   }
 
   @Get(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get a pack by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Pack retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Pack retrieved successfully.',
+    type: PackResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -92,7 +103,11 @@ export class PackController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create a pack' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Pack created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Pack created successfully.',
+    type: PackResponseDto,
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed (dto)' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.POST, ttl: THROTTLE_TTL_MS } })
@@ -103,7 +118,11 @@ export class PackController {
   @Patch(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update a pack by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Pack updated successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Pack updated successfully.',
+    type: PackResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format or invalid body)',

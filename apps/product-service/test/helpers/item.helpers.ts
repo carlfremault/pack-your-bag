@@ -5,8 +5,8 @@ import { App } from 'supertest/types';
 
 import { ItemResponseDto } from '@/common/dto/item-response.dto';
 import { CreateItemDto } from '@/modules/item/dto/create-item.dto';
+import { ItemDeleteImpactDto } from '@/modules/item/dto/item-delete-impact.dto';
 import { UpdateItemDto } from '@/modules/item/dto/update-item.dto';
-import { ItemDeleteImpact } from '@/modules/item/item.service';
 
 export class ItemHelpers {
   constructor(
@@ -103,7 +103,7 @@ export class ItemHelpers {
     accessToken: string;
     expectedStatus?: number;
   }): Promise<{
-    body: ItemDeleteImpact;
+    body: ItemDeleteImpactDto;
   }> {
     const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
 

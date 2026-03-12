@@ -23,9 +23,11 @@ import {
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
+import { CategoryDeleteImpactDto } from './dto/category-delete-impact.dto';
+import { CategoryResponseDto } from './dto/category-response.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CategoryDeleteImpact, CategoryService } from './category.service';
+import { CategoryService } from './category.service';
 
 @ApiTags('category')
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
@@ -41,7 +43,11 @@ export class CategoryController {
   @Get()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get all categories' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Categories retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Categories retrieved successfully.',
+    type: [CategoryResponseDto],
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.CATEGORIES.GET_ALL, ttl: THROTTLE_TTL_MS } })
   async getCategories(@CurrentUser('userId') userId: string) {
@@ -57,6 +63,7 @@ export class CategoryController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Category deletion impact retrieved successfully.',
+    type: CategoryDeleteImpactDto,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -70,14 +77,18 @@ export class CategoryController {
   async getCategoryDeleteImpact(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
-  ): Promise<CategoryDeleteImpact> {
+  ): Promise<CategoryDeleteImpactDto> {
     return this.categoryService.getCategoryDeleteImpact(id, userId);
   }
 
   @Get(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get a category by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Category retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Category retrieved successfully.',
+    type: CategoryResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -95,7 +106,11 @@ export class CategoryController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create a category' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Category created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Category created successfully.',
+    type: CategoryResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (dto)',
@@ -109,7 +124,11 @@ export class CategoryController {
   @Patch(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update a category by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Category updated successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Category updated successfully.',
+    type: CategoryResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format or invalid body).',

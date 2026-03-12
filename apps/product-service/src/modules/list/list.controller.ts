@@ -24,8 +24,10 @@ import {
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
 import { CreateListDto } from './dto/create-list.dto';
+import { ListDeleteImpactDto } from './dto/list-delete-impact.dto';
+import { ListResponseDto } from './dto/list-response.dto';
 import { UpdateListDto } from './dto/update-list.dto';
-import { ListDeleteImpact, ListService } from './list.service';
+import { ListService } from './list.service';
 
 @ApiTags('list')
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
@@ -41,7 +43,11 @@ export class ListController {
   @Get()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get all lists' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Lists retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lists retrieved successfully.',
+    type: [ListResponseDto],
+  })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LISTS.GET_ALL, ttl: THROTTLE_TTL_MS } })
   async getLists(@CurrentUser('userId') userId: string) {
@@ -57,6 +63,7 @@ export class ListController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'List deletion impact retrieved successfully.',
+    type: ListDeleteImpactDto,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -68,14 +75,18 @@ export class ListController {
   async getListDeleteImpact(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
-  ): Promise<ListDeleteImpact> {
+  ): Promise<ListDeleteImpactDto> {
     return this.listService.getListDeleteImpact(id, userId);
   }
 
   @Get(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Get a list by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'List retrieved successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List retrieved successfully.',
+    type: ListResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -93,7 +104,11 @@ export class ListController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Create a list' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'List created successfully.' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'List created successfully.',
+    type: ListResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (dto)',
@@ -107,7 +122,11 @@ export class ListController {
   @Patch(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Update a list by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'List updated successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List updated successfully.',
+    type: ListResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format or invalid body).',
