@@ -23,7 +23,8 @@
         "redhat.vscode-yaml",
         "ms-azuretools.vscode-docker",
         "prisma.prisma",
-        "coderabbit.coderabbit-vscode"
+        "coderabbit.coderabbit-vscode",
+        "dsznajder.es7-react-js-snippets"
       ],
       "settings": {
         "editor.formatOnSave": true,

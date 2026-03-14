@@ -1675,7 +1675,7 @@
             "nullable": true
           },
           "weight": {
-            "type": "object",
+            "type": "number",
             "description": "Item weight",
             "example": 100,
             "nullable": true

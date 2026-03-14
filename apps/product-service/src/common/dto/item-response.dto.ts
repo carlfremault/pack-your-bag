@@ -23,7 +23,7 @@ export class ItemResponseDto {
   @Expose()
   description: string | null;
 
-  @ApiProperty({ description: 'Item weight', example: 100, nullable: true })
+  @ApiProperty({ description: 'Item weight', example: 100, nullable: true, type: Number })
   @Expose()
   weight: number | null;
 
