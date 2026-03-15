@@ -11,9 +11,9 @@ import { extractErrorMessage } from '@/utils/extract-error-message';
 
 import { Item } from '../types';
 
-import AddItemModal from './add-item-modal';
-import ItemsTableActions from './items-table-actions';
-import ItemsTableHeader from './items-table-header';
+import AddItemModal from './AddItemModal';
+import ItemsTableActions from './ItemsTableActions';
+import ItemsTableHeader from './ItemsTableHeader';
 
 const columnHelper = createColumnHelper<Item>();
 

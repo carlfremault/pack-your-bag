@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 
 import { getItem } from '@/features/items/api';
+import { withErrorHandling } from '@/lib/api-handler';
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const { id } = await params;
-  const { data, error, response } = await getItem(id);
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  return withErrorHandling(async () => {
+    const { id } = await params;
+    const data = await getItem(id);
 
-  if (error) {
-    const status = response?.status ?? 500;
-    return NextResponse.json({ error }, { status });
-  }
-
-  return NextResponse.json({ data });
+    return NextResponse.json({ data });
+  });
 }

@@ -1,5 +1,5 @@
-import DeleteItemModal from './delete-item-modal';
-import EditItemModal from './edit-item-modal';
+import DeleteItemModal from './DeleteItemModal';
+import EditItemModal from './EditItemModal';
 
 interface ItemsTableActionsProps {
   itemId: string;

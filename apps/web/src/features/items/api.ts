@@ -1,29 +1,27 @@
-import { productClient } from '@repo/product-client';
+import { getProductClient } from '@/lib/clients/product';
+import { ApiError } from '@/lib/errors';
+import { extractErrorMessage } from '@/utils/extract-error-message';
 
-import { ItemResult, ItemsResult } from './types';
+import { Item } from './types';
 
-const bffSecret = process.env.BFF_SHARED_SECRET;
-if (!bffSecret) {
-  throw new Error('BFF_SHARED_SECRET environment variable is required');
+export async function getItems(): Promise<Item[]> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.GET('/item');
+
+  if (error) throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
+  if (!data) throw new ApiError('No data returned', 500);
+
+  return data;
 }
 
-// TODO: implement proper authentication
-const tempAccessToken = 'insert token here';
-
-const getHeaders = () => ({
-  'x-bff-secret': bffSecret,
-  Authorization: `Bearer ${tempAccessToken}`,
-});
-
-export async function getItems(): Promise<ItemsResult> {
-  return productClient.GET('/item', {
-    headers: getHeaders(),
-  });
-}
-
-export async function getItem(id: string): Promise<ItemResult> {
-  return productClient.GET('/item/{id}', {
+export async function getItem(id: string): Promise<Item> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.GET('/item/{id}', {
     params: { path: { id } },
-    headers: getHeaders(),
   });
+
+  if (error) throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
+  if (!data) throw new ApiError('No data returned', 500);
+
+  return data;
 }

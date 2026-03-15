@@ -1,4 +1,4 @@
-import ConfirmationDialog from '@/components/ui/dialogs/confirmation-dialog';
+import ConfirmationDialog from '@/components/ui/dialogs/ConfirmationDialog';
 import { Modal } from '@/components/ui/modals/modal';
 
 import { useDeleteItem } from '../queries';

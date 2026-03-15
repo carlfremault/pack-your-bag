@@ -42,10 +42,10 @@ const validationSchema = Joi.object({
   AUTH_HEALTH_DISK_PATH: Joi.string().default('/'),
 
   // Database
-  AUTH_USER: Joi.string().required(),
-  AUTH_PASSWORD: Joi.string().required(),
-  AUTH_SCHEMA: Joi.string().required(),
-  AUTH_URL: Joi.string().uri().required(),
+  POSTGRES_AUTH_USER: Joi.string().required(),
+  POSTGRES_AUTH_PASSWORD: Joi.string().required(),
+  POSTGRES_AUTH_SCHEMA: Joi.string().required(),
+  POSTGRES_AUTH_URL: Joi.string().uri().required(),
 
   // DB Pool
   AUTH_DB_POOL_MAX: Joi.number().min(1).max(50).default(20),

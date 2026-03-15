@@ -2,7 +2,7 @@ import { Modal } from '@/components/ui/modals/modal';
 
 import { useItem } from '../queries';
 
-import ItemForm from './item-form';
+import ItemForm from './ItemForm';
 
 interface EditItemModalProps {
   itemId: string;

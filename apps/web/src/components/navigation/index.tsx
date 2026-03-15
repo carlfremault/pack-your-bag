@@ -2,10 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+
+import Button from '../ui/buttons/button';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) =>
+    pathname === path || (pathname.startsWith(path) && path !== '/');
 
   const navigationItems = [
     { label: 'Items', href: '/items' },
@@ -27,7 +31,15 @@ export default function Navigation() {
           </Link>
         ))}
       </div>
-      <div className="text-white">PackYourBag.com</div>
+      <div className="flex items-center gap-2">
+        <Link href="/" className="px-4 text-white">
+          PackYourBag.com
+        </Link>
+        <div className="h-6 w-px bg-white" />
+        <Button type="button" onClick={() => signOut({ redirectTo: '/' })}>
+          Sign out
+        </Button>
+      </div>
     </nav>
   );
 }

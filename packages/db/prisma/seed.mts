@@ -2,9 +2,9 @@ import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from '../generated/prisma/index.js';
 
-const connectionString = process.env.AUTH_URL;
+const connectionString = process.env.POSTGRES_AUTH_URL;
 if (!connectionString) {
-  throw new Error('❌ Connection failed: AUTH_URL is missing in .env');
+  throw new Error('❌ Connection failed: POSTGRES_AUTH_URL is missing in .env');
 }
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
