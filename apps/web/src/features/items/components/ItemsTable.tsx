@@ -44,7 +44,7 @@ export default function ItemsTable() {
         minSize: 50,
         maxSize: 80,
         cell: ({ row }) => {
-          return <ItemsTableActions itemId={row.original.id} />;
+          return <ItemsTableActions item={row.original} />;
         },
       }),
     ],

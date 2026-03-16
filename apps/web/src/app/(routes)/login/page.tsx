@@ -1,4 +1,4 @@
-import LoginFormWrapper from '@/features/items/auth/components/LoginFormWrapper';
+import LoginFormWrapper from '@/features/auth/components/LoginFormWrapper';
 
 export default function Page() {
   return (

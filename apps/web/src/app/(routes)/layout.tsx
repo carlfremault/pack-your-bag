@@ -8,10 +8,6 @@ import '../globals.css';
 export const metadata: Metadata = {
   title: 'PackYourBag - Frontend tryout',
   description: 'Draft of the PackYourBag frontend',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-  },
 };
 
 export default function RootLayout({

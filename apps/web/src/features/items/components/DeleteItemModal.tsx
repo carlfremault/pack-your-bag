@@ -2,13 +2,14 @@ import ConfirmationDialog from '@/components/ui/dialogs/ConfirmationDialog';
 import { Modal } from '@/components/ui/modals/modal';
 
 import { useDeleteItem } from '../queries';
+import { Item } from '../types';
 
 interface DeleteItemModalProps {
-  itemId: string;
+  item: Item;
 }
 
 export default function DeleteItemModal(props: DeleteItemModalProps) {
-  const { itemId } = props;
+  const { item } = props;
 
   const { mutate: deleteItem } = useDeleteItem();
 
@@ -22,7 +23,7 @@ export default function DeleteItemModal(props: DeleteItemModalProps) {
           <ConfirmationDialog
             message="Are you sure you want to delete this item?"
             onConfirm={() => {
-              deleteItem(itemId, {
+              deleteItem(item.id, {
                 onSuccess: () => close(),
                 onError: (error) => {
                   // TODO: Show error toast/notification

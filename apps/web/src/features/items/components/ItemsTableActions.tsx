@@ -1,16 +1,18 @@
+import { Item } from '../types';
+
 import DeleteItemModal from './DeleteItemModal';
 import EditItemModal from './EditItemModal';
 
 interface ItemsTableActionsProps {
-  itemId: string;
+  item: Item;
 }
 export default function ItemsTableActions(props: ItemsTableActionsProps) {
-  const { itemId } = props;
+  const { item } = props;
 
   return (
     <div className="flex items-center justify-center gap-2">
-      <EditItemModal itemId={itemId} />
-      <DeleteItemModal itemId={itemId} />
+      <EditItemModal item={item} />
+      <DeleteItemModal item={item} />
     </div>
   );
 }
