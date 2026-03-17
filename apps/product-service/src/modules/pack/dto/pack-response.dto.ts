@@ -10,9 +10,11 @@ export class PackBaseResponseDto {
   @ApiProperty({ description: 'Pack uuid', example: '123e4567-e89b-12d3-a456-426614174000' })
   @Expose()
   id: string;
+
   @ApiProperty({ description: 'Pack name', example: 'Pack name' })
   @Expose()
   name: string;
+
   @ApiProperty({
     description: 'Pack description',
     example: 'Pack description',
@@ -21,9 +23,18 @@ export class PackBaseResponseDto {
   })
   @Expose()
   description: string | null;
+
   @ApiProperty({ description: 'Pack color code', example: '#000000', nullable: true, type: String })
   @Expose()
   colorCode: string | null;
+
+  @ApiProperty({ description: 'Pack created at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Pack updated at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  updatedAt: Date;
 }
 
 @Exclude()

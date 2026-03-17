@@ -9,6 +9,7 @@ import { CreateTripDto } from '@/modules/trip/dto/create-trip.dto';
 import { UpdateTripDto } from '@/modules/trip/dto/update-trip.dto';
 
 import { createTripWithPack } from './fixtures/product.fixtures';
+import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Trip (e2e)', () => {
@@ -47,6 +48,8 @@ describe('Trip (e2e)', () => {
         name: tripDto.name,
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: null,
       });
     });
@@ -66,11 +69,15 @@ describe('Trip (e2e)', () => {
         name: tripDto.name,
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: expect.objectContaining({
           id: pack.id,
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
     });
@@ -138,6 +145,8 @@ describe('Trip (e2e)', () => {
         name: tripDto.name,
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: null,
       });
     });
@@ -162,11 +171,15 @@ describe('Trip (e2e)', () => {
         name: tripDto.name,
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: expect.objectContaining({
           id: pack.id,
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
     });
@@ -338,6 +351,8 @@ describe('Trip (e2e)', () => {
         name: tripDto.name,
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: null,
       });
 
@@ -357,6 +372,8 @@ describe('Trip (e2e)', () => {
         name: 'Updated Name',
         date: newDate.toISOString(),
         remarks: 'Updated Remarks',
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: null,
       });
     });
@@ -375,6 +392,8 @@ describe('Trip (e2e)', () => {
         name: tripDto.name,
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: null,
       });
 
@@ -393,6 +412,8 @@ describe('Trip (e2e)', () => {
         name: 'Updated Name',
         date: tripDto.date?.toISOString(),
         remarks: tripDto.remarks,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         pack: null,
       });
     });
@@ -424,6 +445,8 @@ describe('Trip (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
     });
@@ -442,6 +465,8 @@ describe('Trip (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
 
@@ -475,6 +500,8 @@ describe('Trip (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
 
@@ -495,6 +522,8 @@ describe('Trip (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
     });
@@ -621,6 +650,8 @@ describe('Trip (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as PackResponseDto,
       });
 
