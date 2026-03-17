@@ -15,6 +15,7 @@ import {
   createListInPackInTrip,
   createMultipleItemsOnList,
 } from './fixtures/product.fixtures';
+import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('List (e2e)', () => {
@@ -51,6 +52,8 @@ describe('List (e2e)', () => {
         name: listDto.name,
         description: listDto.description,
         colorCode: listDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -108,6 +111,8 @@ describe('List (e2e)', () => {
         name: listDto.name,
         description: listDto.description,
         colorCode: listDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -124,6 +129,8 @@ describe('List (e2e)', () => {
         name: list.name,
         description: list.description,
         colorCode: list.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
       });
     });
@@ -284,6 +291,8 @@ describe('List (e2e)', () => {
         name: listDto.name,
         description: listDto.description,
         colorCode: listDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.listHelpers.updateList({
@@ -301,6 +310,8 @@ describe('List (e2e)', () => {
         name: 'Updated List',
         description: 'Updated Description',
         colorCode: '#FFFFFF',
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -319,6 +330,8 @@ describe('List (e2e)', () => {
         name: listDto.name,
         description: listDto.description,
         colorCode: listDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.listHelpers.updateList({
@@ -336,6 +349,8 @@ describe('List (e2e)', () => {
         name: 'Updated List',
         description: listDto.description,
         colorCode: listDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -484,6 +499,8 @@ describe('List (e2e)', () => {
         name: list.name,
         description: list.description,
         colorCode: list.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
       });
 

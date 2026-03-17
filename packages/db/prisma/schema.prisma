@@ -166,11 +166,14 @@ enum AuditSeverity {
 
 
 model Category {
-  id          String    @id @db.Uuid
+  id          String      @id @db.Uuid
   name        String
   description String?
   colorCode   String?
-  userId      String    @db.Uuid
+  userId      String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
   items       Item[]
 
   @@index([userId])
@@ -178,14 +181,16 @@ model Category {
 }
 
 model Item {
-  id          String    @id @db.Uuid
+  id          String      @id @db.Uuid
   name        String
   description String?
   weight      Float?
-  userId      String    @db.Uuid
+  userId      String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   
-  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId  String?    @db.Uuid
+  category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  String?     @db.Uuid
 
   // Join table relations
   itemLists   ItemList[]
@@ -196,11 +201,13 @@ model Item {
 }
 
 model List {
-  id          String    @id @db.Uuid
+  id          String      @id @db.Uuid
   name        String
   description String?
   colorCode   String?
-  userId      String    @db.Uuid
+  userId      String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   // Join table relations
   items       ItemList[]
@@ -211,11 +218,13 @@ model List {
 }
 
 model Pack {
-  id          String    @id @db.Uuid
+  id          String      @id @db.Uuid
   name        String
   description String?
   colorCode   String?
-  userId      String    @db.Uuid
+  userId      String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   // Join table relations
   items       ItemPack[]
@@ -227,14 +236,16 @@ model Pack {
 }
 
 model Trip {
-  id      String    @id @db.Uuid
+  id      String          @id @db.Uuid
   name    String
   date    DateTime?
   remarks String?
-  userId  String    @db.Uuid
+  userId  String          @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  pack    Pack?      @relation(fields: [packId], references: [id], onDelete: SetNull)
-  packId  String?    @db.Uuid
+  pack    Pack?           @relation(fields: [packId], references: [id], onDelete: SetNull)
+  packId  String?         @db.Uuid
 
   @@index([userId])
   @@schema("app_product")

@@ -17,6 +17,7 @@ import {
   createItemOnListAndInPack,
   createItemOnMultipleLists,
 } from './fixtures/product.fixtures';
+import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Item (e2e)', () => {
@@ -55,6 +56,8 @@ describe('Item (e2e)', () => {
         name: itemDto.name,
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -73,11 +76,15 @@ describe('Item (e2e)', () => {
         name: itemDto.name,
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         category: {
           id: category.id,
           name: category.name,
           description: category.description,
           colorCode: category.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         },
       });
     });
@@ -160,6 +167,8 @@ describe('Item (e2e)', () => {
         name: itemDto.name,
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -184,9 +193,15 @@ describe('Item (e2e)', () => {
         name: itemDto.name,
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         category: {
           id: category.id,
           name: category.name,
+          description: category.description,
+          colorCode: category.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         },
       });
     });
@@ -326,6 +341,8 @@ describe('Item (e2e)', () => {
         name: itemDto.name,
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.itemHelpers.updateItem({
@@ -361,6 +378,8 @@ describe('Item (e2e)', () => {
         name: itemDto.name,
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.itemHelpers.updateItem({
@@ -378,6 +397,8 @@ describe('Item (e2e)', () => {
         name: 'Updated Name',
         description: itemDto.description,
         weight: itemDto.weight,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 

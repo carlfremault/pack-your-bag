@@ -31,6 +31,14 @@ export class ItemResponseDto {
   @Expose()
   @Type(() => CategoryResponseDto)
   category: CategoryResponseDto;
+
+  @ApiProperty({ description: 'Item created at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Item updated at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  updatedAt: Date;
 }
 
 @Exclude()
