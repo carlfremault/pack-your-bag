@@ -6,8 +6,8 @@
     "TRUST_PROXY",
     "BFF_SHARED_SECRET",
     "FRONTEND_URL",
-    "ADMIN_URL",
-    "SENTRY_DSN"
+    "SENTRY_DSN",
+    "POSTGRES_*"
   ],
   "tasks": {
     "build": {
@@ -30,19 +30,19 @@
     },
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
-      "env": ["AUTH_*", "RSA_*", "ADMIN_TEST_URL"],
+      "env": ["AUTH_*", "RSA_*"],
       "cache": true,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
       "dependsOn": ["test:setup", "^build"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "ADMIN_TEST_URL"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
     },
     "test:watch": {
       "dependsOn": ["test:setup", "^build"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "ADMIN_TEST_URL"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
     },
     "test:browser": {
       "cache": false,
@@ -54,8 +54,7 @@
     },
     "status": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
-      "env": ["AUTH_URL", "PRODUCT_URL"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
     },
     "generate": {
       "cache": false,
@@ -65,14 +64,12 @@
 
     "deploy": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
-      "env": ["AUTH_URL", "PRODUCT_URL"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
     },
     "seed": {
       "cache": false,
       "dependsOn": ["generate"],
-      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
-      "env": ["AUTH_*"]
+      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"]
     },
     "openapi": {
       "dependsOn": ["build"],
