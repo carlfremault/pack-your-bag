@@ -1,9 +1,18 @@
 'use client';
 
-import { isServer, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isServer, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import { SESSION_EXPIRED_MESSAGE } from '@/lib/errors';
+
+function onSessionExpired(error: Error) {
+  if (error.message === SESSION_EXPIRED_MESSAGE) {
+    window.location.replace('/login');
+  }
+}
 
 function makeQueryClient() {
   return new QueryClient({
+    queryCache: new QueryCache({ onError: onSessionExpired }),
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,

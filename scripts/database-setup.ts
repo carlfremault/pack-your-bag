@@ -10,13 +10,20 @@ expand(myEnv);
 
 async function setup() {
   const isLocal = process.env.POSTGRES_HOST === 'localhost';
-  const adminUrl = process.env.ADMIN_URL;
-  const targetDbName = isTest
-    ? process.env.POSTGRES_TEST_DB || 'packyourbag_test'
-    : process.env.POSTGRES_DB || 'postgres';
+  const adminUrl = process.env.POSTGRES_ADMIN_URL;
+  const mainDbName = process.env.POSTGRES_DB || 'postgres';
+  const targetDbName = isTest ? process.env.POSTGRES_TEST_DB || 'packyourbag_test' : mainDbName;
 
   if (!adminUrl) {
-    console.error('❌ Connection failed: ADMIN_URL is missing in .env');
+    console.error('❌ Connection failed: POSTGRES_ADMIN_URL is missing in .env');
+    process.exit(1);
+  }
+
+  // Safeguard: never drop the main DB when running test setup
+  if (isTest && targetDbName === mainDbName) {
+    console.error(
+      `❌ Refusing to run test setup: POSTGRES_TEST_DB must not equal POSTGRES_DB (both are "${targetDbName}"). Use a separate test database name (e.g. packyourbag_test).`,
+    );
     process.exit(1);
   }
 
@@ -52,7 +59,7 @@ async function setup() {
   }
 
   // STEP 2: Connect to the relevant target database to configure schemas/users
-  const targetUrl = isTest ? process.env.ADMIN_TEST_URL : process.env.ADMIN_URL;
+  const targetUrl = isTest ? process.env.POSTGRES_ADMIN_TEST_URL : process.env.POSTGRES_ADMIN_URL;
   if (!targetUrl) {
     console.error('❌ Connection failed: Target database URL is missing in .env');
     process.exit(1);
@@ -68,12 +75,12 @@ async function setup() {
     await client.connect();
     console.log(`Connected to ${targetDbName} as Admin.`);
 
-    const authUser = process.env.AUTH_USER || 'auth_user';
-    const authPass = process.env.AUTH_PASSWORD;
-    const authSchema = process.env.AUTH_SCHEMA || 'app_auth';
-    const prodUser = process.env.PRODUCT_USER || 'prod_user';
-    const prodPass = process.env.PRODUCT_PASSWORD;
-    const prodSchema = process.env.PRODUCT_SCHEMA || 'app_product';
+    const authUser = process.env.POSTGRES_AUTH_USER || 'auth_user';
+    const authPass = process.env.POSTGRES_AUTH_PASSWORD;
+    const authSchema = process.env.POSTGRES_AUTH_SCHEMA || 'app_auth';
+    const prodUser = process.env.POSTGRES_PRODUCT_USER || 'prod_user';
+    const prodPass = process.env.POSTGRES_PRODUCT_PASSWORD;
+    const prodSchema = process.env.POSTGRES_PRODUCT_SCHEMA || 'app_product';
 
     if (!authPass || !prodPass) {
       throw new Error('User passwords are missing in .env');
@@ -105,8 +112,8 @@ async function setup() {
     await client.query(`REVOKE ALL ON SCHEMA ${prodSchema} FROM ${authUser};`);
     await client.query(`REVOKE ALL ON SCHEMA ${authSchema} FROM ${prodUser};`);
 
-    // Allow the migration user (ADMIN_URL / current connection) to run Prisma migrations
-    // in both schemas. Requires superuser or schema owner; works when ADMIN_URL is postgres.
+    // Allow the migration user (POSTGRES_ADMIN_URL / current connection) to run Prisma migrations
+    // in both schemas. Requires superuser or schema owner; works when POSTGRES_ADMIN_URL is postgres.
     const {
       rows: [{ current_user: migrationUser }],
     } = await client.query<{ current_user: string }>('SELECT current_user');

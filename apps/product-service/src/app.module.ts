@@ -39,10 +39,10 @@ const validationSchema = Joi.object({
   PRODUCT_HEALTH_DISK_PATH: Joi.string().default('/'),
 
   // Database
-  PRODUCT_USER: Joi.string().required(),
-  PRODUCT_PASSWORD: Joi.string().required(),
-  PRODUCT_SCHEMA: Joi.string().required(),
-  PRODUCT_URL: Joi.string().uri().required(),
+  POSTGRES_PRODUCT_USER: Joi.string().required(),
+  POSTGRES_PRODUCT_PASSWORD: Joi.string().required(),
+  POSTGRES_PRODUCT_SCHEMA: Joi.string().required(),
+  POSTGRES_PRODUCT_URL: Joi.string().uri().required(),
 
   // DB Pool
   PRODUCT_DB_POOL_MAX: Joi.number().min(1).max(50).default(20),

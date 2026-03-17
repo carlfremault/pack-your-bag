@@ -1,6 +1,6 @@
 import { Modal } from '@/components/ui/modals/modal';
 
-import ItemForm from './item-form';
+import ItemForm from './ItemForm';
 
 export default function AddItemModal() {
   return (

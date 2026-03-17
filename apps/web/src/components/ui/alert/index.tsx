@@ -2,8 +2,10 @@ import classNames from 'classnames';
 
 import { AlertType } from '@/types/ui-types';
 
+import MessageList from './MessageList';
+
 interface AlertProps {
-  message: string;
+  message: string | string[];
   type?: AlertType;
   className?: string;
 }
@@ -17,7 +19,7 @@ const alertType: Record<AlertType, string> = {
 
 export default function Alert(props: AlertProps) {
   const { message, type = 'error', className } = props;
-  const alertRole = type === 'info' || type === 'success' ? 'status' : 'alert';
+  const alertRole = type === 'error' ? 'alert' : 'status';
 
   const alertClassName = classNames(
     'flex w-full flex-col items-center justify-center self-start rounded-md border p-4',
@@ -27,7 +29,7 @@ export default function Alert(props: AlertProps) {
 
   return (
     <div role={alertRole} className={alertClassName}>
-      {message}
+      {Array.isArray(message) ? <MessageList messages={message} /> : message}
     </div>
   );
 }

@@ -12,7 +12,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly pool: Pool;
 
   constructor(configService: ConfigService) {
-    const connectionString = configService.getOrThrow<string>('PRODUCT_URL');
+    const connectionString = configService.getOrThrow<string>('POSTGRES_PRODUCT_URL');
 
     const poolInstance = new Pool({
       connectionString,

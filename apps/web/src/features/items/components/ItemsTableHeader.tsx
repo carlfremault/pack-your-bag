@@ -12,7 +12,12 @@ export default function ItemsTableHeader(props: TableHeaderProps): React.ReactNo
   return (
     <div className="flex items-center justify-between">
       <p>Total items: {nbItems}</p>
-      <Button onClick={refetch} disabled={isFetching} aria-busy={isFetching}>
+      <Button
+        onClick={refetch}
+        disabled={isFetching}
+        aria-busy={isFetching}
+        aria-label={isFetching ? 'Refetching items' : 'Refetch items'}
+      >
         <span className="flex w-16 items-center justify-center">
           {isFetching ? <Spinner /> : 'Refetch'}
         </span>

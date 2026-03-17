@@ -11,9 +11,9 @@ import { extractErrorMessage } from '@/utils/extract-error-message';
 
 import { Item } from '../types';
 
-import AddItemModal from './add-item-modal';
-import ItemsTableActions from './items-table-actions';
-import ItemsTableHeader from './items-table-header';
+import AddItemModal from './AddItemModal';
+import ItemsTableActions from './ItemsTableActions';
+import ItemsTableHeader from './ItemsTableHeader';
 
 const columnHelper = createColumnHelper<Item>();
 
@@ -44,7 +44,7 @@ export default function ItemsTable() {
         minSize: 50,
         maxSize: 80,
         cell: ({ row }) => {
-          return <ItemsTableActions itemId={row.original.id} />;
+          return <ItemsTableActions item={row.original} />;
         },
       }),
     ],

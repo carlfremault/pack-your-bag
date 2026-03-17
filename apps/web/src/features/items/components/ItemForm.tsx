@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Alert from '@/components/ui/alert';
 import Button from '@/components/ui/buttons/button';
@@ -15,6 +15,22 @@ interface ItemFormProps {
 
 export default function ItemForm(props: ItemFormProps) {
   const { item, onSuccess } = props;
+
+  const [formValues, setFormValues] = useState({
+    name: item?.name ?? '',
+    description: item?.description ?? '',
+    weight: item?.weight?.toString() ?? '',
+    categoryId: '',
+  });
+
+  useEffect(() => {
+    setFormValues({
+      name: item?.name ?? '',
+      description: item?.description ?? '',
+      weight: item?.weight?.toString() ?? '',
+      categoryId: '',
+    });
+  }, [item]);
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -35,12 +51,17 @@ export default function ItemForm(props: ItemFormProps) {
     formRef.current?.reset();
   };
 
+  const handleMutationSuccess = () => {
+    onSuccess();
+    handleReset();
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const payload = {
       name: formData.get('name') as string,
-      description: (formData.get('description') as string) || undefined,
+      description: formData.get('description') as string,
       weight: formData.get('weight') ? Number(formData.get('weight')) : undefined,
       categoryId: (formData.get('categoryId') as string) || undefined,
     };
@@ -49,18 +70,12 @@ export default function ItemForm(props: ItemFormProps) {
       updateItem(
         { id: item.id, body: payload },
         {
-          onSuccess: () => {
-            onSuccess();
-            handleReset();
-          },
+          onSuccess: handleMutationSuccess,
         },
       );
     } else {
       createItem(payload, {
-        onSuccess: () => {
-          onSuccess();
-          handleReset();
-        },
+        onSuccess: handleMutationSuccess,
       });
     }
   };
@@ -83,20 +98,24 @@ export default function ItemForm(props: ItemFormProps) {
             name="name"
             placeholder="Name"
             className="rounded-md border border-gray-300 p-2"
-            defaultValue={item?.name || undefined}
+            value={formValues.name}
+            onChange={(e) => setFormValues((v) => ({ ...v, name: e.target.value }))}
           />
           <input
             name="description"
             placeholder="Description"
             className="rounded-md border border-gray-300 p-2"
-            defaultValue={item?.description || undefined}
+            value={formValues.description}
+            onChange={(e) => setFormValues((v) => ({ ...v, description: e.target.value }))}
           />
           <input
             name="weight"
             type="number"
+            step="0.01"
             placeholder="Weight"
             className="rounded-md border border-gray-300 p-2"
-            defaultValue={item?.weight || undefined}
+            value={formValues.weight}
+            onChange={(e) => setFormValues((v) => ({ ...v, weight: e.target.value }))}
           />
           <input
             name="categoryId"

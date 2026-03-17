@@ -1,16 +1,15 @@
 import { Modal } from '@/components/ui/modals/modal';
 
-import { useItem } from '../queries';
+import { Item } from '../types';
 
-import ItemForm from './item-form';
+import ItemForm from './ItemForm';
 
 interface EditItemModalProps {
-  itemId: string;
+  item: Item;
 }
 
 export default function EditItemModal(props: EditItemModalProps) {
-  const { itemId } = props;
-  const { data: item } = useItem(itemId);
+  const { item } = props;
 
   return (
     <Modal.Root>

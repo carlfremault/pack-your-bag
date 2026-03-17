@@ -9,10 +9,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const buttonColor: Record<ButtonColor, string> = {
-  primary: 'bg-blue-500',
-  secondary: 'bg-green-500',
-  danger: 'bg-red-500',
-  transparent: 'bg-transparent',
+  primary: 'bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300',
+  secondary: 'bg-green-500 hover:bg-green-600 focus:ring-2 focus:ring-green-300',
+  danger: 'bg-red-500 hover:bg-red-600 focus:ring-2 focus:ring-red-300',
+  transparent: 'bg-transparent hover:bg-gray-100 focus:ring-2 focus:ring-gray-300',
 };
 
 const buttonSize: Record<ButtonSize, string> = {
@@ -42,7 +42,7 @@ export default function Button(props: ButtonProps) {
   );
 
   return (
-    <button className={buttonClassName} {...rest}>
+    <button className={buttonClassName} disabled={disabled} {...rest}>
       {children}
     </button>
   );

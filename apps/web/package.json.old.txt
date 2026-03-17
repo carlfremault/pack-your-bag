@@ -7,15 +7,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest --watch --no-coverage",
+    "test:browser": "vitest --config=vitest.browser.config.mts"
   },
   "dependencies": {
     "@repo/product-client": "workspace:*",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
-    "iron-session": "^8.0.4",
     "next": "^16.0.10",
+    "next-auth": "^5.0.0-beta.30",
     "openapi-fetch": "^0.13.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

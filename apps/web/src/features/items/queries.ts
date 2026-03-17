@@ -45,7 +45,7 @@ const fetchItem = async (id: string): Promise<Item> => {
 
 const useItem = (id: string): UseQueryResult<Item> => {
   return useQuery({
-    queryKey: ['item', id],
+    queryKey: ['items', id],
     queryFn: () => fetchItem(id),
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
@@ -71,7 +71,7 @@ const useUpdateItem = () => {
     mutationFn: ({ id, body }: { id: string; body: UpdateItemBody }) => updateItem(id, body),
     onSuccess: (updatedItem, { id }) => {
       if (updatedItem) {
-        queryClient.setQueryData(['item', id], updatedItem);
+        queryClient.setQueryData(['items', id], updatedItem);
       }
       queryClient.invalidateQueries({ queryKey: ['items'] });
     },
@@ -85,7 +85,7 @@ const useDeleteItem = () => {
     mutationFn: deleteItem,
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
-      queryClient.invalidateQueries({ queryKey: ['item', id] });
+      queryClient.removeQueries({ queryKey: ['items', id] });
     },
   });
 };
