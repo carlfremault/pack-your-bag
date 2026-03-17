@@ -9,9 +9,11 @@ export class TripResponseDto {
   @ApiProperty({ description: 'Trip uuid', example: '123e4567-e89b-12d3-a456-426614174000' })
   @Expose()
   id: string;
+
   @ApiProperty({ description: 'Trip name', example: 'Trip name' })
   @Expose()
   name: string;
+
   @ApiProperty({
     description: 'Trip date',
     example: '2026-01-01T00:00:00.000Z',
@@ -20,6 +22,7 @@ export class TripResponseDto {
   })
   @Expose()
   date: Date | null;
+
   @ApiProperty({
     description: 'Trip remarks',
     example: 'Trip remarks',
@@ -33,4 +36,12 @@ export class TripResponseDto {
   @Expose()
   @Type(() => PackResponseDto)
   pack: PackResponseDto;
+
+  @ApiProperty({ description: 'Trip created at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Trip updated at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  updatedAt: Date;
 }

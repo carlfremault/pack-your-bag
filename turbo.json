@@ -69,8 +69,7 @@
     "seed": {
       "cache": false,
       "dependsOn": ["generate"],
-      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
-      "env": ["AUTH_*"]
+      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"]
     },
     "openapi": {
       "dependsOn": ["build"],

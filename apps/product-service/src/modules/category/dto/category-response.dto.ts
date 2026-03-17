@@ -7,9 +7,11 @@ export class CategoryResponseDto {
   @ApiProperty({ description: 'Category uuid', example: '123e4567-e89b-12d3-a456-426614174000' })
   @Expose()
   id: string;
+
   @ApiProperty({ description: 'Category name', example: 'Category name' })
   @Expose()
   name: string;
+
   @ApiProperty({
     description: 'Category description',
     example: 'Category description',
@@ -18,6 +20,7 @@ export class CategoryResponseDto {
   })
   @Expose()
   description: string | null;
+
   @ApiProperty({
     description: 'Category color code',
     example: '#000000',
@@ -26,4 +29,12 @@ export class CategoryResponseDto {
   })
   @Expose()
   colorCode: string | null;
+
+  @ApiProperty({ description: 'Category created at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Category updated at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  updatedAt: Date;
 }

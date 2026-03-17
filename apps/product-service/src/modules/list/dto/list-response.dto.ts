@@ -9,9 +9,11 @@ export class ListBaseResponseDto {
   @ApiProperty({ description: 'List uuid', example: '123e4567-e89b-12d3-a456-426614174000' })
   @Expose()
   id: string;
+
   @ApiProperty({ description: 'List name', example: 'List name' })
   @Expose()
   name: string;
+
   @ApiProperty({
     description: 'List description',
     example: 'List description',
@@ -20,9 +22,18 @@ export class ListBaseResponseDto {
   })
   @Expose()
   description: string | null;
+
   @ApiProperty({ description: 'List color code', example: '#000000', nullable: true, type: String })
   @Expose()
   colorCode: string | null;
+
+  @ApiProperty({ description: 'List created at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({ description: 'List updated at', example: '2026-01-01T00:00:00.000Z' })
+  @Expose()
+  updatedAt: Date;
 }
 
 @Exclude()
