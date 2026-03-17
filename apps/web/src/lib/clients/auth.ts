@@ -1,9 +1,11 @@
 import type { paths } from '@repo/auth-client';
 
+import { headers } from 'next/headers';
 import createClient from 'openapi-fetch';
 
-import { auth } from '../auth';
-import { ApiError } from '../errors';
+import { INTERNAL_TOKEN_HEADER } from '@/proxy';
+
+import { ApiError, SESSION_EXPIRED_MESSAGE } from '../errors';
 
 interface AuthConfig {
   bffSecret: string;
@@ -23,7 +25,7 @@ if (!authConfig.authServiceUrl) {
   throw new Error('AUTH_SERVICE_URL environment variable is required');
 }
 
-// For register, forgot password — no session needed
+/** For register, forgot password — no session needed */
 export function getPublicAuthClient() {
   const client = createClient<paths>({ baseUrl: authConfig.authServiceUrl });
   client.use({
@@ -35,15 +37,17 @@ export function getPublicAuthClient() {
   return client;
 }
 
-// For change password, logout — session required
+/** For change password, logout-all — access token required */
 export async function getAuthClient() {
-  const session = await auth();
-  if (!session?.accessToken) throw new ApiError('Unauthorized', 401);
+  const headersList = await headers();
+  const accessToken = headersList.get(INTERNAL_TOKEN_HEADER);
+
+  if (!accessToken) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
 
   const client = createClient<paths>({ baseUrl: authConfig.authServiceUrl });
   client.use({
     async onRequest({ request }) {
-      request.headers.set('Authorization', `Bearer ${session.accessToken}`);
+      request.headers.set('Authorization', `Bearer ${accessToken}`);
       request.headers.set('x-bff-secret', authConfig.bffSecret);
       return request;
     },
