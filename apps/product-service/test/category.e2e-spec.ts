@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
 
+import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Category (e2e)', () => {
@@ -42,6 +43,8 @@ describe('Category (e2e)', () => {
         name: categoryDto.name,
         description: categoryDto.description,
         colorCode: categoryDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -104,6 +107,8 @@ describe('Category (e2e)', () => {
         name: categoryDto.name,
         description: categoryDto.description,
         colorCode: categoryDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -220,6 +225,8 @@ describe('Category (e2e)', () => {
         name: categoryDto.name,
         description: categoryDto.description,
         colorCode: categoryDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.categoryHelpers.updateCategory({
@@ -241,6 +248,8 @@ describe('Category (e2e)', () => {
         name: 'Updated Category',
         description: 'Updated Description',
         colorCode: '#FFFFFF',
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -259,6 +268,8 @@ describe('Category (e2e)', () => {
         name: categoryDto.name,
         description: categoryDto.description,
         colorCode: categoryDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.categoryHelpers.updateCategory({
@@ -278,6 +289,8 @@ describe('Category (e2e)', () => {
         name: 'Updated Category',
         description: categoryDto.description,
         colorCode: categoryDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -374,6 +387,8 @@ describe('Category (e2e)', () => {
         name: categoryDto.name,
         description: categoryDto.description,
         colorCode: categoryDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.categoryHelpers.deleteCategory({
@@ -474,6 +489,8 @@ describe('Category (e2e)', () => {
           name: categoryDto.name,
           description: categoryDto.description,
           colorCode: categoryDto.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         },
         items: [
           { id: item.id, name: item.name, description: item.description, weight: item.weight },
@@ -498,6 +515,8 @@ describe('Category (e2e)', () => {
           name: categoryDto.name,
           description: categoryDto.description,
           colorCode: categoryDto.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         },
         items: [],
       });

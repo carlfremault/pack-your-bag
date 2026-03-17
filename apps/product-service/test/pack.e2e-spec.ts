@@ -18,6 +18,7 @@ import {
   createPackUsedInMultipleTrips,
   createPackUsedInTrip,
 } from './fixtures/product.fixtures';
+import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Pack (e2e)', () => {
@@ -54,6 +55,8 @@ describe('Pack (e2e)', () => {
         name: packDto.name,
         description: packDto.description,
         colorCode: packDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -111,6 +114,8 @@ describe('Pack (e2e)', () => {
         name: packDto.name,
         description: packDto.description,
         colorCode: packDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -127,6 +132,8 @@ describe('Pack (e2e)', () => {
         name: pack.name,
         description: pack.description,
         colorCode: pack.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
       });
     });
@@ -148,6 +155,8 @@ describe('Pack (e2e)', () => {
         name: pack.name,
         description: pack.description,
         colorCode: pack.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
       expect(createdPack.items).toHaveLength(2);
       expect(createdPack.items).toContainEqual({ quantity: 2, item: item1 });
@@ -167,6 +176,8 @@ describe('Pack (e2e)', () => {
         name: pack.name,
         description: pack.description,
         colorCode: pack.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         lists: [{ quantity: 1, list }],
       });
     });
@@ -188,6 +199,8 @@ describe('Pack (e2e)', () => {
         name: pack.name,
         description: pack.description,
         colorCode: pack.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
       expect(createdPack.lists).toHaveLength(2);
       expect(createdPack.lists).toContainEqual({
@@ -197,6 +210,8 @@ describe('Pack (e2e)', () => {
           name: list1.name,
           description: list1.description,
           colorCode: list1.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as ListResponseDto,
       });
       expect(createdPack.lists).toContainEqual({
@@ -206,6 +221,8 @@ describe('Pack (e2e)', () => {
           name: list2.name,
           description: list2.description,
           colorCode: list2.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
         }) as ListResponseDto,
       });
     });
@@ -223,6 +240,8 @@ describe('Pack (e2e)', () => {
         name: pack.name,
         description: pack.description,
         colorCode: pack.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
         lists: [{ quantity: 1, list }],
       });
@@ -392,6 +411,8 @@ describe('Pack (e2e)', () => {
         name: packDto.name,
         description: packDto.description,
         colorCode: packDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.packHelpers.updatePack({
@@ -409,6 +430,8 @@ describe('Pack (e2e)', () => {
         name: 'Updated Pack',
         description: 'Updated Description',
         colorCode: '#FFFFFF',
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -427,6 +450,8 @@ describe('Pack (e2e)', () => {
         name: packDto.name,
         description: packDto.description,
         colorCode: packDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
 
       await ctx.packHelpers.updatePack({
@@ -444,6 +469,8 @@ describe('Pack (e2e)', () => {
         name: 'Updated Pack',
         description: packDto.description,
         colorCode: packDto.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
       });
     });
 
@@ -587,6 +614,8 @@ describe('Pack (e2e)', () => {
         name: pack.name,
         description: pack.description,
         colorCode: pack.colorCode,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
         lists: [{ quantity: 1, list }],
       });
@@ -715,6 +744,8 @@ describe('Pack (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
           itemCount: 0,
           listCount: 0,
         }) as PackSummaryResponseDto,
@@ -736,6 +767,8 @@ describe('Pack (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
           itemCount: 0,
           listCount: 0,
         }) as PackSummaryResponseDto,
@@ -757,6 +790,8 @@ describe('Pack (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
           itemCount: 1,
           listCount: 1,
         }) as PackSummaryResponseDto,
@@ -778,6 +813,8 @@ describe('Pack (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorCode: pack.colorCode,
+          createdAt: isoDateMatcher,
+          updatedAt: isoDateMatcher,
           itemCount: 0,
           listCount: 0,
         }) as PackSummaryResponseDto,
