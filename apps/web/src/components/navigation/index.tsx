@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+
+import { logoutAction } from '@/features/auth/actions';
 
 import Button from '../ui/buttons/button';
 
@@ -36,9 +37,9 @@ export default function Navigation() {
           PackYourBag.com
         </Link>
         <div className="h-6 w-px bg-white" />
-        <Button type="button" onClick={() => signOut({ redirectTo: '/' })}>
-          Sign out
-        </Button>
+        <form action={logoutAction}>
+          <Button type="submit">Sign out</Button>
+        </form>
       </div>
     </nav>
   );

@@ -108,7 +108,6 @@ export class AuthService {
     }
 
     DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
-
     return this.issueRefreshToken(user.id, user.roleId);
   }
 

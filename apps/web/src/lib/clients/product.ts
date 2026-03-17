@@ -1,9 +1,11 @@
 import type { paths } from '@repo/product-client';
 
+import { headers } from 'next/headers';
 import createClient from 'openapi-fetch';
 
-import { auth } from '../auth';
-import { ApiError } from '../errors';
+import { INTERNAL_TOKEN_HEADER } from '@/proxy';
+
+import { ApiError, SESSION_EXPIRED_MESSAGE } from '../errors';
 
 interface ProductConfig {
   bffSecret: string;
@@ -24,14 +26,15 @@ if (!productConfig.productServiceUrl) {
 }
 
 export async function getProductClient() {
-  // called per-request, no caching — session is always fresh
-  const session = await auth();
-  if (!session?.accessToken) throw new ApiError('Unauthorized', 401);
+  const headersList = await headers();
+  const accessToken = headersList.get(INTERNAL_TOKEN_HEADER);
+
+  if (!accessToken) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
 
   const client = createClient<paths>({ baseUrl: productConfig.productServiceUrl });
   client.use({
     async onRequest({ request }) {
-      request.headers.set('Authorization', `Bearer ${session.accessToken}`);
+      request.headers.set('Authorization', `Bearer ${accessToken}`);
       request.headers.set('x-bff-secret', productConfig.bffSecret);
       return request;
     },

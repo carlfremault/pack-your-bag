@@ -10,3 +10,5 @@ export class ApiError extends Error {
     this.digest = status < 500 ? message : 'Something went wrong';
   }
 }
+
+export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in again.';
