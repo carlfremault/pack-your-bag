@@ -384,6 +384,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description Category created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Category updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ItemResponseDto: {
       /**
@@ -405,9 +417,21 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight: number | null;
+      weight: Record<string, never> | null;
       /** @description Item category */
       category: components['schemas']['CategoryResponseDto'];
+      /**
+       * Format: date-time
+       * @description Item created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Item updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ItemWithQuantityResponseDto: {
       /**
@@ -439,6 +463,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description List created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description List updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
       /** @description Items on list */
       items?: components['schemas']['ItemWithQuantityResponseDto'][];
     };
@@ -472,6 +508,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description Pack created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Pack updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
       /** @description Items in pack */
       items?: components['schemas']['ItemWithQuantityResponseDto'][];
       /** @description Lists in pack */
@@ -501,6 +549,18 @@ export interface components {
       remarks: string | null;
       /** @description Pack used in trip */
       pack: components['schemas']['PackResponseDto'];
+      /**
+       * Format: date-time
+       * @description Trip created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Trip updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ItemDeleteImpactDto: {
       item: components['schemas']['ItemResponseDto'];
@@ -612,6 +672,18 @@ export interface components {
        */
       colorCode: string | null;
       /**
+       * Format: date-time
+       * @description List created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description List updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+      /**
        * @description List item count
        * @example 1
        */
@@ -677,6 +749,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description Pack created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Pack updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
       /**
        * @description Pack item count
        * @example 1
@@ -824,446 +908,12 @@ export interface components {
       quantity: number;
     };
   };
-  ItemResponseDto: {
-    /**
-     * @description Item uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id: string;
-    /**
-     * @description Item name
-     * @example Item name
-     */
-    name: string;
-    /**
-     * @description Item description
-     * @example Item description
-     */
-    description: string | null;
-    /**
-     * @description Item weight
-     * @example 100
-     */
-    weight: Record<string, never> | null;
-    /** @description Item category */
-    category: components['schemas']['CategoryResponseDto'];
-  };
-  ItemWithQuantityResponseDto: {
-    /**
-     * @description Item quantity
-     * @example 1
-     */
-    quantity: number;
-    /** @description Item */
-    item: components['schemas']['ItemResponseDto'];
-  };
-  ListResponseDto: {
-    /**
-     * @description List uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id: string;
-    /**
-     * @description List name
-     * @example List name
-     */
-    name: string;
-    /**
-     * @description List description
-     * @example List description
-     */
-    description: string | null;
-    /**
-     * @description List color code
-     * @example #000000
-     */
-    colorCode: string | null;
-    /** @description Items on list */
-    items?: components['schemas']['ItemWithQuantityResponseDto'][];
-  };
-  ListWithQuantityResponseDto: {
-    /**
-     * @description List quantity
-     * @example 1
-     */
-    quantity: number;
-    /** @description List */
-    list: components['schemas']['ListResponseDto'];
-  };
-  PackResponseDto: {
-    /**
-     * @description Pack uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id: string;
-    /**
-     * @description Pack name
-     * @example Pack name
-     */
-    name: string;
-    /**
-     * @description Pack description
-     * @example Pack description
-     */
-    description: string | null;
-    /**
-     * @description Pack color code
-     * @example #000000
-     */
-    colorCode: string | null;
-    /** @description Items in pack */
-    items?: components['schemas']['ItemWithQuantityResponseDto'][];
-    /** @description Lists in pack */
-    lists?: components['schemas']['ListWithQuantityResponseDto'][];
-  };
-  TripResponseDto: {
-    /**
-     * @description Trip uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id: string;
-    /**
-     * @description Trip name
-     * @example Trip name
-     */
-    name: string;
-    /**
-     * Format: date-time
-     * @description Trip date
-     * @example 2026-01-01T00:00:00.000Z
-     */
-    date: string | null;
-    /**
-     * @description Trip remarks
-     * @example Trip remarks
-     */
-    remarks: string | null;
-    /** @description Pack used in trip */
-    pack: components['schemas']['PackResponseDto'];
-  };
-  ItemDeleteImpactDto: {
-    item: components['schemas']['ItemResponseDto'];
-    lists: components['schemas']['ListResponseDto'][];
-    packs: components['schemas']['PackResponseDto'][];
-    trips: components['schemas']['TripResponseDto'][];
-  };
-  CreateItemDto: {
-    /**
-     * @description Item name
-     * @example Item name
-     */
-    name: string;
-    /**
-     * @description Item description
-     * @example Item description
-     */
-    description?: string;
-    /**
-     * @description Item weight
-     * @example 100
-     */
-    weight?: number;
-    /**
-     * @description Item category uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    categoryId?: string;
-  };
-  UpdateItemDto: {
-    /**
-     * @description Item name
-     * @example Item name
-     */
-    name?: string;
-    /**
-     * @description Item description
-     * @example Item description
-     */
-    description?: string;
-    /**
-     * @description Item weight
-     * @example 100
-     */
-    weight?: number;
-    /**
-     * @description Item category uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    categoryId?: string;
-  };
-  CategoryDeleteImpactDto: {
-    category: components['schemas']['CategoryResponseDto'];
-    items: components['schemas']['ItemResponseDto'][];
-  };
-  CreateCategoryDto: {
-    /**
-     * @description Category name
-     * @example Category name
-     */
-    name: string;
-    /**
-     * @description Category description
-     * @example Category description
-     */
-    description?: string;
-    /**
-     * @description Category color code
-     * @example #000000
-     */
-    colorCode?: string;
-  };
-  UpdateCategoryDto: {
-    /**
-     * @description Category name
-     * @example Category name
-     */
-    name?: string;
-    /**
-     * @description Category description
-     * @example Category description
-     */
-    description?: string;
-    /**
-     * @description Category color code
-     * @example #000000
-     */
-    colorCode?: string;
-  };
-  ListSummaryResponseDto: {
-    /**
-     * @description List uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id: string;
-    /**
-     * @description List name
-     * @example List name
-     */
-    name: string;
-    /**
-     * @description List description
-     * @example List description
-     */
-    description: string | null;
-    /**
-     * @description List color code
-     * @example #000000
-     */
-    colorCode: string | null;
-    /**
-     * @description List item count
-     * @example 1
-     */
-    itemCount: number;
-  };
-  ListDeleteImpactDto: {
-    list: components['schemas']['ListSummaryResponseDto'];
-    packs: components['schemas']['PackResponseDto'][];
-    trips: components['schemas']['TripResponseDto'][];
-  };
-  CreateListDto: {
-    /**
-     * @description List name
-     * @example List name
-     */
-    name: string;
-    /**
-     * @description List description
-     * @example List description
-     */
-    description?: string;
-    /**
-     * @description List color code
-     * @example #000000
-     */
-    colorCode?: string;
-  };
-  UpdateListDto: {
-    /**
-     * @description List name
-     * @example List name
-     */
-    name?: string;
-    /**
-     * @description List description
-     * @example List description
-     */
-    description?: string;
-    /**
-     * @description List color code
-     * @example #000000
-     */
-    colorCode?: string;
-  };
-  PackSummaryResponseDto: {
-    /**
-     * @description Pack uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id: string;
-    /**
-     * @description Pack name
-     * @example Pack name
-     */
-    name: string;
-    /**
-     * @description Pack description
-     * @example Pack description
-     */
-    description: string | null;
-    /**
-     * @description Pack color code
-     * @example #000000
-     */
-    colorCode: string | null;
-    /**
-     * @description Pack item count
-     * @example 1
-     */
-    itemCount: number;
-    /**
-     * @description Pack list count
-     * @example 1
-     */
-    listCount: number;
-  };
-  PackDeleteImpactDto: {
-    pack: components['schemas']['PackSummaryResponseDto'];
-    trips: components['schemas']['TripResponseDto'][];
-  };
-  CreatePackDto: {
-    /**
-     * @description Pack name
-     * @example Pack name
-     */
-    name: string;
-    /**
-     * @description Pack description
-     * @example Pack description
-     */
-    description?: string;
-    /**
-     * @description Pack color code
-     * @example #000000
-     */
-    colorCode?: string;
-  };
-  UpdatePackDto: {
-    /**
-     * @description Pack name
-     * @example Pack name
-     */
-    name?: string;
-    /**
-     * @description Pack description
-     * @example Pack description
-     */
-    description?: string;
-    /**
-     * @description Pack color code
-     * @example #000000
-     */
-    colorCode?: string;
-  };
-  CreateTripDto: {
-    /**
-     * @description Trip name
-     * @example Trip name
-     */
-    name: string;
-    /**
-     * Format: date-time
-     * @description Trip date
-     * @example 2026-01-01T00:00:00.000Z
-     */
-    date?: string;
-    /**
-     * @description Trip remarks
-     * @example Trip remarks
-     */
-    remarks?: string;
-    /**
-     * @description Pack uuid associated with the trip
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    packId: string | null;
-  };
-  UpdateTripDto: {
-    /**
-     * @description Trip name
-     * @example Trip name
-     */
-    name?: string;
-    /**
-     * Format: date-time
-     * @description Trip date
-     * @example 2026-01-01T00:00:00.000Z
-     */
-    date?: string;
-    /**
-     * @description Trip remarks
-     * @example Trip remarks
-     */
-    remarks?: string;
-    /**
-     * @description Pack uuid associated with the trip
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    packId?: string | null;
-  };
-  UpsertItemOnListDto: {
-    /**
-     * @description Item uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    itemId: string;
-    /**
-     * @description List uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    listId: string;
-    /**
-     * @description Item quantity
-     * @example 1
-     */
-    quantity: number;
-  };
-  UpsertItemInPackDto: {
-    /**
-     * @description Item uuid
-     * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
-     */
-    itemId: string;
-    /**
-     * @description Pack uuid
-     * @example b2c3d4e5-f6a7-8901-bcde-f12345678901
-     */
-    packId: string;
-    /**
-     * @description Item quantity
-     * @example 1
-     */
-    quantity: number;
-  };
-  UpsertListInPackDto: {
-    /**
-     * @description List uuid
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    listId: string;
-    /**
-     * @description Pack uuid
-     * @example 987fcdeb-51a2-3bc4-d567-890123456789
-     */
-    packId: string;
-    /**
-     * @description List quantity
-     * @example 1
-     */
-    quantity: number;
-  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
-
 export type $defs = Record<string, never>;
 export interface operations {
   ItemController_getItems: {

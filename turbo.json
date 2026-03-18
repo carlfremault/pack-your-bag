@@ -1,20 +1,13 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": [
-    "NODE_ENV",
-    "TRUST_PROXY",
-    "BFF_SHARED_SECRET",
-    "FRONTEND_URL",
-    "SENTRY_DSN",
-    "POSTGRES_*"
-  ],
+  "globalEnv": ["NODE_ENV", "TRUST_PROXY", "BFF_SHARED_SECRET", "FRONTEND_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "^generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -26,23 +19,23 @@
       "dependsOn": ["^build", "^generate"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
-      "env": ["AUTH_*", "RSA_*"],
+      "env": ["AUTH_*", "RSA_*", "POSTGRES_*"],
       "cache": true,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
       "dependsOn": ["test:setup", "^build"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:watch": {
       "dependsOn": ["test:setup", "^build"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:browser": {
       "cache": false,
