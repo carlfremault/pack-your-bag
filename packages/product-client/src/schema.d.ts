@@ -405,7 +405,7 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight: number | null;
+      weight: Record<string, never> | null;
       /** @description Item category */
       category: components['schemas']['CategoryResponseDto'];
     };
