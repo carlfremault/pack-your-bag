@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import { swaggerConfig } from '@/common/helpers/swagger-config';
 
 import { AppModule } from './app.module';
+
 async function bootstrap() {
   const nodeEnv = process.env.NODE_ENV;
   if (!nodeEnv || !['development', 'test', 'production'].includes(nodeEnv)) {

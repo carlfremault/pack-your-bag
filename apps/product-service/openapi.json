@@ -1646,13 +1646,27 @@
             "description": "Category color code",
             "example": "#000000",
             "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Category created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Category updated at",
+            "example": "2026-01-01T00:00:00.000Z"
           }
         },
         "required": [
           "id",
           "name",
           "description",
-          "colorCode"
+          "colorCode",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "ItemResponseDto": {
@@ -1687,6 +1701,18 @@
                 "$ref": "#/components/schemas/CategoryResponseDto"
               }
             ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Item created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Item updated at",
+            "example": "2026-01-01T00:00:00.000Z"
           }
         },
         "required": [
@@ -1694,7 +1720,9 @@
           "name",
           "description",
           "weight",
-          "category"
+          "category",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "ItemWithQuantityResponseDto": {
@@ -1744,6 +1772,18 @@
             "example": "#000000",
             "nullable": true
           },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
           "items": {
             "description": "Items on list",
             "type": "array",
@@ -1756,7 +1796,9 @@
           "id",
           "name",
           "description",
-          "colorCode"
+          "colorCode",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "ListWithQuantityResponseDto": {
@@ -1806,6 +1848,18 @@
             "example": "#000000",
             "nullable": true
           },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
           "items": {
             "description": "Items in pack",
             "type": "array",
@@ -1825,7 +1879,9 @@
           "id",
           "name",
           "description",
-          "colorCode"
+          "colorCode",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "TripResponseDto": {
@@ -1861,6 +1917,18 @@
                 "$ref": "#/components/schemas/PackResponseDto"
               }
             ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip updated at",
+            "example": "2026-01-01T00:00:00.000Z"
           }
         },
         "required": [
@@ -1868,7 +1936,9 @@
           "name",
           "date",
           "remarks",
-          "pack"
+          "pack",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "ItemDeleteImpactDto": {
@@ -2042,6 +2112,18 @@
             "example": "#000000",
             "nullable": true
           },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
           "itemCount": {
             "type": "number",
             "description": "List item count",
@@ -2053,6 +2135,8 @@
           "name",
           "description",
           "colorCode",
+          "createdAt",
+          "updatedAt",
           "itemCount"
         ]
       },
@@ -2149,6 +2233,18 @@
             "example": "#000000",
             "nullable": true
           },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
           "itemCount": {
             "type": "number",
             "description": "Pack item count",
@@ -2165,6 +2261,8 @@
           "name",
           "description",
           "colorCode",
+          "createdAt",
+          "updatedAt",
           "itemCount",
           "listCount"
         ]

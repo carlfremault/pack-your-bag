@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "generate": "openapi-typescript ../../apps/product-service/openapi.json -o src/schema.d.ts",
+    "generate": "openapi-typescript ../../apps/product-service/openapi.json -o src/schema.d.ts && prettier --write src/schema.d.ts",
     "build": "tsc"
   },
   "exports": {
@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "openapi-typescript": "^7.0.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
