@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { PreferencesService } from './preferences.service';
 
 describe('PreferencesService', () => {
