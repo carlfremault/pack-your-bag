@@ -5,6 +5,7 @@ import { extractErrorMessage } from '@/utils/extract-error-message';
 import { Item } from './types';
 
 export async function getItems(): Promise<Item[]> {
+  console.log('*** DEMO *** Web - API client - getItems ...');
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.GET('/item');
 
@@ -15,6 +16,7 @@ export async function getItems(): Promise<Item[]> {
 }
 
 export async function getItem(id: string): Promise<Item> {
+  console.log('*** DEMO *** Web - API client - getItem ...');
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.GET('/item/{id}', {
     params: { path: { id } },

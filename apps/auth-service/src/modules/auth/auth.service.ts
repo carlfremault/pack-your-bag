@@ -96,6 +96,7 @@ export class AuthService {
   }
 
   async login(body: AuthCredentialsDto): Promise<AuthResponseDto> {
+    console.log('*** DEMO *** Auth Service - login ...');
     const { email, password } = body;
 
     const user = await this.userService.getUser({ email: email.toLowerCase() });
@@ -112,6 +113,7 @@ export class AuthService {
   }
 
   async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<RefreshTokenResult> {
+    console.log('*** DEMO *** Auth Service - refreshToken ...');
     const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
     const user = await this.userService.getUser({ id: userId, isDeleted: false });
     if (!user) {

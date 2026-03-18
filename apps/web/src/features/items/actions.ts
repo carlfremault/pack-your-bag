@@ -6,6 +6,7 @@ import { extractErrorMessage } from '@/utils/extract-error-message';
 import { CreateItemBody, Item, UpdateItemBody } from './types';
 
 export async function createItem(body: CreateItemBody): Promise<Item | undefined> {
+  console.log('*** DEMO *** Web - Server actions - createItem ...');
   const productClient = await getProductClient();
   const { data, error } = await productClient.POST('/item', { body });
 
@@ -15,6 +16,7 @@ export async function createItem(body: CreateItemBody): Promise<Item | undefined
 }
 
 export async function updateItem(id: string, body: UpdateItemBody): Promise<Item | undefined> {
+  console.log('*** DEMO *** Web - Server actions - updateItem ...');
   const productClient = await getProductClient();
   const { data, error } = await productClient.PATCH('/item/{id}', {
     params: { path: { id } },
@@ -27,6 +29,7 @@ export async function updateItem(id: string, body: UpdateItemBody): Promise<Item
 }
 
 export async function deleteItem(id: string): Promise<void> {
+  console.log('*** DEMO *** Web - Server actions - deleteItem ...');
   const productClient = await getProductClient();
   const { error } = await productClient.DELETE('/item/{id}', {
     params: { path: { id } },

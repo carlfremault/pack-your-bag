@@ -25,6 +25,7 @@ export class ItemService {
   // ============================================
 
   async getItems(where: Prisma.ItemWhereInput): Promise<ItemResponseDto[]> {
+    console.log('*** DEMO *** Product Service - getItems ...');
     const result = await this.prisma.item.findMany({
       where,
       include: { category: true },
@@ -34,6 +35,7 @@ export class ItemService {
   }
 
   async getItem(where: Prisma.ItemWhereUniqueInput): Promise<ItemResponseDto> {
+    console.log('*** DEMO *** Product Service - getItem ...');
     const result = await this.prisma.item.findUnique({
       where,
       include: { category: true },
@@ -47,6 +49,7 @@ export class ItemService {
   }
 
   async createItem(item: CreateItemDto, userId: string): Promise<ItemResponseDto> {
+    console.log('*** DEMO *** Product Service - createItem ...');
     return this.prisma.$transaction(async (tx) => {
       const uuid = uuidv7();
       const { categoryId, ...rest } = item;
@@ -79,6 +82,7 @@ export class ItemService {
   }
 
   async updateItem(id: string, item: UpdateItemDto, userId: string): Promise<ItemResponseDto> {
+    console.log('*** DEMO *** Product Service - updateItem ...');
     return this.prisma.$transaction(async (tx) => {
       const storedItem = await tx.item.findUnique({ where: { id, userId } });
       if (!storedItem) {
@@ -115,6 +119,7 @@ export class ItemService {
   // ============================================
 
   async handleItemDeletion(id: string, userId: string): Promise<void> {
+    console.log('*** DEMO *** Product Service - handleItemDeletion ...');
     await this.prisma.$transaction(async (tx) => {
       const item = await tx.item.findUnique({ where: { id, userId } });
       if (!item) {
