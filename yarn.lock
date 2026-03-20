@@ -2953,7 +2953,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@repo/db@workspace:*, @repo/db@workspace:^, @repo/db@workspace:packages/db":
+"@repo/db@workspace:*, @repo/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@repo/db@workspace:packages/db"
   dependencies:
@@ -3028,6 +3028,17 @@ __metadata:
 "@repo/typescript-config@npm:*, @repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"
+  languageName: unknown
+  linkType: soft
+
+"@repo/user-data-client@workspace:packages/user-data-client":
+  version: 0.0.0-use.local
+  resolution: "@repo/user-data-client@workspace:packages/user-data-client"
+  dependencies:
+    openapi-fetch: "npm:^0.13.0"
+    openapi-typescript: "npm:^7.0.0"
+    prettier: "npm:^3.6.2"
+    typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
 
@@ -15277,7 +15288,7 @@ __metadata:
     "@nestjs/terminus": "npm:^11.0.0"
     "@nestjs/testing": "npm:^11.0.1"
     "@nestjs/throttler": "npm:^6.5.0"
-    "@repo/db": "workspace:^"
+    "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/nestjs-common": "workspace:*"
     "@repo/typescript-config": "workspace:*"
