@@ -50,6 +50,8 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
   const rsaPrivateKeyB64 = configService.getOrThrow<string>('RSA_PRIVATE_KEY_B64');
   const jwtTestHelper = new JwtTestHelper(rsaPrivateKeyB64);
 
+  await app.init();
+
   const authHelpers = new AuthHelpers(jwtTestHelper);
   const categoryHelpers = new CategoryHelpers(app, bffSecret);
   const itemHelpers = new ItemHelpers(app, bffSecret);
@@ -60,8 +62,6 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
   const itemListHelpers = new ItemListHelpers(app, bffSecret);
   const itemPackHelpers = new ItemPackHelpers(app, bffSecret);
   const listPackHelpers = new ListPackHelpers(app, bffSecret);
-
-  await app.init();
 
   const resetDb = async () => {
     await prisma.itemList.deleteMany();

@@ -4,10 +4,6 @@ globs: apps/product-service/**/*
 alwaysApply: false
 ---
 
-# Product Service Guidelines
-
-This service is currently being bootstrapped.
-
 ## Patterns to Mimic
 
 - Use `apps/auth-service` as the "Gold Standard" for structure.

@@ -384,6 +384,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description Category created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Category updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ItemResponseDto: {
       /**
@@ -408,6 +420,18 @@ export interface components {
       weight: Record<string, never> | null;
       /** @description Item category */
       category: components['schemas']['CategoryResponseDto'];
+      /**
+       * Format: date-time
+       * @description Item created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Item updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ItemWithQuantityResponseDto: {
       /**
@@ -439,6 +463,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description List created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description List updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
       /** @description Items on list */
       items?: components['schemas']['ItemWithQuantityResponseDto'][];
     };
@@ -472,6 +508,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description Pack created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Pack updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
       /** @description Items in pack */
       items?: components['schemas']['ItemWithQuantityResponseDto'][];
       /** @description Lists in pack */
@@ -501,6 +549,18 @@ export interface components {
       remarks: string | null;
       /** @description Pack used in trip */
       pack: components['schemas']['PackResponseDto'];
+      /**
+       * Format: date-time
+       * @description Trip created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Trip updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ItemDeleteImpactDto: {
       item: components['schemas']['ItemResponseDto'];
@@ -612,6 +672,18 @@ export interface components {
        */
       colorCode: string | null;
       /**
+       * Format: date-time
+       * @description List created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description List updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+      /**
        * @description List item count
        * @example 1
        */
@@ -677,6 +749,18 @@ export interface components {
        * @example #000000
        */
       colorCode: string | null;
+      /**
+       * Format: date-time
+       * @description Pack created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Pack updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
       /**
        * @description Pack item count
        * @example 1

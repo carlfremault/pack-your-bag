@@ -2,7 +2,7 @@
   "name": "pack-your-bag",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "build": "cross-env NODE_ENV=production turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write .",
@@ -23,8 +23,10 @@
     "db:seed": "turbo run seed --filter=@repo/db",
     "openapi:auth": "turbo run openapi --filter=auth-service",
     "openapi:product": "turbo run openapi --filter=product-service",
+    "openapi:user-data": "turbo run openapi --filter=user-data-service",
     "generate:auth-client": "yarn workspace @repo/auth-client generate",
-    "generate:product-client": "yarn workspace @repo/product-client generate"
+    "generate:product-client": "yarn workspace @repo/product-client generate",
+    "generate:user-data-client": "yarn workspace @repo/user-data-client generate"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
