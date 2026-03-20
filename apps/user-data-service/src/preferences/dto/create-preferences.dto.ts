@@ -1,31 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+
+import { DateFormat, Theme, TimeFormat, Units } from '../types/preferences.types';
 
 export class CreatePreferencesDto {
   @ApiProperty({ description: 'Units', example: 'metric' })
   @IsString()
   @IsOptional()
-  units: 'metric' | 'imperial';
+  @IsEnum(Units)
+  units: Units;
 
   @ApiProperty({ description: 'Theme', example: 'light' })
   @IsString()
   @IsOptional()
-  theme: 'light' | 'dark';
+  @IsEnum(Theme)
+  theme: Theme;
 
   @ApiProperty({ description: 'Date format', example: 'DD/MM/YYYY' })
   @IsString()
   @IsOptional()
-  dateFormat:
-    | 'DD/MM/YYYY'
-    | 'MM/DD/YYYY'
-    | 'YYYY/MM/DD'
-    | 'DD-MM-YYYY'
-    | 'MM-DD-YYYY'
-    | 'YYYY-MM-DD';
+  @IsEnum(DateFormat)
+  dateFormat: DateFormat;
 
   @ApiProperty({ description: 'Time format', example: '12h' })
   @IsString()
   @IsOptional()
-  timeFormat: '12h' | '24h';
+  @IsEnum(TimeFormat)
+  timeFormat: TimeFormat;
 }
