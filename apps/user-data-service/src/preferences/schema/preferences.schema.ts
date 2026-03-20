@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { HydratedDocument } from 'mongoose';
 
+import { DateFormat, Theme, TimeFormat, Units } from '../types/preferences.types';
+
 export type PreferenceDocument = HydratedDocument<Preference>;
 
 @Schema({ timestamps: true })
@@ -9,25 +11,17 @@ export class Preference {
   @Prop({ required: true, unique: true, index: true })
   userId: string;
 
-  @Prop({ enum: ['metric', 'imperial'] })
-  units: 'metric' | 'imperial' = 'metric';
+  @Prop({ type: String, enum: Object.values(Units) })
+  units: Units = Units.METRIC;
 
-  @Prop({ enum: ['light', 'dark'] })
-  theme: 'light' | 'dark';
+  @Prop({ type: String, enum: Object.values(Theme) })
+  theme: Theme;
 
-  @Prop({
-    enum: ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY/MM/DD', 'DD-MM-YYYY', 'MM-DD-YYYY', 'YYYY-MM-DD'],
-  })
-  dateFormat:
-    | 'DD/MM/YYYY'
-    | 'MM/DD/YYYY'
-    | 'YYYY/MM/DD'
-    | 'DD-MM-YYYY'
-    | 'MM-DD-YYYY'
-    | 'YYYY-MM-DD';
+  @Prop({ type: String, enum: Object.values(DateFormat) })
+  dateFormat: DateFormat;
 
-  @Prop({ enum: ['12h', '24h'] })
-  timeFormat: '12h' | '24h';
+  @Prop({ type: String, enum: Object.values(TimeFormat) })
+  timeFormat: TimeFormat;
 }
 
 export const PreferenceSchema = SchemaFactory.createForClass(Preference);

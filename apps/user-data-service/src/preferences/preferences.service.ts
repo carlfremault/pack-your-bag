@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
+import { plainToInstance } from 'class-transformer';
 import { Model } from 'mongoose';
 
 import { CreatePreferencesDto } from './dto/create-preferences.dto';
@@ -16,30 +17,33 @@ export class PreferencesService {
     preference: CreatePreferencesDto,
     userId: string,
   ): Promise<PreferencesResponseDto> {
-    return this.preferenceModel.findOneAndUpdate(
+    const result = await this.preferenceModel.findOneAndUpdate(
       { userId },
       { ...preference, userId },
       {
         upsert: true,
-        new: true,
+        returnDocument: 'after',
         setDefaultsOnInsert: true,
       },
     );
+    return plainToInstance(PreferencesResponseDto, result);
   }
 
   async getPreference(userId: string): Promise<PreferencesResponseDto | null> {
-    return this.preferenceModel.findOne({ userId });
+    const result = await this.preferenceModel.findOne({ userId });
+    return result ? plainToInstance(PreferencesResponseDto, result) : null;
   }
 
   async updatePreference(
     userId: string,
     preference: UpdatePreferencesDto,
   ): Promise<PreferencesResponseDto | null> {
-    return this.preferenceModel.findOneAndUpdate(
+    const result = await this.preferenceModel.findOneAndUpdate(
       { userId },
       { ...preference, userId },
-      { new: true },
+      { returnDocument: 'after' },
     );
+    return result ? plainToInstance(PreferencesResponseDto, result) : null;
   }
 
   async deletePreference(userId: string): Promise<boolean> {
