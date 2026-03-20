@@ -15,6 +15,8 @@ import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
 import Joi from 'joi';
 
+import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
+import { MongooseExceptionFilter } from './common/filters/mongoose-exception.filter';
 import { PreferencesModule } from './preferences/preferences.module';
 
 const validationSchema = Joi.object({
@@ -96,10 +98,14 @@ const validationSchema = Joi.object({
         transform: true,
       }),
     },
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: GlobalExceptionsFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: MongooseExceptionFilter,
+    },
   ],
 })
 export class AppModule implements NestModule {

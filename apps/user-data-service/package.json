@@ -22,6 +22,7 @@
     "@nestjs/swagger": "^11.2.6",
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.5.0",
+    "@repo/db": "workspace:*",
     "@repo/nestjs-common": "workspace:*",
     "@sentry/nestjs": "^10.37.0",
     "axios": "^1.13.3",
