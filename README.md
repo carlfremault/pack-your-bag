@@ -21,6 +21,7 @@ Work in Progress - `dev` branch is where the amazing stuff is happening right no
   - [6.1 Phase 0: Development Setup & Foundation](#61-phase-0-development-setup--foundation)
   - [6.2 Phase 1: Identity Provider](#62-phase-1-identity-provider)
   - [6.3 Phase 2: Resource Server (Product Service)](#63-phase-2-resource-server-product-service)
+  - [6.4 Phase 3: Resource Server (User Data Service)](#64-phase-3-resource-server-user-data-service)
 
 ## 1. Idea & motivation
 
@@ -385,6 +386,68 @@ Tests cover the full CRUD surface including ownership enforcement (a user cannot
 #### 6.3.5 API Documentation & Client Generation
 
 Following the same pattern established in Phase 1, Swagger annotations (`@ApiTags`, `@ApiOperation`, `@ApiResponse`) were applied to all controllers and DTOs. The OpenAPI spec was exported and used to generate a typed HTTP client published in the `product-client` package, giving the future BFF (Next.js) type-safe access to the Product Service API from day one.
+
+### 6.4 Phase 3: Resource Server (User Data Service)
+
+#### 6.4.1 Developer Experience: Infrastructure Pays Off
+
+The User Data Service was the first service to benefit fully from the `nestjs-common` package extracted during Phase 2. Where the Auth Service required building all NestJS plumbing from scratch, and the Product Service paid the upfront cost of extracting and packaging that infrastructure into a shared library, the User Data Service simply consumed the result.
+
+Wiring up guards, throttling, the BFF guard, JWT authentication, the global exception filter, the Swagger spec generator, and the Sentry integration amounted to module imports and a handful of configuration constants. The patterns were already established and battle-tested. There was nothing new to design, no shared contract to negotiate.
+
+The only new territory was Mongoose. The `@nestjs/mongoose` docs are well-structured and the decorator-based API (`@Schema()`, `@Prop()`) is intuitive enough that the ramp-up was short. The `MongooseExceptionFilter` required some adapting but the structural pattern was identical to the existing `PrismaExceptionFilter`, so it came together quickly.
+
+Beyond that, the data structure is deliberately simple: a single `Preference` collection, one document per user. The service went from bootstrap to passing tests faster than any previous phase — a concrete return on the infrastructure investment made during Phase 2.
+
+#### 6.4.2 Data Modeling
+
+##### MongoDB Schema
+
+The User Data Service manages user-specific application settings. With no relational dependencies and a schema expected to evolve without coordinated migrations across services, MongoDB is the natural fit.
+
+The `Preference` document is the single collection in this service:
+
+- **`userId`** — unique index; ties the document to the authenticated user.
+- **`units`** — display preference for weight (`metric` / `imperial`).
+- **`theme`** — UI theme (`light` / `dark`).
+- **`dateFormat`** — preferred date display format.
+- **`timeFormat`** — preferred time display format (`12h` / `24h`).
+- **`createdAt` / `updatedAt`** — managed automatically by Mongoose's `timestamps` option.
+
+All string fields are validated against a TypeScript enum at both the DTO layer (`class-validator` `@IsEnum()`) and the Mongoose schema layer (`enum` prop constraint), ensuring consistency from HTTP request through to persistence.
+
+#### 6.4.3 Service Implementation
+
+The User Data Service was bootstrapped by cloning the Auth Service scaffold (as documented at the end of Phase 1), providing the pre-wired monorepo configuration. The `nestjs-common` modules were dropped in immediately: `BffGuardModule`, `JwtAuthModule`, and `CustomThrottlerModule` registered in `AppModule`; `ValidationPipe`, `RequestId` middleware, and Sentry configured in `main.ts`; Swagger spec generation reusing the shared helper.
+
+##### CRUD Operations
+
+The `Preferences` module exposes four routes against a single `/preferences` resource: `GET`, `POST`, `PATCH`, `DELETE`
+
+Ownership is implicit: the `userId` is always sourced from the verified JWT via the `@CurrentUser()` decorator from `nestjs-common`, never from the request body.
+
+##### Exceptions & Observability
+
+The service registers two exception filters:
+
+- **`GlobalExceptionsFilter`** — extended from the `nestjs-common` base class; catches all unhandled exceptions and ensures the API always returns a consistent JSON response.
+- **`MongooseExceptionFilter`** — UDS-specific; maps MongoDB and Mongoose error types to appropriate HTTP responses, mirroring the role `PrismaExceptionFilter` plays in the other services.
+
+Sentry is integrated for production error monitoring via the shared utility from `nestjs-common`.
+
+#### 6.4.4 Testing & Quality Assurance
+
+Unit and integration/E2E tests were implemented following the same patterns established in the previous phases.
+
+**Unit tests** cover the service and controller in isolation, mocking the Mongoose model and verifying correct method delegation.
+
+**Integration / E2E tests** run against a real MongoDB instance. Tests cover the full CRUD surface: successful operations, ownership enforcement, not-found scenarios, and validation failures (invalid enum values, missing required fields).
+
+#### 6.4.5 API Documentation & Client Generation
+
+Swagger annotations (`@ApiTags`, `@ApiOperation`, `@ApiResponse`) were applied to all controllers and DTOs following the established pattern. The OpenAPI spec was exported and used to generate a typed HTTP client published as the `user-data-client` package, giving the BFF type-safe access to the User Data Service API.
+
+As part of this work, the `auth-client` and `product-client` packages were retroactively aligned to the same client template, standardising the `SuccessResponse` and `RequestBody` type utility exports across all three HTTP clients.
 
 ## License
 
