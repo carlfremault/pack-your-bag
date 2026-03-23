@@ -1,0 +1,14 @@
+{
+  "name": "@repo/react-common",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {},
+  "devDependencies": {
+    "react": "^19.2.3",
+    "@types/react": "19.2.6",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "^19.2.3"
+  }
+}
