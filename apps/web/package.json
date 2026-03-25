@@ -12,6 +12,7 @@
     "test:browser": "vitest --config=vitest.browser.config.mts"
   },
   "dependencies": {
+    "@repo/react-common": "workspace:*",
     "@tanstack/react-query": "^5.90.21",
     "classnames": "^2.5.1",
     "next": "^16.1.7",

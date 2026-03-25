@@ -48,3 +48,6 @@ yarn-error.log*
 # Docker / Dev Container logs
 .devcontainer/*.log
 
+
+*storybook.log
+storybook-static
