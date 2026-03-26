@@ -18,6 +18,7 @@
     "view-report": "open-cli coverage/report/index.html"
   },
   "dependencies": {
+    "@vitest/coverage-v8": "4.0.14",
     "vite-tsconfig-paths": "^6.0.3",
     "vitest": "^4.0.14"
   },
