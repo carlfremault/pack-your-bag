@@ -4,6 +4,7 @@ import pluginReact from 'eslint-plugin-react';
 import globals from 'globals';
 import pluginNext from '@next/eslint-plugin-next';
 import { getBaseConfig } from './base.js';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -48,4 +49,5 @@ export const getNextJsConfig = (appDir) => [
       'react/react-in-jsx-scope': 'off',
     },
   },
+  eslintPluginPrettierRecommended,
 ];

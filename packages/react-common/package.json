@@ -1,0 +1,36 @@
+{
+  "name": "@repo/react-common",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^5.0.2",
+    "@storybook/addon-a11y": "^10.3.2",
+    "@storybook/addon-docs": "^10.3.2",
+    "@storybook/addon-onboarding": "^10.3.2",
+    "@storybook/addon-vitest": "^10.3.2",
+    "@storybook/react-vite": "^10.3.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/react": "19.2.6",
+    "@types/react-dom": "^19",
+    "@vitest/browser-playwright": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "playwright": "^1.58.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.4",
+    "storybook": "^10.3.2",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.2",
+    "vitest": "^4.1.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.3"
+  },
+  "scripts": {
+    "storybook": "storybook dev -p 6006 --host 0.0.0.0",
+    "build-storybook": "storybook build"
+  }
+}

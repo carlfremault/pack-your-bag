@@ -6,7 +6,7 @@
     "build": {
       "dependsOn": ["^build", "^generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "storybook-static/**"],
       "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "lint": {
@@ -69,6 +69,11 @@
       "dependsOn": ["build"],
       "inputs": ["src/**/*.ts", "scripts/generate-spec.ts"],
       "outputs": ["openapi.json"]
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true,
+      "outputs": ["storybook-static/**"]
     },
     "transit": {
       "dependsOn": ["^transit"]
