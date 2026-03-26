@@ -7,7 +7,7 @@
       "dependsOn": ["^build", "^generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "storybook-static/**"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -19,7 +19,7 @@
       "dependsOn": ["^build", "^generate"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
@@ -29,13 +29,13 @@
     },
     "test": {
       "dependsOn": ["test:setup", "^build"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:watch": {
       "dependsOn": ["test:setup", "^build"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:browser": {
       "cache": false,

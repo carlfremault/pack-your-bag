@@ -1,9 +1,9 @@
 import { TokenType, User } from '@repo/db';
 import { MS_PER_DAY } from '@repo/nestjs-common';
 
-import { IntegrationTestContext } from 'test/helpers/setup.helpers';
-
 import { generateToken } from '@/common/utils/generateToken';
+
+import { IntegrationTestContext } from '../helpers/setup.helpers';
 
 export interface MailpitMessage {
   To: { Address: string }[];
