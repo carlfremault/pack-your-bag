@@ -1,13 +1,11 @@
 {
   "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "dist",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "noEmit": false,
-    "types": ["node"]
+    "noEmit": false
   },
   "include": ["src/**/*", "scripts/**/*", "test/**/*", "vitest.config.ts"],
   "exclude": ["dist", "node_modules"]

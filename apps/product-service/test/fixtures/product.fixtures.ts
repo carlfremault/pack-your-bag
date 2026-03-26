@@ -1,4 +1,4 @@
-import { IntegrationTestContext } from 'test/helpers/setup.helpers';
+import { IntegrationTestContext } from '../helpers/setup.helpers';
 
 export const createItemInCategory = async (ctx: IntegrationTestContext, accessToken: string) => {
   const { body: category } = await ctx.categoryHelpers.createCategory({

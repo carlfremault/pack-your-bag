@@ -1,16 +1,19 @@
 import { uiConfig } from '@repo/vitest-config/ui';
 
-import tsconfigPaths from 'vite-tsconfig-paths';
+import type { UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
 
+const sharedUiConfig = uiConfig as UserConfig & { test?: Record<string, unknown> };
+
 export default defineConfig({
-  ...uiConfig,
-  plugins: [tsconfigPaths()],
+  ...sharedUiConfig,
+  resolve: { tsconfigPaths: true },
   test: {
-    ...uiConfig.test,
+    ...sharedUiConfig.test,
     coverage: {
-      ...uiConfig.test.coverage,
+      ...sharedUiConfig.test?.coverage,
       provider: 'v8',
+      exclude: ['src/app/**'],
       reporter: [['json', { file: 'coverage-node.json' }]],
       reportsDirectory: './coverage',
     },
