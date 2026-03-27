@@ -24,7 +24,7 @@
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
       "env": ["AUTH_*", "RSA_*", "POSTGRES_*"],
-      "cache": true,
+      "cache": false,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
