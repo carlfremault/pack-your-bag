@@ -12,7 +12,7 @@ export default function FloatingActionButton(props: FloatingActionButtonProps) {
   const { onClick, ariaLabel, className } = props;
 
   const buttonClassName = classNames(
-    'absolute right-4 bottom-20 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-gray-500/40 active:scale-95 transition-[filter,transform,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2',
+    'absolute right-4 bottom-20 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-shadow-fab active:scale-95 transition-[filter,transform,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2',
     className,
   );
 
