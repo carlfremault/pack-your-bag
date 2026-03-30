@@ -1,22 +1,49 @@
 import classNames from 'classnames';
 
-export type ButtonColor = 'primary' | 'outline' | 'warning' | 'danger' | 'transparent';
+export type ButtonColor = 'primary' | 'secondary' | 'info' | 'warning' | 'danger';
 export type ButtonSize = 'small' | 'medium' | 'large';
+export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'link';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   color?: ButtonColor;
   size?: ButtonSize;
+  variant?: ButtonVariant;
   fullWidth?: boolean;
 }
 
-const buttonColor: Record<ButtonColor, string> = {
-  primary: 'bg-primary ring-primary-ring text-primary-foreground',
-  outline:
-    'bg-background text-secondary ring-secondary-ring border border-secondary hover:bg-secondary/10',
-  warning: 'bg-warning ring-warning-ring text-warning-foreground',
-  danger: 'bg-danger ring-danger-ring text-danger-foreground',
-  transparent: 'bg-transparent ring-foreground/80 hover:bg-foreground/5 text-primary',
+const colorVariant: Record<ButtonVariant, Record<ButtonColor, string>> = {
+  solid: {
+    primary: 'bg-primary text-primary-foreground ring-primary-ring',
+    secondary: 'bg-secondary text-secondary-foreground ring-secondary-ring',
+    info: 'bg-info text-info-foreground ring-info-ring',
+    warning: 'bg-warning text-warning-foreground ring-warning-ring',
+    danger: 'bg-danger text-danger-foreground ring-danger-ring',
+  },
+  outline: {
+    primary:
+      'bg-background border border-primary text-primary ring-primary-ring hover:bg-primary/10',
+    secondary:
+      'bg-background border border-secondary text-secondary ring-secondary-ring hover:bg-secondary/10',
+    info: 'bg-background border border-info text-info ring-info-ring hover:bg-info/10',
+    warning:
+      'bg-background border border-warning text-warning ring-warning-ring hover:bg-warning/10',
+    danger: 'bg-background border border-danger text-danger ring-danger-ring hover:bg-danger/10',
+  },
+  ghost: {
+    primary: 'text-primary ring-primary-ring hover:bg-primary/10',
+    secondary: 'text-secondary ring-secondary-ring hover:bg-secondary/10',
+    info: 'text-info ring-info-ring hover:bg-info/10',
+    warning: 'text-warning ring-warning-ring hover:bg-warning/10',
+    danger: 'text-danger ring-danger-ring hover:bg-danger/10',
+  },
+  link: {
+    primary: 'text-primary ring-primary-ring underline-offset-4 hover:underline',
+    secondary: 'text-secondary ring-secondary-ring underline-offset-4 hover:underline',
+    info: 'text-info ring-info-ring underline-offset-4 hover:underline',
+    warning: 'text-warning ring-warning-ring underline-offset-4 hover:underline',
+    danger: 'text-danger ring-danger-ring underline-offset-4 hover:underline',
+  },
 };
 
 const buttonSize: Record<ButtonSize, string> = {
@@ -31,6 +58,7 @@ export default function Button(props: ButtonProps) {
     className,
     color = 'primary',
     size = 'medium',
+    variant = 'solid',
     disabled = false,
     fullWidth = false,
     type = 'button',
@@ -47,14 +75,23 @@ export default function Button(props: ButtonProps) {
     console.warn('Button: add aria-label or aria-labelledby when using non-text children.');
   }
 
+  const isLink = variant === 'link';
+  const isSolid = variant === 'solid';
+  const isOutline = variant === 'outline';
+  const isGhost = variant === 'ghost';
+
   const buttonClassName = classNames(
-    'rounded-md flex items-center justify-center transition-[filter,transform,box-shadow] duration-150 ease-out focus-visible:outline-none shadow-sm font-medium tracking-wide focus-visible:ring-2 ',
-    buttonColor[color],
-    buttonSize[size],
+    'inline-flex items-center justify-center font-medium tracking-wide',
+    'transition-[filter,transform,box-shadow] duration-150 ease-out',
+    'focus-visible:outline-none focus-visible:ring-2',
+    colorVariant[variant][color],
+    !isLink && buttonSize[size],
+    !isLink && 'rounded-md',
+    !isLink && !isGhost && !isOutline && 'shadow-sm',
+    isSolid && !disabled && 'hover:brightness-110',
     disabled
       ? 'cursor-not-allowed opacity-50'
-      : 'cursor-pointer active:shadow-none active:scale-[0.99] active:brightness-95',
-    !disabled && color !== 'transparent' && color !== 'outline' && 'hover:brightness-110',
+      : 'cursor-pointer active:scale-[0.99] active:brightness-95',
     fullWidth ? 'w-full' : 'w-fit',
     className,
   );
