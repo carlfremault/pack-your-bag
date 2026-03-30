@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-export type ButtonColor = 'primary' | 'secondary' | 'warning' | 'danger' | 'transparent';
+export type ButtonColor = 'primary' | 'outline' | 'warning' | 'danger' | 'transparent';
 export type ButtonSize = 'small' | 'medium' | 'large';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,11 +11,12 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const buttonColor: Record<ButtonColor, string> = {
-  primary: 'bg-primary ring-primary-ring',
-  secondary: 'bg-secondary ring-secondary-ring',
-  warning: 'bg-warning ring-warning-ring',
-  danger: 'bg-danger ring-danger-ring',
-  transparent: 'bg-transparent ring-foreground/80 hover:bg-foreground/5',
+  primary: 'bg-primary ring-primary-ring text-primary-foreground',
+  outline:
+    'bg-background text-secondary ring-secondary-ring border border-secondary hover:bg-secondary/10',
+  warning: 'bg-warning ring-warning-ring text-warning-foreground',
+  danger: 'bg-danger ring-danger-ring text-danger-foreground',
+  transparent: 'bg-transparent ring-foreground/80 hover:bg-foreground/5 text-primary',
 };
 
 const buttonSize: Record<ButtonSize, string> = {
@@ -47,14 +48,13 @@ export default function Button(props: ButtonProps) {
   }
 
   const buttonClassName = classNames(
-    'rounded-md flex items-center justify-center transition-[filter,transform,box-shadow] duration-150 ease-out focus-visible:outline-none  shadow-sm font-medium tracking-wide focus-visible:ring-2 ',
+    'rounded-md flex items-center justify-center transition-[filter,transform,box-shadow] duration-150 ease-out focus-visible:outline-none shadow-sm font-medium tracking-wide focus-visible:ring-2 ',
     buttonColor[color],
     buttonSize[size],
     disabled
       ? 'cursor-not-allowed opacity-50'
       : 'cursor-pointer active:shadow-none active:scale-[0.99] active:brightness-95',
-    !disabled && color !== 'transparent' && 'hover:brightness-110',
-    color === 'transparent' ? 'text-foreground' : 'text-white',
+    !disabled && color !== 'transparent' && color !== 'outline' && 'hover:brightness-110',
     fullWidth ? 'w-full' : 'w-fit',
     className,
   );

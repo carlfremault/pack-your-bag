@@ -25,10 +25,10 @@ export const Primary: Story = {
   },
 };
 
-export const Secondary: Story = {
+export const Outline: Story = {
   args: {
     ...Default.args,
-    color: 'secondary',
+    color: 'outline',
   },
 };
 

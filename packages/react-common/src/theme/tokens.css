@@ -5,15 +5,21 @@
 
   /* Button / semantic surfaces */
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-primary-ring: var(--primary-ring);
 
   --color-secondary: var(--secondary);
   --color-secondary-ring: var(--secondary-ring);
 
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-ring: var(--info-ring);
+
   --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-warning-ring: var(--warning-ring);
 
   --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
   --color-danger-ring: var(--danger-ring);
 }
-
