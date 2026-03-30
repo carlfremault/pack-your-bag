@@ -1,0 +1,76 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --primary: #2563eb; /* blue-600 */
+  --primary-ring: #bfdbfe; /* blue-200 */
+
+  --secondary: #16a34a; /* green-600 */
+  --secondary-ring: #bbf7d0; /* green-200 */
+
+  --warning: #d97706; /* amber-600 */
+  --warning-ring: #fde68a; /* amber-200 */
+
+  --danger: #dc2626; /* red-600 */
+  --danger-ring: #fecaca; /* red-200 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    --primary: #3b82f6;
+    --primary-ring: #93c5fd;
+
+    --secondary: #22c55e;
+    --secondary-ring: #86efac;
+
+    --warning: #f59e0b;
+    --warning-ring: #fcd34d;
+
+    --danger: #f87171;
+    --danger-ring: #fca5a5;
+  }
+}
+
+/* 
+  Applied by the Storybook theme switcher (@storybook/addon-themes) 
+  Copy of :root
+*/
+.light {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --primary: #2563eb;
+  --primary-ring: #bfdbfe;
+
+  --secondary: #16a34a;
+  --secondary-ring: #bbf7d0;
+
+  --warning: #d97706;
+  --warning-ring: #fde68a;
+
+  --danger: #dc2626;
+  --danger-ring: #fecaca;
+}
+
+/* 
+  Copy of :root for "prefers-color-scheme: dark"
+*/
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --primary: #3b82f6;
+  --primary-ring: #93c5fd;
+
+  --secondary: #22c55e;
+  --secondary-ring: #86efac;
+
+  --warning: #f59e0b;
+  --warning-ring: #fcd34d;
+
+  --danger: #f87171;
+  --danger-ring: #fca5a5;
+}

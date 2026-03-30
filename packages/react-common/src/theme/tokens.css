@@ -1,0 +1,19 @@
+@theme inline {
+  /* Background / text */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Button / semantic surfaces */
+  --color-primary: var(--primary);
+  --color-primary-ring: var(--primary-ring);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-ring: var(--secondary-ring);
+
+  --color-warning: var(--warning);
+  --color-warning-ring: var(--warning-ring);
+
+  --color-danger: var(--danger);
+  --color-danger-ring: var(--danger-ring);
+}
+

@@ -10,6 +10,7 @@
     "@storybook/addon-a11y": "^10.3.2",
     "@storybook/addon-docs": "^10.3.2",
     "@storybook/addon-onboarding": "^10.3.2",
+    "@storybook/addon-themes": "^10.3.3",
     "@storybook/addon-vitest": "^10.3.2",
     "@storybook/react-vite": "^10.3.2",
     "@tailwindcss/vite": "^4.2.2",
@@ -17,6 +18,7 @@
     "@types/react-dom": "^19",
     "@vitest/browser-playwright": "^4.1.1",
     "@vitest/coverage-v8": "^4.1.1",
+    "classnames": "^2.5.1",
     "playwright": "^1.58.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -27,7 +29,9 @@
     "vitest": "^4.1.1"
   },
   "peerDependencies": {
-    "react": "^19.2.3"
+    "classnames": "^2.5.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006 --host 0.0.0.0",

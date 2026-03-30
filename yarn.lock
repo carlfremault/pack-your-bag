@@ -3223,6 +3223,7 @@ __metadata:
     "@storybook/addon-a11y": "npm:^10.3.2"
     "@storybook/addon-docs": "npm:^10.3.2"
     "@storybook/addon-onboarding": "npm:^10.3.2"
+    "@storybook/addon-themes": "npm:^10.3.3"
     "@storybook/addon-vitest": "npm:^10.3.2"
     "@storybook/react-vite": "npm:^10.3.2"
     "@tailwindcss/vite": "npm:^4.2.2"
@@ -3230,6 +3231,7 @@ __metadata:
     "@types/react-dom": "npm:^19"
     "@vitest/browser-playwright": "npm:^4.1.1"
     "@vitest/coverage-v8": "npm:^4.1.1"
+    classnames: "npm:^2.5.1"
     playwright: "npm:^1.58.2"
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"
@@ -3239,7 +3241,9 @@ __metadata:
     vite: "npm:^8.0.2"
     vitest: "npm:^4.1.1"
   peerDependencies:
-    react: ^19.2.3
+    classnames: ^2.5.1
+    react: ^19.2.4
+    react-dom: ^19.2.4
   languageName: unknown
   linkType: soft
 
@@ -3703,6 +3707,17 @@ __metadata:
   peerDependencies:
     storybook: ^10.3.2
   checksum: 10c0/e5aeb70baf588400b827a232877475e99238288a0fc304adecaa17b99de72b4f8a0a9b306539e2772c26fee30144c73d9799250bed4e8563686b5952ef67036b
+  languageName: node
+  linkType: hard
+
+"@storybook/addon-themes@npm:^10.3.3":
+  version: 10.3.3
+  resolution: "@storybook/addon-themes@npm:10.3.3"
+  dependencies:
+    ts-dedent: "npm:^2.0.0"
+  peerDependencies:
+    storybook: ^10.3.3
+  checksum: 10c0/c3f288f22ade0663d9c4687777679ed64150a08ec5065deb50bf22c7f3e6a93ea48fc83afbfe99e231a8d2dd574093130585ba91c8af655ffe17f22659216a9d
   languageName: node
   linkType: hard
 
