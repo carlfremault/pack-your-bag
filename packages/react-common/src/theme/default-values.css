@@ -1,52 +1,56 @@
 :root {
-  --background: #eaf3f9;
-  --foreground: #131c27;
+  --background: #fdfaf6;
+  --foreground: #1c1410;
 
-  --primary: #3f5068;
-  --primary-foreground: #eaf3f9;
-  --primary-ring: #aecde3;
+  --primary: #0e7fa8;
+  --primary-foreground: #ffffff;
+  --primary-ring: #bae6fd;
 
-  --secondary: #5b7499;
-  --secondary-foreground: #eaf3f9;
-  --secondary-ring: #c8d8e8;
+  --secondary: #d97706;
+  --secondary-foreground: #ffffff;
+  --secondary-ring: #fde68a;
 
-  --info: #aecde3;
-  --info-foreground: #1e3f54;
-  --info-ring: #d4e8f2;
+  --info: #38bdf8;
+  --info-foreground: #0c4a6e;
+  --info-ring: #e0f2fe;
 
-  --warning: #e09a3a;
-  --warning-foreground: #4a2e00;
-  --warning-ring: #fde9b8;
+  --warning: #ea580c;
+  --warning-foreground: #ffffff;
+  --warning-ring: #fed7aa;
 
-  --danger: #d94f46;
+  --danger: #e53e3e;
   --danger-foreground: #ffffff;
-  --danger-ring: #f4b8b5;
+  --danger-ring: #fecaca;
+
+  --shadow-fab: #0e7fa859;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #131c27;
-    --foreground: #eaf3f9;
+    --background: #161008;
+    --foreground: #fdf4e7;
 
-    --primary: #aecde3;
-    --primary-foreground: #131c27;
-    --primary-ring: #3f5068;
+    --primary: #38c5e8;
+    --primary-foreground: #0a2a35;
+    --primary-ring: #0e7fa8;
 
-    --secondary: #7a9ab8;
-    --secondary-foreground: #131c27;
-    --secondary-ring: #3f5068;
+    --secondary: #fbbf24;
+    --secondary-foreground: #1a0e00;
+    --secondary-ring: #92400e;
 
-    --info: #5b7499;
-    --info-foreground: #eaf3f9;
-    --info-ring: #3f5068;
+    --info: #7dd3fc;
+    --info-foreground: #0c2d45;
+    --info-ring: #0369a1;
 
-    --warning: #f0b55a;
-    --warning-foreground: #1a0e00;
-    --warning-ring: #7a4f10;
+    --warning: #fb923c;
+    --warning-foreground: #1a0800;
+    --warning-ring: #9a3412;
 
-    --danger: #f47b74;
-    --danger-foreground: #1a0302;
-    --danger-ring: #7a2420;
+    --danger: #f87171;
+    --danger-foreground: #1a0202;
+    --danger-ring: #991b1b;
+
+    --shadow-fab: #00000080;
   }
 }
 
@@ -55,54 +59,58 @@
   Copy of :root
 */
 .light {
-  --background: #eaf3f9;
-  --foreground: #131c27;
+  --background: #fdfaf6;
+  --foreground: #1c1410;
 
-  --primary: #3f5068;
-  --primary-foreground: #eaf3f9;
-  --primary-ring: #aecde3;
+  --primary: #0e7fa8;
+  --primary-foreground: #ffffff;
+  --primary-ring: #bae6fd;
 
-  --secondary: #5b7499;
-  --secondary-foreground: #eaf3f9;
-  --secondary-ring: #c8d8e8;
+  --secondary: #d97706;
+  --secondary-foreground: #ffffff;
+  --secondary-ring: #fde68a;
 
-  --info: #aecde3;
-  --info-foreground: #1e3f54;
-  --info-ring: #d4e8f2;
+  --info: #38bdf8;
+  --info-foreground: #0c4a6e;
+  --info-ring: #e0f2fe;
 
-  --warning: #e09a3a;
-  --warning-foreground: #4a2e00;
-  --warning-ring: #fde9b8;
+  --warning: #ea580c;
+  --warning-foreground: #ffffff;
+  --warning-ring: #fed7aa;
 
-  --danger: #d94f46;
+  --danger: #e53e3e;
   --danger-foreground: #ffffff;
-  --danger-ring: #f4b8b5;
+  --danger-ring: #fecaca;
+
+  --shadow-fab: #0e7fa859;
 }
 
 /* 
   Copy of :root for "prefers-color-scheme: dark"
 */
 .dark {
-  --background: #131c27;
-  --foreground: #eaf3f9;
+  --background: #161008;
+  --foreground: #fdf4e7;
 
-  --primary: #aecde3;
-  --primary-foreground: #131c27;
-  --primary-ring: #3f5068;
+  --primary: #38c5e8;
+  --primary-foreground: #0a2a35;
+  --primary-ring: #0e7fa8;
 
-  --secondary: #7a9ab8;
-  --secondary-foreground: #131c27;
-  --secondary-ring: #3f5068;
+  --secondary: #fbbf24;
+  --secondary-foreground: #1a0e00;
+  --secondary-ring: #92400e;
 
-  --info: #5b7499;
-  --info-foreground: #eaf3f9;
-  --info-ring: #3f5068;
+  --info: #7dd3fc;
+  --info-foreground: #0c2d45;
+  --info-ring: #0369a1;
 
-  --warning: #f0b55a;
-  --warning-foreground: #1a0e00;
-  --warning-ring: #7a4f10;
+  --warning: #fb923c;
+  --warning-foreground: #1a0800;
+  --warning-ring: #9a3412;
 
-  --danger: #f47b74;
-  --danger-foreground: #1a0302;
-  --danger-ring: #7a2420;
+  --danger: #f87171;
+  --danger-foreground: #1a0202;
+  --danger-ring: #991b1b;
+
+  --shadow-fab: #00000080;
 }
