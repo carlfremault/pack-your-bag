@@ -7,6 +7,7 @@
   --primary-ring: #aecde3;
 
   --secondary: #5b7499;
+  --secondary-foreground: #eaf3f9;
   --secondary-ring: #c8d8e8;
 
   --info: #aecde3;
@@ -32,6 +33,7 @@
     --primary-ring: #3f5068;
 
     --secondary: #7a9ab8;
+    --secondary-foreground: #131c27;
     --secondary-ring: #3f5068;
 
     --info: #5b7499;
@@ -61,6 +63,7 @@
   --primary-ring: #aecde3;
 
   --secondary: #5b7499;
+  --secondary-foreground: #eaf3f9;
   --secondary-ring: #c8d8e8;
 
   --info: #aecde3;
@@ -88,6 +91,7 @@
   --primary-ring: #3f5068;
 
   --secondary: #7a9ab8;
+  --secondary-foreground: #131c27;
   --secondary-ring: #3f5068;
 
   --info: #5b7499;

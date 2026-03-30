@@ -25,10 +25,58 @@ export const Primary: Story = {
   },
 };
 
-export const Outline: Story = {
+export const PrimaryOutline: Story = {
   args: {
     ...Default.args,
-    color: 'outline',
+    color: 'primary',
+    variant: 'outline',
+  },
+};
+
+export const PrimaryGhost: Story = {
+  args: {
+    ...Default.args,
+    color: 'primary',
+    variant: 'ghost',
+  },
+};
+
+export const PrimaryLink: Story = {
+  args: {
+    ...Default.args,
+    color: 'primary',
+    variant: 'link',
+  },
+};
+
+export const Secondary: Story = {
+  args: {
+    ...Default.args,
+    color: 'secondary',
+  },
+};
+
+export const SecondaryOutline: Story = {
+  args: {
+    ...Default.args,
+    color: 'secondary',
+    variant: 'outline',
+  },
+};
+
+export const SecondaryGhost: Story = {
+  args: {
+    ...Default.args,
+    color: 'secondary',
+    variant: 'ghost',
+  },
+};
+
+export const SecondaryLink: Story = {
+  args: {
+    ...Default.args,
+    color: 'secondary',
+    variant: 'link',
   },
 };
 
@@ -39,6 +87,30 @@ export const Danger: Story = {
   },
 };
 
+export const DangerOutline: Story = {
+  args: {
+    ...Default.args,
+    color: 'danger',
+    variant: 'outline',
+  },
+};
+
+export const DangerGhost: Story = {
+  args: {
+    ...Default.args,
+    color: 'danger',
+    variant: 'ghost',
+  },
+};
+
+export const DangerLink: Story = {
+  args: {
+    ...Default.args,
+    color: 'danger',
+    variant: 'link',
+  },
+};
+
 export const Warning: Story = {
   args: {
     ...Default.args,
@@ -46,10 +118,58 @@ export const Warning: Story = {
   },
 };
 
-export const Transparent: Story = {
+export const WarningOutline: Story = {
   args: {
     ...Default.args,
-    color: 'transparent',
+    color: 'warning',
+    variant: 'outline',
+  },
+};
+
+export const WarningGhost: Story = {
+  args: {
+    ...Default.args,
+    color: 'warning',
+    variant: 'ghost',
+  },
+};
+
+export const WarningLink: Story = {
+  args: {
+    ...Default.args,
+    color: 'warning',
+    variant: 'link',
+  },
+};
+
+export const Info: Story = {
+  args: {
+    ...Default.args,
+    color: 'info',
+  },
+};
+
+export const InfoOutline: Story = {
+  args: {
+    ...Default.args,
+    color: 'info',
+    variant: 'outline',
+  },
+};
+
+export const InfoGhost: Story = {
+  args: {
+    ...Default.args,
+    color: 'info',
+    variant: 'ghost',
+  },
+};
+
+export const InfoLink: Story = {
+  args: {
+    ...Default.args,
+    color: 'info',
+    variant: 'link',
   },
 };
 
