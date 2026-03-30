@@ -4,6 +4,7 @@ import swc from 'unplugin-swc';
 import path from 'node:path';
 
 export const nestjsConfig = mergeConfig(baseConfig, {
+  oxc: false,
   resolve: {
     alias: {
       '@': path.resolve(process.cwd(), 'src'),

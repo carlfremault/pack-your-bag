@@ -24,7 +24,7 @@
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
       "env": ["AUTH_*", "RSA_*", "POSTGRES_*"],
-      "cache": true,
+      "cache": false,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
@@ -43,11 +43,13 @@
     },
     "migrate": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["POSTGRES_*"]
     },
     "status": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["POSTGRES_*"]
     },
     "generate": {
       "cache": false,
@@ -58,12 +60,14 @@
 
     "deploy": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["POSTGRES_*"]
     },
     "seed": {
       "cache": false,
       "dependsOn": ["generate"],
-      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"]
+      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
+      "env": ["POSTGRES_*"]
     },
     "openapi": {
       "dependsOn": ["build"],
