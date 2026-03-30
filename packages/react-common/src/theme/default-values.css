@@ -1,4 +1,6 @@
 :root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
   --background: #fdfaf6;
   --foreground: #1c1410;
 
