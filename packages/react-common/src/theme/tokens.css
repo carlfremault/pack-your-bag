@@ -31,6 +31,9 @@
 
   --color-shadow-fab: var(--shadow-fab);
 
+  --color-nav-inactive: var(--nav-inactive);
+  --color-nav-inactive-hover: var(--nav-inactive-hover);
+
   /* Category colors palette */
   --color-cat-ocean-bg: var(--cat-ocean-bg);
   --color-cat-ocean-border: var(--cat-ocean-border);

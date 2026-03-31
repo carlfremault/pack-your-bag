@@ -19,13 +19,14 @@ export default function MobileBottomNav(props: MobileBottomNavProps) {
           onClick={() => onTabChange(id)}
           variant="ghost"
           color={activeTab === id ? 'secondary' : 'info'}
-          className="flex flex-col transition-colors"
+          className="flex flex-col"
           aria-current={activeTab === id ? 'page' : undefined}
         >
           <Icon className="h-6 w-6" />
           <div className="mt-1 text-[10px] font-medium tracking-wide">{label}</div>
+          {/* Big Dot Indicator */}
           <div
-            className={`mx-auto h-1 w-1 rounded-full transition-colors duration-150 ${
+            className={`mx-auto h-1 w-1 rounded-full transition-colors duration-150 ease-out ${
               activeTab === id ? 'bg-secondary' : 'bg-transparent'
             }`}
           />
