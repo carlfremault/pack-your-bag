@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
-import MobileBottomNav from './MobileBottomNav';
+import DesktopNavButtons from './DesktopNavButtons';
 
-const meta: Meta<typeof MobileBottomNav> = {
-  title: 'Components/MobileBottomNav',
-  component: MobileBottomNav,
-  parameters: {
-    layout: 'fullscreen',
-  },
+const meta: Meta<typeof DesktopNavButtons> = {
+  title: 'Components/DesktopNavButtons',
+  component: DesktopNavButtons,
 };
 export default meta;
 
