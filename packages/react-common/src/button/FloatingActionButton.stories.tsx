@@ -9,7 +9,7 @@ const meta: Meta<typeof FloatingActionButton> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof FloatingActionButton>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {

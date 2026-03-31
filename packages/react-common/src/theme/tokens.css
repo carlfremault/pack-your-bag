@@ -5,6 +5,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  --color-logo-gradient-from: var(--logo-gradient-from);
+  --color-logo-gradient-to: var(--logo-gradient-to);
+
   /* Button / semantic surfaces */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);

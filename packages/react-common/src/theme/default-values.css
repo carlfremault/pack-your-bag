@@ -25,6 +25,9 @@
   --danger-ring: #fecaca;
 
   --shadow-fab: #0e7fa859;
+
+  --logo-gradient-from: #0e7fa8;
+  --logo-gradient-to: #f59e0b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -53,6 +56,9 @@
     --danger-ring: #991b1b;
 
     --shadow-fab: #00000080;
+
+    --logo-gradient-from: #38c5e8;
+    --logo-gradient-to: #fbbf24;
   }
 }
 
@@ -85,6 +91,9 @@
   --danger-ring: #fecaca;
 
   --shadow-fab: #0e7fa859;
+
+  --logo-gradient-from: #0e7fa8;
+  --logo-gradient-to: #f59e0b;
 }
 
 /* 
@@ -115,4 +124,7 @@
   --danger-ring: #991b1b;
 
   --shadow-fab: #00000080;
+
+  --logo-gradient-from: #38c5e8;
+  --logo-gradient-to: #fbbf24;
 }
