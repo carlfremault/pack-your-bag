@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-import { type CategoryColor, categoryColors } from '../lib/categoryColors';
+import { type CategoryColor, categoryColors } from '../../lib/categoryColors';
 
 interface CategoryPillProps {
   label: string;
