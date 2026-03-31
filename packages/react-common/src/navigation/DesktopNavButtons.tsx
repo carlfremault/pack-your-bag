@@ -14,7 +14,7 @@ export default function DesktopNavButtons(props: DesktopNavButtonsProps) {
   const buttonClassName =
     'cursor-pointer active:scale-[0.99] active:brightness-95 transition-colors duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide transition-all';
   const activeButtonClassName = 'bg-background text-primary shadow-sm';
-  const inactiveButtonClassName = 'text-info-foreground/70 hover:text-info-foreground';
+  const inactiveButtonClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
 
   return (
     <div className="bg-info-ring flex w-fit rounded-lg p-1">

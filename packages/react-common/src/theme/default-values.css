@@ -28,6 +28,9 @@
 
   --logo-gradient-from: #0e7fa8;
   --logo-gradient-to: #f59e0b;
+
+  --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
+  --nav-inactive-hover: var(--info-foreground);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -59,6 +62,9 @@
 
     --logo-gradient-from: #38c5e8;
     --logo-gradient-to: #fbbf24;
+
+    --nav-inactive: var(--info);
+    --nav-inactive-hover: #e0f2fe;
   }
 }
 
@@ -94,6 +100,9 @@
 
   --logo-gradient-from: #0e7fa8;
   --logo-gradient-to: #f59e0b;
+
+  --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
+  --nav-inactive-hover: var(--info-foreground);
 }
 
 /* 
@@ -127,4 +136,7 @@
 
   --logo-gradient-from: #38c5e8;
   --logo-gradient-to: #fbbf24;
+
+  --nav-inactive: var(--info);
+  --nav-inactive-hover: #e0f2fe;
 }
