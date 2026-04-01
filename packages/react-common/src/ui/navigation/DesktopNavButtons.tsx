@@ -12,7 +12,7 @@ export default function DesktopNavButtons(props: DesktopNavButtonsProps) {
   const { activeTab, onTabChange } = props;
 
   const buttonClassName =
-    'cursor-pointer active:scale-[0.99] active:brightness-95 transition-colors duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide transition-all';
+    'cursor-pointer active:scale-90 active:bg-primary/15 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide';
   const activeButtonClassName = 'bg-background text-primary shadow-sm';
   const inactiveButtonClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
 
