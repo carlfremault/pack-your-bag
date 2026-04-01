@@ -43,7 +43,7 @@ export const PackWithoutItems: Story = {
     id: '1',
     name: 'Pack 1',
     description: 'Collection 1 description',
-    colorTheme: 'jungle',
+    colorTheme: 'lagoon',
     type: 'pack',
     numberOfItems: 0,
     handleOpenCollection: fn(),
