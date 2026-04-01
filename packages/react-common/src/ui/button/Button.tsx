@@ -2,7 +2,7 @@ import classNames from 'classnames';
 
 export type ButtonColor = 'primary' | 'secondary' | 'info' | 'warning' | 'danger';
 export type ButtonSize = 'small' | 'medium' | 'large';
-export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'link';
+export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'link' | 'unstyledIcon';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -44,6 +44,13 @@ const colorVariant: Record<ButtonVariant, Record<ButtonColor, string>> = {
     warning: 'text-warning ring-warning-ring underline-offset-4 hover:underline',
     danger: 'text-danger ring-danger-ring underline-offset-4 hover:underline',
   },
+  unstyledIcon: {
+    primary: 'text-primary/80 hover:text-primary ring-primary-ring',
+    secondary: 'text-secondary/80 hover:text-secondary ring-secondary-ring',
+    info: 'text-info/80 hover:text-info ring-info-ring',
+    warning: 'text-warning/80 hover:text-warning ring-warning-ring',
+    danger: 'text-danger/80 hover:text-danger ring-danger-ring',
+  },
 };
 
 const buttonSize: Record<ButtonSize, string> = {
@@ -79,19 +86,25 @@ export default function Button(props: ButtonProps) {
   const isSolid = variant === 'solid';
   const isOutline = variant === 'outline';
   const isGhost = variant === 'ghost';
+  const isUnstyledIcon = variant === 'unstyledIcon';
 
   const buttonClassName = classNames(
     'inline-flex items-center justify-center font-medium tracking-wide',
-    'transition-[filter,transform,box-shadow] duration-150 ease-out',
+    'transition-[filter,transform,box-shadow,color] duration-150 ease-out',
     'focus-visible:outline-none focus-visible:ring-2',
     colorVariant[variant][color],
-    !isLink && buttonSize[size],
+    !isLink && !isUnstyledIcon && buttonSize[size],
     !isLink && 'rounded-md',
-    !isLink && !isGhost && !isOutline && 'shadow-sm',
+    !isLink && !isGhost && !isOutline && !isUnstyledIcon && 'shadow-sm',
     isSolid && !disabled && 'hover:brightness-110',
     disabled
       ? 'cursor-not-allowed opacity-50'
-      : 'cursor-pointer active:scale-[0.99] active:brightness-95',
+      : classNames(
+          'cursor-pointer',
+          isUnstyledIcon
+            ? 'active:scale-90 active:brightness-90'
+            : 'active:scale-95 active:brightness-95',
+        ),
     fullWidth ? 'w-full' : 'w-fit',
     className,
   );

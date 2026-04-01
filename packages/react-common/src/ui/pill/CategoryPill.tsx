@@ -2,7 +2,7 @@ import classNames from 'classnames';
 
 import { type CategoryColor, categoryColors } from '../../lib/categoryColors';
 
-interface CategoryPillProps {
+export interface CategoryPillProps {
   label: string;
   color: CategoryColor;
 }
@@ -10,7 +10,7 @@ interface CategoryPillProps {
 export default function CategoryPill({ label, color }: CategoryPillProps) {
   const { className } = categoryColors[color];
   const categoryPillClassName = classNames(
-    'uppercase font-bold tracking-wide rounded-full border px-2.5 py-0.5 text-xs',
+    'uppercase font-medium rounded-full border px-1.5 py-0 text-[10px] leading-4 truncate',
     className,
   );
 
