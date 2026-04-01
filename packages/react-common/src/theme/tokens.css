@@ -35,43 +35,43 @@
   --color-nav-inactive-hover: var(--nav-inactive-hover);
 
   /* Category colors palette */
-  --color-cat-ocean-bg: var(--cat-ocean-bg);
-  --color-cat-ocean-border: var(--cat-ocean-border);
-  --color-cat-ocean-text: var(--cat-ocean-text);
+  --color-ocean-bg: var(--ocean-bg);
+  --color-ocean-border: var(--ocean-border);
+  --color-ocean-text: var(--ocean-text);
 
-  --color-cat-sky-bg: var(--cat-sky-bg);
-  --color-cat-sky-border: var(--cat-sky-border);
-  --color-cat-sky-text: var(--cat-sky-text);
+  --color-sky-bg: var(--sky-bg);
+  --color-sky-border: var(--sky-border);
+  --color-sky-text: var(--sky-text);
 
-  --color-cat-lagoon-bg: var(--cat-lagoon-bg);
-  --color-cat-lagoon-border: var(--cat-lagoon-border);
-  --color-cat-lagoon-text: var(--cat-lagoon-text);
+  --color-lagoon-bg: var(--lagoon-bg);
+  --color-lagoon-border: var(--lagoon-border);
+  --color-lagoon-text: var(--lagoon-text);
 
-  --color-cat-sunset-bg: var(--cat-sunset-bg);
-  --color-cat-sunset-border: var(--cat-sunset-border);
-  --color-cat-sunset-text: var(--cat-sunset-text);
+  --color-sunset-bg: var(--sunset-bg);
+  --color-sunset-border: var(--sunset-border);
+  --color-sunset-text: var(--sunset-text);
 
-  --color-cat-sand-bg: var(--cat-sand-bg);
-  --color-cat-sand-border: var(--cat-sand-border);
-  --color-cat-sand-text: var(--cat-sand-text);
+  --color-sand-bg: var(--sand-bg);
+  --color-sand-border: var(--sand-border);
+  --color-sand-text: var(--sand-text);
 
-  --color-cat-coral-bg: var(--cat-coral-bg);
-  --color-cat-coral-border: var(--cat-coral-border);
-  --color-cat-coral-text: var(--cat-coral-text);
+  --color-coral-bg: var(--coral-bg);
+  --color-coral-border: var(--coral-border);
+  --color-coral-text: var(--coral-text);
 
-  --color-cat-jungle-bg: var(--cat-jungle-bg);
-  --color-cat-jungle-border: var(--cat-jungle-border);
-  --color-cat-jungle-text: var(--cat-jungle-text);
+  --color-jungle-bg: var(--jungle-bg);
+  --color-jungle-border: var(--jungle-border);
+  --color-jungle-text: var(--jungle-text);
 
-  --color-cat-lavender-bg: var(--cat-lavender-bg);
-  --color-cat-lavender-border: var(--cat-lavender-border);
-  --color-cat-lavender-text: var(--cat-lavender-text);
+  --color-lavender-bg: var(--lavender-bg);
+  --color-lavender-border: var(--lavender-border);
+  --color-lavender-text: var(--lavender-text);
 
-  --color-cat-rose-bg: var(--cat-rose-bg);
-  --color-cat-rose-border: var(--cat-rose-border);
-  --color-cat-rose-text: var(--cat-rose-text);
+  --color-rose-bg: var(--rose-bg);
+  --color-rose-border: var(--rose-border);
+  --color-rose-text: var(--rose-text);
 
-  --color-cat-slate-bg: var(--cat-slate-bg);
-  --color-cat-slate-border: var(--cat-slate-border);
-  --color-cat-slate-text: var(--cat-slate-text);
+  --color-slate-bg: var(--slate-bg);
+  --color-slate-border: var(--slate-border);
+  --color-slate-text: var(--slate-text);
 }

@@ -8,11 +8,11 @@ const meta: Meta<typeof CategoryPill> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof CategoryPill>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     label: 'Category',
-    color: 'ocean',
+    colorTheme: 'ocean',
   },
 };
