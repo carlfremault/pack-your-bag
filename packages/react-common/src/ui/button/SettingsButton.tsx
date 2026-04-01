@@ -11,7 +11,7 @@ export default function SettingsButton(props: SettingsButtonProps) {
 
   return (
     <Button onClick={onClick} variant="ghost" color="primary" aria-label="Settings">
-      <MdOutlineSettings className="h-5 w-5" />
+      <MdOutlineSettings className="h-5 w-5" aria-hidden="true" />
     </Button>
   );
 }

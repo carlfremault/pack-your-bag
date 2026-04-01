@@ -17,7 +17,7 @@ const meta: Meta<typeof ItemCard> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof ItemCard>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -26,7 +26,7 @@ export const Default: Story = {
     description: 'Item 1 description',
     category: {
       label: 'Category 1',
-      color: 'jungle',
+      colorTheme: 'jungle',
     },
     weight: 10,
     weightUnit: 'kg',
@@ -117,7 +117,7 @@ export const DescriptionWith1000CharactersAndActions: Story = {
     handleEditItem: fn(),
     category: {
       label: 'Category 1',
-      color: 'sand',
+      colorTheme: 'sand',
     },
     actions: (
       <Button variant="unstyledIcon" color="primary" aria-label="Edit Item 1" onClick={fn()}>
@@ -136,7 +136,7 @@ export const DescriptionWith1000CharactersAndQuantityStepper: Story = {
     weightUnit: 'kg',
     category: {
       label: 'Category 1',
-      color: 'lavender',
+      colorTheme: 'lavender',
     },
     handleEditItem: fn(),
     actions: <QuantityStepper quantity={1} onChange={fn()} />,

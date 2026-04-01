@@ -2,7 +2,7 @@
 @import 'tailwindcss';
 @source './';
 @import './theme/default-values.css';
-@import './theme/category-colors.css';
+@import './theme/color-themes.css';
 @import './theme/tokens.css';
 
 body {
