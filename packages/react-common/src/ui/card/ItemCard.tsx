@@ -11,15 +11,15 @@ export interface ItemCardProps {
   category?: CategoryPillProps;
   weight?: number;
   weightUnit?: string;
-  handleEditItem: (id: string) => void;
+  onEditItem: (id: string) => void;
   actions?: React.ReactNode;
 }
 
 export default function ItemCard(props: ItemCardProps) {
-  const { id, name, description, category, weight, weightUnit, handleEditItem, actions } = props;
+  const { id, name, description, category, weight, weightUnit, onEditItem, actions } = props;
 
   return (
-    <div className="bg-background border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-xl border p-3 text-left shadow-sm">
+    <div className="bg-background border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
       <div className="flex w-full items-center justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export default function ItemCard(props: ItemCardProps) {
           variant="unstyledIcon"
           color="primary"
           aria-label={`Edit ${name}`}
-          onClick={() => handleEditItem(id)}
+          onClick={() => onEditItem(id)}
         >
           <MdOutlineEdit className="h-5 w-5" />
         </Button>
