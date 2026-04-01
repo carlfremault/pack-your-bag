@@ -12,7 +12,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    label: 'Category',
+    name: 'Category',
     colorTheme: 'ocean',
   },
 };

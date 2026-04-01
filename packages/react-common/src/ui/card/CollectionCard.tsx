@@ -12,7 +12,7 @@ export interface CollectionCardProps {
   colorTheme?: ColorTheme;
   type: 'list' | 'pack';
   numberOfItems: number;
-  handleOpenCollection: (id: string) => void;
+  onOpenCollection: (id: string) => void;
 }
 
 export default function CollectionCard(props: CollectionCardProps) {
@@ -23,12 +23,12 @@ export default function CollectionCard(props: CollectionCardProps) {
     colorTheme = 'slate',
     type,
     numberOfItems,
-    handleOpenCollection,
+    onOpenCollection,
   } = props;
 
   const { className: colorThemeClassName } = colorThemes[colorTheme];
   const collectionCardClassName = classNames(
-    'flex w-full flex-col items-start justify-between gap-2 rounded-xl border p-3 text-left shadow-sm min-h-50 transition-transform duration-150 hover:-translate-y-0.5 ease-out cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] active:translate-y-0.5',
+    'flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm min-h-50 transition-transform duration-150 hover:-translate-y-0.5 ease-out cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] active:translate-y-0.5',
     colorThemeClassName,
   );
 
@@ -42,7 +42,7 @@ export default function CollectionCard(props: CollectionCardProps) {
   return (
     <button
       type="button"
-      onClick={() => handleOpenCollection(id)}
+      onClick={() => onOpenCollection(id)}
       aria-labelledby={nameId}
       aria-describedby={describedBy}
       className={collectionCardClassName}

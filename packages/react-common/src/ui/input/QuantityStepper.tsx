@@ -24,7 +24,7 @@ export default function QuantityStepper(props: QuantityStepperProps) {
 
   return (
     <div
-      className="bg-info-ring flex w-fit items-center gap-2 rounded-lg p-1"
+      className="bg-info-ring flex w-fit items-center gap-2 rounded-md p-1"
       role="group"
       aria-label="Quantity"
     >

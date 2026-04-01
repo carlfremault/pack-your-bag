@@ -17,7 +17,7 @@ export default function DesktopNavButtons(props: DesktopNavButtonsProps) {
   const inactiveButtonClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
 
   return (
-    <div className="bg-info-ring flex w-fit rounded-lg p-1">
+    <div className="bg-info-ring flex w-fit rounded-md p-1">
       {navTabs.map(({ id, label, icon: Icon }) => (
         <button
           key={id}
