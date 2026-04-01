@@ -19,21 +19,14 @@ export default function ItemCard(props: ItemCardProps) {
   const { id, name, description, category, weight, weightUnit, handleEditItem, actions } = props;
 
   return (
-    <div className="bg-background border-primary-ring flex w-full items-start justify-between rounded-xl border p-3 text-left shadow-sm transition-all">
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-center gap-2">
-          <h3 className="text-primary truncate text-base font-bold">{name}</h3>
-          {category && <CategoryPill {...category} />}
+    <div className="bg-background border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-xl border p-3 text-left shadow-sm">
+      <div className="flex w-full items-center justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-primary truncate text-base font-bold">{name}</h3>
+            {category && <CategoryPill {...category} />}
+          </div>
         </div>
-        {description && <div className="text-primary/70 mr-2 text-xs">{description}</div>}
-        <div className="text-primary flex items-center gap-1 text-xs">
-          <HiOutlineScale className="h-3 w-3" />{' '}
-          {weight !== undefined && weight !== null
-            ? `${weight}${weightUnit ? ` ${weightUnit}` : ''}`
-            : '--'}
-        </div>
-      </div>
-      <div className="flex shrink-0 flex-col items-center justify-between gap-2 self-stretch">
         <Button
           variant="unstyledIcon"
           color="primary"
@@ -42,6 +35,15 @@ export default function ItemCard(props: ItemCardProps) {
         >
           <MdOutlineEdit className="h-5 w-5" />
         </Button>
+      </div>
+      {description && <div className="text-primary/70 text-xs">{description}</div>}
+      <div className="flex w-full items-center justify-between">
+        <div className="text-primary flex items-center gap-1 text-xs">
+          <HiOutlineScale className="h-3 w-3" />
+          {weight !== undefined && weight !== null
+            ? `${weight}${weightUnit ? ` ${weightUnit}` : ''}`
+            : '--'}
+        </div>
         {actions}
       </div>
     </div>
