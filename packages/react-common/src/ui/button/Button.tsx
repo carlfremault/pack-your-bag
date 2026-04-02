@@ -24,7 +24,7 @@ const colorVariant: Record<ButtonVariant, Record<ButtonColor, string>> = {
     primary:
       'bg-background border border-primary text-primary ring-primary-ring hover:bg-primary/10',
     secondary:
-      'bg-background border border-secondary-emphasis text-secondary-emphasis ring-secondary-ring hover:bg-secondary/10',
+      'bg-background border border-secondary text-secondary ring-secondary-ring hover:bg-secondary/10',
     info: 'bg-background border border-info text-info ring-info-ring hover:bg-info/10',
     warning:
       'bg-background border border-warning text-warning ring-warning-ring hover:bg-warning/10',
@@ -32,21 +32,21 @@ const colorVariant: Record<ButtonVariant, Record<ButtonColor, string>> = {
   },
   ghost: {
     primary: 'text-primary ring-primary-ring hover:bg-primary/10',
-    secondary: 'text-secondary-emphasis ring-secondary-ring hover:bg-secondary/10',
+    secondary: 'text-secondary ring-secondary-ring hover:bg-secondary/10',
     info: 'text-info ring-info-ring hover:bg-info/10',
     warning: 'text-warning ring-warning-ring hover:bg-warning/10',
     danger: 'text-danger ring-danger-ring hover:bg-danger/10',
   },
   link: {
     primary: 'text-primary ring-primary-ring underline-offset-4 hover:underline',
-    secondary: 'text-secondary-emphasis ring-secondary-ring underline-offset-4 hover:underline',
+    secondary: 'text-secondary ring-secondary-ring underline-offset-4 hover:underline',
     info: 'text-info ring-info-ring underline-offset-4 hover:underline',
     warning: 'text-warning ring-warning-ring underline-offset-4 hover:underline',
     danger: 'text-danger ring-danger-ring underline-offset-4 hover:underline',
   },
   unstyledIcon: {
     primary: 'text-primary/80 hover:text-primary ring-primary-ring',
-    secondary: 'text-secondary-emphasis/80 hover:text-secondary-emphasis ring-secondary-ring',
+    secondary: 'text-secondary/80 hover:text-secondary ring-secondary-ring',
     info: 'text-info/80 hover:text-info ring-info-ring',
     warning: 'text-warning/80 hover:text-warning ring-warning-ring',
     danger: 'text-danger/80 hover:text-danger ring-danger-ring',
