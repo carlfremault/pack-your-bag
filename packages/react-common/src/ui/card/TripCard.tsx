@@ -31,20 +31,17 @@ export default function TripCard(props: TripCardProps) {
     >
       <div className="flex w-full items-center justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div id={nameId} className="truncate text-sm font-bold">
-            {name}
-          </div>
-          <div
-            id={detailsId}
-            className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2"
-          >
-            <div className="flex min-w-0 items-center gap-1 text-xs max-[319px]:w-full">
-              <BsBackpack className="h-4 w-4" aria-hidden="true" />
-              <span className="block truncate">{packName}</span>
+          <div className="flex gap-1">
+            <div id={nameId} className="truncate text-sm font-bold">
+              {name}
             </div>
-            <div className="bg-surface-overlay rounded-full px-1.5 py-0.5 text-xs">
+            <div className="bg-surface-overlay border-primary-ring rounded-full border px-1.5 py-0.5 text-[10px] font-medium">
               {date.toLocaleDateString()}
             </div>
+          </div>
+          <div className="flex min-w-0 items-center gap-1 text-xs">
+            <BsBackpack className="h-4 w-4" aria-hidden="true" />
+            <span className="block truncate">{packName}</span>
           </div>
         </div>
         <div className="flex flex-col items-center gap-0">
