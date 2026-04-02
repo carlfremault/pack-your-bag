@@ -48,16 +48,16 @@ export default function CollectionCard(props: CollectionCardProps) {
       className={collectionCardClassName}
     >
       <Icon className="h-5 w-5" aria-hidden="true" />
-      <div className="flex w-full min-w-0 flex-col items-start justify-between gap-2">
-        <span id={nameId} className="truncate text-base font-bold">
+      <div className="flex w-full min-w-0 flex-col items-start justify-between gap-1">
+        <span id={nameId} className="truncate text-sm font-bold">
           {name}
         </span>
         {description && (
-          <div id={descriptionId} className="text-xs">
+          <div id={descriptionId} className="text-xs font-extralight">
             {description}
           </div>
         )}
-        <div id={countId} className="flex items-center gap-1 text-xs font-bold">
+        <div id={countId} className="flex items-center gap-1 text-xs">
           {`${numberOfItems} ${numberOfItems === 1 ? 'item' : 'items'}`}
         </div>
       </div>
