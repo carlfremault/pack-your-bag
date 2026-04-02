@@ -21,7 +21,7 @@ export default function CategoryCard(props: CategoryCardProps) {
   const colorLabelClassName = classNames('border h-4 w-4 rounded-full', colorThemeClassName);
 
   const categoryCardClassName =
-    'group bg-background border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm';
+    'group bg-surface border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm';
   const actionGroupClassName =
     'pointer-events-auto flex items-center gap-4 opacity-100 md:pointer-events-none md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100';
 

@@ -19,7 +19,7 @@ export default function ItemCard(props: ItemCardProps) {
   const { id, name, description, category, weight, weightUnit, onEditItem, actions } = props;
 
   return (
-    <div className="bg-background border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
+    <div className="bg-surface border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
       <div className="flex w-full items-center justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

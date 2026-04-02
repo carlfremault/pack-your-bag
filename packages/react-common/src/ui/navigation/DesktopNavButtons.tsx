@@ -12,12 +12,12 @@ export default function DesktopNavButtons(props: DesktopNavButtonsProps) {
   const { activeTab, onTabChange } = props;
 
   const buttonClassName =
-    'cursor-pointer active:scale-90 active:bg-primary/15 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide';
-  const activeButtonClassName = 'bg-background text-primary shadow-sm';
+    'cursor-pointer active:scale-90 active:bg-primary/10 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide';
+  const activeButtonClassName = 'bg-secondary text-secondary-foreground shadow-sm';
   const inactiveButtonClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
 
   return (
-    <div className="bg-info-ring flex w-fit rounded-md p-1">
+    <div className="bg-surface-overlay flex w-fit rounded-md p-1">
       {navTabs.map(({ id, label, icon: Icon }) => (
         <button
           key={id}

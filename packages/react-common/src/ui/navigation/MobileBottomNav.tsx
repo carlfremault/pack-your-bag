@@ -12,7 +12,7 @@ export default function MobileBottomNav(props: MobileBottomNavProps) {
   const { activeTab, onTabChange } = props;
 
   return (
-    <div className="border-primary-ring bg-background absolute bottom-0 z-10 flex w-full justify-around border-t p-2">
+    <div className="border-primary-ring bg-surface absolute bottom-0 z-10 flex w-full justify-around border-t p-2">
       {navTabs.map(({ id, label, icon: Icon }) => (
         <Button
           key={id}
@@ -27,7 +27,7 @@ export default function MobileBottomNav(props: MobileBottomNavProps) {
           {/* Big Dot Indicator */}
           <div
             className={`mx-auto h-1 w-1 rounded-full transition-colors duration-150 ease-out ${
-              activeTab === id ? 'bg-secondary' : 'bg-transparent'
+              activeTab === id ? 'bg-secondary-emphasis' : 'bg-transparent'
             }`}
           />
         </Button>

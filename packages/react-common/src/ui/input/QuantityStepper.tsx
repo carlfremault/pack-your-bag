@@ -18,13 +18,13 @@ export default function QuantityStepper(props: QuantityStepperProps) {
   };
 
   const stepperButtonClassName =
-    'bg-background text-primary ring-primary-ring flex h-6 w-6 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 active:scale-90 active:bg-primary/15 transition-[transform,background-color] duration-150 ease-out';
+    'bg-surface text-primary ring-primary-ring flex h-6 w-6 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 active:scale-90 active:bg-primary/15 transition-[transform,background-color] duration-150 ease-out';
   const inputClassName =
     'text-primary text-sm ring-primary-ring h-6 w-12 rounded-md text-center [appearance:textfield] focus-visible:outline-none focus-visible:ring-2 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none';
 
   return (
     <div
-      className="bg-info-ring flex w-fit items-center gap-2 rounded-md p-1"
+      className="bg-surface-overlay flex w-fit items-center gap-2 rounded-md p-1"
       role="group"
       aria-label="Quantity"
     >
