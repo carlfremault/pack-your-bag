@@ -5,6 +5,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  --color-surface: var(--surface);
+  --color-surface-overlay: var(--surface-overlay);
+
   --color-logo-gradient-from: var(--logo-gradient-from);
   --color-logo-gradient-to: var(--logo-gradient-to);
 
