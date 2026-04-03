@@ -15,10 +15,6 @@
   --accent-ring: #f4c5b8;
   --accent-emphasis: #c1513a;
 
-  --secondary: #fbbf24;
-  --secondary-foreground: #1a0e00;
-  --secondary-ring: #fde68a;
-
   --info: #38bdf8;
   --info-foreground: #0c4a6e;
   --info-ring: #e0f2fe;
@@ -32,9 +28,6 @@
   --danger-ring: #fecaca;
 
   --shadow-fab: #0e7fa859;
-
-  --logo-gradient-from: #0e7fa8;
-  --logo-gradient-to: #f59e0b;
 
   --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
   --nav-inactive-hover: var(--info-foreground);
@@ -56,10 +49,6 @@
     --accent-ring: #7c2d12;
     --accent-emphasis: #f4845f;
 
-    --secondary: #fbbf24;
-    --secondary-foreground: #1a0e00;
-    --secondary-ring: #fde68a;
-
     --info: #7dd3fc;
     --info-foreground: #0c2d45;
     --info-ring: #0369a1;
@@ -73,9 +62,6 @@
     --danger-ring: #991b1b;
 
     --shadow-fab: #00000080;
-
-    --logo-gradient-from: #38c5e8;
-    --logo-gradient-to: #fbbf24;
 
     --nav-inactive: var(--info);
     --nav-inactive-hover: #e0f2fe;
@@ -103,10 +89,6 @@
   --accent-ring: #f4c5b8;
   --accent-emphasis: #c1513a;
 
-  --secondary: #fbbf24;
-  --secondary-foreground: #1a0e00;
-  --secondary-ring: #fde68a;
-
   --info: #38bdf8;
   --info-foreground: #0c4a6e;
   --info-ring: #e0f2fe;
@@ -119,12 +101,8 @@
   --danger-foreground: #ffffff;
   --danger-ring: #fecaca;
 
-  --shadow-fab: #0e7fa859;
-
-  --logo-gradient-from: #0e7fa8;
-  --logo-gradient-to: #f59e0b;
-
-  --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
+  --shadow-fab: #0e7fa859
+    --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
   --nav-inactive-hover: var(--info-foreground);
 }
 
@@ -146,10 +124,6 @@
   --accent-ring: #7c2d12;
   --accent-emphasis: #f4845f;
 
-  --secondary: #fbbf24;
-  --secondary-foreground: #1a0e00;
-  --secondary-ring: #fde68a;
-
   --info: #7dd3fc;
   --info-foreground: #0c2d45;
   --info-ring: #0369a1;
@@ -163,9 +137,6 @@
   --danger-ring: #991b1b;
 
   --shadow-fab: #00000080;
-
-  --logo-gradient-from: #38c5e8;
-  --logo-gradient-to: #fbbf24;
 
   --nav-inactive: var(--info);
   --nav-inactive-hover: #e0f2fe;
