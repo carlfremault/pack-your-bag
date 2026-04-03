@@ -101,8 +101,9 @@
   --danger-foreground: #ffffff;
   --danger-ring: #fecaca;
 
-  --shadow-fab: #0e7fa859
-    --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
+  --shadow-fab: #0e7fa859;
+
+  --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
   --nav-inactive-hover: var(--info-foreground);
 }
 
