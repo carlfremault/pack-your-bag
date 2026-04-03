@@ -30,6 +30,10 @@
   --color-danger-foreground: var(--danger-foreground);
   --color-danger-ring: var(--danger-ring);
 
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-ring: var(--success-ring);
+
   --color-shadow-fab: var(--shadow-fab);
 
   --color-nav-inactive: var(--nav-inactive);

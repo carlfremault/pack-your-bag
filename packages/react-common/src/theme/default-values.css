@@ -27,6 +27,10 @@
   --danger-foreground: #ffffff;
   --danger-ring: #fecaca;
 
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --success-ring: #bbf7d0;
+
   --shadow-fab: #0e7fa859;
 
   --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
@@ -60,6 +64,10 @@
     --danger: #f87171;
     --danger-foreground: #1a0202;
     --danger-ring: #991b1b;
+
+    --success: #4ade80;
+    --success-foreground: #052e16;
+    --success-ring: #166534;
 
     --shadow-fab: #00000080;
 
@@ -101,6 +109,10 @@
   --danger-foreground: #ffffff;
   --danger-ring: #fecaca;
 
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --success-ring: #bbf7d0;
+
   --shadow-fab: #0e7fa859;
 
   --nav-inactive: color-mix(in oklch, var(--info-foreground) 80%, transparent);
@@ -136,6 +148,10 @@
   --danger: #f87171;
   --danger-foreground: #1a0202;
   --danger-ring: #991b1b;
+
+  --success: #4ade80;
+  --success-foreground: #052e16;
+  --success-ring: #166534;
 
   --shadow-fab: #00000080;
 
