@@ -19,11 +19,11 @@ export default function ItemCard(props: ItemCardProps) {
   const { id, name, description, category, weight, weightUnit, onEditItem, actions } = props;
 
   return (
-    <div className="bg-surface border-primary-ring flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
+    <div className="bg-surface border-primary-ring text-primary flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
       <div className="flex w-full items-center justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-primary truncate text-base font-bold">{name}</h3>
+            <h3 className="truncate text-sm font-bold">{name}</h3>
             {category && <CategoryPill {...category} />}
           </div>
         </div>
@@ -36,9 +36,9 @@ export default function ItemCard(props: ItemCardProps) {
           <MdOutlineEdit className="h-5 w-5" />
         </Button>
       </div>
-      {description && <div className="text-primary/70 text-xs">{description}</div>}
+      {description && <div className="text-xs font-light">{description}</div>}
       <div className="flex w-full items-center justify-between">
-        <div className="text-primary flex items-center gap-1 text-xs">
+        <div className="flex items-center gap-1 text-xs">
           <HiOutlineScale className="h-3 w-3" />
           {weight !== undefined && weight !== null
             ? `${weight}${weightUnit ? ` ${weightUnit}` : ''}`

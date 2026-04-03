@@ -16,6 +16,11 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-ring: var(--primary-ring);
 
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-ring: var(--accent-ring);
+  --color-accent-emphasis: var(--accent-emphasis);
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary-ring: var(--secondary-ring);
