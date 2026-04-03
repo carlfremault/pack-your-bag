@@ -53,7 +53,7 @@ export default function CollectionCard(props: CollectionCardProps) {
           {name}
         </span>
         {description && (
-          <div id={descriptionId} className="text-xs font-extralight">
+          <div id={descriptionId} className="text-xs font-light">
             {description}
           </div>
         )}

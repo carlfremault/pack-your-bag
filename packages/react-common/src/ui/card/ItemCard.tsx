@@ -23,7 +23,7 @@ export default function ItemCard(props: ItemCardProps) {
       <div className="flex w-full items-center justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-bold">{name}</span>
+            <h3 className="truncate text-sm font-bold">{name}</h3>
             {category && <CategoryPill {...category} />}
           </div>
         </div>

@@ -50,7 +50,8 @@ export const NotPacked: Story = {
 export const WithLongRemarks: Story = {
   args: {
     ...Default.args,
-    remarks: 'This is a long remark that should wrap to the next line',
+    remarks:
+      'This is a much longer remark that contains significantly more text and should definitely wrap to multiple lines in order to properly test the text wrapping behavior of the TripCard component',
   },
 };
 
@@ -64,13 +65,14 @@ export const WithExtraLongRemarks: Story = {
 export const WithLongPackName: Story = {
   args: {
     ...Default.args,
-    packName: 'Long Pack Name',
+    packName: 'This is a significantly longer pack name for testing',
   },
 };
 
 export const WithExtraLongPackName: Story = {
   args: {
     ...Default.args,
-    packName: 'Extra Long Pack Name',
+    packName:
+      'This is an extremely long pack name that should definitely test the component behavior with very long text strings that might cause overflow or wrapping issues',
   },
 };
