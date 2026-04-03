@@ -49,37 +49,6 @@ export const PrimaryLink: Story = {
   },
 };
 
-export const Secondary: Story = {
-  args: {
-    ...Default.args,
-    color: 'secondary',
-  },
-};
-
-export const SecondaryOutline: Story = {
-  args: {
-    ...Default.args,
-    color: 'secondary',
-    variant: 'outline',
-  },
-};
-
-export const SecondaryGhost: Story = {
-  args: {
-    ...Default.args,
-    color: 'secondary',
-    variant: 'ghost',
-  },
-};
-
-export const SecondaryLink: Story = {
-  args: {
-    ...Default.args,
-    color: 'secondary',
-    variant: 'link',
-  },
-};
-
 export const Danger: Story = {
   args: {
     ...Default.args,

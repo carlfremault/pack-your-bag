@@ -8,9 +8,6 @@
   --color-surface: var(--surface);
   --color-surface-overlay: var(--surface-overlay);
 
-  --color-logo-gradient-from: var(--logo-gradient-from);
-  --color-logo-gradient-to: var(--logo-gradient-to);
-
   /* Button / semantic surfaces */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -20,10 +17,6 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-ring: var(--accent-ring);
   --color-accent-emphasis: var(--accent-emphasis);
-
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary-ring: var(--secondary-ring);
 
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
