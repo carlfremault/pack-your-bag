@@ -3,7 +3,7 @@ import { MdOutlineFormatListBulleted } from 'react-icons/md';
 
 import classNames from 'classnames';
 
-import { ColorTheme, colorThemes } from '../../../lib/colorThemes';
+import { ColorTheme, colorThemes } from '#lib/colorThemes';
 
 export interface CollectionCardProps {
   id: string;
