@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-import { type ColorTheme, colorThemes } from '../../lib/colorThemes';
+import { type ColorTheme, colorThemes } from '#lib/colorThemes';
 
 export interface CategoryPillProps {
   name: string;

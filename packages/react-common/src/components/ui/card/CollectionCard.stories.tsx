@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
-import { colorThemes } from '../../lib/colorThemes';
-import { LONG_DESCRIPTION } from '../../lib/constants';
-
 import CollectionCard from './CollectionCard';
+
+import { colorThemes } from '#lib/colorThemes';
+import { LONG_DESCRIPTION } from '#lib/constants';
 
 const meta: Meta<typeof CollectionCard> = {
   title: 'Components/CollectionCard',

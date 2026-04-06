@@ -2,6 +2,9 @@
   "name": "@repo/react-common",
   "version": "0.0.1",
   "private": true,
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
