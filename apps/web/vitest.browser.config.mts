@@ -2,25 +2,23 @@ import { uiConfig } from '@repo/vitest-config/ui';
 
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import type { UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
 
+const sharedUiConfig = uiConfig as UserConfig & { test?: Record<string, unknown> };
+
 export default defineConfig({
-  ...uiConfig,
-  plugins: [react(), tsconfigPaths()],
+  ...sharedUiConfig,
+  plugins: [react()],
+  resolve: { tsconfigPaths: true },
   test: {
-    ...uiConfig.test,
+    ...sharedUiConfig.test,
     browser: {
       enabled: true,
-      provider: playwright(),
-      instances: [
-        {
-          browser: 'chromium',
-        },
-      ],
+      provider: playwright() as never,
+      instances: [{ browser: 'chromium' }],
     },
     coverage: {
-      ...uiConfig.test.coverage,
       provider: 'istanbul',
       reporter: [['json', { file: 'coverage-browser.json' }]],
       reportsDirectory: './coverage',

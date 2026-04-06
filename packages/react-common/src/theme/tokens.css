@@ -1,0 +1,82 @@
+@theme inline {
+  --font-sans: var(--font-sans);
+
+  /* Background / text */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-surface: var(--surface);
+  --color-surface-overlay: var(--surface-overlay);
+
+  /* Button / semantic surfaces */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-ring: var(--primary-ring);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-ring: var(--accent-ring);
+  --color-accent-emphasis: var(--accent-emphasis);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-ring: var(--info-ring);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-ring: var(--warning-ring);
+
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-ring: var(--danger-ring);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-ring: var(--success-ring);
+
+  --color-shadow-fab: var(--shadow-fab);
+
+  --color-nav-inactive: var(--nav-inactive);
+  --color-nav-inactive-hover: var(--nav-inactive-hover);
+
+  /* Category colors palette */
+  --color-ocean-bg: var(--ocean-bg);
+  --color-ocean-border: var(--ocean-border);
+  --color-ocean-text: var(--ocean-text);
+
+  --color-sky-bg: var(--sky-bg);
+  --color-sky-border: var(--sky-border);
+  --color-sky-text: var(--sky-text);
+
+  --color-lagoon-bg: var(--lagoon-bg);
+  --color-lagoon-border: var(--lagoon-border);
+  --color-lagoon-text: var(--lagoon-text);
+
+  --color-sunset-bg: var(--sunset-bg);
+  --color-sunset-border: var(--sunset-border);
+  --color-sunset-text: var(--sunset-text);
+
+  --color-sand-bg: var(--sand-bg);
+  --color-sand-border: var(--sand-border);
+  --color-sand-text: var(--sand-text);
+
+  --color-coral-bg: var(--coral-bg);
+  --color-coral-border: var(--coral-border);
+  --color-coral-text: var(--coral-text);
+
+  --color-jungle-bg: var(--jungle-bg);
+  --color-jungle-border: var(--jungle-border);
+  --color-jungle-text: var(--jungle-text);
+
+  --color-lavender-bg: var(--lavender-bg);
+  --color-lavender-border: var(--lavender-border);
+  --color-lavender-text: var(--lavender-text);
+
+  --color-rose-bg: var(--rose-bg);
+  --color-rose-border: var(--rose-border);
+  --color-rose-text: var(--rose-text);
+
+  --color-slate-bg: var(--slate-bg);
+  --color-slate-border: var(--slate-border);
+  --color-slate-text: var(--slate-text);
+}

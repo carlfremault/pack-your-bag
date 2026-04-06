@@ -1,9 +1,15 @@
 import { mergeConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { baseConfig } from './base-config.js';
 import swc from 'unplugin-swc';
+import path from 'node:path';
 
 export const nestjsConfig = mergeConfig(baseConfig, {
+  oxc: false,
+  resolve: {
+    alias: {
+      '@': path.resolve(process.cwd(), 'src'),
+    },
+  },
   test: {
     globals: true,
     environment: 'node',
@@ -18,6 +24,5 @@ export const nestjsConfig = mergeConfig(baseConfig, {
     swc.vite({
       module: { type: 'es6' },
     }),
-    tsconfigPaths(),
   ],
 });

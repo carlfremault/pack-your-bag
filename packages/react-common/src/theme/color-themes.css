@@ -1,0 +1,176 @@
+:root {
+  --ocean-bg: #dff4f9;
+  --ocean-border: #0e7fa8;
+  --ocean-text: #0a4f6a;
+
+  --sky-bg: #e0f2fe;
+  --sky-border: #38bdf8;
+  --sky-text: #0369a1;
+
+  --lagoon-bg: #ccfbf1;
+  --lagoon-border: #0d9488;
+  --lagoon-text: #0f5249;
+
+  --sunset-bg: #fff7ed;
+  --sunset-border: #ea580c;
+  --sunset-text: #9a3412;
+
+  --sand-bg: #fef9ec;
+  --sand-border: #d97706;
+  --sand-text: #92400e;
+
+  --coral-bg: #ffe4e6;
+  --coral-border: #f43f5e;
+  --coral-text: #9f1239;
+
+  --jungle-bg: #dcfce7;
+  --jungle-border: #16a34a;
+  --jungle-text: #14532d;
+
+  --lavender-bg: #ede9fe;
+  --lavender-border: #7c3aed;
+  --lavender-text: #4c1d95;
+
+  --rose-bg: #fce7f3;
+  --rose-border: #db2777;
+  --rose-text: #831843;
+
+  --slate-bg: #f1f5f9;
+  --slate-border: #64748b;
+  --slate-text: #1e293b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ocean-bg: #0a2a35;
+    --ocean-border: #38c5e8;
+    --ocean-text: #7dd3fc;
+
+    --sky-bg: #0c1f2e;
+    --sky-border: #7dd3fc;
+    --sky-text: #bae6fd;
+
+    --lagoon-bg: #031a16;
+    --lagoon-border: #2dd4bf;
+    --lagoon-text: #99f6e4;
+
+    --sunset-bg: #1c0e04;
+    --sunset-border: #fb923c;
+    --sunset-text: #fed7aa;
+
+    --sand-bg: #1a1000;
+    --sand-border: #fbbf24;
+    --sand-text: #fde68a;
+
+    --coral-bg: #1f0a0d;
+    --coral-border: #fb7185;
+    --coral-text: #fecdd3;
+
+    --jungle-bg: #071a0e;
+    --jungle-border: #4ade80;
+    --jungle-text: #bbf7d0;
+
+    --lavender-bg: #13091f;
+    --lavender-border: #a78bfa;
+    --lavender-text: #ddd6fe;
+
+    --rose-bg: #1a0610;
+    --rose-border: #f472b6;
+    --rose-text: #fbcfe8;
+
+    --slate-bg: #0f1520;
+    --slate-border: #94a3b8;
+    --slate-text: #cbd5e1;
+  }
+}
+
+/* 
+  Applied by the Storybook theme switcher (@storybook/addon-themes) 
+  Copy of :root
+*/
+.light {
+  --ocean-bg: #dff4f9;
+  --ocean-border: #0e7fa8;
+  --ocean-text: #0a4f6a;
+
+  --sky-bg: #e0f2fe;
+  --sky-border: #38bdf8;
+  --sky-text: #0369a1;
+
+  --lagoon-bg: #ccfbf1;
+  --lagoon-border: #0d9488;
+  --lagoon-text: #0f5249;
+
+  --sunset-bg: #fff7ed;
+  --sunset-border: #ea580c;
+  --sunset-text: #9a3412;
+
+  --sand-bg: #fef9ec;
+  --sand-border: #d97706;
+  --sand-text: #92400e;
+
+  --coral-bg: #ffe4e6;
+  --coral-border: #f43f5e;
+  --coral-text: #9f1239;
+
+  --jungle-bg: #dcfce7;
+  --jungle-border: #16a34a;
+  --jungle-text: #14532d;
+
+  --lavender-bg: #ede9fe;
+  --lavender-border: #7c3aed;
+  --lavender-text: #4c1d95;
+
+  --rose-bg: #fce7f3;
+  --rose-border: #db2777;
+  --rose-text: #831843;
+
+  --slate-bg: #f1f5f9;
+  --slate-border: #64748b;
+  --slate-text: #1e293b;
+}
+
+/* 
+  Copy of :root for "prefers-color-scheme: dark"
+*/
+.dark {
+  --ocean-bg: #0a2a35;
+  --ocean-border: #38c5e8;
+  --ocean-text: #7dd3fc;
+
+  --sky-bg: #0c1f2e;
+  --sky-border: #7dd3fc;
+  --sky-text: #bae6fd;
+
+  --lagoon-bg: #031a16;
+  --lagoon-border: #2dd4bf;
+  --lagoon-text: #99f6e4;
+
+  --sunset-bg: #1c0e04;
+  --sunset-border: #fb923c;
+  --sunset-text: #fed7aa;
+
+  --sand-bg: #1a1000;
+  --sand-border: #fbbf24;
+  --sand-text: #fde68a;
+
+  --coral-bg: #1f0a0d;
+  --coral-border: #fb7185;
+  --coral-text: #fecdd3;
+
+  --jungle-bg: #071a0e;
+  --jungle-border: #4ade80;
+  --jungle-text: #bbf7d0;
+
+  --lavender-bg: #13091f;
+  --lavender-border: #a78bfa;
+  --lavender-text: #ddd6fe;
+
+  --rose-bg: #1a0610;
+  --rose-border: #f472b6;
+  --rose-text: #fbcfe8;
+
+  --slate-bg: #0f1520;
+  --slate-border: #94a3b8;
+  --slate-text: #cbd5e1;
+}

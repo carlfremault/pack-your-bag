@@ -16,20 +16,21 @@
     "pre-commit": "turbo run lint --filter=[{staged}] && lint-staged",
     "db:init": "node --experimental-strip-types scripts/database-setup.ts",
     "db:init:test": "cross-env NODE_ENV=test node --experimental-strip-types scripts/database-setup.ts",
-    "db:generate": "turbo run generate --filter=@repo/db",
-    "db:migrate": "turbo run migrate --filter=@repo/db",
-    "db:status": "turbo run status --filter=@repo/db",
-    "db:deploy": "turbo run deploy --filter=@repo/db",
-    "db:seed": "turbo run seed --filter=@repo/db",
+    "db:generate": "dotenv -e .env -o -- turbo run generate --filter=@repo/db",
+    "db:migrate": "dotenv -e .env -o -- turbo run migrate --filter=@repo/db",
+    "db:status": "dotenv -e .env -o -- turbo run status --filter=@repo/db",
+    "db:deploy": "dotenv -e .env -o -- turbo run deploy --filter=@repo/db",
+    "db:seed": "dotenv -e .env -o -- turbo run seed --filter=@repo/db",
     "openapi:auth": "turbo run openapi --filter=auth-service",
     "openapi:product": "turbo run openapi --filter=product-service",
     "openapi:user-data": "turbo run openapi --filter=user-data-service",
     "generate:auth-client": "yarn workspace @repo/auth-client generate",
     "generate:product-client": "yarn workspace @repo/product-client generate",
-    "generate:user-data-client": "yarn workspace @repo/user-data-client generate"
+    "generate:user-data-client": "yarn workspace @repo/user-data-client generate",
+    "storybook": "turbo run storybook"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
+    "@types/node": "^22.10.7",
     "@types/pg": "^8.16.0",
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
@@ -37,12 +38,11 @@
     "dotenv-expand": "^12.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "playwright": "^1.56.1",
+    "pg": "^8.16.3",
     "prettier": "^3.6.2",
-    "prisma": "^7.2.0",
-    "ts-node": "^10.9.2",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.6.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "engines": {
     "node": ">=22.6.0"
@@ -56,8 +56,5 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "dependencies": {
-    "pg": "^8.16.3"
-  }
+  ]
 }

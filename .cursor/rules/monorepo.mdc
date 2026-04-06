@@ -36,6 +36,10 @@ You are working in a Turborepo monorepo using Yarn 4 (Berry).
 - DO NOT install new global packages.
 - If a task requires changing infrastructure, STOP and ask for confirmation first.
 
+## MODELS
+
+- DO NOT use GPT-3.5 or GPT-4 models in Cursor IDE
+
 ## Project Context
 
 - PostgreSQL is the primary database (managed via Docker Compose). It is used for the Auth Service and Product Service microservices. Each service talks to a separate schema: `app_auth` and `app_product` respectively. These schemas are completely separate and have their own users and password. You can reference `scripts/database-setup.ts` for Postgres configuration.

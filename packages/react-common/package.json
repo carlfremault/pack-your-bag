@@ -1,0 +1,54 @@
+{
+  "name": "@repo/react-common",
+  "version": "0.0.1",
+  "private": true,
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest --watch --no-coverage",
+    "storybook": "storybook dev -p 6006 --host 0.0.0.0",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^5.0.2",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
+    "@storybook/addon-a11y": "^10.3.2",
+    "@storybook/addon-docs": "^10.3.2",
+    "@storybook/addon-onboarding": "^10.3.2",
+    "@storybook/addon-themes": "^10.3.3",
+    "@storybook/addon-vitest": "^10.3.2",
+    "@storybook/react-vite": "^10.3.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/react": "19.2.6",
+    "@types/react-dom": "^19",
+    "@vitest/browser": "^4.1.1",
+    "@vitest/browser-playwright": "^4.1.1",
+    "@vitest/coverage-v8": "^4.1.1",
+    "classnames": "^2.5.1",
+    "eslint": "^9.7.0",
+    "playwright": "^1.58.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.6.0",
+    "storybook": "^10.3.2",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.2",
+    "vitest": "^4.1.1"
+  },
+  "peerDependencies": {
+    "classnames": "^2.5.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.6.0"
+  }
+}

@@ -6,8 +6,8 @@
     "build": {
       "dependsOn": ["^build", "^generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "storybook-static/**"],
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -19,23 +19,23 @@
       "dependsOn": ["^build", "^generate"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:setup": {
       "dependsOn": ["transit", "^generate"],
       "env": ["AUTH_*", "RSA_*", "POSTGRES_*"],
-      "cache": true,
+      "cache": false,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
     },
     "test": {
       "dependsOn": ["test:setup", "^build"],
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:watch": {
       "dependsOn": ["test:setup", "^build"],
       "cache": false,
       "persistent": true,
-      "env": ["AUTH_*", "PRODUCT_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
+      "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:browser": {
       "cache": false,
@@ -43,11 +43,13 @@
     },
     "migrate": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["POSTGRES_*"]
     },
     "status": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["POSTGRES_*"]
     },
     "generate": {
       "cache": false,
@@ -58,17 +60,24 @@
 
     "deploy": {
       "cache": false,
-      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"]
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**"],
+      "env": ["POSTGRES_*"]
     },
     "seed": {
       "cache": false,
       "dependsOn": ["generate"],
-      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"]
+      "inputs": ["prisma/schema.prisma", "prisma/seed.mts"],
+      "env": ["POSTGRES_*"]
     },
     "openapi": {
       "dependsOn": ["build"],
       "inputs": ["src/**/*.ts", "scripts/generate-spec.ts"],
       "outputs": ["openapi.json"]
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true,
+      "outputs": ["storybook-static/**"]
     },
     "transit": {
       "dependsOn": ["^transit"]
