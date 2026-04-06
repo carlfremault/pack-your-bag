@@ -22,6 +22,7 @@ Work in Progress - `dev` branch is where the amazing stuff is happening right no
   - [6.2 Phase 1: Identity Provider](#62-phase-1-identity-provider)
   - [6.3 Phase 2: Resource Server (Product Service)](#63-phase-2-resource-server-product-service)
   - [6.4 Phase 3: Resource Server (User Data Service)](#64-phase-3-resource-server-user-data-service)
+  - [6.5 Phase 4: Frontend](#65-phase-4-frontend)
 
 ## 1. Idea & motivation
 
@@ -298,39 +299,15 @@ Implemented comprehensive test coverage across unit and integration scenarios us
 
 #### 6.3.1 Shared Package Extraction
 
-Before building the Product Service, two pieces of infrastructure were extracted from the Auth Service into shared monorepo packages to avoid duplication and establish a consistent foundation for all downstream services.
+Before building the Product Service, I extracted reusable infrastructure from the Auth Service into two shared monorepo packages.
 
-##### @repo/db — Shared Database Package
+**`@repo/db`** moved the entire Prisma setup — schema definitions, generated client, migrations, and seed scripts — into a standalone package. Both services share the same PostgreSQL instance under separate schemas, so centralizing the ORM layer was the natural move. This extraction also surfaced a dormant permissions issue: migrations had been running under the Auth Service's database role, which only holds privileges on `app_auth`. The setup script was corrected to scope each role exclusively to its own schema, enforcing the Principle of Least Privilege at the migration level, not just at query time.
 
-The original Prisma setup lived inside the Auth Service. As the Product Service would share the same PostgreSQL instance (different schema, same host), the entire database layer was moved to a dedicated `db` package: schema definitions, generated Prisma client, migration scripts, and the database seed.
-
-This surfaced a permissions issue that had been dormant in the Auth Service: migrations were running under the Auth Service's database role, which only holds privileges on the `app_auth` schema. That role has no business touching `app_product` tables. The database setup script was corrected to grant each service's role privileges exclusively to its own schema, enforcing the Principle of Least Privilege at the migration level, not just at query time.
-
-##### @repo/nestjs-common — Shared NestJS Package
-
-The Auth Service had accumulated a collection of NestJS infrastructure components that every resource server would need. Rather than copy-pasting them, they were migrated to a shared `nestjs-common` package:
-
-- **Guards:** `BffGuard` (shared-secret enforcement), `JwtAuthGuard` (RS256 token verification), `CustomThrottlerGuard` (user-aware rate limiting)
-- **Strategies:** Passport JWT strategy for access token verification
-- **Decorators:** `@CurrentUser()` for extracting the authenticated user from the request context, `@ApiBffAndAccessSecurity()` for consistent Swagger security annotations
-- **Modules:** `JwtAuthModule`, `CustomThrottlerModule`, `BffGuardModule` — thin NestJS wrappers that register the guards and strategies as providers, making them available to the consuming service's DI container
-- **Exceptions & Filters:** `GlobalExceptionFilter` base class and `PrismaExceptionFilter` base class, both extensible per service
-- **Utilities:** `RequestId` middleware, Sentry initialization helper, Swagger spec generation script, utils and helper functions
-- **Testing helpers:** JWT generation utility for signing test tokens against the service's RSA key pair
+**`@repo/nestjs-common`** consolidated the guards, Passport strategies, decorators, exception filters, middleware, and testing helpers that every resource server would need. Downstream services now import pre-wired NestJS modules (`JwtAuthModule`, `BffGuardModule`, `CustomThrottlerModule`) and register them with a few lines of configuration.
 
 #### 6.3.2 Design & Data Modeling
 
-##### Database Schema (ERD)
-
-The Product Service manages all packing-related entities. The schema centers on three primary models — `Item`, `List`, and `Pack` — connected through explicit junction tables that carry their own payload (`quantity`).
-
-- **`Category`** groups items. Optional: items have a nullable FK to category.
-- **`Item`** is the atomic unit. Linked to a category (optional).
-- **`List`** is a reusable collection of items, assembled via the `ItemList` junction table.
-- **`Pack`** is the final compiled list for a specific trip context. Items can be added directly via `ItemPack`, or indirectly by including entire Lists via `ListPack`. Both junction tables carry a `quantity` field.
-- **`Trip`** references a single Pack via a foreign key.
-
-All entities carry a `userId` field. Ownership is enforced at the service layer on every read and write operation.
+The database schema centers on three primary models — `Item`, `List`, and `Pack` — connected through junction tables that carry their own payload (e.g., `quantity`). `Category` provides optional grouping. `Trip` references a single Pack. All entities carry a `userId` field with ownership enforced at the service layer.
 
 <p align="center">
     <br>
@@ -339,25 +316,11 @@ All entities carry a `userId` field. Ownership is enforced at the service layer 
     <i>Product Service Entity Relationship Diagram</i>
 </p>
 
-#### 6.3.3 Service Implementation
+#### 6.3.3 Delete Impact Resolution
 
-The Product Service was bootstrapped by cloning the Auth Service (as noted at the end of Phase 1), which provided the wired-up monorepo configuration and a clean NestJS scaffold. Authentication, throttling, and BFF guard modules were wired in from the `nestjs-common` package.
+The most interesting design challenge in this service was delete handling. The dependency graph runs deep: removing a List cascades through `ListPack` to Packs, and from there to Trips. An Item can affect ItemList, ItemPack, Packs, and Trips. A client cannot reasonably track these implications on its own.
 
-##### CRUD Operations
-
-All seven modules — `Category`, `Item`, `List`, `Pack`, `Trip`, `ItemList`, `ItemPack`, and `ListPack` — expose standard Create, Read, and Update routes. Responses are shaped using `class-transformer` DTOs (`@Expose()` / `@Exclude()`) to control exactly what reaches the client, including nested relations where relevant (e.g., a List response includes its items and an item count).
-
-Create and Update operations run inside Prisma transactions where multiple checks are required — for example, creating an Item validates that the provided `categoryId` belongs to the same user before connecting it.
-
-**UUID v7 identifiers** are used across all entities, consistent with the Auth Service. IDs are generated in application code (not delegated to the database), and all `id` route parameters are validated with `ParseUUIDPipe({ version: '7' })` before reaching the service layer.
-
-##### Delete & Dependency Resolution
-
-Delete is intentionally not a simple `DELETE /:id`. The dependency graph runs deep: removing a List will cascade through `ListPack` to Packs, and from there to Trips. Removing an Item can affect ItemList, ItemPack, Packs, and Trips. A client cannot reasonably track these implications on its own.
-
-To address this, every deletable entity exposes a `GET /:id/delete-impact` route that traverses the dependency graph and returns all affected records without modifying any data. The client calls this first, presents the consequences to the user, and only proceeds to `DELETE /:id` on confirmation.
-
-For each entity, the delete impact query resolves what the user needs to be informed about before proceeding:
+To address this, every deletable entity exposes a `GET /:id/delete-impact` endpoint that traverses the full dependency graph and returns all affected records — without modifying any data. The client presents these consequences to the user and only proceeds to `DELETE /:id` on confirmation.
 
 | **Entity deleted** | **Impact reported**                                                                                       |
 | ------------------ | --------------------------------------------------------------------------------------------------------- |
@@ -367,87 +330,59 @@ For each entity, the delete impact query resolves what the user needs to be info
 | Pack               | Trips that will lose their Pack reference (`packId` nulled, Trips not deleted)                            |
 | Trip               | No downstream impact                                                                                      |
 
-##### Exceptions & Observability
-
-The service extends `nestjs-common`'s base exception classes with a `PrismaExceptionFilter` that maps Prisma error codes (unique constraint violations, foreign key errors, record-not-found) to appropriate HTTP responses. A `GlobalExceptionsFilter` filter catches everything else, ensuring the API never leaks stack traces or internal paths to the client. Sentry is integrated for production error monitoring using the shared utility from `nestjs-common`. Unlike the Auth Service, the Product Service does not implement audit logging for CRUD operations. Error tracking via Sentry is sufficient for observability given the lower compliance requirements.
-
-#### 6.3.4 Testing & Quality Assurance
-
-The Product Service holds the core business logic of the application. A regression here has wider consequences than in the Auth Service, where most flows are independently verifiable. Comprehensive test coverage was a prerequisite before moving on.
-
-**Unit tests** cover all services in isolation, mocking the Prisma layer and verifying that service methods call the correct queries.
-
-**Integration / E2E tests** run against a real database using the same PostgreSQL container available in the Dev Container. Each module has a dedicated test suite:
-
-`category`, `item`, `list`, `pack`, `trip`, `item-list`, `item-pack`, `list-pack`
-
-Tests cover the full CRUD surface including ownership enforcement (a user cannot access another user's resources), not-found handling, invalid UUID rejection, and the delete impact traversal logic. Shared fixtures and helpers keep test setup consistent and readable and avoid boilerplate duplication across suites.
-
-#### 6.3.5 API Documentation & Client Generation
-
-Following the same pattern established in Phase 1, Swagger annotations (`@ApiTags`, `@ApiOperation`, `@ApiResponse`) were applied to all controllers and DTOs. The OpenAPI spec was exported and used to generate a typed HTTP client published in the `product-client` package, giving the future BFF (Next.js) type-safe access to the Product Service API from day one.
+Beyond delete handling, the service follows established patterns: full CRUD across all modules with Prisma transactions for multi-step writes, UUID v7 identifiers, `class-transformer` DTOs for response shaping, and comprehensive unit and integration tests against the real PostgreSQL container. A typed HTTP client (`product-client`) was generated from the OpenAPI spec following the same approach as Phase 1.
 
 ### 6.4 Phase 3: Resource Server (User Data Service)
 
-#### 6.4.1 Developer Experience: Infrastructure Pays Off
+#### 6.4.1 Infrastructure Payoff
 
-The User Data Service was the first service to benefit fully from the `nestjs-common` package extracted during Phase 2. Where the Auth Service required building all NestJS plumbing from scratch, and the Product Service paid the upfront cost of extracting and packaging that infrastructure into a shared library, the User Data Service simply consumed the result.
+The User Data Service was the first service to fully benefit from the shared packages extracted during Phase 2. Where the Auth Service required building all NestJS plumbing from scratch, and the Product Service paid the upfront cost of extracting that infrastructure into reusable libraries, the User Data Service simply consumed the result.
 
-Wiring up guards, throttling, the BFF guard, JWT authentication, the global exception filter, the Swagger spec generator, and the Sentry integration amounted to module imports and a handful of configuration constants. The patterns were already established and battle-tested. There was nothing new to design, no shared contract to negotiate.
+Wiring up authentication, throttling, the BFF guard, exception handling, and observability amounted to module imports and a handful of configuration constants. The service went from bootstrap to passing tests faster than any previous phase — a concrete return on the investment made during Phase 2.
 
-The only new territory was Mongoose. The `@nestjs/mongoose` docs are well-structured and the decorator-based API (`@Schema()`, `@Prop()`) is intuitive enough that the ramp-up was short. The `MongooseExceptionFilter` required some adapting but the structural pattern was identical to the existing `PrismaExceptionFilter`, so it came together quickly.
+#### 6.4.2 MongoDB & Data Modeling
 
-Beyond that, the data structure is deliberately simple: a single `Preference` collection, one document per user. The service went from bootstrap to passing tests faster than any previous phase — a concrete return on the infrastructure investment made during Phase 2.
+The only new territory was MongoDB. The User Data Service manages a single `Preference` collection — one document per user — storing display preferences (units, theme, date/time format). With no relational dependencies and a schema expected to evolve without coordinated migrations, document storage was the natural fit.
 
-#### 6.4.2 Data Modeling
+A `MongooseExceptionFilter` was built following the same structural pattern as the `PrismaExceptionFilter` in the other services, mapping MongoDB-specific errors to consistent HTTP responses.
 
-##### MongoDB Schema
+As part of generating the `user-data-client` package, all three HTTP clients (`auth-client`, `product-client`, `user-data-client`) were aligned to the same template, standardizing the `SuccessResponse` and `RequestBody` type utility exports across the monorepo.
 
-The User Data Service manages user-specific application settings. With no relational dependencies and a schema expected to evolve without coordinated migrations across services, MongoDB is the natural fit.
+### 6.5 Phase 4: Frontend
 
-The `Preference` document is the single collection in this service:
+With three backend services operational and their typed HTTP clients published, the focus shifted to the presentation layer. Rather than building UI directly inside the Next.js app, I split this phase into two stages: first, build a shared component library in isolation; then, integrate it into the application with real data and routing.
 
-- **`userId`** — unique index; ties the document to the authenticated user.
-- **`units`** — display preference for weight (`metric` / `imperial`).
-- **`theme`** — UI theme (`light` / `dark`).
-- **`dateFormat`** — preferred date display format.
-- **`timeFormat`** — preferred time display format (`12h` / `24h`).
-- **`createdAt` / `updatedAt`** — managed automatically by Mongoose's `timestamps` option.
+To maintain consistency during component development, I codified the component design philosophy into a Cursor Rule — a machine-readable contract that enforces presentational purity, story coverage, and export conventions as components are built. I also installed several Agent Skills (Next.js best practices, React composition patterns, React performance guidelines) to keep AI-assisted development aligned with current framework idioms.
 
-All string fields are validated against a TypeScript enum at both the DTO layer (`class-validator` `@IsEnum()`) and the Mongoose schema layer (`enum` prop constraint), ensuring consistency from HTTP request through to persistence.
+#### 6.5.1 Component Library & Design System
 
-#### 6.4.3 Service Implementation
+The UI components live in `@repo/react-common`, a shared monorepo package following the same pattern established with `nestjs-common` and `db` in earlier phases.
 
-The User Data Service was bootstrapped by cloning the Auth Service scaffold (as documented at the end of Phase 1), providing the pre-wired monorepo configuration. The `nestjs-common` modules were dropped in immediately: `BffGuardModule`, `JwtAuthModule`, and `CustomThrottlerModule` registered in `AppModule`; `ValidationPipe`, `RequestId` middleware, and Sentry configured in `main.ts`; Swagger spec generation reusing the shared helper.
+The design system is built on a CSS custom property token layer. Semantic tokens (`--primary`, `--accent`, `--danger`) are defined in `tokens.css` and mapped to concrete values in `default-values.css`, with full light and dark mode support. Components reference only the semantic tokens, so theme changes propagate without touching component code. For entities that need visual differentiation (Categories, Lists and Packs), a 10-color theme palette (ocean, sunset, jungle, lavender, etc.) provides color coding via a `colorTheme` prop.
 
-##### CRUD Operations
+#### 6.5.2 Component-Driven Development
 
-The `Preferences` module exposes four routes against a single `/preferences` resource: `GET`, `POST`, `PATCH`, `DELETE`
+Every component has a colocated Storybook story file. Stories serve as the source of truth for a component's valid states — if a state isn't represented in a story, it isn't designed. This replaces the traditional cycle of spinning up the full application, logging in, navigating to the right screen, and creating test data just to verify a visual change. Each story covers the happy path, meaningful visual variants, and edge cases that are likely to break layout (1000-character descriptions, missing optional props, zero-item states).
 
-Ownership is implicit: the `userId` is always sourced from the verified JWT via the `@CurrentUser()` decorator from `nestjs-common`, never from the request body.
+#### 6.5.3 Presentational Components
 
-##### Exceptions & Observability
+All components are purely presentational: no data fetching, no API calls, no internal state management beyond controlled inputs. Data enters exclusively through typed props, and user interactions are communicated upward via callback props (`onEditItem`, `onOpenCollection`, `onTabChange`). This draws a hard boundary between UI and logic — the components don't know where their data comes from or what happens when a button is clicked.
 
-The service registers two exception filters:
+<p align="center">
+    <br>
+    <img src="assets/desktop-header.png" alt="Desktop header example">
+    <br>
+    <i>Desktop header</i>
+</p>
 
-- **`GlobalExceptionsFilter`** — extended from the `nestjs-common` base class; catches all unhandled exceptions and ensures the API always returns a consistent JSON response.
-- **`MongooseExceptionFilter`** — UDS-specific; maps MongoDB and Mongoose error types to appropriate HTTP responses, mirroring the role `PrismaExceptionFilter` plays in the other services.
+Where a component needs to appear differently across contexts, it uses composition rather than conditional logic. `ItemCard`, for example, accepts an `actions` slot as a `React.ReactNode` prop. In a list view, the parent can pass a quantity stepper; in a read-only view, it passes nothing. The card itself doesn't know the difference, and neither rendering path requires a boolean flag or internal branching.
 
-Sentry is integrated for production error monitoring via the shared utility from `nestjs-common`.
-
-#### 6.4.4 Testing & Quality Assurance
-
-Unit and integration/E2E tests were implemented following the same patterns established in the previous phases.
-
-**Unit tests** cover the service and controller in isolation, mocking the Mongoose model and verifying correct method delegation.
-
-**Integration / E2E tests** run against a real MongoDB instance. Tests cover the full CRUD surface: successful operations, ownership enforcement, not-found scenarios, and validation failures (invalid enum values, missing required fields).
-
-#### 6.4.5 API Documentation & Client Generation
-
-Swagger annotations (`@ApiTags`, `@ApiOperation`, `@ApiResponse`) were applied to all controllers and DTOs following the established pattern. The OpenAPI spec was exported and used to generate a typed HTTP client published as the `user-data-client` package, giving the BFF type-safe access to the User Data Service API.
-
-As part of this work, the `auth-client` and `product-client` packages were retroactively aligned to the same client template, standardising the `SuccessResponse` and `RequestBody` type utility exports across all three HTTP clients.
+<p align="center">
+    <br>
+    <img src="assets/item-card.png" alt="Item card example with quantity stepper">
+    <br>
+    <i>Item card with quantity stepper</i>
+</p>
 
 ## License
 
