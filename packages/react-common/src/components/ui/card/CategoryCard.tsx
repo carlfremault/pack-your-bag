@@ -2,7 +2,7 @@ import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 
 import classNames from 'classnames';
 
-import { ColorTheme, colorThemes } from '../../lib/colorThemes';
+import { ColorTheme, colorThemes } from '../../../lib/colorThemes';
 import Button from '../button/Button';
 
 export interface CategoryCardProps {
