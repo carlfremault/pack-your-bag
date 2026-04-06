@@ -51,9 +51,15 @@ export const WithQuantityStepper: Story = {
   args: {
     id: '1',
     name: 'Item 1',
+    weight: 110,
+    weightUnit: 'g',
     description: 'Item 1 description',
+    category: {
+      name: 'Category 1',
+      colorTheme: 'jungle',
+    },
     onEditItem: fn(),
-    actions: <QuantityStepper quantity={1000} onChange={fn()} />,
+    actions: <QuantityStepper quantity={3} onChange={fn()} />,
   },
 };
 
