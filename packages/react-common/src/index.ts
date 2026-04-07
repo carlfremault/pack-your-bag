@@ -8,6 +8,8 @@ export * from './components/ui/card/TripCard';
 export * from './components/ui/card/TripItemCard';
 export * from './components/ui/header/MobileHeader';
 export * from './components/ui/header/DesktopHeader';
+export * from './components/ui/input/Input';
+export * from './components/ui/input/PasswordInput';
 export * from './components/ui/input/QuantityStepper';
 export * from './components/ui/logo/Logo';
 export * from './components/ui/navigation/DesktopNavButtons';
