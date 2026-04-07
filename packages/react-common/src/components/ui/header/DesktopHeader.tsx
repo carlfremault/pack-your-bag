@@ -1,20 +1,19 @@
-import SettingsButton from '../button/SettingsButton';
-import DesktopNavButtons from '../navigation/DesktopNavButtons';
-import { NavTab } from '../navigation/types';
+import { SettingsButton } from '../button/SettingsButton';
+import { DesktopNavButtons } from '../navigation/DesktopNavButtons';
+import type { NavItem } from '../navigation/types';
 
 export interface DesktopHeaderProps {
-  activeTab: NavTab;
-  onTabChange: (tab: NavTab) => void;
-  onSettingsClick: () => void;
+  tabs: NavItem[];
+  activeTabId?: string;
+  settingsLink: NavItem;
+  linkAs?: React.ElementType;
 }
 
-export default function DesktopHeader(props: DesktopHeaderProps) {
-  const { activeTab, onTabChange, onSettingsClick } = props;
-
+export function DesktopHeader({ tabs, activeTabId, settingsLink, linkAs }: DesktopHeaderProps) {
   return (
     <div className="border-primary-ring bg-surface z-10 flex items-center justify-between border-b px-4 py-3 shadow-sm">
-      <DesktopNavButtons activeTab={activeTab} onTabChange={onTabChange} />
-      <SettingsButton onClick={onSettingsClick} />
+      <DesktopNavButtons tabs={tabs} activeTabId={activeTabId} linkAs={linkAs} />
+      <SettingsButton link={settingsLink} linkAs={linkAs} />
     </div>
   );
 }

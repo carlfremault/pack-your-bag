@@ -13,5 +13,5 @@ export * from './components/ui/logo/Logo';
 export * from './components/ui/navigation/DesktopNavButtons';
 export * from './components/ui/navigation/MobileBottomNav';
 export * from './components/ui/navigation/types';
-export * from './components/ui/navigation/constants';
 export * from './components/ui/pill/CategoryPill';
+export * from './components/ui/sidebar/Sidebar';
