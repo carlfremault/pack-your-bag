@@ -1,5 +1,11 @@
+import { Sidebar } from '@repo/react-common';
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+
+import { DesktopNav } from '@/components/navigation/DesktopNav';
+import { MobileHeader } from '@/components/navigation/MobileHeader';
+import { MobileNav } from '@/components/navigation/MobileNav';
 
 import './globals.css';
 
@@ -20,7 +26,28 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+      <body>
+        <div className="flex h-screen flex-col md:flex-row">
+          <div className="hidden md:block">
+            <Sidebar />
+          </div>
+
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="hidden md:block">
+              <DesktopNav />
+            </div>
+            <div className="md:hidden">
+              <MobileHeader />
+            </div>
+
+            <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+
+            <div className="md:hidden">
+              <MobileNav />
+            </div>
+          </div>
+        </div>
+      </body>
     </html>
   );
 }

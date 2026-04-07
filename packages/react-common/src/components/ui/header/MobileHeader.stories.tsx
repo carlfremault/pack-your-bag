@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 
-import MobileHeader from './MobileHeader';
+import { sampleSettingsLink } from '../navigation/constants';
+
+import { MobileHeader } from './MobileHeader';
 
 const meta: Meta<typeof MobileHeader> = {
   title: 'Components/MobileHeader',
@@ -16,6 +17,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    onSettingsClick: fn(),
+    settingsLink: sampleSettingsLink,
   },
 };

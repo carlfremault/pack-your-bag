@@ -1,8 +1,17 @@
 import { IoShirt } from 'react-icons/io5';
-import { MdHiking, MdShoppingBag } from 'react-icons/md';
+import { MdHiking, MdOutlineSettings, MdShoppingBag } from 'react-icons/md';
 
-export const navTabs = [
-  { id: 'items', label: 'Items', icon: IoShirt },
-  { id: 'collections', label: 'Collections', icon: MdShoppingBag },
-  { id: 'trips', label: 'Trips', icon: MdHiking },
-] as const;
+import type { NavItem } from './types';
+
+export const sampleNavTabs: NavItem[] = [
+  { id: 'items', label: 'Items', icon: IoShirt, href: '#' },
+  { id: 'collections', label: 'Collections', icon: MdShoppingBag, href: '#' },
+  { id: 'trips', label: 'Trips', icon: MdHiking, href: '#' },
+];
+
+export const sampleSettingsLink: NavItem = {
+  id: 'settings',
+  label: 'Settings',
+  icon: MdOutlineSettings,
+  href: '#',
+};

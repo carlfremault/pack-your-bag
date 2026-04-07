@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 
-import DesktopHeader from './DesktopHeader';
+import { sampleNavTabs, sampleSettingsLink } from '../navigation/constants';
+
+import { DesktopHeader } from './DesktopHeader';
 
 const meta: Meta<typeof DesktopHeader> = {
   title: 'Components/DesktopHeader',
@@ -16,24 +17,24 @@ type Story = StoryObj<typeof meta>;
 
 export const Items: Story = {
   args: {
-    onSettingsClick: fn(),
-    onTabChange: fn(),
-    activeTab: 'items',
+    tabs: sampleNavTabs,
+    settingsLink: sampleSettingsLink,
+    activeTabId: 'items',
   },
 };
 
 export const Collections: Story = {
   args: {
-    onSettingsClick: fn(),
-    onTabChange: fn(),
-    activeTab: 'collections',
+    tabs: sampleNavTabs,
+    settingsLink: sampleSettingsLink,
+    activeTabId: 'collections',
   },
 };
 
 export const Trips: Story = {
   args: {
-    onSettingsClick: fn(),
-    onTabChange: fn(),
-    activeTab: 'trips',
+    tabs: sampleNavTabs,
+    settingsLink: sampleSettingsLink,
+    activeTabId: 'trips',
   },
 };

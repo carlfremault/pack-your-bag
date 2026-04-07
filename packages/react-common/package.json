@@ -6,7 +6,10 @@
     "#lib/*": "./src/lib/*"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./theme/default-values.css": "./src/theme/default-values.css",
+    "./theme/color-themes.css": "./src/theme/color-themes.css",
+    "./theme/tokens.css": "./src/theme/tokens.css"
   },
   "scripts": {
     "lint": "eslint .",

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 
-import MobileBottomNav from './MobileBottomNav';
+import { sampleNavTabs } from './constants';
+import { MobileBottomNav } from './MobileBottomNav';
 
 const meta: Meta<typeof MobileBottomNav> = {
   title: 'Components/MobileBottomNav',
@@ -16,21 +16,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Items: Story = {
   args: {
-    activeTab: 'items',
-    onTabChange: fn(),
+    tabs: sampleNavTabs,
+    activeTabId: 'items',
   },
 };
 
 export const Collections: Story = {
   args: {
-    activeTab: 'collections',
-    onTabChange: fn(),
+    tabs: sampleNavTabs,
+    activeTabId: 'collections',
   },
 };
 
 export const Trips: Story = {
   args: {
-    activeTab: 'trips',
-    onTabChange: fn(),
+    tabs: sampleNavTabs,
+    activeTabId: 'trips',
   },
 };
