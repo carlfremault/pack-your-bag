@@ -14,7 +14,10 @@ export const INTERNAL_TOKEN_HEADER = 'x-internal-access-token';
 const REFRESH_BUFFER_SECONDS = 30;
 
 /** Routes that require no session. Matched as path prefixes. */
-const PUBLIC_PATHS = ['/login', '/register'];
+const PUBLIC_PATHS = ['/login', '/register', '/policy', '/reset-password'];
+
+/** Public routes where authenticated users should be redirected to /items. */
+const AUTH_REDIRECT_PATHS = ['/login', '/register', '/reset-password'];
 
 /**
  * Internal BFF auth routes (/api/auth/*) are always passed through.
@@ -87,13 +90,14 @@ export default async function middleware(req: NextRequest) {
   }
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const shouldRedirectIfAuthed = AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
 
   // Read the session from the request cookie (temp response — we won't save to it).
   const session = await getIronSession<SessionData>(req, new NextResponse(), sessionOptions);
 
   if (isPublic) {
-    // Redirect already-authenticated users away from the login page.
-    return session.isLoggedIn
+    // Redirect already-authenticated users away from auth-related pages.
+    return session.isLoggedIn && shouldRedirectIfAuthed
       ? NextResponse.redirect(new URL('/items', req.url))
       : NextResponse.next();
   }
