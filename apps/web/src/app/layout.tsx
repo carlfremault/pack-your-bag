@@ -1,4 +1,4 @@
-import { Sidebar } from '@repo/react-common';
+import { Sidebar } from '@repo/react-common/sidebar';
 
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';

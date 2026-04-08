@@ -15,7 +15,7 @@ export interface ItemCardProps {
   actions?: React.ReactNode;
 }
 
-export default function ItemCard(props: ItemCardProps) {
+export function ItemCard(props: ItemCardProps) {
   const { id, name, description, category, weight, weightUnit, onEditItem, actions } = props;
 
   return (

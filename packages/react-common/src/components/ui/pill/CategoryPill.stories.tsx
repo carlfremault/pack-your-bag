@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import CategoryPill from './CategoryPill';
+import { CategoryPill } from './CategoryPill';
 
 const meta: Meta<typeof CategoryPill> = {
   title: 'Components/CategoryPill',

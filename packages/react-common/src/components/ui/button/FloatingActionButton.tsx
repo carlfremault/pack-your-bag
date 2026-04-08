@@ -8,7 +8,7 @@ interface FloatingActionButtonProps {
   className?: string;
 }
 
-export default function FloatingActionButton(props: FloatingActionButtonProps) {
+export function FloatingActionButton(props: FloatingActionButtonProps) {
   const { onClick, ariaLabel, className } = props;
 
   const buttonClassName = classNames(

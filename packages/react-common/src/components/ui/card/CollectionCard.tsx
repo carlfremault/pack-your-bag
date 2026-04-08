@@ -15,7 +15,7 @@ export interface CollectionCardProps {
   onOpenCollection: (id: string) => void;
 }
 
-export default function CollectionCard(props: CollectionCardProps) {
+export function CollectionCard(props: CollectionCardProps) {
   const {
     id,
     name,

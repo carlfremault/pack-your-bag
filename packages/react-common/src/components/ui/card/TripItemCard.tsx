@@ -11,7 +11,7 @@ export interface TripItemCardProps {
   onQuantityPackedChange: (id: string, quantity: number) => void;
 }
 
-export default function TripItemCard(props: TripItemCardProps) {
+export function TripItemCard(props: TripItemCardProps) {
   const { itemId, itemName, quantityNeeded, quantityPacked, onQuantityPackedChange } = props;
 
   const handleQuantityChange = useCallback(

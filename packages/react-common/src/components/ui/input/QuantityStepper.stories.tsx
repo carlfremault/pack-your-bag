@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
-import QuantityStepper from './QuantityStepper';
+import { QuantityStepper } from './QuantityStepper';
 
 const meta: Meta<typeof QuantityStepper> = {
   title: 'Components/QuantityStepper',

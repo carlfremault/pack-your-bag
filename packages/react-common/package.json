@@ -6,7 +6,15 @@
     "#lib/*": "./src/lib/*"
   },
   "exports": {
-    ".": "./src/index.ts",
+    "./alert": "./src/components/ui/alert/Alert.tsx",
+    "./button": "./src/components/ui/button/index.ts",
+    "./card": "./src/components/ui/card/index.ts",
+    "./header": "./src/components/ui/header/index.ts",
+    "./input": "./src/components/ui/input/index.ts",
+    "./logo": "./src/components/ui/logo/Logo.tsx",
+    "./navigation": "./src/components/ui/navigation/index.ts",
+    "./pill": "./src/components/ui/pill/CategoryPill.tsx",
+    "./sidebar": "./src/components/ui/sidebar/Sidebar.tsx",
     "./theme/default-values.css": "./src/theme/default-values.css",
     "./theme/color-themes.css": "./src/theme/color-themes.css",
     "./theme/tokens.css": "./src/theme/tokens.css"

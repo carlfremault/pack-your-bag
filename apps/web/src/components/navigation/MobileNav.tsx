@@ -1,6 +1,6 @@
 'use client';
 
-import { MobileBottomNav } from '@repo/react-common';
+import { MobileBottomNav } from '@repo/react-common/navigation';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

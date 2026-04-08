@@ -1,4 +1,4 @@
-export default function Logo() {
+export function Logo() {
   return (
     <div className="relative inline-block pr-8">
       <div className="from-primary to-accent inline-block bg-linear-to-r bg-clip-text text-lg font-bold text-transparent">

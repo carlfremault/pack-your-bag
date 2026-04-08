@@ -6,7 +6,7 @@ import { fn } from 'storybook/test';
 import { Button } from '../button/Button';
 import QuantityStepper from '../input/QuantityStepper';
 
-import ItemCard from './ItemCard';
+import { ItemCard } from './ItemCard';
 
 import { LONG_DESCRIPTION } from '#lib/constants';
 

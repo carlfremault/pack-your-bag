@@ -1,6 +1,6 @@
 'use client';
 
-import { MobileHeader as MobileHeaderBase } from '@repo/react-common';
+import { MobileHeader as MobileHeaderBase } from '@repo/react-common/header';
 
 import Link from 'next/link';
 

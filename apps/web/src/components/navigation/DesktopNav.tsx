@@ -1,6 +1,6 @@
 'use client';
 
-import { DesktopHeader } from '@repo/react-common';
+import { DesktopHeader } from '@repo/react-common/header';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
