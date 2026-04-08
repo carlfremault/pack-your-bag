@@ -69,7 +69,7 @@ export function getButtonClassName(options: ButtonStyleOptions): string {
   return classNames(
     'inline-flex items-center justify-center font-medium tracking-wide',
     'transition-[filter,transform,box-shadow,color] duration-150 ease-out',
-    'focus-visible:outline-none focus-visible:ring-2',
+    'focus-visible:outline-none focus-visible:ring-2 text-sm',
     colorVariant[variant][color],
     !isLink && !isUnstyledIcon && buttonSize[size],
     !isLink && 'rounded-md',

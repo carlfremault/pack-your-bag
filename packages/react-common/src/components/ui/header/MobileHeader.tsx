@@ -19,9 +19,11 @@ export function MobileHeader(props: MobileHeaderProps) {
       <Logo />
       <div className="flex items-center gap-6">
         <SettingsButton link={settingsLink} linkAs={linkAs} />
-        <Button variant="unstyledIcon" onClick={logOut} aria-label="Log out">
-          <MdLogout className="h-5 w-5" />
-        </Button>
+        <form action={logOut}>
+          <Button variant="unstyledIcon" type="submit" aria-label="Log out">
+            <MdLogout className="h-5 w-5" />
+          </Button>
+        </form>
       </div>
     </header>
   );

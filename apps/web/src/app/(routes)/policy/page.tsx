@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="bg-surface flex flex-col gap-4 p-4 md:p-6">
+    <div className="bg-surface flex flex-col gap-4 p-4 pb-32 md:p-6">
       <h1 className="text-primary text-xl font-semibold">Terms &amp; Privacy Notice</h1>
 
       {/* Terms of Service */}
@@ -27,8 +27,8 @@ export default function Page() {
       <section className="flex flex-col gap-2">
         <h3 className="text-primary font-medium">Your content</h3>
         <p className="text-foreground text-sm">
-          Any trips, packs, and items you create belong to you. We do not claim ownership of your
-          data. We store it solely to provide the service to you.
+          Any trips, packs, collections and items you create belong to you. We do not claim
+          ownership of your data. We store it solely to provide the service to you.
         </p>
       </section>
 
@@ -142,6 +142,6 @@ export default function Page() {
           kind.
         </p>
       </section>
-    </main>
+    </div>
   );
 }

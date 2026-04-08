@@ -25,9 +25,11 @@ export function DesktopHeader({
       <DesktopNavButtons tabs={tabs} activeTabId={activeTabId} linkAs={linkAs} />
       <div className="flex items-center gap-4">
         <SettingsButton link={settingsLink} linkAs={linkAs} />
-        <Button variant="unstyledIcon" onClick={logOut} aria-label="Log out">
-          <MdLogout className="h-5 w-5" />
-        </Button>
+        <form action={logOut}>
+          <Button variant="unstyledIcon" type="submit" aria-label="Log out">
+            <MdLogout className="h-5 w-5" />
+          </Button>
+        </form>
       </div>
     </div>
   );
