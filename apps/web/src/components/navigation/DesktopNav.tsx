@@ -10,6 +10,7 @@ import {
   navTabs,
   settingsLink,
 } from '@/components/navigation/navigation';
+import { logoutAction } from '@/features/auth/actions';
 
 export function DesktopNav() {
   const pathname = usePathname();
@@ -21,6 +22,7 @@ export function DesktopNav() {
       activeTabId={activeTabId}
       settingsLink={settingsLink}
       linkAs={Link}
+      logOut={logoutAction}
     />
   );
 }

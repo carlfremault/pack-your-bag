@@ -1,7 +1,7 @@
 import { HiOutlineScale } from 'react-icons/hi2';
 import { MdOutlineEdit } from 'react-icons/md';
 
-import Button from '../button/Button';
+import { Button } from '../button/Button';
 import CategoryPill, { CategoryPillProps } from '../pill/CategoryPill';
 
 export interface ItemCardProps {

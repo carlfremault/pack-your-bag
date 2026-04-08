@@ -2,7 +2,7 @@ import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 
 import classNames from 'classnames';
 
-import Button from '../button/Button';
+import { Button } from '../button/Button';
 
 import { ColorTheme, colorThemes } from '#lib/colorThemes';
 
