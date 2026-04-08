@@ -15,7 +15,7 @@ export interface CategoryCardProps {
   onDeleteCategory: (id: string) => void;
 }
 
-export default function CategoryCard(props: CategoryCardProps) {
+export function CategoryCard(props: CategoryCardProps) {
   const { id, name, description, colorTheme = 'slate', onEditCategory, onDeleteCategory } = props;
 
   const { className: colorThemeClassName } = colorThemes[colorTheme] ?? colorThemes['slate'];

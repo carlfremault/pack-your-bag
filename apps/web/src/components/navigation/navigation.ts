@@ -1,7 +1,7 @@
 import { IoShirt } from 'react-icons/io5';
 import { MdHiking, MdOutlineSettings, MdShoppingBag } from 'react-icons/md';
 
-import type { NavItem } from '@repo/react-common';
+import type { NavItem } from '@repo/react-common/navigation';
 
 export const navTabs: NavItem[] = [
   { id: 'items', label: 'Items', icon: IoShirt, href: '/items' },

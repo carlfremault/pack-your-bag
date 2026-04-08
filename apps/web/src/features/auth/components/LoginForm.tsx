@@ -2,7 +2,9 @@
 
 import { useActionState } from 'react';
 
-import { Alert, Button, Input, PasswordInput } from '@repo/react-common';
+import { Alert } from '@repo/react-common/alert';
+import { Button } from '@repo/react-common/button';
+import { Input, PasswordInput } from '@repo/react-common/input';
 
 import { loginAction, type LoginState } from '../actions';
 

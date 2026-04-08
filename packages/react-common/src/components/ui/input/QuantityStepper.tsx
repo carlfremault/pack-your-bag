@@ -8,7 +8,7 @@ export interface QuantityStepperProps {
   groupAriaLabel?: string;
 }
 
-export default function QuantityStepper(props: QuantityStepperProps) {
+export function QuantityStepper(props: QuantityStepperProps) {
   const { quantity, onChange, min = 0, max = Infinity, groupAriaLabel = 'Quantity' } = props;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

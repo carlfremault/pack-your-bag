@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
-import TripCard from './TripCard';
+import { TripCard } from './TripCard';
 
 import { LONG_DESCRIPTION } from '#lib/constants';
 

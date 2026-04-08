@@ -2,7 +2,7 @@ import { MdLogout } from 'react-icons/md';
 
 import { Button } from '../button/Button';
 import { SettingsButton } from '../button/SettingsButton';
-import Logo from '../logo/Logo';
+import { Logo } from '../logo/Logo';
 import { NavItem } from '../navigation/types';
 
 export interface MobileHeaderProps {

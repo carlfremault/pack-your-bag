@@ -1,4 +1,4 @@
-import Logo from '../logo/Logo';
+import { Logo } from '../logo/Logo';
 
 export function Sidebar({ children }: { children?: React.ReactNode }) {
   return (
