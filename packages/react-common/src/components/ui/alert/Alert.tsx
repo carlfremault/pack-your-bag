@@ -21,7 +21,7 @@ export function Alert(props: AlertProps) {
   const alertRole = type === 'error' ? 'alert' : 'status';
 
   const alertClassName = classNames(
-    'flex w-full flex-col items-center justify-center self-start rounded-md border p-4',
+    'flex w-full flex-col items-center justify-center self-start rounded-md border p-4 text-sm',
     alertType[type],
     className,
   );
