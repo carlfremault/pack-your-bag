@@ -53,7 +53,7 @@ const buttonSize: Record<ButtonSize, string> = {
   large: 'h-12 px-7 text-lg',
 };
 
-export default function Button(props: ButtonProps) {
+export function Button(props: ButtonProps) {
   const {
     children,
     className,

@@ -1,3 +1,4 @@
+export * from './components/ui/alert/Alert';
 export * from './components/ui/button/Button';
 export * from './components/ui/button/FloatingActionButton';
 export * from './components/ui/button/SettingsButton';
