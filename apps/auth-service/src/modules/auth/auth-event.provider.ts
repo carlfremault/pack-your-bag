@@ -16,6 +16,12 @@ export interface PasswordResetConfirmedEvent {
   resetTimestamp: string;
 }
 
+export interface AccountVerificationRequestedEvent {
+  userId: string;
+  email: string;
+  verificationToken: string;
+}
+
 @Injectable()
 export class AuthEventProvider extends BaseEventProvider {
   constructor(eventEmitter: EventEmitter2) {
@@ -28,5 +34,9 @@ export class AuthEventProvider extends BaseEventProvider {
 
   emitPasswordResetConfirmed(data: PasswordResetConfirmedEvent): void {
     this.safeEmit(AUTH_EVENTS.PASSWORD_RESET_CONFIRMED, data);
+  }
+
+  emitAccountVerificationRequested(data: AccountVerificationRequestedEvent): void {
+    this.safeEmit(AUTH_EVENTS.ACCOUNT_VERIFICATION_REQUESTED, data);
   }
 }

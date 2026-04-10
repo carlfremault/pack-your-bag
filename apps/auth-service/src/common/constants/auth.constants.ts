@@ -18,6 +18,7 @@ export const AUTH_EVENTS = {
   AUDIT_LOG: 'audit.log',
   PASSWORD_RESET_REQUESTED: 'password.reset_requested',
   PASSWORD_RESET_CONFIRMED: 'password.reset_confirmed',
+  ACCOUNT_VERIFICATION_REQUESTED: 'account.verification_requested',
   ACCOUNT_DELETION_REQUESTED: 'account.deletion_requested',
 } as const;
 
@@ -33,6 +34,8 @@ export const THROTTLE_LIMITS = {
   DELETE_USER: 3,
   FORGOT_PASSWORD: 3,
   RESET_PASSWORD: 3,
+  VERIFY_EMAIL: 3,
+  RESEND_VERIFICATION_EMAIL: 5,
   CANCEL_ACCOUNT_DELETION: 3,
 } as const;
 

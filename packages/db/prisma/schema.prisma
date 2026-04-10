@@ -33,7 +33,9 @@ model User {
   refreshToken        RefreshToken[]
   verificationToken   VerificationToken[]
   isDeleted           Boolean   @default(false)
-  deletedAt           DateTime? 
+  deletedAt           DateTime?
+  isEmailVerified     Boolean   @default(false)
+  emailVerifiedAt     DateTime?
 
   @@schema("app_auth")
 }
@@ -77,6 +79,7 @@ model VerificationToken {
 enum TokenType {
   PASSWORD_RESET
   ACCOUNT_DELETION_CANCELLATION
+  EMAIL_VERIFICATION
 
   @@schema("app_auth")
 }
@@ -147,7 +150,8 @@ enum AuditEventType {
   PASSWORD_FORGOTTEN
   PASSWORD_RESET
   CANCEL_ACCOUNT_DELETION
-  
+  EMAIL_VERIFIED
+  EMAIL_VERIFICATION_RESENT
   @@schema("app_auth")
 }
 

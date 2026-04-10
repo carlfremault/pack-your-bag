@@ -13,6 +13,7 @@ describe('Auth login (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await ctx.clearMailpit();
     await ctx.resetDb();
   });
 
@@ -100,6 +101,19 @@ describe('Auth login (e2e)', () => {
       expect(body).toMatchObject({
         error: 'Unauthorized',
         message: 'Invalid email or password',
+      });
+    });
+
+    it('should reject login when email is not verified', async () => {
+      await ctx.authHelpers.registerUser();
+      const { body } = await ctx.authHelpers.loginUser({
+        payload: ctx.authHelpers.defaultUser,
+        expectedStatus: HttpStatus.FORBIDDEN,
+      });
+
+      expect(body).toMatchObject({
+        error: 'EMAIL_NOT_VERIFIED',
+        message: 'Email not verified',
       });
     });
   });

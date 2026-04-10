@@ -3,7 +3,11 @@ import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { createAuthenticatedUser, waitForGracePeriod } from './fixtures/auth.fixtures';
+import {
+  createAuthenticatedUser,
+  registerVerifyAndLoginUser,
+  waitForGracePeriod,
+} from './fixtures/auth.fixtures';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Auth Refresh Token (e2e)', () => {
@@ -14,6 +18,7 @@ describe('Auth Refresh Token (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await ctx.clearMailpit();
     await ctx.resetDb();
   });
 
@@ -262,25 +267,29 @@ describe('Auth Refresh Token (e2e)', () => {
 
     describe('Token Ownership/Family Mismatch', () => {
       it('should detect token ownership mismatch', async () => {
-        const { body: user1 } = await ctx.authHelpers.registerUser();
-        const { body: user2 } = await ctx.authHelpers.registerUser({
-          payload: {
-            email: 'user2@test.com',
-            password: 'validPassword456',
-          },
-        });
+        const user1Credentials = {
+          email: 'user1@test.com',
+          password: 'validPassword123',
+        };
+        const user2Credentials = {
+          email: 'user2@test.com',
+          password: 'validPassword456',
+        };
+
+        const { body: user1Login } = await registerVerifyAndLoginUser(ctx, user1Credentials);
+        const { body: user2Login } = await registerVerifyAndLoginUser(ctx, user2Credentials);
 
         const user1Token = await ctx.prisma.refreshToken.findFirstOrThrow({
-          where: { userId: user1.user.id },
+          where: { userId: user1Login.user.id },
         });
 
         await ctx.prisma.refreshToken.update({
           where: { id: user1Token.id },
-          data: { userId: user2.user.id },
+          data: { userId: user2Login.user.id },
         });
 
         const { body } = await ctx.authHelpers.refreshToken(
-          user1.refresh_token,
+          user1Login.refresh_token,
           HttpStatus.UNAUTHORIZED,
         );
         expect(body).toMatchObject({
@@ -291,25 +300,29 @@ describe('Auth Refresh Token (e2e)', () => {
       });
 
       it('should detect token family mismatch', async () => {
-        const { body: user1 } = await ctx.authHelpers.registerUser();
-        const { body: user2 } = await ctx.authHelpers.registerUser({
-          payload: {
-            email: 'user2@test.com',
-            password: 'validPassword456',
-          },
-        });
+        const user1Credentials = {
+          email: 'user1@test.com',
+          password: 'validPassword123',
+        };
+        const user2Credentials = {
+          email: 'user2@test.com',
+          password: 'validPassword456',
+        };
+
+        const { body: user1Login } = await registerVerifyAndLoginUser(ctx, user1Credentials);
+        const { body: user2Login } = await registerVerifyAndLoginUser(ctx, user2Credentials);
 
         const user2Token = await ctx.prisma.refreshToken.findFirstOrThrow({
-          where: { userId: user2.user.id },
+          where: { userId: user2Login.user.id },
         });
 
         await ctx.prisma.refreshToken.updateMany({
-          where: { userId: user1.user.id },
+          where: { userId: user1Login.user.id },
           data: { family: user2Token.family },
         });
 
         const { body } = await ctx.authHelpers.refreshToken(
-          user1.refresh_token,
+          user1Login.refresh_token,
           HttpStatus.UNAUTHORIZED,
         );
         expect(body).toMatchObject({
@@ -323,7 +336,7 @@ describe('Auth Refresh Token (e2e)', () => {
 
   describe('Auth Service - /logout (DELETE)', () => {
     it('should reject refresh after manual logout, within grace period', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
 
       await ctx.authHelpers.logoutUser(body.refresh_token);
 
@@ -339,7 +352,7 @@ describe('Auth Refresh Token (e2e)', () => {
     });
 
     it('should reject refresh after manual logout, after grace period', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
 
       await ctx.authHelpers.logoutUser(body.refresh_token);
 
@@ -356,7 +369,7 @@ describe('Auth Refresh Token (e2e)', () => {
     });
 
     it('should allow different devices after single device logout', async () => {
-      const { body: device1 } = await ctx.authHelpers.registerUser();
+      const { body: device1 } = await registerVerifyAndLoginUser(ctx);
       const { body: device2 } = await ctx.authHelpers.loginUser();
 
       await ctx.authHelpers.logoutUser(device1.refresh_token);
@@ -378,7 +391,7 @@ describe('Auth Refresh Token (e2e)', () => {
 
   describe('Auth Service - /logout-all (DELETE)', () => {
     it('should revoke all refresh tokens across all devices', async () => {
-      const { body: user } = await ctx.authHelpers.registerUser();
+      const { body: user } = await registerVerifyAndLoginUser(ctx);
       const { body: device1 } = await ctx.authHelpers.loginUser();
       const { body: device2 } = await ctx.authHelpers.loginUser();
 
@@ -415,7 +428,7 @@ describe('Auth Refresh Token (e2e)', () => {
     });
 
     it('should reject request with missing x-bff-secret header', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
       const response = await request(ctx.app.getHttpServer())
         .post('/auth/refresh-token')
         .set('Authorization', `Bearer ${body.refresh_token}`)
@@ -427,7 +440,7 @@ describe('Auth Refresh Token (e2e)', () => {
     });
 
     it('should reject request with invalid x-bff-secret header', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
       const response = await request(ctx.app.getHttpServer())
         .post('/auth/refresh-token')
         .set('Authorization', `Bearer ${body.refresh_token}`)
@@ -440,7 +453,7 @@ describe('Auth Refresh Token (e2e)', () => {
     });
 
     it('should not accept an access token when a refresh token is needed', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
       const response = await ctx.authHelpers.refreshToken(
         body.access_token,
         HttpStatus.UNAUTHORIZED,
@@ -454,7 +467,7 @@ describe('Auth Refresh Token (e2e)', () => {
     });
 
     it('should not accept a refresh token when an access token is needed', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
       const response = await request(ctx.app.getHttpServer())
         .delete('/auth/logout-all')
         .set('Authorization', `Bearer ${body.refresh_token}`)

@@ -19,6 +19,14 @@ interface AuditableResponse {
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
   private readonly logger = new Logger(AuditInterceptor.name, { timestamp: true });
+  private static readonly UNAUTHENTICATED_EVENTS: AuditEventType[] = [
+    AuditEventType.PASSWORD_FORGOTTEN,
+    AuditEventType.PASSWORD_RESET,
+    AuditEventType.USER_REGISTERED,
+    AuditEventType.EMAIL_VERIFIED,
+    AuditEventType.EMAIL_VERIFICATION_RESENT,
+  ];
+
   constructor(
     private readonly reflector: Reflector,
     private readonly auditProvider: AuditLogProvider,
@@ -41,12 +49,7 @@ export class AuditInterceptor implements NestInterceptor {
         const userId = user?.userId || data?.user?.id || null;
         const eventType: AuditEventType = auditOverride || defaultEvent;
 
-        const unauthenticatedEvents = [
-          AuditEventType.PASSWORD_FORGOTTEN,
-          AuditEventType.PASSWORD_RESET,
-        ] as AuditEventType[];
-
-        if (!userId && !unauthenticatedEvents.includes(eventType)) {
+        if (!userId && !AuditInterceptor.UNAUTHENTICATED_EVENTS.includes(eventType)) {
           this.logger.warn(`Could not resolve userId for audit event: ${eventType}`);
         }
 
