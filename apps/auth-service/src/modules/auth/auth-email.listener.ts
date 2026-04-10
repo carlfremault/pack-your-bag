@@ -6,6 +6,7 @@ import { AUTH_EVENTS } from '@/common/constants/auth.constants';
 import { EmailService } from '@/modules/email/email.service';
 
 import type {
+  AccountVerificationRequestedEvent,
   PasswordResetConfirmedEvent,
   PasswordResetRequestedEvent,
 } from './auth-event.provider';
@@ -57,6 +58,27 @@ export class AuthEmailListener {
       {
         userId,
         emailType: 'PASSWORD_RESET_CONFIRMATION',
+      },
+    );
+  }
+
+  @OnEvent(AUTH_EVENTS.ACCOUNT_VERIFICATION_REQUESTED, { async: true })
+  async handleAccountVerificationRequested(
+    event: AccountVerificationRequestedEvent,
+  ): Promise<void> {
+    const { userId, email, verificationToken } = event;
+    const verificationLink = `${this.frontendUrl}/verify-email?token=${encodeURIComponent(verificationToken)}`;
+
+    await this.emailService.sendEmailWithRetry(
+      {
+        to: email,
+        subject: 'Account Verification Request',
+        text: `Complete your registration here: ${verificationLink}`,
+        html: `<p>Click here to confirm your email address and complete your registration: <a href="${verificationLink}">Confirm Email</a></p>`,
+      },
+      {
+        userId,
+        emailType: 'ACCOUNT_VERIFICATION_REQUEST',
       },
     );
   }

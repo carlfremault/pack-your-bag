@@ -205,7 +205,12 @@ describe('Password Reset Flow (E2E)', () => {
 
       // Confirmation email should not have been sent
       const messages = await getMailpitMessages(ctx);
-      expect(messages).toHaveLength(0);
+      const email = messages.find(
+        (m) =>
+          m.To[0]?.Address === ctx.authHelpers.defaultUser.email &&
+          m.Subject === 'Password Reset Request',
+      );
+      expect(email).toBeUndefined();
     });
 
     it('should reject invalid token', async () => {

@@ -131,4 +131,57 @@ describe('AuthEmailListener', () => {
       expect(mockEmailService.sendEmailWithRetry).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('handleAccountVerificationRequested', () => {
+    it('should call emailService with correct verification email content and context', async () => {
+      mockEmailService.sendEmailWithRetry.mockResolvedValue(undefined);
+
+      const event = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        verificationToken: 'abc123verificationtoken456',
+      };
+
+      await authEmailListener.handleAccountVerificationRequested(event);
+
+      expect(mockEmailService.sendEmailWithRetry).toHaveBeenCalledWith(
+        {
+          to: 'testemail@test.com',
+          subject: 'Account Verification Request',
+          text: expect.stringContaining('https://test.com/verify-email?token=') as string,
+          html: expect.stringContaining('https://test.com/verify-email?token=') as string,
+        },
+        {
+          userId: 'user-123',
+          emailType: 'ACCOUNT_VERIFICATION_REQUEST',
+        },
+      );
+      expect(mockEmailService.sendEmailWithRetry).toHaveBeenCalledTimes(1);
+    });
+
+    it('should URL encode the verification token', async () => {
+      mockEmailService.sendEmailWithRetry.mockResolvedValue(undefined);
+
+      const event = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        verificationToken: 'token+with/special&chars',
+      };
+
+      const encodedToken = encodeURIComponent(event.verificationToken);
+
+      await authEmailListener.handleAccountVerificationRequested(event);
+
+      expect(mockEmailService.sendEmailWithRetry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(encodedToken) as string,
+          html: expect.stringContaining(encodedToken) as string,
+        }),
+        {
+          userId: 'user-123',
+          emailType: 'ACCOUNT_VERIFICATION_REQUEST',
+        },
+      );
+    });
+  });
 });

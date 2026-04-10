@@ -76,6 +76,7 @@ const validationSchema = Joi.object({
   AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS: Joi.number().min(1).default(14),
   AUTH_VERIFICATION_TOKEN_RETENTION_DAYS: Joi.number().min(1).default(1),
   AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: Joi.number().default(900000),
+  AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_MS: Joi.number().default(3600000),
 
   // Logging
   AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),

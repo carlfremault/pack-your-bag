@@ -15,8 +15,17 @@ export interface MailpitMessage {
 
 const GRACE_PERIOD_BUFFER_MS = 1000;
 
+export const createVerifiedUser = async (ctx: IntegrationTestContext) => {
+  await ctx.authHelpers.registerUser();
+  await ctx.prisma.user.update({
+    where: { email: ctx.authHelpers.defaultUser.email },
+    data: { isEmailVerified: true, emailVerifiedAt: new Date() },
+  });
+};
+
 export const createAuthenticatedUser = async (ctx: IntegrationTestContext) => {
-  const response = await ctx.authHelpers.registerUser();
+  await createVerifiedUser(ctx);
+  const response = await ctx.authHelpers.loginUser();
   const { access_token, refresh_token } = response.body;
 
   const user = await ctx.prisma.user.findUnique({
@@ -112,6 +121,23 @@ export const generateVerificationTokenAndDeleteUser = async (
   });
 
   return { user, token };
+};
+
+export const registerVerifyAndLoginUser = async (
+  ctx: IntegrationTestContext,
+  credentials?: { email: string; password: string },
+) => {
+  const payload = credentials ?? ctx.authHelpers.defaultUser;
+
+  await ctx.authHelpers.registerUser({ payload });
+  const user = await ctx.prisma.user.findUniqueOrThrow({
+    where: { email: payload.email.toLowerCase() },
+  });
+  await ctx.prisma.user.update({
+    where: { id: user.id },
+    data: { isEmailVerified: true, emailVerifiedAt: new Date() },
+  });
+  return await ctx.authHelpers.loginUser({ payload });
 };
 
 export const waitForGracePeriod = async (ctx: IntegrationTestContext) => {

@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { AuditEventType, Prisma, TokenType } from '@repo/db';
+import { AuditEventType, Prisma, TokenType, User } from '@repo/db';
 import { DeletedUserHelper, InvalidSessionException } from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
@@ -16,6 +16,7 @@ import { v7 as uuidv7 } from 'uuid';
 
 import { AUTH_DEFAULT_USER_ROLE_ID, DEFAULT_LOCALE } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
 import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
@@ -25,10 +26,13 @@ import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.servi
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
+import { PrismaService } from '@/prisma/prisma.service';
 
 import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
+import { AuthResendVerificationEmailDto } from './dto/auth-resend-verification-email.dto';
 import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { AuthVerifyEmailDto } from './dto/auth-verify-email.dto';
 import { AuthEventProvider } from './auth-event.provider';
 
 interface RefreshTokenResult {
@@ -46,8 +50,10 @@ export class AuthService {
   private readonly accessTokenExpiresIn: number;
   private readonly refreshTokenExpiresIn: number;
   private readonly passwordResetTokenExpiresInMS: number;
+  private readonly emailVerificationTokenExpiresInMS: number;
 
   constructor(
+    private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly refreshTokenService: RefreshTokenService,
@@ -70,13 +76,16 @@ export class AuthService {
     this.passwordResetTokenExpiresInMS = this.configService.getOrThrow<number>(
       'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
     );
+    this.emailVerificationTokenExpiresInMS = this.configService.getOrThrow<number>(
+      'AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_MS',
+    );
   }
 
   // ============================================
   // BASIC ROUTE HANDLERS
   // ============================================
 
-  async register(body: AuthCredentialsDto): Promise<AuthResponseDto> {
+  async register(body: AuthCredentialsDto): Promise<void> {
     const { email, password } = body;
 
     const uuid = uuidv7();
@@ -89,10 +98,13 @@ export class AuthService {
       role: {
         connect: { id: this.defaultUserRoleId },
       },
+      isEmailVerified: false,
+      emailVerifiedAt: null,
     };
 
     const newUser = await this.userService.createUser(data);
-    return this.issueRefreshToken(newUser.id, newUser.roleId);
+
+    await this.sendVerificationEmail(newUser);
   }
 
   async login(body: AuthCredentialsDto): Promise<AuthResponseDto> {
@@ -105,6 +117,10 @@ export class AuthService {
 
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.isEmailVerified) {
+      throw new EmailNotVerifiedException();
     }
 
     DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
@@ -239,6 +255,55 @@ export class AuthService {
   }
 
   // ============================================
+  // EMAIL VERIFICATION
+  // ============================================
+
+  async verifyEmail(body: AuthVerifyEmailDto): Promise<void> {
+    const { token } = body;
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+
+    await this.prisma.$transaction(async (tx) => {
+      const verificationRecord = await this.verificationTokenService.getVerificationToken(
+        {
+          where: {
+            token: hash,
+            type: TokenType.EMAIL_VERIFICATION,
+            used: false,
+          },
+        },
+        tx,
+      );
+
+      if (!verificationRecord || verificationRecord.expiresAt < new Date()) {
+        throw new InvalidTokenException();
+      }
+
+      const user = await this.userService.getUser({ id: verificationRecord.userId }, tx);
+      if (!user || user.isDeleted) {
+        throw new InvalidTokenException();
+      }
+
+      await this.userService.updateUser(
+        { id: user.id },
+        { isEmailVerified: true, emailVerifiedAt: new Date() },
+        tx,
+      );
+      await this.verificationTokenService.markTokenAsUsed(verificationRecord.id, tx);
+    });
+  }
+
+  async resendVerificationEmail(body: AuthResendVerificationEmailDto): Promise<void> {
+    const { email } = body;
+    const user = await this.userService.getUser({ email: email.toLowerCase(), isDeleted: false });
+
+    if (!user || user.isEmailVerified) {
+      return;
+    }
+
+    await this.sendVerificationEmail(user);
+  }
+
+  // ============================================
   // HELPER FUNCTIONS
   // ============================================
 
@@ -327,5 +392,23 @@ export class AuthService {
       });
       throw new InternalServerErrorException('Could not generate JWT tokens');
     }
+  }
+
+  private async sendVerificationEmail(user: User): Promise<void> {
+    const { token: verificationToken, hashedToken: hashedVerificationToken } = generateToken();
+    const expiresAt = new Date(Date.now() + this.emailVerificationTokenExpiresInMS);
+
+    await this.verificationTokenService.upsertVerificationToken(
+      user.id,
+      hashedVerificationToken,
+      expiresAt,
+      TokenType.EMAIL_VERIFICATION,
+    );
+
+    this.authEventProvider.emitAccountVerificationRequested({
+      userId: user.id,
+      email: user.email,
+      verificationToken: verificationToken,
+    });
   }
 }
