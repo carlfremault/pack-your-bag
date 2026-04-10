@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { MdCheckCircleOutline, MdOutlineCircle } from 'react-icons/md';
 
-import QuantityStepper from '../input/QuantityStepper';
+import { QuantityStepper } from '../input/QuantityStepper';
 
 export interface TripItemCardProps {
   itemId: string;

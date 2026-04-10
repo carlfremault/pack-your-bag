@@ -26,6 +26,18 @@ export const getBaseConfig = (appDir) =>
       },
     },
     {
+      rules: {
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+          },
+        ],
+      },
+    },
+    {
       plugins: { 'simple-import-sort': simpleImportSort },
       rules: {
         'simple-import-sort/imports': [

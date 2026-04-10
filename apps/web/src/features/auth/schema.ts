@@ -25,10 +25,11 @@ export const registerSchema = z
     path: ['confirmPassword'],
   });
 
-export const passwordResetSchema = z.object({
+export const emailOnlySchema = z.object({
   email: z.email('Invalid email'),
 });
 
 export type LoginInputs = z.infer<typeof loginSchema>;
 export type RegisterInputs = z.infer<typeof registerSchema>;
-export type PasswordResetInputs = z.infer<typeof passwordResetSchema>;
+export type PasswordResetInputs = z.infer<typeof emailOnlySchema>;
+export type ResendVerificationEmailInputs = z.infer<typeof emailOnlySchema>;
