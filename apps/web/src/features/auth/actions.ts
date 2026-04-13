@@ -9,6 +9,10 @@ import { postToAuthService } from './auth-http';
 import { emailOnlySchema, loginSchema, registerSchema } from './schema';
 import { FormError, FormValues } from './types';
 
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
 async function authenticateAndCreateSession(
   endpoint: string,
   credentials: Record<string, string>,
