@@ -8,6 +8,11 @@ alwaysApply: true
 
 Turborepo monorepo using Yarn 4 (Berry).
 
+# Communication
+
+- Be succinct and to the point in all your code, documentation and explainations unless explicitly asked for more details. Avoid fluff.
+- Pattern: [thing] [action] [reason]. [next step].
+
 ## Architecture Anchors
 
 - `apps/*` contains deployable apps/services.
