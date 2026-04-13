@@ -1,28 +1,34 @@
 ---
 description: Patterns for NestJS Backend Services
-globs: apps/**/*.ts
+globs: apps/{auth-service,product-service,user-data-service}/**/*.ts
 alwaysApply: false
 ---
 
 # NestJS Development Standards
 
-When working in `apps/auth-service`, `apps/product-service`, or `apps/user-data-service`:
+When working in backend services (`auth-service`, `product-service`, `user-data-service`):
 
 ## Code Structure
 
 - Follow the standard NestJS module pattern: `module -> controller -> service`.
-- **Prisma:** Always use the `PrismaService` located in the local `src/prisma` folder of the app.
-- **DTOs:** Use `class-validator` and `class-transformer` for request validation.
+- For Auth and Product services, use the local `src/prisma/PrismaService`.
+- Use `class-validator` and `class-transformer` for request validation.
 
 ## Testing
 
 - Use Vitest.
-- Unit Test files should be named `*.spec.ts` and are located next to the file tested.
-- E2E/Integration tests should be named `*.e2e-spec.ts`go into the local `test`folder of the app.
-- Reference `@repo/vitest-config/nestjs` for base configurations extended by the app's specific configuration in `apps/<service-name>/vitest.config.ts`
-- Tests should be thorough but not over the top. There should not be too much overlap between Unit and E2E/Integration tests.
+- Unit tests: `*.spec.ts` colocated with source.
+- E2E/integration tests: `*.e2e-spec.ts` in each app's `test` folder.
+- Base config: `@repo/vitest-config/nestjs`, extended in `apps/<service-name>/vitest.config.ts`.
+- Keep unit and E2E coverage complementary (minimal overlap).
 
-## Database (Prisma)
+## Documentation
 
-- The schema is located at `apps/<service-name>/prisma/schema.prisma`.
-- After changing the schema, remind the user to run `yarn workspace <service-name> generate`.
+- For every new controller or public API, add `@ApiTags`, `@ApiOperation`, and `@ApiResponse` from `@nestjs/swagger`.
+
+## Database
+
+- Auth and Product use PostgreSQL, one schema per service (`app_auth`, `app_product`).
+- Prisma schemas live in `apps/<service-name>/prisma/schema.prisma`.
+- After schema changes, remind user to run `yarn workspace <service-name> generate`.
+- MongoDB is used for the User Data Service only.

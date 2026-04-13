@@ -6,40 +6,24 @@ alwaysApply: true
 
 # Pack Your Bag - Monorepo Standards
 
-You are working in a Turborepo monorepo using Yarn 4 (Berry).
+Turborepo monorepo using Yarn 4 (Berry).
 
-## Core Architecture
+## Architecture Anchors
 
-- **Apps:** Located in `/apps`. These are standalone NestJS or Web services.
-- **Packages:** Located in `/packages`. These are shared configurations or libraries.
-- **Service Stack:** NestJS (Backend), Prisma (ORM), Vitest (Testing), TypeScript.
+- `apps/*` contains deployable apps/services.
+- `packages/*` contains shared libraries and configs.
+- Prefer shared configs: `@repo/typescript-config`, `@repo/eslint-config`, `@repo/vitest-config`.
 
 ## Execution Rules
 
-- **Package Management:** ALWAYS use `yarn`. Never use `npm` or `pnpm`.
-- **Task Running:** Use `turbo run <task>` for workspace-wide commands.
-- **Adding Dependencies:** - To add a package to a specific app: `yarn workspace <workspace-name> add <package>`
-  - Check the root `package.json` for existing workspace names.
-- **Clean Code:** ALWAYS respect TypeScript, ESLint and Strict mode rules. NEVER use `any`.
-- **Documentation:** For every new Controller or Public API, ALWAYS add @ApiTags, @ApiOperation, and @ApiResponse decorators from @nestjs/swagger.
+- Use `yarn`. Never use `npm` or `pnpm`.
+- Use `turbo run <task>` for workspace-wide tasks.
+- Add dependencies with `yarn workspace <workspace-name> add <package>`.
+- Respect TypeScript/ESLint strictness. Never use `any`.
 
-## Shared Configs
-
-- Use `@repo/typescript-config` for TS settings.
-- Use `@repo/eslint-config` for linting.
-- Use `@repo/vitest-config` for all testing logic.
-
-## 🛑 SAFETY GUARDRAILS (CRITICAL)
+## Safety Guardrails
 
 - DO NOT modify `docker-compose.yml`, `.devcontainer/`, or any file in the root directory unless specifically asked.
 - DO NOT attempt to create or migrate databases automatically.
 - DO NOT install new global packages.
 - If a task requires changing infrastructure, STOP and ask for confirmation first.
-
-## MODELS
-
-- DO NOT use GPT-3.5 or GPT-4 models in Cursor IDE
-
-## Project Context
-
-- PostgreSQL is the primary database (managed via Docker Compose). It is used for the Auth Service and Product Service microservices. Each service talks to a separate schema: `app_auth` and `app_product` respectively. These schemas are completely separate and have their own users and password. You can reference `scripts/database-setup.ts` for Postgres configuration.
