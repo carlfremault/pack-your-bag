@@ -8,11 +8,15 @@ alwaysApply: true
 
 You are working in a Turborepo monorepo using Yarn 4 (Berry).
 
+## Communication
+
+Be brief and to the point in all code, documentation and explanations unless explicitly asked for more details. I can see all the code you generate in my IDE so avoid superfluously summarizing what you did in text. Remove all fluff.
+
 ## Core Architecture
 
 - **Apps:** Located in `/apps`. These are standalone NestJS or Web services.
 - **Packages:** Located in `/packages`. These are shared configurations or libraries.
-- **Service Stack:** NestJS (Backend), Prisma (ORM), Vitest (Testing), TypeScript.
+- **Service Stack:** NestJS (Backend), Prisma (ORM), Vitest (Testing), TypeScript, React, NextJS.
 
 ## Execution Rules
 
@@ -21,7 +25,6 @@ You are working in a Turborepo monorepo using Yarn 4 (Berry).
 - **Adding Dependencies:** - To add a package to a specific app: `yarn workspace <workspace-name> add <package>`
   - Check the root `package.json` for existing workspace names.
 - **Clean Code:** ALWAYS respect TypeScript, ESLint and Strict mode rules. NEVER use `any`.
-- **Documentation:** For every new Controller or Public API, ALWAYS add @ApiTags, @ApiOperation, and @ApiResponse decorators from @nestjs/swagger.
 
 ## Shared Configs
 
@@ -35,11 +38,3 @@ You are working in a Turborepo monorepo using Yarn 4 (Berry).
 - DO NOT attempt to create or migrate databases automatically.
 - DO NOT install new global packages.
 - If a task requires changing infrastructure, STOP and ask for confirmation first.
-
-## MODELS
-
-- DO NOT use GPT-3.5 or GPT-4 models in Cursor IDE
-
-## Project Context
-
-- PostgreSQL is the primary database (managed via Docker Compose). It is used for the Auth Service and Product Service microservices. Each service talks to a separate schema: `app_auth` and `app_product` respectively. These schemas are completely separate and have their own users and password. You can reference `scripts/database-setup.ts` for Postgres configuration.

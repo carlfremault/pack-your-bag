@@ -22,25 +22,6 @@ alwaysApply: false
 
 - Use the **CSF3** format (object syntax, not function syntax)
 - Always define `args` at the story level, not inline in a render function
-- The `default` export must include at minimum `{ component }`
-
-```tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import { MyComponent } from './MyComponent';
-
-const meta: Meta<typeof MyComponent> = {
-  component: MyComponent,
-};
-export default meta;
-
-type Story = StoryObj<typeof MyComponent>;
-
-export const Default: Story = {
-  args: {
-    label: 'Example',
-  },
-};
-```
 
 ## Required stories per component
 
@@ -63,5 +44,10 @@ Every component must have at minimum:
 
 ## Exporting components
 
-- Add the component to `packages/react-common/src/index.ts` before considering it done
+- Add the component to `packages/react-common/package.json`'s `exports` object before considering it done
 - Do not export internal subcomponents unless they are independently reusable
+
+## Skills Usage (Only When Applicable)
+
+- Use `.cursor/skills/web-design-guidelines/SKILL.md` only for explicit UI/UX/accessibility/design audits and reviews.
+- Do not load skills by default; select them only when the current task clearly matches the skill's use case.
