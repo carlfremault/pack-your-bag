@@ -15,7 +15,7 @@ export default function LoginForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      {state?.formError && <Alert message={state.formError} />}
+      {state?.formError && <Alert type="error" message={state.formError} />}
       <Input
         label="Email"
         name="email"
@@ -30,7 +30,7 @@ export default function LoginForm() {
         errorMessage={state?.fieldErrors?.password}
       />
       <div className="flex items-end justify-between">
-        <LinkButton href="/reset-password" variant="link" linkAs={Link} className="text-xs">
+        <LinkButton href="/password-forgotten" variant="link" linkAs={Link} className="text-xs">
           Password forgotten?
         </LinkButton>
         <div className="flex items-center justify-end gap-2">

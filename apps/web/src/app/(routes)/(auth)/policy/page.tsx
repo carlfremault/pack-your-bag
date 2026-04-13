@@ -87,11 +87,13 @@ export default function Page() {
       <section className="flex flex-col gap-2">
         <h3 className="text-primary font-medium">Session cookie</h3>
         <p className="text-foreground text-sm">
-          When you log in, we place a single encrypted cookie (<code>pyb-session</code>) on your
-          device to keep you authenticated. It is marked <code>HttpOnly</code> (JavaScript on the
-          page cannot read it) and is only transmitted over HTTPS. The cookie contains an encrypted
-          authentication token — never your email address or password. It expires when you log out
-          or after 14 days.
+          When you register or sign in, we place a single encrypted cookie (<code>pyb-session</code>
+          ) on your device to keep you authenticated. It is marked <code>HttpOnly</code> (JavaScript
+          on the page cannot read it) and is only transmitted over HTTPS. The cookie contains an
+          encrypted authentication token — never your password. It expires when you log out or after
+          14 days. During email address verification, the encrypted cookie may temporarily hold your
+          email address solely to pre-fill the resend form. It is removed as soon as verification is
+          complete or you sign in, and never used for any other purpose.
         </p>
       </section>
 

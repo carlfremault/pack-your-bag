@@ -9,6 +9,7 @@ export interface SessionData {
   refreshToken?: string;
   /** Unix timestamp in seconds */
   accessTokenExpiresAt?: number;
+  pendingVerificationEmail?: string;
 }
 
 export const SESSION_COOKIE_NAME = 'pyb-session';

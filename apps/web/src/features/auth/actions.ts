@@ -5,53 +5,13 @@ import { redirect } from 'next/navigation';
 import { getAuthConfig } from '@/lib/auth-config';
 import { getSession } from '@/lib/session';
 
-import { loginSchema, passwordResetSchema, registerSchema } from './schema';
+import { postToAuthService } from './auth-http';
+import { emailOnlySchema, loginSchema, registerSchema } from './schema';
+import { FormError, FormValues } from './types';
 
-type FormValues = { email: string };
-
-type FormError = {
-  formError: string;
-  values: FormValues;
-};
-
-type PostResult = { ok: true; body: unknown } | { ok: false; error: FormError };
-
-async function postToAuthService(
-  endpoint: string,
-  payload: Record<string, string>,
-  values: FormValues,
-  fallbackError = 'Something went wrong',
-): Promise<PostResult> {
-  const { authServiceUrl, bffSecret } = getAuthConfig();
-
-  let res: Response;
-  try {
-    res = await fetch(`${authServiceUrl}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-bff-secret': bffSecret,
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    return { ok: false, error: { formError: 'Authentication service unavailable', values } };
-  }
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    return {
-      ok: false,
-      error: {
-        formError: (body.message as string | undefined) ?? fallbackError,
-        values,
-      },
-    };
-  }
-
-  const body: unknown = await res.json().catch(() => null);
-  return { ok: true, body };
-}
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
 
 async function authenticateAndCreateSession(
   endpoint: string,
@@ -65,7 +25,16 @@ async function authenticateAndCreateSession(
     'Invalid email or password',
   );
 
-  if (!result.ok) return result.error;
+  if (!result.ok) {
+    if (result.error.errorCode === 'EMAIL_NOT_VERIFIED') {
+      const session = await getSession();
+      session.pendingVerificationEmail = values.email || undefined;
+      await session.save();
+
+      redirect('/email-not-verified');
+    }
+    return result.error;
+  }
 
   const body = result.body as {
     user: { id: string; role: number };
@@ -81,10 +50,15 @@ async function authenticateAndCreateSession(
   session.accessToken = body.access_token;
   session.refreshToken = body.refresh_token;
   session.accessTokenExpiresAt = Math.floor(Date.now() / 1000) + body.expires_in;
+  session.pendingVerificationEmail = undefined;
   await session.save();
 
   redirect('/items');
 }
+
+// ============================================
+// LOGIN
+// ============================================
 
 export type LoginState = {
   fieldErrors?: {
@@ -142,6 +116,10 @@ export async function logoutAction() {
   redirect('/login');
 }
 
+// ============================================
+// REGISTER
+// ============================================
+
 export type RegisterState = {
   fieldErrors?: {
     email?: string;
@@ -179,8 +157,20 @@ export async function registerAction(
   }
 
   const { email, password } = parsed.data;
-  return authenticateAndCreateSession('/auth/register', { email, password }, values);
+  const result = await postToAuthService('/auth/register', { email, password }, values);
+
+  if (!result.ok) return result.error;
+
+  const session = await getSession();
+  session.pendingVerificationEmail = parsed.data.email;
+  await session.save();
+
+  redirect('/register-success');
 }
+
+// ============================================
+// PASSWORD RESET
+// ============================================
 
 export type PasswordResetState = {
   fieldErrors?: {
@@ -202,7 +192,7 @@ export async function passwordResetAction(
   };
   const values = { email: raw.email ?? '' };
 
-  const parsed = passwordResetSchema.safeParse(raw);
+  const parsed = emailOnlySchema.safeParse(raw);
 
   if (!parsed.success) {
     const fieldErrors: NonNullable<PasswordResetState>['fieldErrors'] = {};
@@ -218,6 +208,52 @@ export async function passwordResetAction(
   const result = await postToAuthService('/auth/forgot-password', parsed.data, values);
 
   if (!result.ok) return result.error;
+
+  return { success: true };
+}
+
+// ============================================
+// EMAIL VERIFICATION
+// ============================================
+
+export type ResendVerificationEmailState = {
+  fieldErrors?: {
+    email?: string;
+  };
+  formError?: string;
+  success?: boolean;
+  values?: {
+    email?: string;
+  };
+} | null;
+
+export async function resendVerificationEmailAction(
+  _prevState: ResendVerificationEmailState,
+  formData: FormData,
+): Promise<ResendVerificationEmailState> {
+  const raw = { email: formData.get('email') as string | null };
+  const values = { email: raw.email ?? '' };
+
+  const parsed = emailOnlySchema.safeParse(raw);
+
+  if (!parsed.success) {
+    const fieldErrors: NonNullable<ResendVerificationEmailState>['fieldErrors'] = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (field === 'email') {
+        fieldErrors[field] ??= issue.message;
+      }
+    }
+    return { fieldErrors, values };
+  }
+
+  const result = await postToAuthService('/auth/resend-verification-email', parsed.data, values);
+
+  if (!result.ok) return result.error;
+
+  const session = await getSession();
+  session.pendingVerificationEmail = undefined;
+  await session.save();
 
   return { success: true };
 }

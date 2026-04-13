@@ -43,7 +43,7 @@ export default function PasswordResetForm() {
       />
       <div className="flex items-center justify-end gap-2">
         <LinkButton href="/login" variant="outline" linkAs={Link}>
-          Cancel
+          Back to login
         </LinkButton>
         <Button type="submit" disabled={pending} className="self-end">
           {pending ? 'Submitting...' : 'Submit'}

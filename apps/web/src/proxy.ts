@@ -14,10 +14,25 @@ export const INTERNAL_TOKEN_HEADER = 'x-internal-access-token';
 const REFRESH_BUFFER_SECONDS = 30;
 
 /** Routes that require no session. Matched as path prefixes. */
-const PUBLIC_PATHS = ['/login', '/register', '/policy', '/reset-password'];
+const PUBLIC_PATHS = [
+  '/login',
+  '/register',
+  '/register-success',
+  '/policy',
+  '/password-forgotten',
+  '/verify-email',
+  '/email-not-verified',
+];
 
 /** Public routes where authenticated users should be redirected to /items. */
-const AUTH_REDIRECT_PATHS = ['/login', '/register', '/reset-password'];
+const AUTH_REDIRECT_PATHS = [
+  '/login',
+  '/register',
+  '/register-success',
+  '/password-forgotten',
+  '/verify-email',
+  '/email-not-verified',
+];
 
 /**
  * Internal BFF auth routes (/api/auth/*) are always passed through.
