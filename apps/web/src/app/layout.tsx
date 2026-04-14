@@ -6,6 +6,7 @@ import { Inter } from 'next/font/google';
 import { DesktopNav } from '@/components/navigation/DesktopNav';
 import { MobileHeader } from '@/components/navigation/MobileHeader';
 import { MobileNav } from '@/components/navigation/MobileNav';
+import Providers from '@/components/providers';
 
 import './globals.css';
 
@@ -27,26 +28,28 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <div className="flex h-screen flex-col md:flex-row">
-          <div className="hidden md:block">
-            <Sidebar />
+        <Providers>
+          <div className="flex h-screen flex-col lg:flex-row">
+            <div className="hidden lg:block">
+              <Sidebar />
+            </div>
+
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <div className="hidden lg:block">
+                <DesktopNav />
+              </div>
+              <div className="lg:hidden">
+                <MobileHeader />
+              </div>
+
+              <main className="flex-1 overflow-y-auto">{children}</main>
+
+              <div className="lg:hidden">
+                <MobileNav />
+              </div>
+            </div>
           </div>
-
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="hidden md:block">
-              <DesktopNav />
-            </div>
-            <div className="md:hidden">
-              <MobileHeader />
-            </div>
-
-            <main className="flex-1 overflow-y-auto">{children}</main>
-
-            <div className="md:hidden">
-              <MobileNav />
-            </div>
-          </div>
-        </div>
+        </Providers>
       </body>
     </html>
   );

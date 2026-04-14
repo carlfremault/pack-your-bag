@@ -1,3 +1,21 @@
-export default function ItemsPage() {
-  return <div>ItemsPage</div>;
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
+
+import { getAllItems } from '@/features/item/api';
+import ItemsView from '@/features/item/components/ItemsView';
+
+export default async function Page() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['items'],
+    queryFn: () => getAllItems(),
+  });
+
+  return (
+    <div className="flex min-h-screen justify-center">
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ItemsView />
+      </HydrationBoundary>
+    </div>
+  );
 }

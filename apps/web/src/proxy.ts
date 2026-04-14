@@ -40,9 +40,12 @@ const AUTH_REDIRECT_PATHS = [
  */
 const AUTH_API_PREFIX = '/api/auth/';
 
-async function doRefresh(
-  refreshToken: string,
-): Promise<{ accessToken: string; refreshToken: string; accessTokenExpiresAt: number } | null> {
+type RefreshResult =
+  | { kind: 'success'; accessToken: string; refreshToken: string; accessTokenExpiresAt: number }
+  | { kind: 'invalid' }
+  | { kind: 'transient' };
+
+async function doRefresh(refreshToken: string): Promise<RefreshResult> {
   try {
     const { authServiceUrl, bffSecret } = getAuthConfig();
     const res = await fetch(`${authServiceUrl}/auth/refresh-token`, {
@@ -53,16 +56,22 @@ async function doRefresh(
       },
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        return { kind: 'invalid' };
+      }
+      return { kind: 'transient' };
+    }
 
     const body = await res.json();
     return {
+      kind: 'success',
       accessToken: body.access_token as string,
       refreshToken: body.refresh_token as string,
       accessTokenExpiresAt: Math.floor(Date.now() / 1000) + (body.expires_in as number),
     };
   } catch {
-    return null;
+    return { kind: 'transient' };
   }
 }
 
@@ -79,8 +88,8 @@ function isProgrammaticRequest(req: NextRequest): boolean {
  * Handle an authentication failure.
  *
  * - Navigation requests: redirect to /login (browser follows naturally).
- * - Programmatic requests: pass through WITHOUT the token header and clear the
- *   session cookie. Downstream handlers (getProductClient etc.) will throw a
+ * - Programmatic requests: pass through WITHOUT the token header and optionally
+ *   clear the session cookie. Downstream handlers (getProductClient etc.) will throw a
  *   readable "session expired" error that React Query surfaces to the user.
  *   The global QueryCache/MutationCache error handler then triggers the redirect.
  */
@@ -133,9 +142,10 @@ export default async function middleware(req: NextRequest) {
   if (needsRefresh) {
     const refreshed = await doRefresh(session.refreshToken);
 
-    if (!refreshed) {
-      // Refresh token invalid/expired — clear session and handle by request type.
-      return handleAuthFailure(req, true);
+    if (refreshed.kind !== 'success') {
+      // Clear the session only for definitive auth failures.
+      // Transient upstream errors should not force logout.
+      return handleAuthFailure(req, refreshed.kind === 'invalid');
     }
 
     // Build response with:
