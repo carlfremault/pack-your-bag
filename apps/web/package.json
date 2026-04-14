@@ -14,6 +14,7 @@
   "dependencies": {
     "@repo/react-common": "workspace:*",
     "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
     "iron-session": "^8.0.4",
     "next": "^16.2.1",
@@ -27,6 +28,7 @@
     "@repo/typescript-config": "workspace:*",
     "@repo/vitest-config": "workspace:*",
     "@tailwindcss/postcss": "^4",
+    "@tanstack/react-query-devtools": "^5.96.2",
     "@types/react": "19.2.6",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",

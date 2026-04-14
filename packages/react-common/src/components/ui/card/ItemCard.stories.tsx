@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
 import { Button } from '../button/Button';
-import QuantityStepper from '../input/QuantityStepper';
+import { QuantityStepper } from '../input/QuantityStepper';
 
 import { ItemCard } from './ItemCard';
 

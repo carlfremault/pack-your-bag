@@ -17,7 +17,9 @@
     "./sidebar": "./src/components/ui/sidebar/Sidebar.tsx",
     "./theme/default-values.css": "./src/theme/default-values.css",
     "./theme/color-themes.css": "./src/theme/color-themes.css",
-    "./theme/tokens.css": "./src/theme/tokens.css"
+    "./theme/tokens.css": "./src/theme/tokens.css",
+    "./hooks": "./src/hooks/index.ts",
+    "./table": "./src/components/table/DataTable.tsx"
   },
   "scripts": {
     "lint": "eslint .",
@@ -39,6 +41,7 @@
     "@storybook/addon-vitest": "^10.3.2",
     "@storybook/react-vite": "^10.3.2",
     "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/react-table": "^8.21.3",
     "@types/react": "19.2.6",
     "@types/react-dom": "^19",
     "@vitest/browser": "^4.1.1",
@@ -57,6 +60,7 @@
     "vitest": "^4.1.1"
   },
   "peerDependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

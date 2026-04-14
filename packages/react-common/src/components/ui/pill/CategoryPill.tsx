@@ -10,7 +10,7 @@ export interface CategoryPillProps {
 export function CategoryPill({ name, colorTheme }: CategoryPillProps) {
   const { className: colorThemeClassName } = colorThemes[colorTheme];
   const categoryPillClassName = classNames(
-    'uppercase font-medium rounded-full border px-1.5 py-0 text-[10px] leading-4 truncate',
+    'uppercase font-medium rounded-full border px-1.5 py-0 text-[10px] truncate',
     colorThemeClassName,
   );
 

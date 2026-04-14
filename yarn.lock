@@ -3259,6 +3259,7 @@ __metadata:
     "@storybook/addon-vitest": "npm:^10.3.2"
     "@storybook/react-vite": "npm:^10.3.2"
     "@tailwindcss/vite": "npm:^4.2.2"
+    "@tanstack/react-table": "npm:^8.21.3"
     "@types/react": "npm:19.2.6"
     "@types/react-dom": "npm:^19"
     "@vitest/browser": "npm:^4.1.1"
@@ -3276,6 +3277,7 @@ __metadata:
     vite: "npm:^8.0.2"
     vitest: "npm:^4.1.1"
   peerDependencies:
+    "@tanstack/react-table": ^8.21.3
     classnames: ^2.5.1
     react: ^19.2.4
     react-dom: ^19.2.4
@@ -4369,6 +4371,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-devtools@npm:5.96.2":
+  version: 5.96.2
+  resolution: "@tanstack/query-devtools@npm:5.96.2"
+  checksum: 10c0/9b47c5182ab8925f3000a17d340a19602e7e7b11cc48c77a6f6c7863b830191ab8e6e48ee5ed6278a1cc380e70d2061708de2f30fdb62cb6785c57f07d61c589
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.96.2":
+  version: 5.96.2
+  resolution: "@tanstack/react-query-devtools@npm:5.96.2"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.96.2"
+  peerDependencies:
+    "@tanstack/react-query": ^5.96.2
+    react: ^18 || ^19
+  checksum: 10c0/92bd9a1d5e4a2aa6de7c0d350e3657d9b83f11bacbe72ad7af9d68de0e18206a73d04dd745eabf2e3f35d5c11e5eea8a4ab66a43643762affd128a571c769ef1
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-query@npm:^5.90.21":
   version: 5.95.0
   resolution: "@tanstack/react-query@npm:5.95.0"
@@ -4377,6 +4398,25 @@ __metadata:
   peerDependencies:
     react: ^18 || ^19
   checksum: 10c0/67025fa88de906a7b5511c6ac09f953904f0c3f72976ca2af578b63a005b27320d95fe05e1f01dcefae9bfeb3db11b190a06908c32014009c363f363cb0eb0ad
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-table@npm:^8.21.3":
+  version: 8.21.3
+  resolution: "@tanstack/react-table@npm:8.21.3"
+  dependencies:
+    "@tanstack/table-core": "npm:8.21.3"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 10c0/85d1d0fcb690ecc011f68a5a61c96f82142e31a0270dcf9cbc699a6f36715b1653fe6ff1518302a6d08b7093351fc4cabefd055a7db3cd8ac01e068956b0f944
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.21.3":
+  version: 8.21.3
+  resolution: "@tanstack/table-core@npm:8.21.3"
+  checksum: 10c0/40e3560e6d55e07cc047024aa7f83bd47a9323d21920d4adabba8071fd2d21230c48460b26cedf392588f8265b9edc133abb1b0d6d0adf4dae0970032900a8c9
   languageName: node
   linkType: hard
 
@@ -17061,6 +17101,8 @@ __metadata:
     "@repo/vitest-config": "workspace:*"
     "@tailwindcss/postcss": "npm:^4"
     "@tanstack/react-query": "npm:^5.90.21"
+    "@tanstack/react-query-devtools": "npm:^5.96.2"
+    "@tanstack/react-table": "npm:^8.21.3"
     "@types/react": "npm:19.2.6"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^5.1.1"

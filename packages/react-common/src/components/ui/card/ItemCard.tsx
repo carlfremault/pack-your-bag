@@ -8,7 +8,7 @@ export interface ItemCardProps {
   id: string;
   name: string;
   description?: string;
-  category?: CategoryPillProps;
+  category: CategoryPillProps | null;
   weight?: number;
   weightUnit?: string;
   onEditItem: (id: string) => void;
@@ -24,7 +24,11 @@ export function ItemCard(props: ItemCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm font-bold">{name}</h3>
-            {category && <CategoryPill {...category} />}
+            {category && (
+              <div className="hidden sm:flex">
+                <CategoryPill {...category} />
+              </div>
+            )}
           </div>
         </div>
         <Button
@@ -36,6 +40,11 @@ export function ItemCard(props: ItemCardProps) {
           <MdOutlineEdit className="h-5 w-5" />
         </Button>
       </div>
+      {category && (
+        <div className="flex sm:hidden">
+          <CategoryPill {...category} />
+        </div>
+      )}
       {description && <div className="text-xs font-light">{description}</div>}
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-1 text-xs">
