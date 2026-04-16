@@ -1,6 +1,6 @@
-import { CenteredSurfaceCard } from '@repo/react-common/card';
-
 import type { Metadata } from 'next';
+
+import { CenteredSurfaceCard } from '@repo/react-common/card';
 
 import ResendVerificationForm from '@/features/auth/components/ResendVerificationForm';
 import { getSession } from '@/lib/session';

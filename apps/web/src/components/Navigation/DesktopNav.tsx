@@ -1,15 +1,15 @@
 'use client';
 
-import { DesktopHeader } from '@repo/react-common/header';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
+import { DesktopHeader } from '@repo/react-common/header';
 
 import {
   getActiveTabFromPathname,
   navTabs,
   settingsLink,
-} from '@/components/navigation/navigation';
+} from '@/components/Navigation/navigation';
 import { logoutAction } from '@/features/auth/actions';
 
 export function DesktopNav() {

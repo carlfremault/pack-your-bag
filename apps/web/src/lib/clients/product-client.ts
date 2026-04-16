@@ -1,6 +1,7 @@
+import { headers } from 'next/headers';
+
 import type { paths } from '@repo/product-client';
 
-import { headers } from 'next/headers';
 import createClient from 'openapi-fetch';
 
 import { INTERNAL_TOKEN_HEADER } from '@/proxy';

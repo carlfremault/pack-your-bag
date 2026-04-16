@@ -47,8 +47,8 @@ export const getBaseConfig = (appDir) =>
               // 1. Sentry / Instrumentation MUST be first
               ['^\\u0000\\./instrument'],
 
-              // 2. External packages: React/NestJS
-              ['^react', '^@nestjs'],
+              // 2. External packages: React/NestJS/NextJS
+              ['^react', '^next', '^@nestjs'],
 
               // 3. Monorepo Workspace (@repo/...)
               ['^@repo/'],

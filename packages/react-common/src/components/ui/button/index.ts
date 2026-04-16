@@ -8,3 +8,4 @@ export {
 export { FloatingActionButton } from './FloatingActionButton';
 export { LinkButton, type LinkButtonProps } from './LinkButton';
 export { SettingsButton, type SettingsButtonProps } from './SettingsButton';
+export { SubmitButton, type SubmitButtonProps } from './SubmitButton';

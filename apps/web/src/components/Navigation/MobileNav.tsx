@@ -1,11 +1,11 @@
 'use client';
 
-import { MobileBottomNav } from '@repo/react-common/navigation';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { getActiveTabFromPathname, navTabs } from '@/components/navigation/navigation';
+import { MobileBottomNav } from '@repo/react-common/navigation';
+
+import { getActiveTabFromPathname, navTabs } from '@/components/Navigation/navigation';
 
 export function MobileNav() {
   const pathname = usePathname();

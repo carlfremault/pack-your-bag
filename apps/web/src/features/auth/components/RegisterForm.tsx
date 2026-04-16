@@ -1,12 +1,11 @@
 'use client';
 
 import { useActionState } from 'react';
+import Link from 'next/link';
 
 import { Alert } from '@repo/react-common/alert';
-import { Button, LinkButton } from '@repo/react-common/button';
+import { LinkButton, SubmitButton } from '@repo/react-common/button';
 import { Input, PasswordInput } from '@repo/react-common/input';
-
-import Link from 'next/link';
 
 import { registerAction, type RegisterState } from '../actions';
 
@@ -47,9 +46,7 @@ export default function RegisterForm() {
           <LinkButton href="/login" variant="outline" linkAs={Link}>
             Sign in
           </LinkButton>
-          <Button type="submit" disabled={pending}>
-            {pending ? 'Signing up...' : 'Sign up'}
-          </Button>
+          <SubmitButton pending={pending}>Sign up</SubmitButton>
         </div>
       </div>
     </form>
