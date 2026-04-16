@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "generate": "openapi-typescript ../../apps/product-service/openapi.json -o src/schema.d.ts && prettier --write src/schema.d.ts",
+    "generate": "openapi-typescript ../../apps/product-service/openapi.json -o src/schema.d.ts && openapi-zod-client ../../apps/product-service/openapi.json -o src/schema.zod.ts --template ./scripts/schemas-only.hbs && prettier --write src/schema.d.ts src/schema.zod.ts",
     "build": "tsc"
   },
   "exports": {
@@ -11,10 +11,12 @@
   },
   "devDependencies": {
     "openapi-typescript": "^7.0.0",
+    "openapi-zod-client": "^1.18.0",
     "prettier": "^3.6.2",
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "openapi-fetch": "^0.13.0"
+    "openapi-fetch": "^0.13.0",
+    "zod": "^4.1.12"
   }
 }

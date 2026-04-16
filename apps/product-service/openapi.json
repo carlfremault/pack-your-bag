@@ -1689,13 +1689,14 @@
             "nullable": true
           },
           "weight": {
-            "type": "object",
+            "type": "number",
             "description": "Item weight",
             "example": 100,
             "nullable": true
           },
           "category": {
             "description": "Item category",
+            "nullable": true,
             "allOf": [
               {
                 "$ref": "#/components/schemas/CategoryResponseDto"
@@ -1979,22 +1980,28 @@
           "name": {
             "type": "string",
             "description": "Item name",
-            "example": "Item name"
+            "example": "Item name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Item description",
-            "example": "Item description"
+            "example": "Item description",
+            "maxLength": 1000
           },
           "weight": {
             "type": "number",
             "description": "Item weight",
-            "example": 100
+            "example": 100,
+            "minimum": 0,
+            "exclusiveMinimum": true
           },
           "categoryId": {
             "type": "string",
             "description": "Item category uuid",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "format": "uuid"
           }
         },
         "required": [
@@ -2007,22 +2014,28 @@
           "name": {
             "type": "string",
             "description": "Item name",
-            "example": "Item name"
+            "example": "Item name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Item description",
-            "example": "Item description"
+            "example": "Item description",
+            "maxLength": 1000
           },
           "weight": {
             "type": "number",
             "description": "Item weight",
-            "example": 100
+            "example": 100,
+            "minimum": 0,
+            "exclusiveMinimum": true
           },
           "categoryId": {
             "type": "string",
             "description": "Item category uuid",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "format": "uuid"
           }
         }
       },
