@@ -4,7 +4,7 @@ import { useId, useState } from 'react';
 
 import classNames from 'classnames';
 
-import { inputLabelClassName, inputRequiredClassName, inputWrapperClassName } from './Input';
+import { inputRequiredClassName, inputWrapperClassName } from './Input';
 
 export interface PasswordInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -13,6 +13,9 @@ export interface PasswordInputProps
   defaultVisible?: boolean;
   errorMessage?: string;
 }
+
+const passwordInputContainerClassName =
+  'border-primary-ring bg-primary-foreground rounded-md border px-3 py-2 text-sm flex items-center justify-between focus-within:ring-info-ring focus-within:ring-2';
 
 export function PasswordInput(props: PasswordInputProps) {
   const {
@@ -26,12 +29,9 @@ export function PasswordInput(props: PasswordInputProps) {
   const [isVisible, setIsVisible] = useState(defaultVisible);
   const errorId = useId();
 
-  const passwordInputContainerClassName =
-    'border-primary-ring bg-primary-foreground rounded-md border px-3 py-2 text-sm flex items-center justify-between focus-within:ring-info-ring focus-within:ring-2';
-
   return (
     <label className={inputWrapperClassName}>
-      <span className={inputLabelClassName}>
+      <span className="text-primary flex items-center gap-1 text-[10px] font-medium uppercase">
         {label} {required && <span className={inputRequiredClassName}>*</span>}
       </span>
       <div className={classNames(passwordInputContainerClassName, className)}>
@@ -48,7 +48,7 @@ export function PasswordInput(props: PasswordInputProps) {
           onClick={() => setIsVisible((current) => !current)}
           aria-label={isVisible ? 'Hide password' : 'Show password'}
           aria-pressed={isVisible}
-          className="cursor-pointer text-xs font-medium outline-none focus-visible:underline"
+          className="text-primary cursor-pointer text-xs font-medium outline-none focus-visible:underline"
         >
           {isVisible ? 'Hide' : 'Show'}
         </button>

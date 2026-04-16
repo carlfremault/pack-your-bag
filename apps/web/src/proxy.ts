@@ -1,8 +1,11 @@
-import { getIronSession } from 'iron-session';
 import { type NextRequest, NextResponse } from 'next/server';
+
+import { getIronSession } from 'iron-session';
 
 import { getAuthConfig } from '@/lib/auth-config';
 import { SESSION_COOKIE_NAME, type SessionData, sessionOptions } from '@/lib/session';
+
+import { AUTH_REDIRECT_PATHS, PUBLIC_PATHS } from './lib/constants';
 
 /**
  * This header carries the current (possibly just-refreshed) access token from
@@ -12,27 +15,6 @@ import { SESSION_COOKIE_NAME, type SessionData, sessionOptions } from '@/lib/ses
 export const INTERNAL_TOKEN_HEADER = 'x-internal-access-token';
 
 const REFRESH_BUFFER_SECONDS = 30;
-
-/** Routes that require no session. Matched as path prefixes. */
-const PUBLIC_PATHS = [
-  '/login',
-  '/register',
-  '/register-success',
-  '/policy',
-  '/password-forgotten',
-  '/verify-email',
-  '/email-not-verified',
-];
-
-/** Public routes where authenticated users should be redirected to /items. */
-const AUTH_REDIRECT_PATHS = [
-  '/login',
-  '/register',
-  '/register-success',
-  '/password-forgotten',
-  '/verify-email',
-  '/email-not-verified',
-];
 
 /**
  * Internal BFF auth routes (/api/auth/*) are always passed through.
@@ -100,7 +82,9 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean): NextResponse
     return response;
   }
 
-  const response = NextResponse.redirect(new URL('/login', req.url));
+  const loginUrl = new URL('/login', req.url);
+  loginUrl.searchParams.set('reason', 'session_expired');
+  const response = NextResponse.redirect(loginUrl);
   if (clearCookie) response.cookies.delete(SESSION_COOKIE_NAME);
   return response;
 }

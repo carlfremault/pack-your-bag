@@ -4,6 +4,7 @@ type ErrorPayload = {
   error?: {
     message?: unknown;
     status?: unknown;
+    details?: unknown;
   };
 };
 
@@ -16,11 +17,16 @@ export async function toHttpError(response: Response): Promise<HttpError> {
     payload = undefined;
   }
 
+  const rawMessage = payload?.error?.message;
   const message =
-    typeof payload?.error?.message === 'string' ? payload.error.message : `HTTP ${response.status}`;
+    typeof rawMessage === 'string'
+      ? rawMessage
+      : Array.isArray(rawMessage) && typeof rawMessage[0] === 'string'
+        ? rawMessage[0]
+        : `HTTP ${response.status}`;
 
   const status =
     typeof payload?.error?.status === 'number' ? payload.error.status : response.status;
 
-  return new HttpError(message, status);
+  return new HttpError(message, status, payload?.error?.details);
 }

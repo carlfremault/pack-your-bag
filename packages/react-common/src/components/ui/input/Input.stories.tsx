@@ -43,3 +43,10 @@ export const Email: Story = {
     onChange: fn(),
   },
 };
+
+export const WithMaxLength: Story = {
+  args: {
+    ...Default.args,
+    maxLength: 10,
+  },
+};

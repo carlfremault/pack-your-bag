@@ -12,11 +12,15 @@ export class ApiError extends Error {
 }
 
 export class HttpError extends Error {
+  details?: unknown;
+
   constructor(
     message: string,
     public status: number,
+    details?: unknown,
   ) {
     super(message);
     this.name = 'HttpError';
+    this.details = details;
   }
 }

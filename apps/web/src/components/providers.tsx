@@ -11,6 +11,12 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { SESSION_EXPIRED_MESSAGE } from '@/lib/constants';
 
+import { SidebarProvider } from './Sidebar';
+
+// -------------------------------
+// React Query
+// -------------------------------
+
 function onSessionExpired(error: Error) {
   if (error.message === SESSION_EXPIRED_MESSAGE) {
     window.location.replace('/login');
@@ -40,12 +46,16 @@ function getQueryClient() {
   }
 }
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+// --------------------------------
+// Providers
+// --------------------------------
+
+export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <SidebarProvider>{children}</SidebarProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
