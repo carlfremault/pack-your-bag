@@ -1,6 +1,6 @@
-import { CenteredSurfaceCard } from '@repo/react-common/card';
-
 import type { Metadata } from 'next';
+
+import { CenteredSurfaceCard } from '@repo/react-common/card';
 
 import RegisterForm from '@/features/auth/components/RegisterForm';
 

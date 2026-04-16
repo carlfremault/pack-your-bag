@@ -1,12 +1,11 @@
 'use client';
 
 import { useActionState } from 'react';
+import Link from 'next/link';
 
 import { Alert } from '@repo/react-common/alert';
-import { Button, LinkButton } from '@repo/react-common/button';
+import { LinkButton, SubmitButton } from '@repo/react-common/button';
 import { Input } from '@repo/react-common/input';
-
-import Link from 'next/link';
 
 import { passwordResetAction, type PasswordResetState } from '../actions';
 
@@ -45,9 +44,7 @@ export default function PasswordResetForm() {
         <LinkButton href="/login" variant="outline" linkAs={Link}>
           Back to login
         </LinkButton>
-        <Button type="submit" disabled={pending} className="self-end">
-          {pending ? 'Submitting...' : 'Submit'}
-        </Button>
+        <SubmitButton pending={pending}>Submit</SubmitButton>
       </div>
     </form>
   );

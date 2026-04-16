@@ -1,12 +1,11 @@
 'use client';
 
 import { useActionState } from 'react';
+import Link from 'next/link';
 
 import { Alert } from '@repo/react-common/alert';
-import { Button, LinkButton } from '@repo/react-common/button';
+import { LinkButton, SubmitButton } from '@repo/react-common/button';
 import { Input } from '@repo/react-common/input';
-
-import Link from 'next/link';
 
 import { resendVerificationEmailAction, type ResendVerificationEmailState } from '../actions';
 
@@ -53,9 +52,7 @@ export default function ResendVerificationForm(props: ResendVerificationFormProp
         <LinkButton href="/login" variant="outline" linkAs={Link}>
           Back to login
         </LinkButton>
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Resending...' : 'Resend verification email'}
-        </Button>
+        <SubmitButton pending={pending}>Resend verification email</SubmitButton>
       </div>
     </form>
   );

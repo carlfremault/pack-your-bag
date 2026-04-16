@@ -1,5 +1,6 @@
-import { getIronSession, type SessionOptions } from 'iron-session';
 import { cookies } from 'next/headers';
+
+import { getIronSession, type SessionOptions } from 'iron-session';
 
 export interface SessionData {
   isLoggedIn?: boolean;

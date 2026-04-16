@@ -1,9 +1,9 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
 import { Alert } from '@repo/react-common/alert';
 import { LinkButton } from '@repo/react-common/button';
 import { CenteredSurfaceCard } from '@repo/react-common/card';
-
-import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import ResendVerificationForm from '@/features/auth/components/ResendVerificationForm';
 import { verifyEmail } from '@/features/auth/queries';

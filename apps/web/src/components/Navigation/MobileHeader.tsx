@@ -1,10 +1,10 @@
 'use client';
 
-import { MobileHeader as MobileHeaderBase } from '@repo/react-common/header';
-
 import Link from 'next/link';
 
-import { settingsLink } from '@/components/navigation/navigation';
+import { MobileHeader as MobileHeaderBase } from '@repo/react-common/header';
+
+import { settingsLink } from '@/components/Navigation/navigation';
 import { logoutAction } from '@/features/auth/actions';
 
 export function MobileHeader() {
