@@ -1,12 +1,15 @@
-import { Sidebar } from '@repo/react-common/sidebar';
-
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
-import { DesktopNav } from '@/components/navigation/DesktopNav';
-import { MobileHeader } from '@/components/navigation/MobileHeader';
-import { MobileNav } from '@/components/navigation/MobileNav';
-import Providers from '@/components/providers';
+import { Sidebar } from '@repo/react-common/sidebar';
+
+import { DesktopNav } from '@/components/Navigation/DesktopNav';
+import { MobileHeader } from '@/components/Navigation/MobileHeader';
+import { MobileNav } from '@/components/Navigation/MobileNav';
+import { MobileNavDrawer } from '@/components/Navigation/MobileNavDrawer';
+import { Providers } from '@/components/providers';
+import { SidebarSlot } from '@/components/Sidebar';
+import { ToastNotifications } from '@/components/ToastNotifications';
 
 import './globals.css';
 
@@ -31,7 +34,9 @@ export default function RootLayout({
         <Providers>
           <div className="flex h-screen flex-col lg:flex-row">
             <div className="hidden lg:block">
-              <Sidebar />
+              <Sidebar>
+                <SidebarSlot />
+              </Sidebar>
             </div>
 
             <div className="flex flex-1 flex-col overflow-hidden">
@@ -42,13 +47,15 @@ export default function RootLayout({
                 <MobileHeader />
               </div>
 
-              <main className="flex-1 overflow-y-auto">{children}</main>
+              <main className="mb-16 flex-1 overflow-y-auto lg:mb-0">{children}</main>
 
               <div className="lg:hidden">
+                <MobileNavDrawer />
                 <MobileNav />
               </div>
             </div>
           </div>
+          <ToastNotifications />
         </Providers>
       </body>
     </html>

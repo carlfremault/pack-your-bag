@@ -17,8 +17,7 @@ function getBreakpoint(width: number): Breakpoint {
 }
 
 export function useBreakpoint() {
-  // Use a stable initial width for SSR + first client render to avoid hydration mismatch.
-  const [width, setWidth] = useState<number>(breakpoints.lg);
+  const [width, setWidth] = useState<number | null>(null);
 
   useEffect(() => {
     const observer = new ResizeObserver(([entry]) => {
@@ -28,12 +27,15 @@ export function useBreakpoint() {
     return () => observer.disconnect();
   }, []);
 
-  const breakpoint = getBreakpoint(width);
+  const isReady = width !== null;
+  const resolvedWidth = width ?? breakpoints.lg;
+  const breakpoint = getBreakpoint(resolvedWidth);
 
   return {
+    isReady,
     breakpoint,
-    isMobile: width < breakpoints.md,
-    isTablet: width >= breakpoints.md && width < breakpoints.lg,
-    isDesktop: width >= breakpoints.lg,
+    isMobile: isReady && resolvedWidth < breakpoints.md,
+    isTablet: isReady && resolvedWidth >= breakpoints.md && resolvedWidth < breakpoints.lg,
+    isDesktop: isReady && resolvedWidth >= breakpoints.lg,
   };
 }

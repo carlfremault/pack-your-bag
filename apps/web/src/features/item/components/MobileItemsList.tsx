@@ -1,6 +1,3 @@
-import { ReactNode } from 'react';
-
-import { Alert } from '@repo/react-common/alert';
 import { ItemCard } from '@repo/react-common/card';
 
 import { toItemCardProps } from '@/lib/mappers/item.mapper';
@@ -12,35 +9,37 @@ import MobileItemsListSkeleton from './MobileItemsListSkeleton';
 export interface MobileItemsListProps {
   items: Item[];
   onEditItem: (id: string) => void;
-  isFetching: boolean;
-  errorMessage: string | null;
+  isLoading: boolean;
 }
 
 export default function MobileItemsList(props: MobileItemsListProps) {
-  const { items, onEditItem, isFetching, errorMessage } = props;
+  const { items, onEditItem, isLoading } = props;
 
-  let content: ReactNode;
+  const containerClassName = 'flex w-full max-w-3xl flex-col gap-2 p-2 sm:p-4';
 
-  if (!errorMessage) {
-    if (isFetching) {
-      content = <MobileItemsListSkeleton />;
-    } else if (!items.length) {
-      content = (
+  if (isLoading) {
+    return (
+      <div className={containerClassName}>
+        <MobileItemsListSkeleton />
+      </div>
+    );
+  }
+
+  if (!items.length) {
+    return (
+      <div className={containerClassName}>
         <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
           No items found
         </div>
-      );
-    } else {
-      content = items.map((item) => (
-        <ItemCard key={item.id} {...toItemCardProps(item, { onEditItem })} />
-      ));
-    }
+      </div>
+    );
   }
 
   return (
-    <div className="flex w-full max-w-3xl flex-col gap-2 p-2 sm:p-4">
-      {errorMessage && <Alert message={errorMessage} type="error" />}
-      {content}
+    <div className={containerClassName}>
+      {items.map((item) => (
+        <ItemCard key={item.id} {...toItemCardProps(item, { onEditItem })} />
+      ))}
     </div>
   );
 }
