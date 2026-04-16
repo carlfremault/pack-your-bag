@@ -23,14 +23,14 @@ export class ItemResponseDto {
   @Expose()
   description: string | null;
 
-  @ApiProperty({ description: 'Item weight', example: 100, nullable: true })
+  @ApiProperty({ description: 'Item weight', example: 100, nullable: true, type: Number })
   @Expose()
   weight: number | null;
 
-  @ApiProperty({ description: 'Item category', type: CategoryResponseDto })
+  @ApiProperty({ description: 'Item category', type: CategoryResponseDto, nullable: true })
   @Expose()
   @Type(() => CategoryResponseDto)
-  category: CategoryResponseDto;
+  category: CategoryResponseDto | null;
 
   @ApiProperty({ description: 'Item created at', example: '2026-01-01T00:00:00.000Z' })
   @Expose()

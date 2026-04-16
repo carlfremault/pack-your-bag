@@ -417,9 +417,9 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight: Record<string, never> | null;
+      weight: number | null;
       /** @description Item category */
-      category: components['schemas']['CategoryResponseDto'];
+      category: components['schemas']['CategoryResponseDto'] | null;
       /**
        * Format: date-time
        * @description Item created at
@@ -585,6 +585,7 @@ export interface components {
        */
       weight?: number;
       /**
+       * Format: uuid
        * @description Item category uuid
        * @example 123e4567-e89b-12d3-a456-426614174000
        */
@@ -607,6 +608,7 @@ export interface components {
        */
       weight?: number;
       /**
+       * Format: uuid
        * @description Item category uuid
        * @example 123e4567-e89b-12d3-a456-426614174000
        */

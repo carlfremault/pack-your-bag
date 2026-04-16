@@ -23,7 +23,7 @@ Turborepo monorepo using Yarn 4 (Berry).
 
 - Use `yarn`. Never use `npm` or `pnpm`.
 - Use `turbo run <task>` for workspace-wide tasks.
-- Add dependencies with `yarn workspace <workspace-name> add <package>`.
+- Do not add/remove dependencies. Tell me the changes you need.
 - Respect TypeScript/ESLint strictness. Never use `any`.
 
 ## Safety Guardrails
