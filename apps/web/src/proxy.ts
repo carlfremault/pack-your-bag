@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { getIronSession } from 'iron-session';
 
-import { getAuthConfig } from '@/lib/auth-config';
+import { getAuthConfig } from '@/lib/clients/auth-config';
 import { SESSION_COOKIE_NAME, type SessionData, sessionOptions } from '@/lib/session';
 
 import { AUTH_REDIRECT_PATHS, PUBLIC_PATHS } from './lib/constants';

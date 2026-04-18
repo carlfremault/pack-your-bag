@@ -5,7 +5,7 @@ import { IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-vali
 import { LOCALE_MESSAGE, LOCALE_REGEX } from '@/common/constants/auth.constants';
 
 export class DeleteUserDto {
-  @ApiProperty({ example: 'v4l1dPassw0rd' })
+  @ApiProperty({ example: 'v4l1dPassw0rd', minLength: 1 })
   @IsNotEmpty()
   @IsString()
   readonly password: string;
@@ -13,6 +13,8 @@ export class DeleteUserDto {
   @ApiProperty({
     example: 'fr-FR',
     description: 'User locale, to enable date localization in email templates',
+    maxLength: 10,
+    required: false,
   })
   @IsOptional()
   @IsString()

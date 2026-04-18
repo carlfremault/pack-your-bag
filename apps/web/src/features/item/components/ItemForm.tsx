@@ -8,7 +8,7 @@ import { Button, SubmitButton } from '@repo/react-common/button';
 import { Input, TextareaInput } from '@repo/react-common/input';
 
 import { ITEM_DESCRIPTION_MAX_LENGTH, ITEM_NAME_MAX_LENGTH } from '@/lib/constants';
-import { extractErrorMessage } from '@/utils/extract-error-message';
+import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 import { getFieldErrorsFromHttpError } from '@/utils/getFieldErrors';
 
 import { useCreateItem } from '../queries';

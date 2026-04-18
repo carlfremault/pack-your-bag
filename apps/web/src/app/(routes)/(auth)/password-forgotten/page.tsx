@@ -2,18 +2,18 @@ import type { Metadata } from 'next';
 
 import { CenteredSurfaceCard } from '@repo/react-common/card';
 
-import PasswordResetForm from '@/features/auth/components/PasswordResetForm';
+import PasswordForgottenForm from '@/features/auth/components/PasswordForgottenForm';
 
 export const metadata: Metadata = {
-  title: 'Reset Password',
-  description: 'Reset your PackYourBag password',
+  title: 'Password forgotten',
+  description: 'Request a password reset link.',
 };
 
 export default function Page() {
   return (
-    <CenteredSurfaceCard title="Reset Password">
+    <CenteredSurfaceCard title="Password forgotten">
       <p className="text-primary text-sm">Enter your email to receive a password reset link.</p>
-      <PasswordResetForm />
+      <PasswordForgottenForm />
     </CenteredSurfaceCard>
   );
 }

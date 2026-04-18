@@ -2,58 +2,33 @@
 
 import { redirect } from 'next/navigation';
 
-import { getAuthConfig } from '@/lib/auth-config';
+import { ApiError } from '@/lib/errors';
 import { getSession } from '@/lib/session';
 
-import { postToAuthService } from './auth-http';
-import { emailOnlySchema, loginSchema, registerSchema } from './schema';
-import { FormError, FormValues } from './types';
+import { login, logout, passwordForgotten, register, resendVerificationEmail } from './api';
+import { AuthApiError } from './errors';
+import {
+  loginSchema,
+  passwordForgottenSchema,
+  registerSchema,
+  resendVerificationEmailSchema,
+} from './schema';
+import { LoginResponse } from './types';
 
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
-async function authenticateAndCreateSession(
-  endpoint: string,
-  credentials: Record<string, string>,
-  values: FormValues,
-): Promise<FormError> {
-  const result = await postToAuthService(
-    endpoint,
-    credentials,
-    values,
-    'Invalid email or password',
-  );
-
-  if (!result.ok) {
-    if (result.error.errorCode === 'EMAIL_NOT_VERIFIED') {
-      const session = await getSession();
-      session.pendingVerificationEmail = values.email || undefined;
-      await session.save();
-
-      redirect('/email-not-verified');
-    }
-    return result.error;
-  }
-
-  const body = result.body as {
-    user: { id: string; role: number };
-    access_token: string;
-    refresh_token: string;
-    expires_in: number;
-  };
-
+export async function createSessionFromLoginResponse(response: LoginResponse): Promise<void> {
   const session = await getSession();
   session.isLoggedIn = true;
-  session.userId = body.user.id;
-  session.role = body.user.role;
-  session.accessToken = body.access_token;
-  session.refreshToken = body.refresh_token;
-  session.accessTokenExpiresAt = Math.floor(Date.now() / 1000) + body.expires_in;
+  session.userId = response.user.id;
+  session.role = response.user.role;
+  session.accessToken = response.access_token;
+  session.refreshToken = response.refresh_token;
+  session.accessTokenExpiresAt = Math.floor(Date.now() / 1000) + response.expires_in;
   session.pendingVerificationEmail = undefined;
   await session.save();
-
-  redirect('/items');
 }
 
 // ============================================
@@ -91,22 +66,32 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
     return { fieldErrors, values };
   }
 
-  return authenticateAndCreateSession('/auth/login', parsed.data, values);
+  try {
+    const data = await login(parsed.data);
+    await createSessionFromLoginResponse(data);
+  } catch (e) {
+    if (e instanceof AuthApiError && e.errorCode === 'EMAIL_NOT_VERIFIED') {
+      const session = await getSession();
+      session.pendingVerificationEmail = values.email || undefined;
+      await session.save();
+      redirect('/email-not-verified');
+    }
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
+  }
+
+  redirect('/items');
 }
+
+// ============================================
+// LOGOUT
+// ============================================
 
 export async function logoutAction() {
   const session = await getSession();
 
   if (session.isLoggedIn && session.refreshToken) {
-    const { authServiceUrl, bffSecret } = getAuthConfig();
     try {
-      await fetch(`${authServiceUrl}/auth/logout`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session.refreshToken}`,
-          'x-bff-secret': bffSecret,
-        },
-      });
+      await logout();
     } catch {
       // Best-effort: destroy the local session regardless of the upstream call
     }
@@ -157,9 +142,12 @@ export async function registerAction(
   }
 
   const { email, password } = parsed.data;
-  const result = await postToAuthService('/auth/register', { email, password }, values);
 
-  if (!result.ok) return result.error;
+  try {
+    await register({ email, password });
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
+  }
 
   const session = await getSession();
   session.pendingVerificationEmail = parsed.data.email;
@@ -172,7 +160,7 @@ export async function registerAction(
 // PASSWORD RESET
 // ============================================
 
-export type PasswordResetState = {
+export type PasswordForgottenState = {
   fieldErrors?: {
     email?: string;
   };
@@ -183,19 +171,17 @@ export type PasswordResetState = {
   };
 } | null;
 
-export async function passwordResetAction(
-  _prevState: PasswordResetState,
+export async function passwordForgottenAction(
+  _prevState: PasswordForgottenState,
   formData: FormData,
-): Promise<PasswordResetState> {
-  const raw = {
-    email: formData.get('email') as string | null,
-  };
+): Promise<PasswordForgottenState> {
+  const raw = { email: formData.get('email') as string | null };
   const values = { email: raw.email ?? '' };
 
-  const parsed = emailOnlySchema.safeParse(raw);
+  const parsed = passwordForgottenSchema.safeParse(raw);
 
   if (!parsed.success) {
-    const fieldErrors: NonNullable<PasswordResetState>['fieldErrors'] = {};
+    const fieldErrors: NonNullable<PasswordForgottenState>['fieldErrors'] = {};
     for (const issue of parsed.error.issues) {
       const field = issue.path[0];
       if (field === 'email') {
@@ -205,9 +191,11 @@ export async function passwordResetAction(
     return { fieldErrors, values };
   }
 
-  const result = await postToAuthService('/auth/forgot-password', parsed.data, values);
-
-  if (!result.ok) return result.error;
+  try {
+    await passwordForgotten(parsed.data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
+  }
 
   return { success: true };
 }
@@ -234,7 +222,7 @@ export async function resendVerificationEmailAction(
   const raw = { email: formData.get('email') as string | null };
   const values = { email: raw.email ?? '' };
 
-  const parsed = emailOnlySchema.safeParse(raw);
+  const parsed = resendVerificationEmailSchema.safeParse(raw);
 
   if (!parsed.success) {
     const fieldErrors: NonNullable<ResendVerificationEmailState>['fieldErrors'] = {};
@@ -247,9 +235,11 @@ export async function resendVerificationEmailAction(
     return { fieldErrors, values };
   }
 
-  const result = await postToAuthService('/auth/resend-verification-email', parsed.data, values);
-
-  if (!result.ok) return result.error;
+  try {
+    await resendVerificationEmail(parsed.data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
+  }
 
   const session = await getSession();
   session.pendingVerificationEmail = undefined;
