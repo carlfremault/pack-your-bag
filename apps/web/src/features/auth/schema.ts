@@ -1,6 +1,6 @@
 import { schemas } from '@repo/auth-client';
 
-import { z } from '@/lib/zod';
+import { z } from 'zod';
 
 // This needs to be aligned with the password validation in the auth-service
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -26,8 +26,3 @@ export const registerSchema = loginSchema
   });
 export const passwordForgottenSchema = schemas.AuthForgotPasswordDto;
 export const resendVerificationEmailSchema = schemas.AuthResendVerificationEmailDto;
-
-export type LoginInputs = z.infer<typeof loginSchema>;
-export type RegisterInputs = z.infer<typeof registerSchema>;
-export type PasswordForgottenInputs = z.infer<typeof passwordForgottenSchema>;
-export type ResendVerificationEmailInputs = z.infer<typeof resendVerificationEmailSchema>;
