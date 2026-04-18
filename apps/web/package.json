@@ -12,6 +12,8 @@
     "test:browser": "vitest --config=vitest.browser.config.mts"
   },
   "dependencies": {
+    "@repo/auth-client": "workspace:*",
+    "@repo/product-client": "workspace:*",
     "@repo/react-common": "workspace:*",
     "@tanstack/react-query": "^5.97.0",
     "@tanstack/react-table": "^8.21.3",
