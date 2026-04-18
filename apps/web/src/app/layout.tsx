@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Link from 'next/link';
 
 import { Sidebar } from '@repo/react-common/sidebar';
 
@@ -34,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex h-screen flex-col lg:flex-row">
             <div className="hidden lg:block">
-              <Sidebar>
+              <Sidebar linkAs={Link}>
                 <SidebarSlot />
               </Sidebar>
             </div>
