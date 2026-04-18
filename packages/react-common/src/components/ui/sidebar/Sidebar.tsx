@@ -1,10 +1,18 @@
 import { Logo } from '../logo/Logo';
 
-export function Sidebar({ children }: { children?: React.ReactNode }) {
+export interface SidebarProps {
+  linkAs?: React.ElementType;
+  children?: React.ReactNode;
+}
+export function Sidebar(props: SidebarProps) {
+  const { linkAs: LinkComponent = 'a', children } = props;
+
   return (
     <aside className="border-info-ring bg-surface flex h-full w-1/5 min-w-64 shrink-0 flex-col border-r px-4 py-3 shadow-sm">
       <div className="self-start">
-        <Logo />
+        <LinkComponent href="/" aria-label="Go to homepage">
+          <Logo />
+        </LinkComponent>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center">{children}</div>
     </aside>

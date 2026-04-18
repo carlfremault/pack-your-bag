@@ -13,10 +13,13 @@ export interface MobileHeaderProps {
 
 export function MobileHeader(props: MobileHeaderProps) {
   const { settingsLink, linkAs, logOut } = props;
+  const LinkComponent = linkAs ?? 'a';
 
   return (
     <header className="border-primary-ring bg-surface z-10 flex items-center justify-between border-b px-4 py-3 shadow-sm">
-      <Logo />
+      <LinkComponent href="/" aria-label="Go to homepage">
+        <Logo />
+      </LinkComponent>
       <div className="flex items-center gap-6">
         <SettingsButton link={settingsLink} linkAs={linkAs} />
         <form action={logOut}>
