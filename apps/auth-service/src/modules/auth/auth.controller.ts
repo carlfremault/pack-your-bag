@@ -42,7 +42,7 @@ import { AuthVerifyEmailDto } from './dto/auth-verify-email.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
-@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Missing or invalid BFF secret.' })
 @ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('auth')
 @UseGuards(BffGuard)

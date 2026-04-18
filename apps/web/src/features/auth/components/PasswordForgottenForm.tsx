@@ -7,11 +7,11 @@ import { Alert } from '@repo/react-common/alert';
 import { LinkButton, SubmitButton } from '@repo/react-common/button';
 import { Input } from '@repo/react-common/input';
 
-import { passwordResetAction, type PasswordResetState } from '../actions';
+import { passwordForgottenAction, type PasswordForgottenState } from '../actions';
 
-export default function PasswordResetForm() {
-  const [state, formAction, pending] = useActionState<PasswordResetState, FormData>(
-    passwordResetAction,
+export default function PasswordForgottenForm() {
+  const [state, formAction, pending] = useActionState<PasswordForgottenState, FormData>(
+    passwordForgottenAction,
     null,
   );
 

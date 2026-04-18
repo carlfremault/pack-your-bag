@@ -9,7 +9,7 @@ import { Spinner } from '@repo/react-common/spinner';
 
 import { Modal } from '@/components/Modal';
 import { SidebarPortal } from '@/components/Sidebar';
-import { extractErrorMessage } from '@/utils/extract-error-message';
+import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useAllItems } from '../queries';
 

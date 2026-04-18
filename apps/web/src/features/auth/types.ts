@@ -1,7 +1,8 @@
-export type FormValues = { email?: string; token?: string };
+import type { RequestBody, SuccessResponse } from '@repo/auth-client';
 
-export type FormError = {
-  formError: string;
-  errorCode?: string;
-  values: FormValues;
-};
+export type LoginBody = RequestBody<'/auth/login', 'post'>;
+export type LoginResponse = SuccessResponse<'/auth/login', 'post'>;
+export type RegisterBody = RequestBody<'/auth/register', 'post'>;
+export type PasswordForgottenBody = RequestBody<'/auth/forgot-password', 'post'>;
+export type ResendVerificationEmailBody = RequestBody<'/auth/resend-verification-email', 'post'>;
+export type VerifyEmailBody = RequestBody<'/auth/verify-email', 'post'>;

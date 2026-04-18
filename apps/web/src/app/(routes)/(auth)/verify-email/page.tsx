@@ -6,7 +6,7 @@ import { LinkButton } from '@repo/react-common/button';
 import { CenteredSurfaceCard } from '@repo/react-common/card';
 
 import ResendVerificationForm from '@/features/auth/components/ResendVerificationForm';
-import { verifyEmail } from '@/features/auth/queries';
+import { verifyEmailToken } from '@/features/auth/queries';
 import { getSession } from '@/lib/session';
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export default async function Page({
     );
   }
 
-  const result = await verifyEmail(token);
+  const result = await verifyEmailToken(token);
 
   if (!result.success) {
     const session = await getSession();

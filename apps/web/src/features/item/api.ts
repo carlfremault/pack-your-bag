@@ -1,6 +1,6 @@
 import { getProductClient } from '@/lib/clients/product-client';
 import { ApiError } from '@/lib/errors';
-import { extractErrorMessage } from '@/utils/extract-error-message';
+import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { CreateItemBody, Item } from './types';
 

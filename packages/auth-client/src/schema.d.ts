@@ -13,7 +13,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Register a new user and issue tokens */
+    /** Register a new user and send verification email */
     post: operations['AuthController_register'];
     delete?: never;
     options?: never;
@@ -140,6 +140,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/auth/verify-email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Verify email address using a token from the verification email */
+    post: operations['AuthController_verifyEmail'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/resend-verification-email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Resend verification email */
+    post: operations['AuthController_resendVerificationEmail'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/user/delete': {
     parameters: {
       query?: never;
@@ -246,7 +280,18 @@ export interface components {
        * @description User locale, to enable date localization in email templates
        * @example fr-FR
        */
-      locale: string;
+      locale?: string;
+    };
+    AuthVerifyEmailDto: {
+      /** @example 4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a */
+      token: string;
+    };
+    AuthResendVerificationEmailDto: {
+      /**
+       * Format: email
+       * @example john.doe@example.com
+       */
+      email: string;
     };
     DeleteUserDto: {
       /** @example v4l1dPassw0rd */
@@ -255,7 +300,7 @@ export interface components {
        * @description User locale, to enable date localization in email templates
        * @example fr-FR
        */
-      locale: string;
+      locale?: string;
     };
     CancelDeletionDto: {
       /** @example 4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a */
@@ -285,14 +330,12 @@ export interface operations {
       };
     };
     responses: {
-      /** @description User registered. */
-      201: {
+      /** @description User registered and verification email sent. */
+      204: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          'application/json': components['schemas']['AuthResponseDto'];
-        };
+        content?: never;
       };
       /** @description Validation failed. */
       400: {
@@ -302,7 +345,7 @@ export interface operations {
         content?: never;
       };
       /** @description Missing or invalid BFF secret. */
-      403: {
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -360,7 +403,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Missing or invalid BFF secret. */
+      /** @description Email not verified. */
       403: {
         headers: {
           [name: string]: unknown;
@@ -401,13 +444,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Missing or invalid BFF secret. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Rate limit exceeded. */
       429: {
         headers: {
@@ -440,13 +476,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Missing or invalid BFF secret. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Rate limit exceeded. */
       429: {
         headers: {
@@ -474,13 +503,6 @@ export interface operations {
       };
       /** @description Invalid or expired access token. */
       401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Missing or invalid BFF secret. */
-      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -531,13 +553,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Missing or invalid BFF secret. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Rate limit exceeded. */
       429: {
         headers: {
@@ -575,7 +590,7 @@ export interface operations {
         content?: never;
       };
       /** @description Missing or invalid BFF secret. */
-      403: {
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -618,7 +633,93 @@ export interface operations {
         content?: never;
       };
       /** @description Missing or invalid BFF secret. */
-      403: {
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rate limit exceeded. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_verifyEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AuthVerifyEmailDto'];
+      };
+    };
+    responses: {
+      /** @description Email verified successfully. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Token invalid, expired, or already used. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid BFF secret. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rate limit exceeded. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_resendVerificationEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AuthResendVerificationEmailDto'];
+      };
+    };
+    responses: {
+      /** @description Verification email resent if the address is registered and unverified. Response is identical either way to prevent user enumeration. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid BFF secret. */
+      401: {
         headers: {
           [name: string]: unknown;
         };
