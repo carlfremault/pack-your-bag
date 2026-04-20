@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack
 
 import { toHttpError } from '@/utils/http-error';
 
-import { CreateItemBody, Item } from './types';
+import { CreateItemBody, Item, UpdateItemBody } from './types';
 
 // -------------------------------
 // Fetch all items
@@ -81,4 +81,50 @@ const useCreateItem = () => {
   });
 };
 
-export { fetchAllItems, useAllItems, useCreateItem };
+// -------------------------------
+// Update item
+// -------------------------------
+const updateItem = async (id: string, body: UpdateItemBody): Promise<Item> => {
+  const res = await fetch(`/api/item/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useUpdateItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: UpdateItemBody }) => updateItem(id, body),
+    onMutate: async ({ id, body }) => {
+      await queryClient.cancelQueries({ queryKey: ['items'] });
+
+      const previousItems = queryClient.getQueryData<Item[]>(['items']) ?? [];
+
+      queryClient.setQueryData(['items'], (old: Item[] = []) =>
+        old.map((item) =>
+          item.id === id ? { ...item, ...body, updatedAt: new Date().toISOString() } : item,
+        ),
+      );
+
+      return { previousItems };
+    },
+    onError: (_error, _body, context) => {
+      queryClient.setQueryData(['items'], context?.previousItems);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+};
+
+export { fetchAllItems, useAllItems, useCreateItem, useUpdateItem };

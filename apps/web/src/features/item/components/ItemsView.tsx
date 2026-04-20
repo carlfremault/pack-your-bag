@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -45,10 +45,15 @@ function ItemsView() {
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname);
   };
 
-  const handleEditItem = (id: string) => {
-    // TODO: Implement edit item
-    console.log(id);
-  };
+  const handleEditItem = useCallback(
+    (id: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('action', 'edit');
+      params.set('id', id);
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   useEffect(() => {
     if (isError) {
@@ -82,7 +87,7 @@ function ItemsView() {
   return (
     <>
       <SidebarPortal>{action ? form : <SidebarAddItem />}</SidebarPortal>
-      <DesktopItemsTable items={data} isLoading={isLoading} />
+      <DesktopItemsTable items={data} isLoading={isLoading} onEditItem={handleEditItem} />
     </>
   );
 }

@@ -11,7 +11,7 @@ import { ITEM_DESCRIPTION_MAX_LENGTH, ITEM_NAME_MAX_LENGTH } from '@/lib/constan
 import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 import { getFieldErrorsFromHttpError } from '@/utils/getFieldErrors';
 
-import { useCreateItem } from '../queries';
+import { useCreateItem, useUpdateItem } from '../queries';
 import { Item } from '../types';
 
 export interface ItemFormProps {
@@ -36,10 +36,12 @@ const ITEM_FORM_FIELDS: (keyof ItemFieldErrors)[] = ['name', 'description', 'wei
 
 export default function ItemForm(props: ItemFormProps) {
   const { item } = props;
+  const editMode = item !== undefined;
 
   const [formValues, setFormValues] = useState(getInitialFormValues(item));
   const [fieldErrors, setFieldErrors] = useState<ItemFieldErrors>({});
-  const { mutate: createItem, isPending } = useCreateItem();
+  const { mutate: createItem, isPending: isCreating } = useCreateItem();
+  const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
   const router = useRouter();
 
   const handleReset = () => {
@@ -54,7 +56,18 @@ export default function ItemForm(props: ItemFormProps) {
   const handleSuccess = () => {
     setFieldErrors({});
     closeForm();
-    toast.success('Item created successfully');
+    toast.success(editMode ? 'Item updated successfully' : 'Item created successfully');
+  };
+
+  const handleError = (error: Error) => {
+    const itemFieldErrors = getFieldErrorsFromHttpError(error, ITEM_FORM_FIELDS);
+    if (itemFieldErrors) {
+      setFieldErrors(itemFieldErrors);
+      return;
+    }
+
+    setFieldErrors({});
+    toast.error(`Error: ${extractErrorMessage(error)}`);
   };
 
   const clearFieldError = (fieldName: keyof ItemFieldErrors) => {
@@ -78,30 +91,31 @@ export default function ItemForm(props: ItemFormProps) {
     const payload = {
       name: formValues.name,
       description: formValues.description,
-      weight: formValues.weight ? Number(formValues.weight) : undefined,
+      weight: formValues.weight ? Number(formValues.weight) : editMode ? null : undefined,
       categoryId: formValues.categoryId || undefined,
     };
 
-    createItem(payload, {
-      onSuccess: handleSuccess,
-      onError: (error) => {
-        const itemFieldErrors = getFieldErrorsFromHttpError(error, ITEM_FORM_FIELDS);
-        if (itemFieldErrors) {
-          setFieldErrors(itemFieldErrors);
-          return;
-        }
-
-        setFieldErrors({});
-        toast.error(`Error: ${extractErrorMessage(error)}`);
-      },
-    });
+    if (editMode) {
+      updateItem(
+        { id: item.id, body: payload },
+        {
+          onSuccess: handleSuccess,
+          onError: handleError,
+        },
+      );
+    } else {
+      createItem(payload, {
+        onSuccess: handleSuccess,
+        onError: handleError,
+      });
+    }
   };
 
   return (
     <div className="flex flex-col gap-2">
       <form onSubmit={handleSubmit}>
         <fieldset
-          disabled={isPending}
+          disabled={isCreating || isUpdating}
           className="flex flex-col gap-4 transition-opacity disabled:opacity-50"
         >
           <Input
@@ -136,7 +150,7 @@ export default function ItemForm(props: ItemFormProps) {
           />
 
           <div className="flex flex-col items-center gap-2">
-            <SubmitButton pending={isPending} className="w-full">
+            <SubmitButton pending={isCreating || isUpdating} className="w-full">
               Save
             </SubmitButton>
             <div className="flex w-full items-center justify-between gap-2">

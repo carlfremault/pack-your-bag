@@ -25,7 +25,7 @@ export const CreateItemDto = z
   .object({
     name: z.string().min(1).max(128),
     description: z.string().max(1000).optional(),
-    weight: z.number().gt(0).optional(),
+    weight: z.number().gte(0).nullish(),
     categoryId: z.string().uuid().optional(),
   })
   .passthrough();
@@ -81,7 +81,7 @@ export const UpdateItemDto = z
   .object({
     name: z.string().min(1).max(128),
     description: z.string().max(1000),
-    weight: z.number().gt(0),
+    weight: z.number().gte(0).nullable(),
     categoryId: z.string().uuid(),
   })
   .partial()
