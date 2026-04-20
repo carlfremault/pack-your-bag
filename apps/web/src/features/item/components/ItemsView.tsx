@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -9,7 +8,6 @@ import { Spinner } from '@repo/react-common/spinner';
 
 import { Modal } from '@/components/Modal';
 import { SidebarPortal } from '@/components/Sidebar';
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useAllItems } from '../queries';
 
@@ -28,7 +26,7 @@ function ItemsView() {
   const action = rawAction === 'add' || rawAction === 'edit' ? rawAction : null;
   const itemId = searchParams.get('id');
 
-  const { data = [], isLoading, isError, error } = useAllItems();
+  const { data = [], isLoading } = useAllItems();
   const editedItem = data.find((item) => item.id === itemId);
   const isEditReady = action !== 'edit' || editedItem !== undefined;
 
@@ -54,12 +52,6 @@ function ItemsView() {
     },
     [pathname, router, searchParams],
   );
-
-  useEffect(() => {
-    if (isError) {
-      toast.error(extractErrorMessage(error));
-    }
-  }, [isError, error]);
 
   if (!isReady) {
     return (

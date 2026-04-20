@@ -1,5 +1,7 @@
 'use client';
 
+import toast from 'react-hot-toast';
+
 import {
   environmentManager,
   MutationCache,
@@ -10,6 +12,7 @@ import {
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { SESSION_EXPIRED_MESSAGE } from '@/lib/constants';
+import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { SidebarProvider } from './Sidebar';
 
@@ -17,16 +20,18 @@ import { SidebarProvider } from './Sidebar';
 // React Query
 // -------------------------------
 
-function onSessionExpired(error: Error) {
+function onQueryError(error: Error) {
   if (error.message === SESSION_EXPIRED_MESSAGE) {
-    window.location.replace('/login');
+    window.location.replace('/login?reason=session_expired');
+    return;
   }
+  toast.error(extractErrorMessage(error));
 }
 
 function makeQueryClient() {
   return new QueryClient({
-    queryCache: new QueryCache({ onError: onSessionExpired }),
-    mutationCache: new MutationCache({ onError: onSessionExpired }),
+    queryCache: new QueryCache({ onError: onQueryError }),
+    mutationCache: new MutationCache({ onError: onQueryError }),
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
