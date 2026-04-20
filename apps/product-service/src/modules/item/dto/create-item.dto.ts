@@ -4,10 +4,11 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MaxLength,
+  Min,
+  ValidateIf,
 } from 'class-validator';
 
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from '@/common/constants/product.constants';
@@ -37,15 +38,17 @@ export class CreateItemDto {
 
   @ApiProperty({
     description: 'Item weight',
+    type: 'number',
     example: 100,
     required: false,
+    nullable: true,
     minimum: 0,
-    exclusiveMinimum: true,
   })
+  @ValidateIf((_object, value) => value !== null)
   @IsNumber()
-  @IsPositive()
   @IsOptional()
-  weight?: number;
+  @Min(0)
+  weight?: number | null;
 
   @ApiProperty({
     description: 'Item category uuid',

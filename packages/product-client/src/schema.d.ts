@@ -583,7 +583,7 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight?: number;
+      weight?: number | null;
       /**
        * Format: uuid
        * @description Item category uuid
@@ -606,7 +606,7 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight?: number;
+      weight?: number | null;
       /**
        * Format: uuid
        * @description Item category uuid

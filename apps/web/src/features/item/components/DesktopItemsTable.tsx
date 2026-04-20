@@ -10,16 +10,18 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 import { Item } from '../types';
 
 import DesktopItemsTableSkeleton from './DesktopItemsTableSkeleton';
+import ItemsTableActions from './ItemsTableActions';
 
 export interface DesktopItemsTableProps {
   items: Item[];
   isLoading: boolean;
+  onEditItem: (id: string) => void;
 }
 
 const columnHelper = createColumnHelper<Item>();
 
 export default function DesktopItemsTable(props: DesktopItemsTableProps) {
-  const { items, isLoading } = props;
+  const { items, isLoading, onEditItem } = props;
 
   const columns = useMemo(
     () => [
@@ -40,8 +42,18 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
           ) : null;
         },
       }),
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        size: 50,
+        minSize: 50,
+        maxSize: 80,
+        cell: ({ row }) => {
+          return <ItemsTableActions item={row.original} onEditItem={onEditItem} />;
+        },
+      }),
     ],
-    [],
+    [onEditItem],
   );
 
   return (

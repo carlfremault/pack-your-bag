@@ -1,7 +1,8 @@
 import { HttpError } from '@/lib/errors';
 
-type FieldErrorsPayload = {
-  fieldErrors?: Record<string, string[] | undefined>;
+type ZodErrorTree = {
+  errors: string[];
+  properties?: Record<string, { errors: string[] }>;
 };
 
 export function getFieldErrorsFromHttpError<TField extends string>(
@@ -16,17 +17,16 @@ export function getFieldErrorsFromHttpError<TField extends string>(
     return null;
   }
 
-  const details = error.details as FieldErrorsPayload;
-  const fieldErrors = details.fieldErrors;
+  const { properties } = error.details as ZodErrorTree;
 
-  if (!fieldErrors || typeof fieldErrors !== 'object') {
+  if (!properties || typeof properties !== 'object') {
     return null;
   }
 
   const parsedFieldErrors: Partial<Record<TField, string>> = {};
 
   for (const field of fields) {
-    const message = fieldErrors[field]?.[0];
+    const message = properties[field]?.errors?.[0];
     if (message) {
       parsedFieldErrors[field] = message;
     }

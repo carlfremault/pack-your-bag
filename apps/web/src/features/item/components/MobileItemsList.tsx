@@ -8,8 +8,8 @@ import MobileItemsListSkeleton from './MobileItemsListSkeleton';
 
 export interface MobileItemsListProps {
   items: Item[];
-  onEditItem: (id: string) => void;
   isLoading: boolean;
+  onEditItem: (id: string) => void;
 }
 
 export default function MobileItemsList(props: MobileItemsListProps) {
