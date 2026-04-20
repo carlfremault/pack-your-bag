@@ -75,7 +75,7 @@ function isProgrammaticRequest(req: NextRequest): boolean {
  *   readable "session expired" error that React Query surfaces to the user.
  *   The global QueryCache/MutationCache error handler then triggers the redirect.
  */
-function handleAuthFailure(req: NextRequest, clearCookie: boolean): NextResponse {
+function handleAuthFailure(req: NextRequest, clearCookie: boolean, expired = true): NextResponse {
   if (isProgrammaticRequest(req)) {
     const response = NextResponse.next();
     if (clearCookie) response.cookies.delete(SESSION_COOKIE_NAME);
@@ -83,7 +83,7 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean): NextResponse
   }
 
   const loginUrl = new URL('/login', req.url);
-  loginUrl.searchParams.set('reason', 'session_expired');
+  if (expired) loginUrl.searchParams.set('reason', 'session_expired');
   const response = NextResponse.redirect(loginUrl);
   if (clearCookie) response.cookies.delete(SESSION_COOKIE_NAME);
   return response;
@@ -113,7 +113,7 @@ export default async function middleware(req: NextRequest) {
   // ── Protected route ─────────────────────────────────────────────────────────
 
   if (!session.isLoggedIn) {
-    return handleAuthFailure(req, false);
+    return handleAuthFailure(req, false, false);
   }
 
   // Defensive check for corrupted session data
