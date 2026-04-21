@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
-import { PasswordInput } from './PasswordInput';
+import { InputPassword } from './InputPassword';
 
-const meta: Meta<typeof PasswordInput> = {
-  title: 'Components/PasswordInput',
-  component: PasswordInput,
+const meta: Meta<typeof InputPassword> = {
+  title: 'Components/InputPassword',
+  component: InputPassword,
   decorators: [
     (Story) => (
       <div className="bg-surface w-full">

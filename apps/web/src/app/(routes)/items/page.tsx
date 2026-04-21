@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
+import { getAllCategories } from '@/features/category/api';
 import { getAllItems } from '@/features/item/api';
 import ItemsView from '@/features/item/components/ItemsView';
 
@@ -9,6 +10,11 @@ export default async function Page() {
   await queryClient.prefetchQuery({
     queryKey: ['items'],
     queryFn: () => getAllItems(),
+  });
+
+  await queryClient.prefetchQuery({
+    queryKey: ['categories'],
+    queryFn: () => getAllCategories(),
   });
 
   return (

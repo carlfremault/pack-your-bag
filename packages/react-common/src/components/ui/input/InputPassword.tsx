@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { inputRequiredClassName, inputWrapperClassName } from './Input';
 
-export interface PasswordInputProps
+export interface InputPasswordProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label: string;
   required?: boolean;
@@ -14,10 +14,10 @@ export interface PasswordInputProps
   errorMessage?: string;
 }
 
-const passwordInputContainerClassName =
+const inputPasswordContainerClassName =
   'border-primary-ring bg-primary-foreground rounded-md border px-3 py-2 text-sm flex items-center justify-between focus-within:ring-info-ring focus-within:ring-2';
 
-export function PasswordInput(props: PasswordInputProps) {
+export function InputPassword(props: InputPasswordProps) {
   const {
     className,
     label,
@@ -34,7 +34,7 @@ export function PasswordInput(props: PasswordInputProps) {
       <span className="text-primary flex items-center gap-1 text-[10px] font-medium uppercase">
         {label} {required && <span className={inputRequiredClassName}>*</span>}
       </span>
-      <div className={classNames(passwordInputContainerClassName, className)}>
+      <div className={classNames(inputPasswordContainerClassName, className)}>
         <input
           className="flex-1 border-0 bg-transparent outline-none focus:ring-0 focus:outline-none"
           type={isVisible ? 'text' : 'password'}

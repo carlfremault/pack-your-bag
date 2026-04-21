@@ -4,13 +4,13 @@ import classNames from 'classnames';
 
 import { inputFieldClassName, inputLabelClassName, inputWrapperClassName } from './Input';
 
-export interface TextareaInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface InputTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   maxLength?: number;
   errorMessage?: string;
 }
 
-export function TextareaInput(props: TextareaInputProps) {
+export function InputTextarea(props: InputTextareaProps) {
   const { className, label, maxLength, errorMessage, ...rest } = props;
   const errorId = useId();
   const valueLength = String(rest.value ?? '').length;

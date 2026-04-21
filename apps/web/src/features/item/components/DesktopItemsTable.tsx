@@ -52,7 +52,8 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         cell: ({ row }) => {
           return (
             <ItemsTableActions
-              item={row.original}
+              itemName={row.original.name}
+              itemId={row.original.id}
               onEditItem={onEditItem}
               onDeleteItem={onDeleteItem}
             />

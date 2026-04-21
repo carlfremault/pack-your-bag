@@ -26,7 +26,7 @@ export const CreateItemDto = z
     name: z.string().min(1).max(128),
     description: z.string().max(1000).optional(),
     weight: z.number().gte(0).nullish(),
-    categoryId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().nullish(),
   })
   .passthrough();
 export const ItemWithQuantityResponseDto = z
@@ -82,7 +82,7 @@ export const UpdateItemDto = z
     name: z.string().min(1).max(128),
     description: z.string().max(1000),
     weight: z.number().gte(0).nullable(),
-    categoryId: z.string().uuid(),
+    categoryId: z.string().uuid().nullable(),
   })
   .partial()
   .passthrough();
