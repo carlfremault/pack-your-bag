@@ -176,7 +176,9 @@ function ModalContent(props: ContentProps) {
   return createPortal(
     <div
       className="bg-primary-ring/50 fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={closeModal}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal();
+      }}
     >
       <div
         ref={dialogRef}
@@ -186,7 +188,6 @@ function ModalContent(props: ContentProps) {
         aria-labelledby={title ? titleId : undefined}
         aria-label={title ? undefined : ariaLabel}
         aria-describedby={ariaDescribedBy}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex w-full justify-between">
           {title && (

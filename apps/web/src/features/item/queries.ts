@@ -165,4 +165,4 @@ const useDeleteItem = () => {
   });
 };
 
-export { fetchAllItems, useAllItems, useCreateItem, useUpdateItem, useDeleteItem };
+export { useAllItems, useCreateItem, useUpdateItem, useDeleteItem };

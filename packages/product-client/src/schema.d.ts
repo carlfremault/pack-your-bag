@@ -589,7 +589,7 @@ export interface components {
        * @description Item category uuid
        * @example 123e4567-e89b-12d3-a456-426614174000
        */
-      categoryId?: string;
+      categoryId?: string | null;
     };
     UpdateItemDto: {
       /**
@@ -612,7 +612,7 @@ export interface components {
        * @description Item category uuid
        * @example 123e4567-e89b-12d3-a456-426614174000
        */
-      categoryId?: string;
+      categoryId?: string | null;
     };
     CategoryDeleteImpactDto: {
       category: components['schemas']['CategoryResponseDto'];

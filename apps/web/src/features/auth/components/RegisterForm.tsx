@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { Alert } from '@repo/react-common/alert';
 import { LinkButton, SubmitButton } from '@repo/react-common/button';
-import { Input, PasswordInput } from '@repo/react-common/input';
+import { Input, InputPassword } from '@repo/react-common/input';
 
 import { registerAction, type RegisterState } from '../actions';
 
@@ -26,13 +26,13 @@ export default function RegisterForm() {
         defaultValue={state?.values?.email}
         errorMessage={state?.fieldErrors?.email}
       />
-      <PasswordInput
+      <InputPassword
         label="Password"
         name="password"
         required
         errorMessage={state?.fieldErrors?.password}
       />
-      <PasswordInput
+      <InputPassword
         label="Confirm Password"
         name="confirmPassword"
         required

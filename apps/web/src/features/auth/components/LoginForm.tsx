@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { Alert } from '@repo/react-common/alert';
 import { LinkButton, SubmitButton } from '@repo/react-common/button';
-import { Input, PasswordInput } from '@repo/react-common/input';
+import { Input, InputPassword } from '@repo/react-common/input';
 
 import { loginAction, type LoginState } from '../actions';
 
@@ -22,7 +22,7 @@ export default function LoginForm() {
         defaultValue={state?.values?.email}
         errorMessage={state?.fieldErrors?.email}
       />
-      <PasswordInput
+      <InputPassword
         label="Password"
         name="password"
         required

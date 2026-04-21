@@ -1,4 +1,5 @@
 export { Input, type InputProps } from './Input';
-export { PasswordInput, type PasswordInputProps } from './PasswordInput';
+export { InputSelect, type InputSelectProps, type InputSelectOption } from './InputSelect';
+export { InputPassword, type InputPasswordProps } from './InputPassword';
 export { QuantityStepper, type QuantityStepperProps } from './QuantityStepper';
-export { TextareaInput, type TextareaInputProps } from './TextareaInput';
+export { InputTextarea, type InputTextareaProps } from './InputTextarea';
