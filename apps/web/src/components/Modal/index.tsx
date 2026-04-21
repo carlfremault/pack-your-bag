@@ -123,6 +123,8 @@ function ModalTrigger(props: TriggerProps) {
 type ContentProps = {
   title?: string;
   ariaLabel?: string;
+  role?: 'dialog' | 'alertdialog';
+  ariaDescribedBy?: string;
   children: React.ReactNode | ((close: () => void) => React.ReactNode);
 };
 
@@ -130,7 +132,7 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function ModalContent(props: ContentProps) {
-  const { title, ariaLabel = 'Modal dialog', children } = props;
+  const { title, ariaLabel = 'Modal dialog', role = 'dialog', ariaDescribedBy, children } = props;
 
   const { isOpen, closeModal } = useModal();
   const titleId = useId();
@@ -179,10 +181,11 @@ function ModalContent(props: ContentProps) {
       <div
         ref={dialogRef}
         className="bg-surface border-primary-ring max-h-full w-full max-w-lg overflow-y-auto rounded-md border p-4 shadow-lg"
-        role="dialog"
+        role={role}
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         aria-label={title ? undefined : ariaLabel}
+        aria-describedby={ariaDescribedBy}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex w-full justify-between">

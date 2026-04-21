@@ -9,6 +9,7 @@
     "./alert": "./src/components/ui/alert/Alert.tsx",
     "./button": "./src/components/ui/button/index.ts",
     "./card": "./src/components/ui/card/index.ts",
+    "./confirmation-dialog": "./src/components/ui/dialog/ConfirmationDialog.tsx",
     "./header": "./src/components/ui/header/index.ts",
     "./input": "./src/components/ui/input/index.ts",
     "./logo": "./src/components/ui/logo/Logo.tsx",

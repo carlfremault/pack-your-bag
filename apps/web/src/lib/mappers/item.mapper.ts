@@ -4,7 +4,7 @@ import { Item } from '@/features/item/types';
 
 export function toItemCardProps(
   item: Item,
-  handlers: Pick<ItemCardProps, 'onEditItem'>,
+  handlers: Pick<ItemCardProps, 'onEditItem' | 'onDeleteItem'>,
 ): ItemCardProps {
   return {
     id: item.id,

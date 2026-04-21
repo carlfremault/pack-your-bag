@@ -42,3 +42,14 @@ export async function updateItem(id: string, body: UpdateItemBody): Promise<Item
 
   return data;
 }
+
+export async function deleteItem(id: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/item/{id}', {
+    params: { path: { id } },
+  });
+
+  if (error) {
+    throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
+  }
+}

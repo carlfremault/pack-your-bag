@@ -16,12 +16,13 @@ export interface DesktopItemsTableProps {
   items: Item[];
   isLoading: boolean;
   onEditItem: (id: string) => void;
+  onDeleteItem: (id: string) => void;
 }
 
 const columnHelper = createColumnHelper<Item>();
 
 export default function DesktopItemsTable(props: DesktopItemsTableProps) {
-  const { items, isLoading, onEditItem } = props;
+  const { items, isLoading, onEditItem, onDeleteItem } = props;
 
   const columns = useMemo(
     () => [
@@ -45,15 +46,21 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
       columnHelper.display({
         id: 'actions',
         header: 'Actions',
-        size: 50,
-        minSize: 50,
+        size: 80,
+        minSize: 80,
         maxSize: 80,
         cell: ({ row }) => {
-          return <ItemsTableActions item={row.original} onEditItem={onEditItem} />;
+          return (
+            <ItemsTableActions
+              item={row.original}
+              onEditItem={onEditItem}
+              onDeleteItem={onDeleteItem}
+            />
+          );
         },
       }),
     ],
-    [onEditItem],
+    [onEditItem, onDeleteItem],
   );
 
   return (

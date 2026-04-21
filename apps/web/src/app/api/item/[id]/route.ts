@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import z from 'zod';
 
-import { updateItem } from '@/features/item/api';
+import { deleteItem, updateItem } from '@/features/item/api';
 import { updateItemSchema } from '@/features/item/schema';
 import { withErrorHandling } from '@/lib/api-handler';
 
@@ -28,5 +28,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const data = await updateItem(id, parsedBody.data);
 
     return NextResponse.json({ data }, { status: 200 });
+  });
+}
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  return withErrorHandling(async () => {
+    const { id } = await params;
+
+    await deleteItem(id);
+
+    return NextResponse.json({ message: 'Item deleted successfully' }, { status: 200 });
   });
 }

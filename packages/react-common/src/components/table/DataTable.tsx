@@ -31,7 +31,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
   return (
     <div className="bg-surface border-primary-ring w-full overflow-x-auto rounded-md border shadow-sm">
-      <table className="text-primary w-full border-collapse">
+      <table className="text-primary w-full table-fixed border-collapse">
         <thead className="border-primary-ring border-b">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>

@@ -30,6 +30,7 @@ export const Default: Story = {
     weight: 10,
     weightUnit: 'kg',
     onEditItem: fn(),
+    onDeleteItem: fn(),
   },
 };
 
@@ -39,9 +40,10 @@ export const WithActions: Story = {
     name: 'Item 1',
     description: 'Item 1 description',
     onEditItem: fn(),
+    onDeleteItem: fn(),
     actions: (
       <Button variant="unstyledIcon" color="primary" aria-label="Edit Item 1" onClick={fn()}>
-        <MdOutlineEdit className="text-primary/80 hover:text-primary h-5 w-5 transition-colors md:ml-4" />
+        <MdOutlineEdit className="text-primary/80 hover:text-primary h-5 w-5 transition-colors" />
       </Button>
     ),
   },
@@ -59,6 +61,7 @@ export const WithQuantityStepper: Story = {
       colorTheme: 'jungle',
     },
     onEditItem: fn(),
+    onDeleteItem: fn(),
     actions: <QuantityStepper quantity={3} onChange={fn()} />,
   },
 };
@@ -71,6 +74,7 @@ export const NoCategory: Story = {
     weight: 10,
     weightUnit: 'kg',
     onEditItem: fn(),
+    onDeleteItem: fn(),
   },
 };
 
@@ -80,6 +84,7 @@ export const NoWeight: Story = {
     name: 'Item 1',
     description: 'Item 1 description',
     onEditItem: fn(),
+    onDeleteItem: fn(),
   },
 };
 
@@ -90,6 +95,7 @@ export const WeightButNoWeightUnit: Story = {
     description: 'Item 1 description',
     weight: 10,
     onEditItem: fn(),
+    onDeleteItem: fn(),
   },
 };
 
@@ -98,6 +104,7 @@ export const NoDescription: Story = {
     id: '1',
     name: 'Item 1',
     onEditItem: fn(),
+    onDeleteItem: fn(),
   },
 };
 
@@ -109,6 +116,7 @@ export const DescriptionWith1000Characters: Story = {
     weight: 10,
     weightUnit: 'kg',
     onEditItem: fn(),
+    onDeleteItem: fn(),
   },
 };
 
@@ -120,13 +128,14 @@ export const DescriptionWith1000CharactersAndActions: Story = {
     weight: 10,
     weightUnit: 'kg',
     onEditItem: fn(),
+    onDeleteItem: fn(),
     category: {
       name: 'Category 1',
       colorTheme: 'sand',
     },
     actions: (
       <Button variant="unstyledIcon" color="primary" aria-label="Edit Item 1" onClick={fn()}>
-        <MdOutlineEdit className="text-primary/80 hover:text-primary h-5 w-5 transition-colors md:ml-4" />
+        <MdOutlineEdit className="text-primary/80 hover:text-primary h-5 w-5 transition-colors" />
       </Button>
     ),
   },
@@ -144,6 +153,7 @@ export const DescriptionWith1000CharactersAndQuantityStepper: Story = {
       colorTheme: 'lavender',
     },
     onEditItem: fn(),
+    onDeleteItem: fn(),
     actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };
