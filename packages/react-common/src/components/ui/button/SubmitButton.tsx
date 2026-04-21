@@ -1,23 +1,31 @@
 import { Spinner } from '../spinner/Spinner';
 
 import { Button } from './Button';
+import type { ButtonColor } from './button-styles';
 
 export interface SubmitButtonProps {
   pending: boolean;
+  color?: ButtonColor;
   children: React.ReactNode;
   ariaLabel?: string;
   className?: string;
 }
 
 export function SubmitButton(props: SubmitButtonProps) {
-  const { pending, children, ariaLabel, className } = props;
+  const { pending, color = 'primary', children, ariaLabel, className } = props;
 
   const buttonAriaLabel =
     ariaLabel ??
     (typeof children === 'string' || typeof children === 'number' ? String(children) : undefined);
 
   return (
-    <Button type="submit" disabled={pending} aria-label={buttonAriaLabel} className={className}>
+    <Button
+      type="submit"
+      color={color}
+      disabled={pending}
+      aria-label={buttonAriaLabel}
+      className={className}
+    >
       <span className="relative inline-flex items-center justify-center leading-none">
         <span className={`inline-flex items-center ${pending ? 'invisible' : ''}`}>{children}</span>
         {pending && (

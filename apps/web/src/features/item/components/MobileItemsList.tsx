@@ -10,12 +10,13 @@ export interface MobileItemsListProps {
   items: Item[];
   isLoading: boolean;
   onEditItem: (id: string) => void;
+  onDeleteItem: (id: string) => void;
 }
 
 export default function MobileItemsList(props: MobileItemsListProps) {
-  const { items, onEditItem, isLoading } = props;
+  const { items, onEditItem, onDeleteItem, isLoading } = props;
 
-  const containerClassName = 'flex w-full max-w-3xl flex-col gap-2 p-2 sm:p-4';
+  const containerClassName = 'flex w-full max-w-3xl flex-col gap-2 p-2 sm:p-4 mb-[33%]';
 
   if (isLoading) {
     return (
@@ -38,7 +39,7 @@ export default function MobileItemsList(props: MobileItemsListProps) {
   return (
     <div className={containerClassName}>
       {items.map((item) => (
-        <ItemCard key={item.id} {...toItemCardProps(item, { onEditItem })} />
+        <ItemCard key={item.id} {...toItemCardProps(item, { onEditItem, onDeleteItem })} />
       ))}
     </div>
   );

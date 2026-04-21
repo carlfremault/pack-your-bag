@@ -1,5 +1,5 @@
 import { HiOutlineScale } from 'react-icons/hi2';
-import { MdOutlineEdit } from 'react-icons/md';
+import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 
 import { Button } from '../button/Button';
 import { CategoryPill, type CategoryPillProps } from '../pill/CategoryPill';
@@ -12,25 +12,33 @@ export interface ItemCardProps {
   weight?: number;
   weightUnit?: string;
   onEditItem: (id: string) => void;
+  onDeleteItem: (id: string) => void;
   actions?: React.ReactNode;
 }
 
 export function ItemCard(props: ItemCardProps) {
-  const { id, name, description, category, weight, weightUnit, onEditItem, actions } = props;
+  const { id, name, description, category, weight, weightUnit, onEditItem, onDeleteItem, actions } =
+    props;
 
   return (
-    <div className="bg-surface border-primary-ring text-primary flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
-      <div className="flex w-full items-center justify-between">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-bold">{name}</h3>
-            {category && (
-              <div className="hidden sm:flex">
-                <CategoryPill {...category} />
-              </div>
-            )}
-          </div>
+    <div className="bg-surface border-primary-ring text-primary flex min-h-24 w-full items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm">
+      <div className="flex h-full w-full flex-1 flex-col justify-between gap-2">
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+          <h3 className="truncate text-sm font-bold">{name}</h3>
+          {category && <CategoryPill {...category} />}
         </div>
+        {description && <div className="text-xs font-light">{description}</div>}
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-1 text-xs">
+            <HiOutlineScale className="h-3 w-3" />
+            {weight !== undefined && weight !== null
+              ? `${weight}${weightUnit ? ` ${weightUnit}` : ''}`
+              : '--'}
+          </div>
+          {actions}
+        </div>
+      </div>
+      <div className="flex h-full flex-col justify-between">
         <Button
           variant="unstyledIcon"
           color="primary"
@@ -39,21 +47,14 @@ export function ItemCard(props: ItemCardProps) {
         >
           <MdOutlineEdit className="h-5 w-5" />
         </Button>
-      </div>
-      {category && (
-        <div className="flex sm:hidden">
-          <CategoryPill {...category} />
-        </div>
-      )}
-      {description && <div className="text-xs font-light">{description}</div>}
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-1 text-xs">
-          <HiOutlineScale className="h-3 w-3" />
-          {weight !== undefined && weight !== null
-            ? `${weight}${weightUnit ? ` ${weightUnit}` : ''}`
-            : '--'}
-        </div>
-        {actions}
+        <Button
+          variant="unstyledIcon"
+          color="danger"
+          aria-label={`Delete ${name}`}
+          onClick={() => onDeleteItem(id)}
+        >
+          <MdDeleteOutline className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

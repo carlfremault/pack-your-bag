@@ -127,4 +127,42 @@ const useUpdateItem = () => {
   });
 };
 
-export { fetchAllItems, useAllItems, useCreateItem, useUpdateItem };
+// -------------------------------
+// Delete item
+// -------------------------------
+const deleteItem = async (id: string): Promise<void> => {
+  const res = await fetch(`/api/item/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+};
+
+const useDeleteItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteItem,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['items'] });
+
+      const previousItems = queryClient.getQueryData<Item[]>(['items']) ?? [];
+
+      queryClient.setQueryData(['items'], (old: Item[] = []) =>
+        old.filter((item) => item.id !== id),
+      );
+
+      return { previousItems };
+    },
+    onError: (_error, _id, context) => {
+      queryClient.setQueryData(['items'], context?.previousItems);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+};
+
+export { fetchAllItems, useAllItems, useCreateItem, useUpdateItem, useDeleteItem };
