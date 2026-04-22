@@ -1,24 +1,36 @@
+'use client';
+
+import toast from 'react-hot-toast';
+
 import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { Modal } from '@/components/Modal';
+import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
-import { useCategoryDeleteImpact } from '../queries';
+import { useCategoryDeleteImpact, useDeleteCategory } from '../queries';
 
 interface DeleteCategoryModalProps {
   categoryId: string;
-  isDeleting: boolean;
-  onConfirm: () => void;
   onClose: () => void;
 }
 
-export default function DeleteCategoryModal({
-  categoryId,
-  isDeleting,
-  onConfirm,
-  onClose,
-}: DeleteCategoryModalProps) {
+export default function DeleteCategoryModal(props: DeleteCategoryModalProps) {
+  const { categoryId, onClose } = props;
   const { data, isLoading, isError } = useCategoryDeleteImpact(categoryId);
+  const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
+
+  const confirmDeleteCategory = () => {
+    deleteCategory(categoryId, {
+      onSuccess: () => {
+        onClose();
+        toast.success('Category deleted successfully');
+      },
+      onError: (error) => {
+        toast.error(`Error: ${extractErrorMessage(error)}`);
+      },
+    });
+  };
 
   const impactedItems = data?.items ?? [];
   const impactedItemsCount = impactedItems.length;
@@ -34,7 +46,7 @@ export default function DeleteCategoryModal({
         <ConfirmationDialog
           isPending={isDeleting}
           disabled={isLoading || isError}
-          onConfirm={onConfirm}
+          onConfirm={confirmDeleteCategory}
           closeForm={onClose}
         >
           <div id="confirmation-dialog-desc">
