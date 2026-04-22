@@ -3,3 +3,8 @@ export { InputSelect, type InputSelectProps, type InputSelectOption } from './In
 export { InputPassword, type InputPasswordProps } from './InputPassword';
 export { QuantityStepper, type QuantityStepperProps } from './QuantityStepper';
 export { InputTextarea, type InputTextareaProps } from './InputTextarea';
+export {
+  InputIconToggle,
+  type InputIconToggleProps,
+  type IconToggleOption,
+} from './InputIconToggle';

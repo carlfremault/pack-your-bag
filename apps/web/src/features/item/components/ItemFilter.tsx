@@ -1,8 +1,15 @@
 'use client';
 
 import { useMemo } from 'react';
+import { MdArrowDownward, MdArrowUpward } from 'react-icons/md';
 
-import { Input, InputSelect, InputSelectOption } from '@repo/react-common/input';
+import {
+  IconToggleOption,
+  Input,
+  InputIconToggle,
+  InputSelect,
+  InputSelectOption,
+} from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
 
 import { useAllCategories } from '@/features/category/queries';
@@ -25,9 +32,9 @@ const SORT_FIELD_OPTIONS: InputSelectOption[] = [
   { value: 'category', label: 'Category' },
 ];
 
-const SORT_DIRECTION_OPTIONS: InputSelectOption[] = [
-  { value: 'asc', label: 'Ascending' },
-  { value: 'desc', label: 'Descending' },
+const SORT_DIRECTION_OPTIONS: IconToggleOption<ItemFilterState['sortDirection']>[] = [
+  { value: 'asc', label: 'Ascending', icon: MdArrowUpward },
+  { value: 'desc', label: 'Descending', icon: MdArrowDownward },
 ];
 
 export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
@@ -74,14 +81,12 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
             }}
           />
         </div>
-        <div className="w-[140px]">
-          <InputSelect
+        <div className="flex flex-0">
+          <InputIconToggle
             label="Order"
             options={SORT_DIRECTION_OPTIONS}
             value={filterState.sortDirection}
-            onChange={(v) => {
-              if (v) onChange({ sortDirection: v as ItemFilterState['sortDirection'] });
-            }}
+            onChange={(v) => onChange({ sortDirection: v })}
           />
         </div>
       </div>
