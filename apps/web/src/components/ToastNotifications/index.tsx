@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -8,10 +8,7 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 
 import { SESSION_EXPIRED_MESSAGE } from '@/lib/constants';
 
-export function ToastNotifications() {
-  const { isDesktop } = useBreakpoint();
-  const position = isDesktop ? 'bottom-center' : 'top-center';
-
+function ToastTrigger() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,23 +34,35 @@ export function ToastNotifications() {
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
   }, [pathname, router, searchParams]);
 
+  return null;
+}
+
+export function ToastNotifications() {
+  const { isDesktop } = useBreakpoint();
+  const position = isDesktop ? 'bottom-center' : 'top-center';
+
   return (
-    <Toaster
-      position={position}
-      toastOptions={{
-        success: {
-          duration: 5000,
-        },
-        error: {
-          duration: 6000,
-        },
-        style: { border: '1px solid var(--info-ring)' },
-        ariaProps: {
-          role: 'status',
-          'aria-live': 'polite',
-        },
-      }}
-      containerStyle={{ zIndex: 9999 }}
-    />
+    <>
+      <Suspense fallback={null}>
+        <ToastTrigger />
+      </Suspense>
+      <Toaster
+        position={position}
+        toastOptions={{
+          success: {
+            duration: 5000,
+          },
+          error: {
+            duration: 6000,
+          },
+          style: { border: '1px solid var(--info-ring)' },
+          ariaProps: {
+            role: 'status',
+            'aria-live': 'polite',
+          },
+        }}
+        containerStyle={{ zIndex: 9999 }}
+      />
+    </>
   );
 }

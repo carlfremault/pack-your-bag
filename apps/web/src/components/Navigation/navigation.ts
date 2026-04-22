@@ -20,3 +20,19 @@ export function getActiveTabFromPathname(pathname: string): NavItem['id'] | unde
   const tab = navTabs.find((t) => pathname.startsWith(t.href));
   return tab?.id;
 }
+
+export function buildTabsWithActionParams(
+  tabs: NavItem[],
+  searchParams: { get: (key: string) => string | null },
+): NavItem[] {
+  const action = searchParams.get('action');
+  if (!action) return tabs;
+
+  const params = new URLSearchParams();
+  params.set('action', action);
+  const id = searchParams.get('id');
+  if (id) params.set('id', id);
+  const query = params.toString();
+
+  return tabs.map((tab) => ({ ...tab, href: `${tab.href}?${query}` }));
+}
