@@ -21,9 +21,9 @@ export class CreateListDto {
   @MaxLength(DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ description: 'List color code', example: '#000000', required: false })
+  @ApiProperty({ description: 'List color theme', example: 'slate', required: false })
   @IsString()
   @IsOptional()
   @MaxLength(COLOR_CODE_MAX_LENGTH)
-  colorCode?: string;
+  colorTheme?: string;
 }

@@ -25,7 +25,7 @@ export class ListBaseResponseDto {
 
   @ApiProperty({ description: 'List color code', example: '#000000', nullable: true, type: String })
   @Expose()
-  colorCode: string | null;
+  colorTheme: string | null;
 
   @ApiProperty({ description: 'List created at', example: '2026-01-01T00:00:00.000Z' })
   @Expose()

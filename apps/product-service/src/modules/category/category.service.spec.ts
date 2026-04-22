@@ -47,7 +47,7 @@ describe('CategoryService', () => {
   describe('createCategory', () => {
     it('should build correct create data with userId and id', async () => {
       const userId = 'user-1';
-      const dto = { name: 'Test Category', description: 'Test Description', colorCode: '#000000' };
+      const dto = { name: 'Test Category', description: 'Test Description', colorTheme: 'slate' };
       let capturedData: Record<string, unknown> = {};
       mockPrismaService.category.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
@@ -61,7 +61,7 @@ describe('CategoryService', () => {
       expect(capturedData).toMatchObject({
         name: 'Test Category',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       });
       expect(capturedData.id).toBeDefined();
       expect(typeof capturedData.id).toBe('string');
@@ -75,7 +75,7 @@ describe('CategoryService', () => {
       const dto = {
         name: 'Updated Category',
         description: 'Updated Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
 
       mockPrismaService.category.findUnique.mockResolvedValue({ id, userId });
@@ -98,7 +98,7 @@ describe('CategoryService', () => {
       const dto = {
         name: 'Updated Category',
         description: 'Updated Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
       mockPrismaService.category.findUnique.mockResolvedValue(null);
 
@@ -179,7 +179,7 @@ describe('CategoryService', () => {
         id: 'category-1',
         name: 'Test Category',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
       };
       const items = [
@@ -195,7 +195,7 @@ describe('CategoryService', () => {
           id: 'category-1',
           name: 'Test Category',
           description: 'Test Description',
-          colorCode: '#000000',
+          colorTheme: 'slate',
         },
         items: [{ id: 'item-1', name: 'Test Item', description: 'Test Description', weight: 1 }],
       });

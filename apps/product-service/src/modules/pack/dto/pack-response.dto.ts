@@ -24,9 +24,14 @@ export class PackBaseResponseDto {
   @Expose()
   description: string | null;
 
-  @ApiProperty({ description: 'Pack color code', example: '#000000', nullable: true, type: String })
+  @ApiProperty({
+    description: 'Pack color theme',
+    example: 'slate',
+    nullable: true,
+    type: String,
+  })
   @Expose()
-  colorCode: string | null;
+  colorTheme: string | null;
 
   @ApiProperty({ description: 'Pack created at', example: '2026-01-01T00:00:00.000Z' })
   @Expose()

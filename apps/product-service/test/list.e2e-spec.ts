@@ -51,7 +51,7 @@ describe('List (e2e)', () => {
         id: expect.any(String) as string,
         name: listDto.name,
         description: listDto.description,
-        colorCode: listDto.colorCode,
+        colorTheme: listDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -83,7 +83,7 @@ describe('List (e2e)', () => {
 
     it('should return 400 if the payload is missing required fields', async () => {
       const { body } = await ctx.listHelpers.createList({
-        payload: { description: 'Test Description', colorCode: '#000000' },
+        payload: { description: 'Test Description', colorTheme: 'slate' },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });
@@ -110,7 +110,7 @@ describe('List (e2e)', () => {
         id: body.id,
         name: listDto.name,
         description: listDto.description,
-        colorCode: listDto.colorCode,
+        colorTheme: listDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -128,7 +128,7 @@ describe('List (e2e)', () => {
         id: list.id,
         name: list.name,
         description: list.description,
-        colorCode: list.colorCode,
+        colorTheme: list.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -290,14 +290,18 @@ describe('List (e2e)', () => {
       expect(createdList).toMatchObject({
         name: listDto.name,
         description: listDto.description,
-        colorCode: listDto.colorCode,
+        colorTheme: listDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
 
       await ctx.listHelpers.updateList({
         id: body.id,
-        payload: { name: 'Updated List', description: 'Updated Description', colorCode: '#FFFFFF' },
+        payload: {
+          name: 'Updated List',
+          description: 'Updated Description',
+          colorTheme: 'slate',
+        },
         accessToken: validAccessToken,
       });
 
@@ -309,7 +313,7 @@ describe('List (e2e)', () => {
       expect(updatedList).toMatchObject({
         name: 'Updated List',
         description: 'Updated Description',
-        colorCode: '#FFFFFF',
+        colorTheme: 'slate',
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -329,7 +333,7 @@ describe('List (e2e)', () => {
       expect(createdList).toMatchObject({
         name: listDto.name,
         description: listDto.description,
-        colorCode: listDto.colorCode,
+        colorTheme: listDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -348,7 +352,7 @@ describe('List (e2e)', () => {
       expect(updatedList).toMatchObject({
         name: 'Updated List',
         description: listDto.description,
-        colorCode: listDto.colorCode,
+        colorTheme: listDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -498,7 +502,7 @@ describe('List (e2e)', () => {
         id: list.id,
         name: list.name,
         description: list.description,
-        colorCode: list.colorCode,
+        colorTheme: list.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],

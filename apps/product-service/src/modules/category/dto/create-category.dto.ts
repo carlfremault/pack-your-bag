@@ -25,9 +25,8 @@ export class CreateCategoryDto {
   @MaxLength(DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ description: 'Category color code', example: '#000000', required: false })
+  @ApiProperty({ description: 'Category color theme', example: 'slate' })
   @IsString()
-  @IsOptional()
   @MaxLength(COLOR_CODE_MAX_LENGTH)
-  colorCode?: string;
+  colorTheme: string;
 }
