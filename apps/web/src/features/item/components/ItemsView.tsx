@@ -15,13 +15,13 @@ import { useAllItems } from '../queries';
 
 import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
+import { ItemFilter, ItemFilterState } from './ItemFilter';
 import ItemForm from './ItemForm';
-import { ItemsFilter, ItemsFilterState } from './ItemsFilter';
 import MobileItemsList from './MobileItemsList';
 
 const MODAL_TITLES = { add: 'Add Item', edit: 'Edit Item', categories: 'Categories' } as const;
 
-const DEFAULT_FILTER_STATE: ItemsFilterState = {
+const DEFAULT_FILTER_STATE: ItemFilterState = {
   search: '',
   categoryId: '',
   sortField: 'name',
@@ -37,7 +37,7 @@ export default function ItemsView() {
 
   const { data = [], isLoading } = useAllItems();
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const [filterState, setFilterState] = useState<ItemsFilterState>(DEFAULT_FILTER_STATE);
+  const [filterState, setFilterState] = useState<ItemFilterState>(DEFAULT_FILTER_STATE);
 
   // Variables
   const rawAction = searchParams.get('action');
@@ -83,7 +83,7 @@ export default function ItemsView() {
 
   // Handlers
   const handleFilterChange = useCallback(
-    (updates: Partial<ItemsFilterState>) => setFilterState((prev) => ({ ...prev, ...updates })),
+    (updates: Partial<ItemFilterState>) => setFilterState((prev) => ({ ...prev, ...updates })),
     [],
   );
 
@@ -142,7 +142,7 @@ export default function ItemsView() {
     return (
       <>
         <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
-          <ItemsFilter filterState={filterState} onChange={handleFilterChange} />
+          <ItemFilter filterState={filterState} onChange={handleFilterChange} />
           <MobileItemsList
             items={filteredItems}
             isLoading={isLoading}
@@ -166,7 +166,7 @@ export default function ItemsView() {
     <>
       <SidebarPortal>{panelContent ?? <SidebarNav />}</SidebarPortal>
       <div className="flex w-full flex-col gap-4 p-4">
-        <ItemsFilter filterState={filterState} onChange={handleFilterChange} />
+        <ItemFilter filterState={filterState} onChange={handleFilterChange} />
         <DesktopItemsTable
           items={filteredItems}
           isLoading={isLoading}

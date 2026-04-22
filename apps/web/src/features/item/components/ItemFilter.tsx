@@ -7,16 +7,16 @@ import { CategoryPill } from '@repo/react-common/pill';
 
 import { useAllCategories } from '@/features/category/queries';
 
-export interface ItemsFilterState {
+export interface ItemFilterState {
   search: string;
   categoryId: string;
   sortField: 'name' | 'weight' | 'category';
   sortDirection: 'asc' | 'desc';
 }
 
-interface ItemsFilterProps {
-  filterState: ItemsFilterState;
-  onChange: (updates: Partial<ItemsFilterState>) => void;
+interface ItemFilterProps {
+  filterState: ItemFilterState;
+  onChange: (updates: Partial<ItemFilterState>) => void;
 }
 
 const SORT_FIELD_OPTIONS: InputSelectOption[] = [
@@ -30,7 +30,7 @@ const SORT_DIRECTION_OPTIONS: InputSelectOption[] = [
   { value: 'desc', label: 'Descending' },
 ];
 
-export function ItemsFilter({ filterState, onChange }: ItemsFilterProps) {
+export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
   const { data: categories = [] } = useAllCategories();
 
   const categoryOptions = useMemo<InputSelectOption[]>(
@@ -70,7 +70,7 @@ export function ItemsFilter({ filterState, onChange }: ItemsFilterProps) {
             options={SORT_FIELD_OPTIONS}
             value={filterState.sortField}
             onChange={(v) => {
-              if (v) onChange({ sortField: v as ItemsFilterState['sortField'] });
+              if (v) onChange({ sortField: v as ItemFilterState['sortField'] });
             }}
           />
         </div>
@@ -80,7 +80,7 @@ export function ItemsFilter({ filterState, onChange }: ItemsFilterProps) {
             options={SORT_DIRECTION_OPTIONS}
             value={filterState.sortDirection}
             onChange={(v) => {
-              if (v) onChange({ sortDirection: v as ItemsFilterState['sortDirection'] });
+              if (v) onChange({ sortDirection: v as ItemFilterState['sortDirection'] });
             }}
           />
         </div>
