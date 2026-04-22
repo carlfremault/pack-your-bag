@@ -23,12 +23,11 @@ export class CategoryResponseDto {
 
   @ApiProperty({
     description: 'Category color code',
-    example: '#000000',
-    nullable: true,
+    example: 'slate',
     type: String,
   })
   @Expose()
-  colorCode: string | null;
+  colorTheme: string;
 
   @ApiProperty({ description: 'Category created at', example: '2026-01-01T00:00:00.000Z' })
   @Expose()

@@ -18,7 +18,7 @@ export class ListHelpers {
     return {
       name: 'Test List',
       description: 'Test Description',
-      colorCode: '#000000',
+      colorTheme: 'slate',
     };
   }
 

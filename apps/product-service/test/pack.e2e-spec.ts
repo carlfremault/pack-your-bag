@@ -54,7 +54,7 @@ describe('Pack (e2e)', () => {
         id: expect.any(String) as string,
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -86,7 +86,7 @@ describe('Pack (e2e)', () => {
 
     it('should return 400 if the payload is missing required fields', async () => {
       const { body } = await ctx.packHelpers.createPack({
-        payload: { description: 'Test Description', colorCode: '#000000' },
+        payload: { description: 'Test Description', colorTheme: 'slate' },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });
@@ -113,7 +113,7 @@ describe('Pack (e2e)', () => {
         id: body.id,
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -131,7 +131,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -154,7 +154,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -175,7 +175,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         lists: [{ quantity: 1, list }],
@@ -198,7 +198,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -209,7 +209,7 @@ describe('Pack (e2e)', () => {
           id: list1.id,
           name: list1.name,
           description: list1.description,
-          colorCode: list1.colorCode,
+          colorTheme: list1.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         }) as ListResponseDto,
@@ -220,7 +220,7 @@ describe('Pack (e2e)', () => {
           id: list2.id,
           name: list2.name,
           description: list2.description,
-          colorCode: list2.colorCode,
+          colorTheme: list2.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         }) as ListResponseDto,
@@ -239,7 +239,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -410,14 +410,18 @@ describe('Pack (e2e)', () => {
       expect(createdPack).toMatchObject({
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
 
       await ctx.packHelpers.updatePack({
         id: pack.id,
-        payload: { name: 'Updated Pack', description: 'Updated Description', colorCode: '#FFFFFF' },
+        payload: {
+          name: 'Updated Pack',
+          description: 'Updated Description',
+          colorTheme: 'slate',
+        },
         accessToken: validAccessToken,
       });
 
@@ -429,7 +433,7 @@ describe('Pack (e2e)', () => {
       expect(updatedPack).toMatchObject({
         name: 'Updated Pack',
         description: 'Updated Description',
-        colorCode: '#FFFFFF',
+        colorTheme: 'slate',
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -449,7 +453,7 @@ describe('Pack (e2e)', () => {
       expect(createdPack).toMatchObject({
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -468,7 +472,7 @@ describe('Pack (e2e)', () => {
       expect(updatedPack).toMatchObject({
         name: 'Updated Pack',
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -613,7 +617,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -743,7 +747,7 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
           itemCount: 0,
@@ -766,7 +770,7 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
           itemCount: 0,
@@ -789,7 +793,7 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
           itemCount: 1,
@@ -812,7 +816,7 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
           itemCount: 0,

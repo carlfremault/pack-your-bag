@@ -21,9 +21,9 @@ export class CreatePackDto {
   @MaxLength(DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ description: 'Pack color code', example: '#000000', required: false })
+  @ApiProperty({ description: 'Pack color theme', example: 'slate', required: false })
   @IsString()
   @IsOptional()
   @MaxLength(COLOR_CODE_MAX_LENGTH)
-  colorCode?: string;
+  colorTheme?: string;
 }

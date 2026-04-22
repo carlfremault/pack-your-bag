@@ -18,7 +18,7 @@ export class PackHelpers {
     return {
       name: 'Test Pack',
       description: 'Test Description',
-      colorCode: '#000000',
+      colorTheme: 'slate',
     };
   }
 

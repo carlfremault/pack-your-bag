@@ -47,7 +47,7 @@ describe('PackService', () => {
   describe('createPack', () => {
     it('should build correct create data with userId and id', async () => {
       const userId = 'user-1';
-      const dto = { name: 'Test Pack', description: 'Test Description', colorCode: '#000000' };
+      const dto = { name: 'Test Pack', description: 'Test Description', colorTheme: 'slate' };
       let capturedData: Record<string, unknown> = {};
       mockPrismaService.pack.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
@@ -61,7 +61,7 @@ describe('PackService', () => {
       expect(capturedData).toMatchObject({
         name: 'Test Pack',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId: 'user-1',
       });
       expect(capturedData.id).toBeDefined();
@@ -76,7 +76,7 @@ describe('PackService', () => {
       const dto = {
         name: 'Updated Pack',
         description: 'Updated Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
       mockPrismaService.pack.findUnique.mockResolvedValue({ id, userId });
 
@@ -98,7 +98,7 @@ describe('PackService', () => {
       const dto = {
         name: 'Updated Pack',
         description: 'Updated Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
       mockPrismaService.pack.findUnique.mockResolvedValue(null);
 
@@ -199,7 +199,7 @@ describe('PackService', () => {
         id,
         name: 'Test Pack',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
       };
       const trips = [{ id: 'trip-1', name: 'Test Trip', date, remarks: 'Test Remarks', userId }];
@@ -209,7 +209,7 @@ describe('PackService', () => {
       const result = await service.getPackDeleteImpact(id, userId);
 
       expect(result).toMatchObject({
-        pack: { id, name: 'Test Pack', description: 'Test Description', colorCode: '#000000' },
+        pack: { id, name: 'Test Pack', description: 'Test Description', colorTheme: 'slate' },
         trips: [{ id: 'trip-1', name: 'Test Trip', date, remarks: 'Test Remarks' }],
       });
     });

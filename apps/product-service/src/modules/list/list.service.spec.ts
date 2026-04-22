@@ -53,7 +53,7 @@ describe('ListService', () => {
   describe('createList', () => {
     it('should build correct create data with userId and id', async () => {
       const userId = 'user-1';
-      const dto = { name: 'Test List', description: 'Test Description', colorCode: '#000000' };
+      const dto = { name: 'Test List', description: 'Test Description', colorTheme: 'slate' };
       let capturedData: Record<string, unknown> = {};
       mockPrismaService.list.create.mockImplementation(
         (args: { data: Record<string, unknown> }) => {
@@ -67,7 +67,7 @@ describe('ListService', () => {
       expect(capturedData).toMatchObject({
         name: 'Test List',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       });
       expect(capturedData.id).toBeDefined();
       expect(typeof capturedData.id).toBe('string');
@@ -81,7 +81,7 @@ describe('ListService', () => {
       const dto = {
         name: 'Updated List',
         description: 'Updated Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
       mockPrismaService.list.findUnique.mockResolvedValue({ id, userId });
 
@@ -103,7 +103,7 @@ describe('ListService', () => {
       const dto = {
         name: 'Updated List',
         description: 'Updated Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
       mockPrismaService.list.findUnique.mockResolvedValue(null);
 
@@ -150,7 +150,7 @@ describe('ListService', () => {
         id,
         name: 'Test List',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
         _count: { items: 2 },
       };
@@ -158,7 +158,7 @@ describe('ListService', () => {
         id: 'pack-1',
         name: 'Test Pack',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
       };
       const trip = {
@@ -194,7 +194,7 @@ describe('ListService', () => {
           id,
           name: 'Test List',
           description: 'Test Description',
-          colorCode: '#000000',
+          colorTheme: 'slate',
           itemCount: 2,
         },
         packs: [
@@ -202,7 +202,7 @@ describe('ListService', () => {
             id: 'pack-1',
             name: 'Test Pack',
             description: 'Test Description',
-            colorCode: '#000000',
+            colorTheme: 'slate',
             items: undefined,
             lists: undefined,
           },
@@ -289,7 +289,7 @@ describe('ListService', () => {
         id: listId,
         name: 'Test List',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
       };
       const packs = [
@@ -297,7 +297,7 @@ describe('ListService', () => {
           id: 'pack-1',
           name: 'Test Pack',
           description: 'Test Description',
-          colorCode: '#000000',
+          colorTheme: 'slate',
           userId,
         },
       ];
@@ -313,7 +313,7 @@ describe('ListService', () => {
           id: listId,
           name: 'Test List',
           description: 'Test Description',
-          colorCode: '#000000',
+          colorTheme: 'slate',
           itemCount: 0,
         },
         packs: [
@@ -321,7 +321,7 @@ describe('ListService', () => {
             id: 'pack-1',
             name: 'Test Pack',
             description: 'Test Description',
-            colorCode: '#000000',
+            colorTheme: 'slate',
             items: undefined,
             lists: undefined,
           },
