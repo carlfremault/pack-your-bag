@@ -4,7 +4,7 @@ import z from 'zod';
 
 import { createItem, getAllItems } from '@/features/item/api';
 import { createItemSchema } from '@/features/item/schema';
-import { withErrorHandling } from '@/lib/api-handler';
+import { withErrorHandling } from '@/lib/api-handlers';
 
 export async function GET() {
   return withErrorHandling(async () => {

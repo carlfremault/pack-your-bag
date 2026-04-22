@@ -1,7 +1,5 @@
-import { handleApiResponse } from '@/lib/api-handler';
+import { handleApiResponse, handleApiVoidResponse } from '@/lib/api-handlers';
 import { getProductClient } from '@/lib/clients/product-client';
-import { ApiError } from '@/lib/errors';
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { CreateItemBody, Item, UpdateItemBody } from './types';
 
@@ -31,8 +29,5 @@ export async function deleteItem(id: string): Promise<void> {
   const { error, response } = await productClient.DELETE('/item/{id}', {
     params: { path: { id } },
   });
-
-  if (error) {
-    throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
-  }
+  handleApiVoidResponse(error, response);
 }

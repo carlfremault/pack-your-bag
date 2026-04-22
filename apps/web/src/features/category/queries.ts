@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack
 
 import { toHttpError } from '@/utils/http-error';
 
-import { Category, CreateCategoryBody, UpdateCategoryBody } from './types';
+import { Category, CategoryDeleteImpact, CreateCategoryBody, UpdateCategoryBody } from './types';
 
 // -------------------------------
 // Fetch all Categories
@@ -131,4 +131,70 @@ const useUpdateCategory = () => {
   });
 };
 
-export { useAllCategories, useCreateCategory, useUpdateCategory };
+// -------------------------------
+// Get category delete impact
+// -------------------------------
+const fetchCategoryDeleteImpact = async (id: string): Promise<CategoryDeleteImpact> => {
+  const res = await fetch(`/api/category/${id}/delete-impact`);
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useCategoryDeleteImpact = (id: string): UseQueryResult<CategoryDeleteImpact> => {
+  return useQuery({
+    queryKey: ['categoryDeleteImpact', id],
+    queryFn: () => fetchCategoryDeleteImpact(id),
+    enabled: !!id,
+  });
+};
+
+// -------------------------------
+// Delete category
+// -------------------------------
+const deleteCategory = async (id: string): Promise<void> => {
+  const res = await fetch(`/api/category/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+};
+
+const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteCategory,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['categories'] });
+
+      const previousCategories = queryClient.getQueryData<Category[]>(['categories']) ?? [];
+
+      queryClient.setQueryData(['categories'], (old: Category[] = []) =>
+        old.filter((category) => category.id !== id),
+      );
+
+      return { previousCategories };
+    },
+    onError: (_error, _id, context) => {
+      queryClient.setQueryData(['categories'], context?.previousCategories);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+};
+
+export {
+  useAllCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+  useCategoryDeleteImpact,
+};

@@ -4,7 +4,7 @@ import z from 'zod';
 
 import { createCategory, getAllCategories } from '@/features/category/api';
 import { createCategorySchema } from '@/features/category/schema';
-import { withErrorHandling } from '@/lib/api-handler';
+import { withErrorHandling } from '@/lib/api-handlers';
 
 export async function GET() {
   return withErrorHandling(async () => {
