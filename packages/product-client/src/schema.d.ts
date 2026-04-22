@@ -381,9 +381,9 @@ export interface components {
       description: string | null;
       /**
        * @description Category color code
-       * @example #000000
+       * @example slate
        */
-      colorCode: string | null;
+      colorTheme: string;
       /**
        * Format: date-time
        * @description Category created at
@@ -462,7 +462,7 @@ export interface components {
        * @description List color code
        * @example #000000
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description List created at
@@ -504,10 +504,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description Pack created at
@@ -630,10 +630,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Category color code
-       * @example #000000
+       * @description Category color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme: string;
     };
     UpdateCategoryDto: {
       /**
@@ -647,10 +647,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Category color code
-       * @example #000000
+       * @description Category color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     ListSummaryResponseDto: {
       /**
@@ -672,7 +672,7 @@ export interface components {
        * @description List color code
        * @example #000000
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description List created at
@@ -708,10 +708,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description List color code
-       * @example #000000
+       * @description List color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     UpdateListDto: {
       /**
@@ -725,10 +725,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description List color code
-       * @example #000000
+       * @description List color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     PackSummaryResponseDto: {
       /**
@@ -747,10 +747,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description Pack created at
@@ -790,10 +790,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     UpdatePackDto: {
       /**
@@ -807,10 +807,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     CreateTripDto: {
       /**

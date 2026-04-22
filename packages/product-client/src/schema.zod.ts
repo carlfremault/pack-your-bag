@@ -5,7 +5,7 @@ export const CategoryResponseDto = z
     id: z.string(),
     name: z.string(),
     description: z.string().nullable(),
-    colorCode: z.string().nullable(),
+    colorTheme: z.string(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
   })
@@ -37,7 +37,7 @@ export const ListResponseDto = z
     id: z.string(),
     name: z.string(),
     description: z.string().nullable(),
-    colorCode: z.string().nullable(),
+    colorTheme: z.string().nullable(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     items: z.array(ItemWithQuantityResponseDto).optional(),
@@ -51,7 +51,7 @@ export const PackResponseDto = z
     id: z.string(),
     name: z.string(),
     description: z.string().nullable(),
-    colorCode: z.string().nullable(),
+    colorTheme: z.string().nullable(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     items: z.array(ItemWithQuantityResponseDto).optional(),
@@ -87,24 +87,20 @@ export const UpdateItemDto = z
   .partial()
   .passthrough();
 export const CreateCategoryDto = z
-  .object({
-    name: z.string(),
-    description: z.string().optional(),
-    colorCode: z.string().optional(),
-  })
+  .object({ name: z.string(), description: z.string().optional(), colorTheme: z.string() })
   .passthrough();
 export const CategoryDeleteImpactDto = z
   .object({ category: CategoryResponseDto, items: z.array(ItemResponseDto) })
   .passthrough();
 export const UpdateCategoryDto = z
-  .object({ name: z.string(), description: z.string(), colorCode: z.string() })
+  .object({ name: z.string(), description: z.string(), colorTheme: z.string() })
   .partial()
   .passthrough();
 export const CreateListDto = z
   .object({
     name: z.string(),
     description: z.string().optional(),
-    colorCode: z.string().optional(),
+    colorTheme: z.string().optional(),
   })
   .passthrough();
 export const ListSummaryResponseDto = z
@@ -112,7 +108,7 @@ export const ListSummaryResponseDto = z
     id: z.string(),
     name: z.string(),
     description: z.string().nullable(),
-    colorCode: z.string().nullable(),
+    colorTheme: z.string().nullable(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     itemCount: z.number(),
@@ -126,14 +122,14 @@ export const ListDeleteImpactDto = z
   })
   .passthrough();
 export const UpdateListDto = z
-  .object({ name: z.string(), description: z.string(), colorCode: z.string() })
+  .object({ name: z.string(), description: z.string(), colorTheme: z.string() })
   .partial()
   .passthrough();
 export const CreatePackDto = z
   .object({
     name: z.string(),
     description: z.string().optional(),
-    colorCode: z.string().optional(),
+    colorTheme: z.string().optional(),
   })
   .passthrough();
 export const PackSummaryResponseDto = z
@@ -141,7 +137,7 @@ export const PackSummaryResponseDto = z
     id: z.string(),
     name: z.string(),
     description: z.string().nullable(),
-    colorCode: z.string().nullable(),
+    colorTheme: z.string().nullable(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     itemCount: z.number(),
@@ -152,7 +148,7 @@ export const PackDeleteImpactDto = z
   .object({ pack: PackSummaryResponseDto, trips: z.array(TripResponseDto) })
   .passthrough();
 export const UpdatePackDto = z
-  .object({ name: z.string(), description: z.string(), colorCode: z.string() })
+  .object({ name: z.string(), description: z.string(), colorTheme: z.string() })
   .partial()
   .passthrough();
 export const CreateTripDto = z

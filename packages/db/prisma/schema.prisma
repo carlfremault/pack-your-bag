@@ -173,7 +173,7 @@ model Category {
   id            String      @id @db.Uuid
   name          String
   description   String?
-  colorTheme    String
+  colorTheme    String      @default("slate")
   userId        String      @db.Uuid
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -205,13 +205,13 @@ model Item {
 }
 
 model List {
-  id          String      @id @db.Uuid
-  name        String
-  description String?
-  colorTheme   String?
-  userId      String      @db.Uuid
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String      @id @db.Uuid
+  name          String
+  description   String?
+  colorTheme    String?      
+  userId        String      @db.Uuid
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   // Join table relations
   items       ItemList[]

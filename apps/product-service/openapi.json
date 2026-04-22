@@ -1641,11 +1641,10 @@
             "example": "Category description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
             "description": "Category color code",
-            "example": "#000000",
-            "nullable": true
+            "example": "slate"
           },
           "createdAt": {
             "format": "date-time",
@@ -1664,7 +1663,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt"
         ]
@@ -1767,7 +1766,7 @@
             "example": "List description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
             "description": "List color code",
             "example": "#000000",
@@ -1797,7 +1796,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt"
         ]
@@ -1843,10 +1842,10 @@
             "example": "Pack description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000",
+            "description": "Pack color theme",
+            "example": "slate",
             "nullable": true
           },
           "createdAt": {
@@ -1880,7 +1879,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt"
         ]
@@ -2072,14 +2071,15 @@
             "description": "Category description",
             "example": "Category description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Category color code",
-            "example": "#000000"
+            "description": "Category color theme",
+            "example": "slate"
           }
         },
         "required": [
-          "name"
+          "name",
+          "colorTheme"
         ]
       },
       "UpdateCategoryDto": {
@@ -2095,10 +2095,10 @@
             "description": "Category description",
             "example": "Category description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Category color code",
-            "example": "#000000"
+            "description": "Category color theme",
+            "example": "slate"
           }
         }
       },
@@ -2121,7 +2121,7 @@
             "example": "List description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
             "description": "List color code",
             "example": "#000000",
@@ -2149,7 +2149,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt",
           "itemCount"
@@ -2193,10 +2193,10 @@
             "description": "List description",
             "example": "List description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "List color code",
-            "example": "#000000"
+            "description": "List color theme",
+            "example": "slate"
           }
         },
         "required": [
@@ -2216,10 +2216,10 @@
             "description": "List description",
             "example": "List description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "List color code",
-            "example": "#000000"
+            "description": "List color theme",
+            "example": "slate"
           }
         }
       },
@@ -2242,10 +2242,10 @@
             "example": "Pack description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000",
+            "description": "Pack color theme",
+            "example": "slate",
             "nullable": true
           },
           "createdAt": {
@@ -2275,7 +2275,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt",
           "itemCount",
@@ -2313,10 +2313,10 @@
             "description": "Pack description",
             "example": "Pack description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000"
+            "description": "Pack color theme",
+            "example": "slate"
           }
         },
         "required": [
@@ -2336,10 +2336,10 @@
             "description": "Pack description",
             "example": "Pack description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000"
+            "description": "Pack color theme",
+            "example": "slate"
           }
         }
       },
