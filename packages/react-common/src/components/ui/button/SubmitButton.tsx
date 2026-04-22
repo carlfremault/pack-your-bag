@@ -5,6 +5,7 @@ import type { ButtonColor } from './button-styles';
 
 export interface SubmitButtonProps {
   pending: boolean;
+  disabled?: boolean;
   color?: ButtonColor;
   children: React.ReactNode;
   ariaLabel?: string;
@@ -12,7 +13,7 @@ export interface SubmitButtonProps {
 }
 
 export function SubmitButton(props: SubmitButtonProps) {
-  const { pending, color = 'primary', children, ariaLabel, className } = props;
+  const { pending, disabled = false, color = 'primary', children, ariaLabel, className } = props;
 
   const buttonAriaLabel =
     ariaLabel ??
@@ -22,7 +23,7 @@ export function SubmitButton(props: SubmitButtonProps) {
     <Button
       type="submit"
       color={color}
-      disabled={pending}
+      disabled={disabled || pending}
       aria-label={buttonAriaLabel}
       className={className}
     >

@@ -129,7 +129,9 @@ export default async function middleware(req: NextRequest) {
     if (refreshed.kind !== 'success') {
       // Clear the session only for definitive auth failures.
       // Transient upstream errors should not force logout.
-      return handleAuthFailure(req, refreshed.kind === 'invalid');
+      // Root is just a routing stub — don't signal "session expired" there.
+      const isRoot = pathname === '/';
+      return handleAuthFailure(req, refreshed.kind === 'invalid', !isRoot);
     }
 
     // Build response with:

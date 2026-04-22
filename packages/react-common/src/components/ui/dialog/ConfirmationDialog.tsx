@@ -2,6 +2,7 @@ import { Button, ButtonColor, SubmitButton } from '@repo/react-common/button';
 
 export interface ConfirmationDialogProps {
   isPending: boolean;
+  disabled?: boolean;
   onConfirm: () => void;
   closeForm: () => void;
   children: React.ReactNode;
@@ -9,7 +10,14 @@ export interface ConfirmationDialogProps {
 }
 
 export function ConfirmationDialog(props: ConfirmationDialogProps) {
-  const { isPending, onConfirm, closeForm, children, submitButtonColor = 'danger' } = props;
+  const {
+    isPending,
+    disabled = false,
+    onConfirm,
+    closeForm,
+    children,
+    submitButtonColor = 'danger',
+  } = props;
 
   const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,7 +28,7 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
     <div className="flex flex-col gap-6">
       {children}
       <form onSubmit={handleConfirm} className="flex items-center justify-end gap-2">
-        <SubmitButton color={submitButtonColor} pending={isPending}>
+        <SubmitButton color={submitButtonColor} pending={isPending} disabled={disabled}>
           Confirm
         </SubmitButton>
         <Button

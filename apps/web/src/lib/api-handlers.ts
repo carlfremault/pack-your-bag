@@ -31,3 +31,9 @@ export function handleApiResponse<T>(
   if (!data) throw new ApiError('No data returned', 500);
   return data;
 }
+
+export function handleApiVoidResponse(error: unknown, response: Response | undefined): void {
+  if (error) {
+    throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
+  }
+}

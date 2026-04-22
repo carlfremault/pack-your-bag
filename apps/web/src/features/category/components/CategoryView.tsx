@@ -1,12 +1,16 @@
 import { useCallback, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { Button } from '@repo/react-common/button';
 
-import { useAllCategories } from '../queries';
+import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
+
+import { useAllCategories, useDeleteCategory } from '../queries';
 
 import BackButton from './BackButton';
 import { CategoryForm } from './CategoryForm';
 import CategoryTable from './CategoryTable';
+import DeleteCategoryModal from './DeleteCategoryModal';
 
 export function CategoryView() {
   const [mode, setMode] = useState<'table' | 'form'>('table');
@@ -14,6 +18,15 @@ export function CategoryView() {
 
   const { data = [], isLoading } = useAllCategories();
   const editCategory = data.find((category) => category.id === categoryId);
+
+  const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
+  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
+  const categoryToDelete = data.find((category) => category.id === deleteCategoryId) ?? null;
+
+  const closeForm = () => {
+    setCategoryId(null);
+    setMode('table');
+  };
 
   const handleAddCategory = () => {
     setCategoryId(null);
@@ -25,39 +38,63 @@ export function CategoryView() {
     setMode('form');
   }, []);
 
-  const closeForm = () => {
-    setCategoryId(null);
-    setMode('table');
-  };
+  const handleDeleteCategory = useCallback((id: string) => {
+    setDeleteCategoryId(id);
+  }, []);
 
-  const categoryViewClassName = 'flex h-full max-h-[80vh] flex-col justify-center gap-4';
+  const closeDeleteModal = useCallback(() => {
+    setDeleteCategoryId(null);
+  }, []);
 
+  const confirmDeleteCategory = useCallback(() => {
+    if (!deleteCategoryId) return;
+    deleteCategory(deleteCategoryId, {
+      onSuccess: () => {
+        closeDeleteModal();
+        toast.success('Category deleted successfully');
+      },
+      onError: (error) => {
+        toast.error(`Error: ${extractErrorMessage(error)}`);
+      },
+    });
+  }, [deleteCategoryId, deleteCategory, closeDeleteModal]);
+
+  let content: React.ReactNode = null;
   if (mode === 'table') {
-    return (
-      <div className={categoryViewClassName}>
-        <BackButton />
+    content = (
+      <>
         <CategoryTable
           categories={data}
           isLoading={isLoading}
           onEditCategory={handleEditCategory}
-          onDeleteCategory={(id) => {}}
+          onDeleteCategory={handleDeleteCategory}
         />
         <Button className="w-full" onClick={handleAddCategory}>
           Add Category
         </Button>
-      </div>
+        {categoryToDelete && (
+          <DeleteCategoryModal
+            categoryId={categoryToDelete.id}
+            isDeleting={isDeleting}
+            onConfirm={confirmDeleteCategory}
+            onClose={closeDeleteModal}
+          />
+        )}
+      </>
     );
-  }
-
-  if (mode === 'form') {
-    return (
-      <div className={categoryViewClassName}>
-        <BackButton />
+  } else if (mode === 'form') {
+    content = (
+      <>
         <h2 className="text-primary text-xl">{categoryId ? 'Edit Category' : 'Add Category'}</h2>
         <CategoryForm category={editCategory} onClose={closeForm} />
-      </div>
+      </>
     );
   }
 
-  return null;
+  return (
+    <div className="flex h-full max-h-[80vh] flex-col justify-center gap-4">
+      <BackButton />
+      {content}
+    </div>
+  );
 }

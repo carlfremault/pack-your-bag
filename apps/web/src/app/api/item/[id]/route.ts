@@ -4,7 +4,7 @@ import z from 'zod';
 
 import { deleteItem, updateItem } from '@/features/item/api';
 import { updateItemSchema } from '@/features/item/schema';
-import { withErrorHandling } from '@/lib/api-handler';
+import { withErrorHandling } from '@/lib/api-handlers';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return withErrorHandling(async () => {
