@@ -125,6 +125,7 @@ export default function ItemForm(props: ItemFormProps) {
         />
         <InputSelect
           label="Category"
+          isClearable
           placeholder="Select a category"
           options={categoryOptions}
           value={formValues.categoryId}

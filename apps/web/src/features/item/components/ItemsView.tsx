@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -16,11 +16,20 @@ import { useAllItems } from '../queries';
 import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
 import ItemForm from './ItemForm';
+import { ItemsFilter, ItemsFilterState } from './ItemsFilter';
 import MobileItemsList from './MobileItemsList';
 
 const MODAL_TITLES = { add: 'Add Item', edit: 'Edit Item', categories: 'Categories' } as const;
 
+const DEFAULT_FILTER_STATE: ItemsFilterState = {
+  search: '',
+  categoryId: '',
+  sortField: 'name',
+  sortDirection: 'asc',
+};
+
 export default function ItemsView() {
+  // Hooks
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
@@ -28,7 +37,9 @@ export default function ItemsView() {
 
   const { data = [], isLoading } = useAllItems();
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const [filterState, setFilterState] = useState<ItemsFilterState>(DEFAULT_FILTER_STATE);
 
+  // Variables
   const rawAction = searchParams.get('action');
   const formAction =
     rawAction === 'add' || rawAction === 'edit' || rawAction === 'categories' ? rawAction : null;
@@ -36,6 +47,45 @@ export default function ItemsView() {
   const actionItem = data.find((item) => item.id === itemId);
   const isFormReady = formAction === 'add' || (formAction === 'edit' && actionItem !== undefined);
   const formKey = formAction === 'edit' ? `edit-${actionItem?.id}` : 'add';
+
+  const filteredItems = useMemo(() => {
+    let result = [...data];
+
+    if (filterState.search) {
+      const term = filterState.search.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(term) ||
+          (item.description?.toLowerCase().includes(term) ?? false),
+      );
+    }
+
+    if (filterState.categoryId) {
+      result = result.filter((item) => item.category?.id === filterState.categoryId);
+    }
+
+    result.sort((a, b) => {
+      let cmp: number;
+      if (filterState.sortField === 'weight') {
+        cmp = (a.weight ?? 0) - (b.weight ?? 0);
+      } else if (filterState.sortField === 'name') {
+        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      } else {
+        cmp = (a.category?.name ?? '')
+          .toLowerCase()
+          .localeCompare((b.category?.name ?? '').toLowerCase());
+      }
+      return filterState.sortDirection === 'asc' ? cmp : -cmp;
+    });
+
+    return result;
+  }, [data, filterState]);
+
+  // Handlers
+  const handleFilterChange = useCallback(
+    (updates: Partial<ItemsFilterState>) => setFilterState((prev) => ({ ...prev, ...updates })),
+    [],
+  );
 
   const closeFormAction = useCallback(
     (isOpen?: boolean) => {
@@ -69,12 +119,13 @@ export default function ItemsView() {
 
   if (!isReady) {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex h-full w-full items-center justify-center">
         <Spinner size="large" />
       </div>
     );
   }
 
+  // Render
   let panelContent: React.ReactNode = null;
   if (formAction === 'categories') {
     panelContent = <CategoryView />;
@@ -90,12 +141,15 @@ export default function ItemsView() {
   if (!isDesktop) {
     return (
       <>
-        <MobileItemsList
-          items={data}
-          isLoading={isLoading}
-          onEditItem={handleEditItem}
-          onDeleteItem={handleDeleteItem}
-        />
+        <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
+          <ItemsFilter filterState={filterState} onChange={handleFilterChange} />
+          <MobileItemsList
+            items={filteredItems}
+            isLoading={isLoading}
+            onEditItem={handleEditItem}
+            onDeleteItem={handleDeleteItem}
+          />
+        </div>
         {formAction && (
           <Modal.Root open onOpenChange={closeFormAction}>
             <Modal.Content title={modalTitle} className="h-full">
@@ -111,12 +165,15 @@ export default function ItemsView() {
   return (
     <>
       <SidebarPortal>{panelContent ?? <SidebarNav />}</SidebarPortal>
-      <DesktopItemsTable
-        items={data}
-        isLoading={isLoading}
-        onEditItem={handleEditItem}
-        onDeleteItem={handleDeleteItem}
-      />
+      <div className="flex w-full flex-col gap-4 p-4">
+        <ItemsFilter filterState={filterState} onChange={handleFilterChange} />
+        <DesktopItemsTable
+          items={filteredItems}
+          isLoading={isLoading}
+          onEditItem={handleEditItem}
+          onDeleteItem={handleDeleteItem}
+        />
+      </div>
       {deleteItemModal}
     </>
   );

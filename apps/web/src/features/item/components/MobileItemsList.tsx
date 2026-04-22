@@ -16,7 +16,7 @@ export interface MobileItemsListProps {
 export default function MobileItemsList(props: MobileItemsListProps) {
   const { items, onEditItem, onDeleteItem, isLoading } = props;
 
-  const containerClassName = 'flex w-full max-w-3xl flex-col gap-2 p-2 sm:p-4 mb-[33%]';
+  const containerClassName = 'flex w-full flex-col gap-2 mb-[33%]';
 
   if (isLoading) {
     return (
