@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -11,9 +10,8 @@ import { Modal } from '@/components/Modal';
 import { SidebarNav } from '@/components/Navigation/SidebarNav';
 import { SidebarPortal } from '@/components/Sidebar';
 import { CategoryView } from '@/features/category/components/CategoryView';
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
-import { useAllItems, useDeleteItem } from '../queries';
+import { useAllItems } from '../queries';
 
 import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
@@ -29,6 +27,7 @@ export default function ItemsView() {
   const searchParams = useSearchParams();
 
   const { data = [], isLoading } = useAllItems();
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
 
   const rawAction = searchParams.get('action');
   const formAction =
@@ -37,10 +36,6 @@ export default function ItemsView() {
   const actionItem = data.find((item) => item.id === itemId);
   const isFormReady = formAction === 'add' || (formAction === 'edit' && actionItem !== undefined);
   const formKey = formAction === 'edit' ? `edit-${actionItem?.id}` : 'add';
-
-  const { mutate: deleteItem, isPending: isDeleting } = useDeleteItem();
-  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const itemToDelete = data.find((item) => item.id === deleteItemId) ?? null;
 
   const closeFormAction = useCallback(
     (isOpen?: boolean) => {
@@ -72,19 +67,6 @@ export default function ItemsView() {
     setDeleteItemId(null);
   }, []);
 
-  const confirmDeleteItem = useCallback(() => {
-    if (!deleteItemId) return;
-    deleteItem(deleteItemId, {
-      onSuccess: () => {
-        closeDeleteModal();
-        toast.success('Item deleted successfully');
-      },
-      onError: (error) => {
-        toast.error(`Error: ${extractErrorMessage(error)}`);
-      },
-    });
-  }, [deleteItemId, deleteItem, closeDeleteModal]);
-
   if (!isReady) {
     return (
       <div className="flex items-center justify-center">
@@ -101,6 +83,9 @@ export default function ItemsView() {
   }
 
   const modalTitle = formAction ? MODAL_TITLES[formAction] : '';
+  const deleteItemModal = deleteItemId && (
+    <DeleteItemModal itemId={deleteItemId} onClose={closeDeleteModal} />
+  );
 
   if (!isDesktop) {
     return (
@@ -118,13 +103,7 @@ export default function ItemsView() {
             </Modal.Content>
           </Modal.Root>
         )}
-        {itemToDelete && (
-          <DeleteItemModal
-            isDeleting={isDeleting}
-            onConfirm={confirmDeleteItem}
-            onClose={closeDeleteModal}
-          />
-        )}
+        {deleteItemModal}
       </>
     );
   }
@@ -138,13 +117,7 @@ export default function ItemsView() {
         onEditItem={handleEditItem}
         onDeleteItem={handleDeleteItem}
       />
-      {itemToDelete && (
-        <DeleteItemModal
-          isDeleting={isDeleting}
-          onConfirm={confirmDeleteItem}
-          onClose={closeDeleteModal}
-        />
-      )}
+      {deleteItemModal}
     </>
   );
 }

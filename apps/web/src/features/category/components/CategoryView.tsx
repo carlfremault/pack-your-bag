@@ -1,11 +1,8 @@
 import { useCallback, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { Button } from '@repo/react-common/button';
 
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
-
-import { useAllCategories, useDeleteCategory } from '../queries';
+import { useAllCategories } from '../queries';
 
 import BackButton from './BackButton';
 import { CategoryForm } from './CategoryForm';
@@ -15,13 +12,10 @@ import DeleteCategoryModal from './DeleteCategoryModal';
 export function CategoryView() {
   const [mode, setMode] = useState<'table' | 'form'>('table');
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
 
   const { data = [], isLoading } = useAllCategories();
   const editCategory = data.find((category) => category.id === categoryId);
-
-  const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
-  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
-  const categoryToDelete = data.find((category) => category.id === deleteCategoryId) ?? null;
 
   const closeForm = () => {
     setCategoryId(null);
@@ -46,19 +40,6 @@ export function CategoryView() {
     setDeleteCategoryId(null);
   }, []);
 
-  const confirmDeleteCategory = useCallback(() => {
-    if (!deleteCategoryId) return;
-    deleteCategory(deleteCategoryId, {
-      onSuccess: () => {
-        closeDeleteModal();
-        toast.success('Category deleted successfully');
-      },
-      onError: (error) => {
-        toast.error(`Error: ${extractErrorMessage(error)}`);
-      },
-    });
-  }, [deleteCategoryId, deleteCategory, closeDeleteModal]);
-
   let content: React.ReactNode = null;
   if (mode === 'table') {
     content = (
@@ -72,13 +53,8 @@ export function CategoryView() {
         <Button className="w-full" onClick={handleAddCategory}>
           Add Category
         </Button>
-        {categoryToDelete && (
-          <DeleteCategoryModal
-            categoryId={categoryToDelete.id}
-            isDeleting={isDeleting}
-            onConfirm={confirmDeleteCategory}
-            onClose={closeDeleteModal}
-          />
+        {deleteCategoryId && (
+          <DeleteCategoryModal categoryId={deleteCategoryId} onClose={closeDeleteModal} />
         )}
       </>
     );
