@@ -10,7 +10,7 @@ export function SidebarNav() {
         <IoShirtOutline size={64} className="text-primary" aria-hidden="true" />
       </div>
       <LinkButton
-        href="/items?action=add"
+        href="?action=add-item"
         color="primary"
         linkAs={Link}
         variant="solid"
@@ -20,7 +20,7 @@ export function SidebarNav() {
         Add new item
       </LinkButton>
       <LinkButton
-        href="/items?action=categories"
+        href="?action=manage-categories"
         color="primary"
         linkAs={Link}
         variant="outline"

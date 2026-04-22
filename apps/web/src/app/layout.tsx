@@ -10,6 +10,7 @@ import { MobileNav } from '@/components/Navigation/MobileNav';
 import { MobileNavDrawer } from '@/components/Navigation/MobileNavDrawer';
 import { Providers } from '@/components/providers';
 import { SidebarSlot } from '@/components/Sidebar';
+import { ActionPanel } from '@/components/Sidebar/ActionPanel';
 import { ToastNotifications } from '@/components/ToastNotifications';
 
 import './globals.css';
@@ -56,6 +57,7 @@ export default function RootLayout({
               </div>
             </div>
           </div>
+          <ActionPanel />
           <ToastNotifications />
         </Providers>
       </body>

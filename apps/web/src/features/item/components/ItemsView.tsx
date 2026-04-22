@@ -1,24 +1,24 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
-import { Modal } from '@/components/Modal';
-import { SidebarNav } from '@/components/Navigation/SidebarNav';
-import { SidebarPortal } from '@/components/Sidebar';
-import { CategoryView } from '@/features/category/components/CategoryView';
-
 import { useAllItems } from '../queries';
 
 import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
-import ItemForm from './ItemForm';
+import { ItemFilter, ItemFilterState } from './ItemFilter';
 import MobileItemsList from './MobileItemsList';
 
-const MODAL_TITLES = { add: 'Add Item', edit: 'Edit Item', categories: 'Categories' } as const;
+const DEFAULT_FILTER_STATE: ItemFilterState = {
+  search: '',
+  categoryId: '',
+  sortField: 'name',
+  sortDirection: 'asc',
+};
 
 export default function ItemsView() {
   const { isReady, isDesktop } = useBreakpoint();
@@ -28,31 +28,50 @@ export default function ItemsView() {
 
   const { data = [], isLoading } = useAllItems();
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const [filterState, setFilterState] = useState<ItemFilterState>(DEFAULT_FILTER_STATE);
 
-  const rawAction = searchParams.get('action');
-  const formAction =
-    rawAction === 'add' || rawAction === 'edit' || rawAction === 'categories' ? rawAction : null;
-  const itemId = searchParams.get('id');
-  const actionItem = data.find((item) => item.id === itemId);
-  const isFormReady = formAction === 'add' || (formAction === 'edit' && actionItem !== undefined);
-  const formKey = formAction === 'edit' ? `edit-${actionItem?.id}` : 'add';
+  const filteredItems = useMemo(() => {
+    let result = [...data];
 
-  const closeFormAction = useCallback(
-    (isOpen?: boolean) => {
-      if (isOpen) return;
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete('action');
-      params.delete('id');
-      const nextQuery = params.toString();
-      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname);
-    },
-    [pathname, router, searchParams],
+    if (filterState.search) {
+      const term = filterState.search.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(term) ||
+          (item.description?.toLowerCase().includes(term) ?? false),
+      );
+    }
+
+    if (filterState.categoryId) {
+      result = result.filter((item) => item.category?.id === filterState.categoryId);
+    }
+
+    result.sort((a, b) => {
+      let cmp: number;
+      if (filterState.sortField === 'weight') {
+        cmp = (a.weight ?? 0) - (b.weight ?? 0);
+      } else if (filterState.sortField === 'name') {
+        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      } else {
+        cmp = (a.category?.name ?? '')
+          .toLowerCase()
+          .localeCompare((b.category?.name ?? '').toLowerCase());
+      }
+      return filterState.sortDirection === 'asc' ? cmp : -cmp;
+    });
+
+    return result;
+  }, [data, filterState]);
+
+  const handleFilterChange = useCallback(
+    (updates: Partial<ItemFilterState>) => setFilterState((prev) => ({ ...prev, ...updates })),
+    [],
   );
 
   const handleEditItem = useCallback(
     (id: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set('action', 'edit');
+      params.set('action', 'edit-item');
       params.set('id', id);
       router.push(`${pathname}?${params.toString()}`);
     },
@@ -69,20 +88,12 @@ export default function ItemsView() {
 
   if (!isReady) {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex h-full w-full items-center justify-center">
         <Spinner size="large" />
       </div>
     );
   }
 
-  let panelContent: React.ReactNode = null;
-  if (formAction === 'categories') {
-    panelContent = <CategoryView />;
-  } else if (formAction && isFormReady) {
-    panelContent = <ItemForm key={formKey} item={formAction === 'edit' ? actionItem : undefined} />;
-  }
-
-  const modalTitle = formAction ? MODAL_TITLES[formAction] : '';
   const deleteItemModal = deleteItemId && (
     <DeleteItemModal itemId={deleteItemId} onClose={closeDeleteModal} />
   );
@@ -90,19 +101,15 @@ export default function ItemsView() {
   if (!isDesktop) {
     return (
       <>
-        <MobileItemsList
-          items={data}
-          isLoading={isLoading}
-          onEditItem={handleEditItem}
-          onDeleteItem={handleDeleteItem}
-        />
-        {formAction && (
-          <Modal.Root open onOpenChange={closeFormAction}>
-            <Modal.Content title={modalTitle} className="h-full">
-              {panelContent ?? <Spinner size="small" />}
-            </Modal.Content>
-          </Modal.Root>
-        )}
+        <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
+          <ItemFilter filterState={filterState} onChange={handleFilterChange} />
+          <MobileItemsList
+            items={filteredItems}
+            isLoading={isLoading}
+            onEditItem={handleEditItem}
+            onDeleteItem={handleDeleteItem}
+          />
+        </div>
         {deleteItemModal}
       </>
     );
@@ -110,13 +117,15 @@ export default function ItemsView() {
 
   return (
     <>
-      <SidebarPortal>{panelContent ?? <SidebarNav />}</SidebarPortal>
-      <DesktopItemsTable
-        items={data}
-        isLoading={isLoading}
-        onEditItem={handleEditItem}
-        onDeleteItem={handleDeleteItem}
-      />
+      <div className="flex w-full flex-col gap-4 p-4">
+        <ItemFilter filterState={filterState} onChange={handleFilterChange} />
+        <DesktopItemsTable
+          items={filteredItems}
+          isLoading={isLoading}
+          onEditItem={handleEditItem}
+          onDeleteItem={handleDeleteItem}
+        />
+      </div>
       {deleteItemModal}
     </>
   );

@@ -1,15 +1,19 @@
 import { useCallback, useState } from 'react';
+import { MdArrowBack } from 'react-icons/md';
 
 import { Button } from '@repo/react-common/button';
 
 import { useAllCategories } from '../queries';
 
-import BackButton from './BackButton';
 import { CategoryForm } from './CategoryForm';
 import CategoryTable from './CategoryTable';
 import DeleteCategoryModal from './DeleteCategoryModal';
 
-export function CategoryView() {
+interface CategoryViewProps {
+  onClose: () => void;
+}
+
+export function CategoryView({ onClose }: CategoryViewProps) {
   const [mode, setMode] = useState<'table' | 'form'>('table');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
@@ -69,7 +73,16 @@ export function CategoryView() {
 
   return (
     <div className="flex h-full max-h-[80vh] flex-col justify-center gap-4">
-      <BackButton />
+      <div className="hidden lg:block">
+        <Button
+          variant="link"
+          onClick={onClose}
+          aria-label="Back"
+          className="flex items-center gap-2 text-xs"
+        >
+          <MdArrowBack className="h-4 w-4" aria-hidden="true" focusable="false" /> Back
+        </Button>
+      </div>
       {content}
     </div>
   );
