@@ -5,6 +5,6 @@ import { Category } from '@/features/category/types';
 export function toCategoryPillProps(category: Category): CategoryPillProps {
   return {
     name: category.name,
-    colorTheme: category.colorCode,
+    colorTheme: category.colorTheme,
   };
 }

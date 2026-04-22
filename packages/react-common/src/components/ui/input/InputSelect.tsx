@@ -65,6 +65,13 @@ export function InputSelect(props: InputSelectProps) {
     return () => document.removeEventListener('pointerdown', handlePointerDown, { capture: true });
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen && focusedIndex >= 0) {
+      const focusedElement = document.getElementById(`${optionIdPrefix}-${focusedIndex}`);
+      focusedElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [isOpen, focusedIndex, optionIdPrefix]);
+
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     close();
@@ -155,7 +162,7 @@ export function InputSelect(props: InputSelectProps) {
           <ul
             id={listboxId}
             role="listbox"
-            className="bg-surface border-primary-ring absolute z-10 mt-1 w-full rounded-md border shadow-md"
+            className="bg-surface border-primary-ring absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-md border shadow-md"
           >
             {options.map((option, index) => (
               <li

@@ -1,6 +1,6 @@
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
-type DataTableProps<T> = {
+export type DataTableProps<T> = {
   data: Array<T>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns: ColumnDef<T, any>[];
@@ -31,7 +31,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
 
   return (
     <div className="bg-surface border-primary-ring w-full overflow-x-auto rounded-md border shadow-sm">
-      <table className="text-primary w-full table-fixed border-collapse">
+      <table className="text-primary w-full border-collapse">
         <thead className="border-primary-ring border-b">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>

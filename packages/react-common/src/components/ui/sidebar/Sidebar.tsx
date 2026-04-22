@@ -8,7 +8,7 @@ export function Sidebar(props: SidebarProps) {
   const { linkAs: LinkComponent = 'a', children } = props;
 
   return (
-    <aside className="border-info-ring bg-surface flex h-full w-1/5 min-w-64 shrink-0 flex-col border-r px-4 py-3 shadow-sm">
+    <aside className="border-info-ring bg-surface flex h-full w-full min-w-64 shrink-0 flex-col border-r px-4 py-3 shadow-sm">
       <div className="self-start">
         <LinkComponent href="/" aria-label="Go to homepage">
           <Logo />

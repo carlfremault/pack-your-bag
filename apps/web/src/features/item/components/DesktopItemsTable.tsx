@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { CategoryPill } from '@repo/react-common/pill';
-import { DataTable } from '@repo/react-common/table';
+import { DataTable, DataTableActions } from '@repo/react-common/table';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -10,7 +10,6 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 import { Item } from '../types';
 
 import DesktopItemsTableSkeleton from './DesktopItemsTableSkeleton';
-import ItemsTableActions from './ItemsTableActions';
 
 export interface DesktopItemsTableProps {
   items: Item[];
@@ -51,11 +50,11 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         maxSize: 80,
         cell: ({ row }) => {
           return (
-            <ItemsTableActions
-              itemName={row.original.name}
-              itemId={row.original.id}
-              onEditItem={onEditItem}
-              onDeleteItem={onDeleteItem}
+            <DataTableActions
+              rowName={row.original.name}
+              rowId={row.original.id}
+              onEdit={onEditItem}
+              onDelete={onDeleteItem}
             />
           );
         },

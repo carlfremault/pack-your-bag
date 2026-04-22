@@ -18,7 +18,7 @@ export default async function Page() {
   });
 
   return (
-    <div className="flex min-h-screen justify-center">
+    <div className="flex justify-center">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ItemsView />
       </HydrationBoundary>

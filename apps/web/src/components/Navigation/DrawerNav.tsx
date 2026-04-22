@@ -8,7 +8,7 @@ type DrawerNavProps = {
 
 export function DrawerNav({ onNavigate }: DrawerNavProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <LinkButton
         href="/items?action=add"
         variant="solid"
@@ -19,6 +19,17 @@ export function DrawerNav({ onNavigate }: DrawerNavProps) {
         onClick={onNavigate}
       >
         Add new item
+      </LinkButton>
+      <LinkButton
+        href="/items?action=categories"
+        variant="outline"
+        color="primary"
+        size="large"
+        className="w-full"
+        linkAs={Link}
+        onClick={onNavigate}
+      >
+        Manage categories
       </LinkButton>
     </div>
   );
