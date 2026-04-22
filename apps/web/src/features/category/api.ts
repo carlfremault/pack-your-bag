@@ -1,17 +1,25 @@
+import { handleApiResponse } from '@/lib/api-handler';
 import { getProductClient } from '@/lib/clients/product-client';
-import { ApiError } from '@/lib/errors';
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
-import { Category } from './types';
+import { Category, CreateCategoryBody, UpdateCategoryBody } from './types';
 
 export async function getAllCategories(): Promise<Category[]> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.GET('/category');
+  return handleApiResponse(data, error, response);
+}
 
-  if (error) {
-    throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
-  }
-  if (!data) throw new ApiError('No data returned', 500);
+export async function createCategory(body: CreateCategoryBody): Promise<Category> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/category', { body });
+  return handleApiResponse(data, error, response);
+}
 
-  return data;
+export async function updateCategory(id: string, body: UpdateCategoryBody): Promise<Category> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.PATCH('/category/{id}', {
+    params: { path: { id } },
+    body,
+  });
+  return handleApiResponse(data, error, response);
 }

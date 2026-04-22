@@ -8,7 +8,9 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { Modal } from '@/components/Modal';
+import { SidebarNav } from '@/components/Navigation/SidebarNav';
 import { SidebarPortal } from '@/components/Sidebar';
+import { CategoryView } from '@/features/category/components/CategoryView';
 import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useAllItems, useDeleteItem } from '../queries';
@@ -17,9 +19,10 @@ import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
 import ItemForm from './ItemForm';
 import MobileItemsList from './MobileItemsList';
-import SidebarAddItem from './SidebarAddItem';
 
-function ItemsView() {
+const MODAL_TITLES = { add: 'Add Item', edit: 'Edit Item', categories: 'Categories' } as const;
+
+export default function ItemsView() {
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
@@ -28,7 +31,8 @@ function ItemsView() {
   const { data = [], isLoading } = useAllItems();
 
   const rawAction = searchParams.get('action');
-  const formAction = rawAction === 'add' || rawAction === 'edit' ? rawAction : null;
+  const formAction =
+    rawAction === 'add' || rawAction === 'edit' || rawAction === 'categories' ? rawAction : null;
   const itemId = searchParams.get('id');
   const actionItem = data.find((item) => item.id === itemId);
   const isFormReady = formAction === 'add' || (formAction === 'edit' && actionItem !== undefined);
@@ -89,10 +93,14 @@ function ItemsView() {
     );
   }
 
-  const form =
-    formAction && isFormReady ? (
-      <ItemForm key={formKey} item={formAction === 'edit' ? actionItem : undefined} />
-    ) : null;
+  let panelContent: React.ReactNode = null;
+  if (formAction === 'categories') {
+    panelContent = <CategoryView />;
+  } else if (formAction && isFormReady) {
+    panelContent = <ItemForm key={formKey} item={formAction === 'edit' ? actionItem : undefined} />;
+  }
+
+  const modalTitle = formAction ? MODAL_TITLES[formAction] : '';
 
   if (!isDesktop) {
     return (
@@ -105,8 +113,8 @@ function ItemsView() {
         />
         {formAction && (
           <Modal.Root open onOpenChange={closeFormAction}>
-            <Modal.Content title={formAction === 'add' ? 'Add Item' : 'Edit Item'}>
-              {form ?? <Spinner size="small" />}
+            <Modal.Content title={modalTitle} className="h-full">
+              {panelContent ?? <Spinner size="small" />}
             </Modal.Content>
           </Modal.Root>
         )}
@@ -123,7 +131,7 @@ function ItemsView() {
 
   return (
     <>
-      <SidebarPortal>{form ?? <SidebarAddItem />}</SidebarPortal>
+      <SidebarPortal>{panelContent ?? <SidebarNav />}</SidebarPortal>
       <DesktopItemsTable
         items={data}
         isLoading={isLoading}
@@ -140,5 +148,3 @@ function ItemsView() {
     </>
   );
 }
-
-export default ItemsView;

@@ -21,7 +21,8 @@
     "./theme/color-themes.css": "./src/theme/color-themes.css",
     "./theme/tokens.css": "./src/theme/tokens.css",
     "./hooks": "./src/hooks/index.ts",
-    "./table": "./src/components/table/DataTable.tsx"
+    "./table": "./src/components/table/index.ts",
+    "./color-themes": "./src/lib/colorThemes.ts"
   },
   "scripts": {
     "lint": "eslint .",

@@ -14,7 +14,7 @@ export function toItemCardProps(
     category: item.category
       ? {
           name: item.category.name,
-          colorTheme: item.category.colorCode,
+          colorTheme: item.category.colorTheme,
         }
       : null,
     ...handlers,

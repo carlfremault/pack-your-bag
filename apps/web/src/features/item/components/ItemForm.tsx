@@ -49,7 +49,7 @@ export default function ItemForm(props: ItemFormProps) {
   const { data: categories } = useAllCategories();
   const categoryOptions =
     categories?.map((category) => ({
-      label: <CategoryPill name={category.name} colorTheme={category.colorCode} />,
+      label: <CategoryPill name={category.name} colorTheme={category.colorTheme} />,
       value: category.id,
     })) ?? [];
 
@@ -97,8 +97,14 @@ export default function ItemForm(props: ItemFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const trimmedName = formValues.name.trim();
+    if (!trimmedName) {
+      setFieldErrors((current) => ({ ...current, name: 'Name is required' }));
+      return;
+    }
+
     const payload = {
-      name: formValues.name,
+      name: trimmedName,
       description: formValues.description,
       weight: formValues.weight ? Number(formValues.weight) : editMode ? null : undefined,
       categoryId: formValues.categoryId ? formValues.categoryId : editMode ? null : undefined,
@@ -156,6 +162,7 @@ export default function ItemForm(props: ItemFormProps) {
           />
           <InputSelect
             label="Category"
+            placeholder="Select a category"
             options={categoryOptions}
             value={formValues.categoryId}
             onChange={(value) => handleFieldChange('categoryId', value)}

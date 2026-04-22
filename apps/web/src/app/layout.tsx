@@ -34,7 +34,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <div className="flex h-screen flex-col lg:flex-row">
-            <div className="hidden lg:block">
+            <div className="hidden w-1/5 min-w-64 lg:block">
               <Sidebar linkAs={Link}>
                 <SidebarSlot />
               </Sidebar>

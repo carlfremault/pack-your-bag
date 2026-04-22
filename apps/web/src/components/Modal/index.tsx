@@ -4,6 +4,8 @@ import { MdClose } from 'react-icons/md';
 
 import { Button, ButtonColor, ButtonSize } from '@repo/react-common/button';
 
+import classNames from 'classnames';
+
 // ------------------------------------------------------------
 // Modal Context
 // ------------------------------------------------------------
@@ -122,6 +124,7 @@ function ModalTrigger(props: TriggerProps) {
 
 type ContentProps = {
   title?: string;
+  className?: string;
   ariaLabel?: string;
   role?: 'dialog' | 'alertdialog';
   ariaDescribedBy?: string;
@@ -132,7 +135,14 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function ModalContent(props: ContentProps) {
-  const { title, ariaLabel = 'Modal dialog', role = 'dialog', ariaDescribedBy, children } = props;
+  const {
+    title,
+    className,
+    ariaLabel = 'Modal dialog',
+    role = 'dialog',
+    ariaDescribedBy,
+    children,
+  } = props;
 
   const { isOpen, closeModal } = useModal();
   const titleId = useId();
@@ -173,6 +183,11 @@ function ModalContent(props: ContentProps) {
 
   if (!isOpen || typeof document === 'undefined') return null;
 
+  const modalContentClassName = classNames(
+    'bg-surface border-primary-ring max-h-full w-full max-w-lg overflow-y-auto rounded-md border p-4 shadow-lg',
+    className,
+  );
+
   return createPortal(
     <div
       className="bg-primary-ring/50 fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -182,7 +197,7 @@ function ModalContent(props: ContentProps) {
     >
       <div
         ref={dialogRef}
-        className="bg-surface border-primary-ring max-h-full w-full max-w-lg overflow-y-auto rounded-md border p-4 shadow-lg"
+        className={modalContentClassName}
         role={role}
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
