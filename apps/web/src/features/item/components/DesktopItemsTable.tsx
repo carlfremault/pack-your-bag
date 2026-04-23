@@ -64,7 +64,7 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
   );
 
   return (
-    <div className="bg-background w-full p-4">
+    <div className="bg-background w-full">
       {isLoading ? (
         <DesktopItemsTableSkeleton />
       ) : (

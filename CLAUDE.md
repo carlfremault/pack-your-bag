@@ -13,11 +13,12 @@ packages/  db, nestjs-common, react-common, auth-client, product-client, user-da
 
 ## Commands
 
+Single workspace: yarn workspace @repo/<name> <script> for packages, yarn workspace <name> <script> for apps
+
 ```bash
-yarn dev / build / lint / check-types / format
+yarn dev / build / lint / format
 
 yarn test / test:watch / test:browser
-# Single workspace: yarn workspace @repo/<name> test
 
 yarn db:init / db:migrate / db:generate / db:seed / db:deploy / db:status
 

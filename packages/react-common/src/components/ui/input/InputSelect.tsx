@@ -24,6 +24,7 @@ export interface InputSelectProps {
   errorMessage?: string;
   required?: boolean;
   disabled?: boolean;
+  isClearable?: boolean;
 }
 
 export function InputSelect(props: InputSelectProps) {
@@ -36,6 +37,7 @@ export function InputSelect(props: InputSelectProps) {
     errorMessage,
     required = false,
     disabled = false,
+    isClearable = false,
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -145,7 +147,7 @@ export function InputSelect(props: InputSelectProps) {
           <span className="truncate">{selectedOption?.label ?? placeholder}</span>
           <MdExpandMore className="h-4 w-4 shrink-0 opacity-60" />
         </button>
-        {selectedOption && !disabled && (
+        {selectedOption && !disabled && isClearable && (
           <button
             type="button"
             aria-label="Clear selection"
