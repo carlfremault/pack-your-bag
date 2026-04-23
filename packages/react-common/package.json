@@ -6,6 +6,7 @@
     "#lib/*": "./src/lib/*"
   },
   "exports": {
+    "./table": "./src/components/table/index.ts",
     "./alert": "./src/components/ui/alert/Alert.tsx",
     "./button": "./src/components/ui/button/index.ts",
     "./card": "./src/components/ui/card/index.ts",
@@ -17,12 +18,12 @@
     "./pill": "./src/components/ui/pill/CategoryPill.tsx",
     "./sidebar": "./src/components/ui/sidebar/Sidebar.tsx",
     "./spinner": "./src/components/ui/spinner/Spinner.tsx",
+    "./tooltip": "./src/components/ui/tooltip/Tooltip.tsx",
+    "./hooks": "./src/hooks/index.ts",
+    "./color-themes": "./src/lib/colorThemes.ts",
     "./theme/default-values.css": "./src/theme/default-values.css",
     "./theme/color-themes.css": "./src/theme/color-themes.css",
-    "./theme/tokens.css": "./src/theme/tokens.css",
-    "./hooks": "./src/hooks/index.ts",
-    "./table": "./src/components/table/index.ts",
-    "./color-themes": "./src/lib/colorThemes.ts"
+    "./theme/tokens.css": "./src/theme/tokens.css"
   },
   "scripts": {
     "lint": "eslint .",

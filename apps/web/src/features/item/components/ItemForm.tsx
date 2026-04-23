@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
+import { Tooltip } from '@repo/react-common/tooltip';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
@@ -48,7 +49,11 @@ export default function ItemForm(props: ItemFormProps) {
   const { data: categories } = useAllCategories();
   const categoryOptions =
     categories?.map((category) => ({
-      label: <CategoryPill name={category.name} colorTheme={category.colorTheme} />,
+      label: (
+        <Tooltip text={category.name}>
+          <CategoryPill name={category.name} colorTheme={category.colorTheme} />
+        </Tooltip>
+      ),
       value: category.id,
     })) ?? [];
 

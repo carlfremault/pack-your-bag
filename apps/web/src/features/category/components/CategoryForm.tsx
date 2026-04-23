@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { colorThemes } from '@repo/react-common/color-themes';
 import { Input, InputSelect } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
+import { Tooltip } from '@repo/react-common/tooltip';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useFormState } from '@/hooks/useFormState';
@@ -40,7 +41,11 @@ export function CategoryForm(props: CategoryFormProps) {
   const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
 
   const colorThemeOptions = Object.entries(colorThemes).map(([key, config]) => ({
-    label: <CategoryPill name={config.label} colorTheme={key} />,
+    label: (
+      <Tooltip text={config.label}>
+        <CategoryPill name={config.label} colorTheme={key} />
+      </Tooltip>
+    ),
     value: key,
   }));
 
