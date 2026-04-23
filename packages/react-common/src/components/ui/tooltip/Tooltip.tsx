@@ -42,15 +42,22 @@ export function Tooltip(props: TooltipProps) {
     setTooltip({ x: rect.left + rect.width / 2, y: rect.top });
   };
 
+  const handleFocus = () => {
+    handleMouseEnter();
+  };
+
   return (
     <span
       ref={wrapperRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setTooltip(null)}
+      onFocus={handleFocus}
+      onBlur={() => setTooltip(null)}
       className={className}
     >
       {children}
       {tooltip &&
+        typeof document !== 'undefined' &&
         createPortal(
           <span
             ref={tooltipRef}
