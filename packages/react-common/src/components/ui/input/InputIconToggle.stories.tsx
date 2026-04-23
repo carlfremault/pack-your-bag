@@ -1,6 +1,7 @@
 import { MdArrowDownward, MdArrowUpward } from 'react-icons/md';
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from 'storybook/test';
 
 import { InputIconToggle } from './InputIconToggle';
 
@@ -12,7 +13,7 @@ const meta: Meta<typeof InputIconToggle> = {
       { value: 'asc', label: 'Ascending', icon: MdArrowUpward },
       { value: 'desc', label: 'Descending', icon: MdArrowDownward },
     ],
-    onChange: () => {},
+    onChange: fn(),
   },
 };
 

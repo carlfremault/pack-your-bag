@@ -98,7 +98,6 @@ export function CategoryForm(props: CategoryFormProps) {
       <InputSelect
         label="Color"
         required
-        isClearable
         placeholder="Select a color"
         options={colorThemeOptions}
         value={formValues.colorTheme}

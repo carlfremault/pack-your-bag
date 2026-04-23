@@ -100,12 +100,13 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
                 </span>
               </button>
               {hasActiveFilters && (
-                <span
-                  className="bg-info absolute -top-1 -right-1 h-2 w-2 rounded-full"
-                  aria-hidden="true"
-                  aria-label="Active filters"
-                  role="presentation"
-                />
+                <>
+                  <span
+                    className="bg-info absolute -top-1 -right-1 h-2 w-2 rounded-full"
+                    aria-hidden
+                  />
+                  <span className="sr-only">(filters active)</span>
+                </>
               )}
             </div>
           </div>

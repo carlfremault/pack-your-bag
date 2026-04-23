@@ -70,10 +70,12 @@ export default function ItemsView() {
         cmp = (a.weight ?? 0) - (b.weight ?? 0);
       } else if (filterState.sortField === 'name') {
         cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      } else {
+      } else if (filterState.sortField === 'category') {
         cmp = (a.category?.name ?? '')
           .toLowerCase()
           .localeCompare((b.category?.name ?? '').toLowerCase());
+      } else {
+        cmp = 0;
       }
       return filterState.sortDirection === 'asc' ? cmp : -cmp;
     });
