@@ -53,11 +53,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
                     key={header.id}
                     className="px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase"
                     scope="col"
-                    style={
-                      header.column.columnDef.size !== undefined
-                        ? { width: header.getSize() }
-                        : undefined
-                    }
+                    style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder
                       ? null

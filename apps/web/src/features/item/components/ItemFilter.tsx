@@ -52,11 +52,11 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
 
   const categoryOptions = useMemo<InputSelectOption[]>(
     () =>
-      categories.map((c) => ({
-        value: c.id,
+      categories.map((category) => ({
+        value: category.id,
         label: (
-          <Tooltip text={c.name}>
-            <CategoryPill name={c.name} colorTheme={c.colorTheme} />
+          <Tooltip text={category.name}>
+            <CategoryPill name={category.name} colorTheme={category.colorTheme} />
           </Tooltip>
         ),
       })),
