@@ -6,20 +6,12 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
-import { Modal } from '@/components/Modal';
-import { SidebarNav } from '@/components/Navigation/SidebarNav';
-import { SidebarPortal } from '@/components/Sidebar';
-import { CategoryView } from '@/features/category/components/CategoryView';
-
 import { useAllItems } from '../queries';
 
 import DesktopItemsTable from './DesktopItemsTable';
 import ItemDeleteModal from './ItemDeleteModal';
 import { ItemFilter, ItemFilterState } from './ItemFilter';
-import ItemForm from './ItemForm';
 import MobileItemsList from './MobileItemsList';
-
-const MODAL_TITLES = { add: 'Add Item', edit: 'Edit Item', categories: 'Categories' } as const;
 
 const DEFAULT_FILTER_STATE: ItemFilterState = {
   search: '',
@@ -38,15 +30,6 @@ export default function ItemsView() {
   const { data = [], isLoading } = useAllItems();
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [filterState, setFilterState] = useState<ItemFilterState>(DEFAULT_FILTER_STATE);
-
-  // Variables
-  const rawAction = searchParams.get('action');
-  const formAction =
-    rawAction === 'add' || rawAction === 'edit' || rawAction === 'categories' ? rawAction : null;
-  const itemId = searchParams.get('id');
-  const actionItem = data.find((item) => item.id === itemId);
-  const isFormReady = formAction === 'add' || (formAction === 'edit' && actionItem !== undefined);
-  const formKey = formAction === 'edit' ? `edit-${actionItem?.id}` : 'add';
 
   const filteredItems = useMemo(() => {
     let result = [...data];
@@ -83,28 +66,15 @@ export default function ItemsView() {
     return result;
   }, [data, filterState]);
 
-  // Handlers
   const handleFilterChange = useCallback(
     (updates: Partial<ItemFilterState>) => setFilterState((prev) => ({ ...prev, ...updates })),
     [],
   );
 
-  const closeFormAction = useCallback(
-    (isOpen?: boolean) => {
-      if (isOpen) return;
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete('action');
-      params.delete('id');
-      const nextQuery = params.toString();
-      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname);
-    },
-    [pathname, router, searchParams],
-  );
-
   const handleEditItem = useCallback(
     (id: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set('action', 'edit');
+      params.set('action', 'edit-item');
       params.set('id', id);
       router.push(`${pathname}?${params.toString()}`);
     },
@@ -127,15 +97,6 @@ export default function ItemsView() {
     );
   }
 
-  // Render
-  let panelContent: React.ReactNode = null;
-  if (formAction === 'categories') {
-    panelContent = <CategoryView />;
-  } else if (formAction && isFormReady) {
-    panelContent = <ItemForm key={formKey} item={formAction === 'edit' ? actionItem : undefined} />;
-  }
-
-  const modalTitle = formAction ? MODAL_TITLES[formAction] : '';
   const deleteItemModal = deleteItemId && (
     <ItemDeleteModal itemId={deleteItemId} onClose={closeDeleteModal} />
   );
@@ -152,13 +113,6 @@ export default function ItemsView() {
             onDeleteItem={handleDeleteItem}
           />
         </div>
-        {formAction && (
-          <Modal.Root open onOpenChange={closeFormAction}>
-            <Modal.Content title={modalTitle} className="h-full">
-              {panelContent ?? <Spinner size="small" />}
-            </Modal.Content>
-          </Modal.Root>
-        )}
         {deleteItemModal}
       </>
     );
@@ -166,7 +120,6 @@ export default function ItemsView() {
 
   return (
     <>
-      <SidebarPortal>{panelContent ?? <SidebarNav />}</SidebarPortal>
       <div className="flex h-full w-full flex-col gap-4 p-4">
         <ItemFilter filterState={filterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">

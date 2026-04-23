@@ -1,10 +1,10 @@
 'use client';
 
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
+import { Spinner } from '@repo/react-common/spinner';
 import { Tooltip } from '@repo/react-common/tooltip';
 
 import { FormWrapper } from '@/components/FormWrapper';
@@ -12,11 +12,12 @@ import { useAllCategories } from '@/features/category/queries';
 import { useFormState } from '@/hooks/useFormState';
 import { ITEM_DESCRIPTION_MAX_LENGTH, ITEM_NAME_MAX_LENGTH } from '@/lib/constants';
 
-import { useCreateItem, useUpdateItem } from '../queries';
+import { useAllItems, useCreateItem, useUpdateItem } from '../queries';
 import { Item } from '../types';
 
 export interface ItemFormProps {
-  item?: Item;
+  itemId?: string;
+  onClose: () => void;
 }
 
 export type ItemFieldErrors = {
@@ -36,12 +37,11 @@ const getInitialFormValues = (item?: Item) => ({
 const ITEM_FORM_FIELDS: (keyof ItemFieldErrors)[] = ['name', 'description', 'weight', 'categoryId'];
 
 export default function ItemForm(props: ItemFormProps) {
-  const { item } = props;
-  const editMode = item !== undefined;
+  const { itemId, onClose } = props;
+  const editMode = itemId !== undefined;
 
-  const router = useRouter();
-  const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
-    useFormState(getInitialFormValues(item), ITEM_FORM_FIELDS);
+  const { data: items = [], isLoading: isItemsLoading } = useAllItems();
+  const itemToEdit: Item | undefined = itemId ? items.find((i) => i.id === itemId) : undefined;
 
   const { mutate: createItem, isPending: isCreating } = useCreateItem();
   const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
@@ -57,13 +57,12 @@ export default function ItemForm(props: ItemFormProps) {
       value: category.id,
     })) ?? [];
 
-  const closeForm = () => {
-    router.replace('/items');
-  };
+  const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
+    useFormState(getInitialFormValues(itemToEdit), ITEM_FORM_FIELDS);
 
   const handleSuccess = () => {
     setFieldErrors({});
-    closeForm();
+    onClose();
     toast.success(editMode ? 'Item updated successfully' : 'Item created successfully');
   };
 
@@ -84,8 +83,9 @@ export default function ItemForm(props: ItemFormProps) {
     };
 
     if (editMode) {
+      if (!itemToEdit) return;
       updateItem(
-        { id: item.id, body: payload },
+        { id: itemToEdit.id, body: payload },
         { onSuccess: handleSuccess, onError: handleError },
       );
     } else {
@@ -93,12 +93,16 @@ export default function ItemForm(props: ItemFormProps) {
     }
   };
 
+  if (editMode && isItemsLoading && !itemToEdit) {
+    return <Spinner size="small" />;
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <FormWrapper
         onSubmit={handleSubmit}
         onReset={handleReset}
-        onClose={closeForm}
+        onClose={onClose}
         isPending={isCreating || isUpdating}
       >
         <Input
