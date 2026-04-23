@@ -30,23 +30,30 @@ export function DataTable<T>(props: DataTableProps<T>) {
   }
 
   return (
-    <div className="bg-surface border-primary-ring w-full overflow-x-auto rounded-md border shadow-sm">
-      <table className="text-primary w-full border-collapse">
+    <div className="bg-surface border-primary-ring text-primary w-full overflow-hidden rounded-md border shadow-sm">
+      <table className="w-full table-auto border-collapse">
         <thead className="border-primary-ring border-b">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase"
-                  scope="col"
-                  style={{ width: header.getSize() }}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const size = header.getSize();
+                const isFixed = size !== 150;
+
+                return (
+                  <th
+                    key={header.id}
+                    className="px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase"
+                    style={{
+                      width: isFixed ? `${size}px` : 'auto',
+                      maxWidth: isFixed ? `${size}px` : 'auto',
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
@@ -56,11 +63,25 @@ export function DataTable<T>(props: DataTableProps<T>) {
               key={row.id}
               className={row.index % 2 === 0 ? 'bg-surface' : 'bg-surface-overlay/70'}
             >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3 text-sm">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+              {row.getVisibleCells().map((cell) => {
+                const size = cell.column.getSize();
+                const isFixed = size !== 150;
+
+                return (
+                  <td
+                    key={cell.id}
+                    className="px-4 py-3 text-sm"
+                    style={{
+                      width: isFixed ? `${size}px` : 'auto',
+                      maxWidth: isFixed ? `${size}px` : '0',
+                    }}
+                  >
+                    <div className="min-w-0 overflow-hidden">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </div>
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

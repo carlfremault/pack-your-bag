@@ -45,9 +45,9 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
       columnHelper.display({
         id: 'actions',
         header: 'Actions',
-        size: 80,
-        minSize: 80,
-        maxSize: 80,
+        size: 100,
+        minSize: 100,
+        maxSize: 100,
         cell: ({ row }) => {
           return (
             <DataTableActions

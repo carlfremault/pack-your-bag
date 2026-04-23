@@ -40,8 +40,8 @@ export function ItemCard(props: ItemCardProps) {
         className,
       )}
     >
-      <div className="flex h-full w-full flex-1 flex-col justify-between gap-2">
-        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+      <div className="flex h-full w-full min-w-0 flex-1 flex-col justify-between gap-2">
+        <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center">
           <h3 className="truncate text-sm font-bold">{name}</h3>
           {category && <CategoryPill {...category} />}
         </div>
