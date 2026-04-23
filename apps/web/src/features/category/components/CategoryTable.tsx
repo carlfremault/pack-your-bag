@@ -36,10 +36,10 @@ export default function CategoryTable(props: CategoryTableProps) {
       }),
       columnHelper.display({
         id: 'actions',
-        header: 'Actions',
-        size: 100,
-        minSize: 100,
-        maxSize: 100,
+        header: () => <div className="text-center">Actions</div>,
+        size: 80,
+        minSize: 80,
+        maxSize: 80,
         cell: ({ row }) => {
           return (
             <DataTableActions

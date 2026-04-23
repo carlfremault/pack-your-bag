@@ -31,9 +31,7 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         cell: ({ row }) => {
           return (
             <Tooltip text={row.original.name}>
-              <div className="line-clamp-2 text-sm leading-normal font-bold">
-                {row.original.name}
-              </div>
+              <div className="line-clamp-2 text-sm leading-normal">{row.original.name}</div>
             </Tooltip>
           );
         },
@@ -43,13 +41,16 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         cell: ({ row }) => {
           return row.original.description ? (
             <Tooltip text={row.original.description}>
-              <div className="truncate text-xs font-light">{row.original.description}</div>
+              <div className="line-clamp-2 text-xs font-light">{row.original.description}</div>
             </Tooltip>
           ) : null;
         },
       }),
       columnHelper.accessor('weight', {
         header: 'Weight',
+        size: 100,
+        minSize: 100,
+        maxSize: 100,
       }),
       columnHelper.accessor('category', {
         header: 'Category',
@@ -63,8 +64,10 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
       }),
       columnHelper.display({
         id: 'actions',
-        header: 'Actions',
-        size: 100,
+        header: () => <div className="text-center">Actions</div>,
+        size: 80,
+        minSize: 80,
+        maxSize: 80,
         cell: ({ row }) => {
           return (
             <DataTableActions
@@ -81,11 +84,11 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
   );
 
   return (
-    <div className="bg-background w-full">
+    <div className="bg-background h-full w-full">
       {isLoading ? (
         <DesktopItemsTableSkeleton />
       ) : (
-        <DataTable data={items} columns={columns} emptyStateLabel="No items found" />
+        <DataTable data={items} columns={columns} emptyStateLabel="No items found" scrollable />
       )}
     </div>
   );
