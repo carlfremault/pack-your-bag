@@ -11,6 +11,7 @@ import {
   InputSelectOption,
 } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
+import { Tooltip } from '@repo/react-common/tooltip';
 
 import classNames from 'classnames';
 
@@ -51,9 +52,13 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
 
   const categoryOptions = useMemo<InputSelectOption[]>(
     () =>
-      categories.map((c) => ({
-        value: c.id,
-        label: <CategoryPill name={c.name} colorTheme={c.colorTheme} />,
+      categories.map((category) => ({
+        value: category.id,
+        label: (
+          <Tooltip text={category.name}>
+            <CategoryPill name={category.name} colorTheme={category.colorTheme} />
+          </Tooltip>
+        ),
       })),
     [categories],
   );

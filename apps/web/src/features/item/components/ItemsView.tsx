@@ -167,14 +167,16 @@ export default function ItemsView() {
   return (
     <>
       <SidebarPortal>{panelContent ?? <SidebarNav />}</SidebarPortal>
-      <div className="flex w-full flex-col gap-4 p-4">
+      <div className="flex h-full w-full flex-col gap-4 p-4">
         <ItemFilter filterState={filterState} onChange={handleFilterChange} />
-        <DesktopItemsTable
-          items={filteredItems}
-          isLoading={isLoading}
-          onEditItem={handleEditItem}
-          onDeleteItem={handleDeleteItem}
-        />
+        <div className="min-h-0 flex-1">
+          <DesktopItemsTable
+            items={filteredItems}
+            isLoading={isLoading}
+            onEditItem={handleEditItem}
+            onDeleteItem={handleDeleteItem}
+          />
+        </div>
       </div>
       {deleteItemModal}
     </>

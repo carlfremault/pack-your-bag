@@ -140,11 +140,18 @@ export function InputSelect(props: InputSelectProps) {
           onClick={() => setIsOpen((o) => !o)}
           className={classNames(
             inputFieldClassName,
-            'flex w-full items-center justify-between text-left',
+            'grid w-full grid-cols-[1fr_auto] items-center text-left',
             !selectedOption && 'text-primary/50',
           )}
         >
-          <span className="truncate">{selectedOption?.label ?? placeholder}</span>
+          <span
+            className={classNames(
+              'min-w-0 truncate',
+              isClearable && selectedOption && !disabled ? 'mr-8' : 'mr-1',
+            )}
+          >
+            {selectedOption?.label ?? placeholder}
+          </span>
           <MdExpandMore className="h-4 w-4 shrink-0 opacity-60" />
         </button>
         {selectedOption && !disabled && isClearable && (

@@ -23,6 +23,10 @@
 - Consistent loading, empty, and error states for async UI.
 - Follow the established styling system — avoid one-off patterns.
 
+## Accessibility
+
+- All components should adhere strictly to a11y guidelines and patterns.
+
 ## Reference Skills (read only when the task clearly matches)
 
 - **Next.js App Router patterns** (RSC boundaries, route handlers, async APIs, metadata, file conventions, hydration errors):

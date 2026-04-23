@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { CategoryPill } from '@repo/react-common/pill';
 import { DataTable, DataTableActions } from '@repo/react-common/table';
+import { Tooltip } from '@repo/react-common/tooltip';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -26,12 +27,16 @@ export default function CategoryTable(props: CategoryTableProps) {
       columnHelper.accessor('name', {
         header: 'Category',
         cell: ({ row }) => {
-          return <CategoryPill name={row.original.name} colorTheme={row.original.colorTheme} />;
+          return (
+            <Tooltip text={row.original.name}>
+              <CategoryPill name={row.original.name} colorTheme={row.original.colorTheme} />
+            </Tooltip>
+          );
         },
       }),
       columnHelper.display({
         id: 'actions',
-        header: 'Actions',
+        header: () => <div className="text-center">Actions</div>,
         size: 80,
         minSize: 80,
         maxSize: 80,
