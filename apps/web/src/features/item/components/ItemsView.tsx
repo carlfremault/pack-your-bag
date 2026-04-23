@@ -13,8 +13,8 @@ import { CategoryView } from '@/features/category/components/CategoryView';
 
 import { useAllItems } from '../queries';
 
-import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
+import ItemDeleteModal from './ItemDeleteModal';
 import { ItemFilter, ItemFilterState } from './ItemFilter';
 import ItemForm from './ItemForm';
 import MobileItemsList from './MobileItemsList';
@@ -135,7 +135,7 @@ export default function ItemsView() {
 
   const modalTitle = formAction ? MODAL_TITLES[formAction] : '';
   const deleteItemModal = deleteItemId && (
-    <DeleteItemModal itemId={deleteItemId} onClose={closeDeleteModal} />
+    <ItemDeleteModal itemId={deleteItemId} onClose={closeDeleteModal} />
   );
 
   if (!isDesktop) {
