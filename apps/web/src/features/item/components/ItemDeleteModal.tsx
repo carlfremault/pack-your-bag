@@ -9,12 +9,12 @@ import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useDeleteItem } from '../queries';
 
-interface DeleteItemModalProps {
+interface ItemDeleteModalProps {
   itemId: string;
   onClose: () => void;
 }
 
-export default function DeleteItemModal(props: DeleteItemModalProps) {
+export default function ItemDeleteModal(props: ItemDeleteModalProps) {
   const { itemId, onClose } = props;
   const { mutate: deleteItem, isPending: isDeleting } = useDeleteItem();
 

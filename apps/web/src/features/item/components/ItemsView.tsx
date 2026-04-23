@@ -8,8 +8,8 @@ import { Spinner } from '@repo/react-common/spinner';
 
 import { useAllItems } from '../queries';
 
-import DeleteItemModal from './DeleteItemModal';
 import DesktopItemsTable from './DesktopItemsTable';
+import ItemDeleteModal from './ItemDeleteModal';
 import { ItemFilter, ItemFilterState } from './ItemFilter';
 import MobileItemsList from './MobileItemsList';
 
@@ -21,6 +21,7 @@ const DEFAULT_FILTER_STATE: ItemFilterState = {
 };
 
 export default function ItemsView() {
+  // Hooks
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
@@ -52,10 +53,12 @@ export default function ItemsView() {
         cmp = (a.weight ?? 0) - (b.weight ?? 0);
       } else if (filterState.sortField === 'name') {
         cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      } else {
+      } else if (filterState.sortField === 'category') {
         cmp = (a.category?.name ?? '')
           .toLowerCase()
           .localeCompare((b.category?.name ?? '').toLowerCase());
+      } else {
+        cmp = 0;
       }
       return filterState.sortDirection === 'asc' ? cmp : -cmp;
     });
@@ -95,7 +98,7 @@ export default function ItemsView() {
   }
 
   const deleteItemModal = deleteItemId && (
-    <DeleteItemModal itemId={deleteItemId} onClose={closeDeleteModal} />
+    <ItemDeleteModal itemId={deleteItemId} onClose={closeDeleteModal} />
   );
 
   if (!isDesktop) {
@@ -117,14 +120,16 @@ export default function ItemsView() {
 
   return (
     <>
-      <div className="flex w-full flex-col gap-4 p-4">
+      <div className="flex h-full w-full flex-col gap-4 p-4">
         <ItemFilter filterState={filterState} onChange={handleFilterChange} />
-        <DesktopItemsTable
-          items={filteredItems}
-          isLoading={isLoading}
-          onEditItem={handleEditItem}
-          onDeleteItem={handleDeleteItem}
-        />
+        <div className="min-h-0 flex-1">
+          <DesktopItemsTable
+            items={filteredItems}
+            isLoading={isLoading}
+            onEditItem={handleEditItem}
+            onDeleteItem={handleDeleteItem}
+          />
+        </div>
       </div>
       {deleteItemModal}
     </>

@@ -2064,7 +2064,9 @@
           "name": {
             "type": "string",
             "description": "Category name",
-            "example": "Category name"
+            "example": "Category name",
+            "maxLength": 64,
+            "minLength": 1
           },
           "description": {
             "type": "string",
@@ -2088,7 +2090,9 @@
           "name": {
             "type": "string",
             "description": "Category name",
-            "example": "Category name"
+            "example": "Category name",
+            "maxLength": 64,
+            "minLength": 1
           },
           "description": {
             "type": "string",
