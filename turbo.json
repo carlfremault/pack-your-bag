@@ -22,7 +22,7 @@
       "env": ["AUTH_*", "PRODUCT_*", "UDS_*", "RSA_*", "SENTRY_DSN", "POSTGRES_*", "MONGO_*"]
     },
     "test:setup": {
-      "dependsOn": ["transit", "^generate"],
+      "dependsOn": ["transit"],
       "env": ["AUTH_*", "RSA_*", "POSTGRES_*"],
       "cache": false,
       "inputs": ["../../packages/db/prisma/schema.prisma", "../../packages/db/prisma/seed.mts"]
