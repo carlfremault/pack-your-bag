@@ -2,7 +2,7 @@ interface MessageListProps {
   messages: string[];
 }
 
-export default function MessageList(props: MessageListProps) {
+export function MessageList(props: MessageListProps) {
   const { messages } = props;
 
   return (

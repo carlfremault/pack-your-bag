@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
 import { Spinner } from '@repo/react-common/spinner';
-import { Tooltip } from '@repo/react-common/tooltip';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
@@ -49,11 +48,7 @@ export default function ItemForm(props: ItemFormProps) {
   const { data: categories } = useAllCategories();
   const categoryOptions =
     categories?.map((category) => ({
-      label: (
-        <Tooltip text={category.name}>
-          <CategoryPill name={category.name} colorTheme={category.colorTheme} />
-        </Tooltip>
-      ),
+      label: <CategoryPill name={category.name} colorTheme={category.colorTheme} />,
       value: category.id,
     })) ?? [];
 

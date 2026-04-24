@@ -19,6 +19,7 @@
     "./sidebar": "./src/components/ui/sidebar/Sidebar.tsx",
     "./spinner": "./src/components/ui/spinner/Spinner.tsx",
     "./tooltip": "./src/components/ui/tooltip/Tooltip.tsx",
+    "./utils": "./src/components/ui/utils/index.ts",
     "./hooks": "./src/hooks/index.ts",
     "./color-themes": "./src/lib/colorThemes.ts",
     "./theme/default-values.css": "./src/theme/default-values.css",

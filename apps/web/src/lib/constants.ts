@@ -5,7 +5,7 @@ export const ITEM_NAME_MAX_LENGTH = 128;
 export const ITEM_DESCRIPTION_MAX_LENGTH = 1000;
 
 // Category Dto
-export const CATEGORY_NAME_MAX_LENGTH = 64;
+export const CATEGORY_NAME_MAX_LENGTH = 32;
 
 // Routes that require no session. Matched as path prefixes.
 export const PUBLIC_PATHS = [

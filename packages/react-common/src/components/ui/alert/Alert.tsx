@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-import MessageList from '../utils/MessageList';
+import { MessageList } from '../utils/MessageList';
 
 type AlertType = 'info' | 'warning' | 'error' | 'success';
 interface AlertProps {
