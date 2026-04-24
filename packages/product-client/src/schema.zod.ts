@@ -88,7 +88,7 @@ export const UpdateItemDto = z
   .passthrough();
 export const CreateCategoryDto = z
   .object({
-    name: z.string().min(1).max(64),
+    name: z.string().min(1).max(32),
     description: z.string().optional(),
     colorTheme: z.string(),
   })
@@ -97,7 +97,7 @@ export const CategoryDeleteImpactDto = z
   .object({ category: CategoryResponseDto, items: z.array(ItemResponseDto) })
   .passthrough();
 export const UpdateCategoryDto = z
-  .object({ name: z.string().min(1).max(64), description: z.string(), colorTheme: z.string() })
+  .object({ name: z.string().min(1).max(32), description: z.string(), colorTheme: z.string() })
   .partial()
   .passthrough();
 export const CreateListDto = z
