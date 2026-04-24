@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { MdArrowBack } from 'react-icons/md';
 
 import { Button } from '@repo/react-common/button';
 
@@ -11,9 +10,10 @@ import DeleteCategoryModal from './DeleteCategoryModal';
 
 interface CategoryViewProps {
   onClose: () => void;
+  onTitleChange: (title: string) => void;
 }
 
-export function CategoryView({ onClose }: CategoryViewProps) {
+export function CategoryView({ onClose, onTitleChange }: CategoryViewProps) {
   const [mode, setMode] = useState<'table' | 'form'>('table');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
@@ -21,20 +21,26 @@ export function CategoryView({ onClose }: CategoryViewProps) {
   const { data = [], isLoading } = useAllCategories();
   const editCategory = data.find((category) => category.id === categoryId);
 
-  const closeForm = () => {
+  const closeForm = useCallback(() => {
     setCategoryId(null);
     setMode('table');
-  };
+    onTitleChange('Categories');
+  }, [onTitleChange]);
 
   const handleAddCategory = () => {
     setCategoryId(null);
     setMode('form');
+    onTitleChange('Add category');
   };
 
-  const handleEditCategory = useCallback((id: string) => {
-    setCategoryId(id);
-    setMode('form');
-  }, []);
+  const handleEditCategory = useCallback(
+    (id: string) => {
+      setCategoryId(id);
+      setMode('form');
+      onTitleChange('Edit category');
+    },
+    [onTitleChange],
+  );
 
   const handleDeleteCategory = useCallback((id: string) => {
     setDeleteCategoryId(id);
@@ -57,33 +63,19 @@ export function CategoryView({ onClose }: CategoryViewProps) {
         <Button className="w-full" onClick={handleAddCategory}>
           Add Category
         </Button>
+        <div className="hidden lg:block">
+          <Button variant="outline" onClick={onClose} className="w-full">
+            Back
+          </Button>
+        </div>
         {deleteCategoryId && (
           <DeleteCategoryModal categoryId={deleteCategoryId} onClose={closeDeleteModal} />
         )}
       </>
     );
   } else if (mode === 'form') {
-    content = (
-      <>
-        <h2 className="text-primary text-xl">{categoryId ? 'Edit Category' : 'Add Category'}</h2>
-        <CategoryForm category={editCategory} onClose={closeForm} />
-      </>
-    );
+    content = <CategoryForm category={editCategory} onClose={closeForm} />;
   }
 
-  return (
-    <div className="flex h-full max-h-[80vh] flex-col justify-center gap-4">
-      <div className="hidden lg:block">
-        <Button
-          variant="link"
-          onClick={onClose}
-          aria-label="Back"
-          className="flex items-center gap-2 text-xs"
-        >
-          <MdArrowBack className="h-4 w-4" aria-hidden="true" focusable="false" /> Back
-        </Button>
-      </div>
-      {content}
-    </div>
-  );
+  return <div className="flex h-full max-h-[80vh] flex-col justify-center gap-4">{content}</div>;
 }
