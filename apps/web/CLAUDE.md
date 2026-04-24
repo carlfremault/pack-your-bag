@@ -27,16 +27,11 @@
 
 - All components should adhere strictly to a11y guidelines and patterns.
 
-## Reference Skills (read only when the task clearly matches)
+## Specialized Context & Patterns
 
-- **Next.js App Router patterns** (RSC boundaries, route handlers, async APIs, metadata, file conventions, hydration errors):
-  Read `.cursor/skills/next-best-practices/SKILL.md` then follow the links to the relevant sub-files.
+When performing tasks related to the following areas, read the specified files first to ensure compliance with project standards:
 
-- **React/Next.js performance** (rendering, bundle size, data loading, interaction latency):
-  Read `.cursor/skills/vercel-react-best-practices/rules/_sections.md` to identify the relevant rules, then read those rule files.
-
-- **Component API design** (refactoring props, reducing boolean props, compound components):
-  Read `.cursor/skills/vercel-composition-patterns/README.md` then the relevant rule files under `rules/`.
-
-- **UI/UX/accessibility audit**:
-  Read `.cursor/skills/web-design-guidelines/SKILL.md` and follow the instructions there (fetches live guidelines).
+- **Next.js App Router:** If modifying routes or server components, read `.skills/next-best-practices/SKILL.md`.
+- **Performance Optimization:** If optimizing rendering or bundle size, read `.skills/vercel-react-best-practices/rules/_sections.md`.
+- **Component Design:** When creating or refactoring components, read `.skills/vercel-composition-patterns/README.md`.
+- **Accessibility/UI:** Before finalizing UI changes, refer to `.skills/web-design-guidelines/SKILL.md`.

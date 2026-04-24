@@ -25,10 +25,9 @@
 - Add the component to `package.json`'s `exports` before considering it done.
 - Do not export internal subcomponents unless they are independently reusable.
 
-## Reference Skills (read only when the task clearly matches)
+## Specialized Context & Patterns
 
-- **UI/UX/accessibility audit**:
-  Read `.cursor/skills/web-design-guidelines/SKILL.md` and follow the instructions there.
+When performing tasks related to the following areas, read the specified files first to ensure compliance with project standards:
 
-- **Component API design** (compound components, boolean prop reduction):
-  Read `.cursor/skills/vercel-composition-patterns/README.md` then the relevant rule files.
+- **Accessibility/UI:** Before finalizing UI changes, refer to `.skills/web-design-guidelines/SKILL.md`.
+- **Component Design:** When creating or refactoring components, read `.skills/vercel-composition-patterns/README.md`.
