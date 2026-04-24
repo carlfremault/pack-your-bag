@@ -54,11 +54,7 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
     () =>
       categories.map((category) => ({
         value: category.id,
-        label: (
-          <Tooltip text={category.name}>
-            <CategoryPill name={category.name} colorTheme={category.colorTheme} />
-          </Tooltip>
-        ),
+        label: <CategoryPill name={category.name} colorTheme={category.colorTheme} />,
       })),
     [categories],
   );

@@ -4,9 +4,9 @@
   "service": "dev-container",
   "workspaceFolder": "/workspaces/pack-your-bag",
   "mounts": [
-    // "source=pack-your-bag-node-modules-v24,target=${containerWorkspaceFolder}/node_modules,type=volume", // Cursor extensions
+    "source=pack-your-bag-node-modules-v24,target=${containerWorkspaceFolder}/node_modules,type=volume", 
     "source=pack-your-bag-extensions-v24,target=/home/node/.vscode-server/extensions,type=volume", // VSCode extensions
-    "source=pack-your-bag-cursor-extensions,target=/home/node/.cursor-server,type=volume"
+    // "source=pack-your-bag-cursor-extensions,target=/home/node/.cursor-server,type=volume" // Cursor extensions
   ],
   "containerEnv": {
     "SHELL": "/usr/bin/zsh",

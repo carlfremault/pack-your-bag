@@ -5,6 +5,7 @@ import classNames from 'classnames';
 
 import { Button } from '../button/Button';
 import { CategoryPill, type CategoryPillProps } from '../pill/CategoryPill';
+import { ExpandableText } from '../utils';
 
 export interface ItemCardProps {
   id: string;
@@ -40,12 +41,16 @@ export function ItemCard(props: ItemCardProps) {
         className,
       )}
     >
-      <div className="flex h-full w-full min-w-0 flex-1 flex-col justify-between gap-2">
+      <div className="flex h-full w-full min-w-0 flex-1 flex-col justify-between gap-4">
         <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center">
-          <h3 className="text-sm font-bold">{name}</h3>
+          <h3 className="text-sm font-bold wrap-break-word">{name}</h3>
           {category && <CategoryPill {...category} />}
         </div>
-        {description && <div className="text-xs font-light">{description}</div>}
+        {description && (
+          <div className="text-xs font-light">
+            <ExpandableText text={description} />
+          </div>
+        )}
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-1 text-xs">
             <HiOutlineScale className="h-3 w-3" />

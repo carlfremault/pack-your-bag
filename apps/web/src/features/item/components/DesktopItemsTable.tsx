@@ -1,8 +1,10 @@
+'use client';
+
 import { useMemo } from 'react';
 
 import { CategoryPill } from '@repo/react-common/pill';
 import { DataTable, DataTableActions } from '@repo/react-common/table';
-import { Tooltip } from '@repo/react-common/tooltip';
+import { ExpandableText } from '@repo/react-common/utils';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -29,20 +31,14 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
       columnHelper.accessor('name', {
         header: 'Name',
         cell: ({ row }) => {
-          return (
-            <Tooltip text={row.original.name}>
-              <div className="line-clamp-2 text-sm leading-normal">{row.original.name}</div>
-            </Tooltip>
-          );
+          return <div className="text-sm leading-normal wrap-break-word">{row.original.name}</div>;
         },
       }),
       columnHelper.accessor('description', {
         header: 'Description',
         cell: ({ row }) => {
           return row.original.description ? (
-            <Tooltip text={row.original.description}>
-              <div className="line-clamp-2 text-xs font-light">{row.original.description}</div>
-            </Tooltip>
+            <ExpandableText text={row.original.description} />
           ) : null;
         },
       }),
@@ -56,9 +52,7 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         header: 'Category',
         cell: ({ row }) => {
           return row.original.category ? (
-            <Tooltip text={row.original.category.name}>
-              <CategoryPill {...toCategoryPillProps(row.original.category)} />
-            </Tooltip>
+            <CategoryPill {...toCategoryPillProps(row.original.category)} />
           ) : null;
         },
       }),
