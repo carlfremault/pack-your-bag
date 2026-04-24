@@ -12,7 +12,7 @@ export function DesktopNavButtons(props: DesktopNavButtonsProps) {
   const { tabs, activeTabId, linkAs: LinkComponent = 'a' } = props;
 
   const tabClassName =
-    'cursor-pointer active:scale-90 active:bg-primary/10 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide';
+    'cursor-pointer active:scale-90 active:bg-primary/10 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide focus-visible:ring-primary-ring focus-visible:ring-2 focus-visible:outline-none';
   const activeClassName = 'bg-surface text-primary shadow-sm';
   const inactiveClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
 
