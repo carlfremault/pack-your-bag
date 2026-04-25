@@ -4,6 +4,8 @@ import Link from 'next/link';
 
 import { Sidebar } from '@repo/react-common/sidebar';
 
+import { dehydrate, QueryClient } from '@tanstack/react-query';
+
 import { DesktopNav } from '@/components/Navigation/DesktopNav';
 import { MobileHeader } from '@/components/Navigation/MobileHeader';
 import { MobileNav } from '@/components/Navigation/MobileNav';
@@ -12,6 +14,9 @@ import { Providers } from '@/components/providers';
 import { SidebarSlot } from '@/components/Sidebar';
 import { ActionPanel } from '@/components/Sidebar/ActionPanel';
 import { ToastNotifications } from '@/components/ToastNotifications';
+import { getPreferences } from '@/features/preferences/api';
+import { PreferencesInitializer } from '@/features/preferences/PreferencesInitializer';
+import { Preferences } from '@/features/preferences/types';
 import { getSession } from '@/lib/session';
 
 import './globals.css';
@@ -34,10 +39,20 @@ export default async function RootLayout({
   const session = await getSession();
   const isLoggedIn = session.isLoggedIn ?? false;
 
+  const queryClient = new QueryClient();
+  if (isLoggedIn) {
+    await queryClient.prefetchQuery({
+      queryKey: ['preferences'],
+      queryFn: getPreferences,
+    });
+  }
+  const dehydratedState = dehydrate(queryClient);
+  const theme = queryClient.getQueryData<Preferences>(['preferences'])?.theme;
+
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={[inter.variable, theme].filter(Boolean).join(' ')}>
       <body>
-        <Providers>
+        <Providers dehydratedState={dehydratedState}>
           <div className="flex h-screen flex-col lg:flex-row">
             <div className="hidden w-1/4 min-w-80 lg:block">
               <Sidebar linkAs={Link}>
@@ -62,6 +77,7 @@ export default async function RootLayout({
             </div>
           </div>
           {isLoggedIn && <ActionPanel />}
+          {isLoggedIn && <PreferencesInitializer />}
           <ToastNotifications />
         </Providers>
       </body>

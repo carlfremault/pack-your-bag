@@ -2,8 +2,15 @@
   "name": "@repo/constants",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch"
+  },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
