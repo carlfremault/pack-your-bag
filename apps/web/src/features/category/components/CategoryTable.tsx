@@ -5,6 +5,8 @@ import { DataTable, DataTableActions } from '@repo/react-common/table';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
+import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
+
 import { Category } from '../types';
 
 import { CategoryTableSkeleton } from './CategoryTableSkeleton';
@@ -26,7 +28,7 @@ export default function CategoryTable(props: CategoryTableProps) {
       columnHelper.accessor('name', {
         header: 'Category',
         cell: ({ row }) => {
-          return <CategoryPill name={row.original.name} colorTheme={row.original.colorTheme} />;
+          return <CategoryPill {...toCategoryPillProps(row.original)} />;
         },
       }),
       columnHelper.display({

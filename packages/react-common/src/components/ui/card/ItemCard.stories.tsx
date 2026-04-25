@@ -3,12 +3,11 @@ import { MdOutlineEdit } from 'react-icons/md';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
+import { LONG_DESCRIPTION } from '../../../lib/constants';
 import { Button } from '../button/Button';
 import { QuantityStepper } from '../input/QuantityStepper';
 
 import { ItemCard } from './ItemCard';
-
-import { LONG_DESCRIPTION } from '#lib/constants';
 
 const meta: Meta<typeof ItemCard> = {
   title: 'Components/ItemCard',

@@ -1,4 +1,5 @@
 import type { ItemCardProps } from '@repo/react-common/card';
+import { type ColorTheme } from '@repo/react-common/color-themes';
 
 import { Item } from '@/features/item/types';
 
@@ -14,7 +15,7 @@ export function toItemCardProps(
     category: item.category
       ? {
           name: item.category.name,
-          colorTheme: item.category.colorTheme,
+          colorTheme: item.category.colorTheme as ColorTheme,
         }
       : null,
     ...handlers,

@@ -2,9 +2,6 @@
   "name": "@repo/react-common",
   "version": "0.0.1",
   "private": true,
-  "imports": {
-    "#lib/*": "./src/lib/*"
-  },
   "exports": {
     "./table": "./src/components/table/index.ts",
     "./alert": "./src/components/ui/alert/Alert.tsx",
