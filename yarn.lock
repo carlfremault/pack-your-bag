@@ -3227,6 +3227,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@repo/constants@workspace:*, @repo/constants@workspace:packages/constants":
+  version: 0.0.0-use.local
+  resolution: "@repo/constants@workspace:packages/constants"
+  dependencies:
+    "@repo/typescript-config": "workspace:*"
+    typescript: "npm:^6.0.2"
+  languageName: unknown
+  linkType: soft
+
 "@repo/db@workspace:*, @repo/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@repo/db@workspace:packages/db"
@@ -3358,14 +3367,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@repo/user-data-client@workspace:packages/user-data-client":
+"@repo/user-data-client@workspace:*, @repo/user-data-client@workspace:packages/user-data-client":
   version: 0.0.0-use.local
   resolution: "@repo/user-data-client@workspace:packages/user-data-client"
   dependencies:
     openapi-fetch: "npm:^0.13.0"
     openapi-typescript: "npm:^7.0.0"
+    openapi-zod-client: "npm:^1.18.0"
     prettier: "npm:^3.6.2"
     typescript: "npm:^6.0.2"
+    zod: "npm:^4.3.6"
+  peerDependencies:
+    zod: ^4.3.6
   languageName: unknown
   linkType: soft
 
@@ -14196,6 +14209,7 @@ __metadata:
     "@nestjs/testing": "npm:^11.0.1"
     "@nestjs/throttler": "npm:^6.5.0"
     "@prisma/adapter-pg": "npm:^7.2.0"
+    "@repo/constants": "workspace:*"
     "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/nestjs-common": "workspace:*"
@@ -17029,6 +17043,7 @@ __metadata:
     "@nestjs/terminus": "npm:^11.0.0"
     "@nestjs/testing": "npm:^11.0.1"
     "@nestjs/throttler": "npm:^6.5.0"
+    "@repo/constants": "workspace:*"
     "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/nestjs-common": "workspace:*"
@@ -17384,10 +17399,12 @@ __metadata:
   resolution: "web@workspace:apps/web"
   dependencies:
     "@repo/auth-client": "workspace:*"
+    "@repo/constants": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/product-client": "workspace:*"
     "@repo/react-common": "workspace:*"
     "@repo/typescript-config": "workspace:*"
+    "@repo/user-data-client": "workspace:*"
     "@repo/vitest-config": "workspace:*"
     "@tailwindcss/postcss": "npm:^4"
     "@tanstack/react-query": "npm:^5.97.0"
