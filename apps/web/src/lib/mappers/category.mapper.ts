@@ -1,3 +1,4 @@
+import { type ColorTheme } from '@repo/react-common/color-themes';
 import { CategoryPillProps } from '@repo/react-common/pill';
 
 import { Category } from '@/features/category/types';
@@ -5,6 +6,6 @@ import { Category } from '@/features/category/types';
 export function toCategoryPillProps(category: Category): CategoryPillProps {
   return {
     name: category.name,
-    colorTheme: category.colorTheme,
+    colorTheme: category.colorTheme as ColorTheme,
   };
 }

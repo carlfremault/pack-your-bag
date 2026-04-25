@@ -4,14 +4,15 @@
   "service": "dev-container",
   "workspaceFolder": "/workspaces/pack-your-bag",
   "mounts": [
-    "source=pack-your-bag-node-modules-v24,target=${containerWorkspaceFolder}/node_modules,type=volume", 
-    "source=pack-your-bag-extensions-v24,target=/home/node/.vscode-server/extensions,type=volume", // VSCode extensions
+    "source=pack-your-bag-node-modules-v24,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=pack-your-bag-extensions-v24,target=/home/node/.vscode-server/extensions,type=volume" // VSCode extensions
     // "source=pack-your-bag-cursor-extensions,target=/home/node/.cursor-server,type=volume" // Cursor extensions
   ],
   "containerEnv": {
     "SHELL": "/usr/bin/zsh",
     "YARN_CACHE_FOLDER": "/home/node/.cache/yarn",
-    "YARN_ENABLE_TELEMETRY": "0"
+    "YARN_ENABLE_TELEMETRY": "0",
+    "CLAUDE_CODE_AUTO_CONNECT_IDE": "true"
   },
   "forwardPorts": [3000, 3001, 3002, 3003, 8001, 8002, 8003],
   "customizations": {
@@ -24,7 +25,8 @@
         "ms-azuretools.vscode-docker",
         "prisma.prisma",
         "coderabbit.coderabbit-vscode",
-        "codeium.codeium"
+        "codeium.codeium",
+        "anthropic.claude-code"
       ],
       "settings": {
         "editor.formatOnSave": true,

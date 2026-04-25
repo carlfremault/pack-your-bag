@@ -10,6 +10,7 @@ import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
 import { useFormState } from '@/hooks/useFormState';
 import { ITEM_DESCRIPTION_MAX_LENGTH, ITEM_NAME_MAX_LENGTH } from '@/lib/constants';
+import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import { useAllItems, useCreateItem, useUpdateItem } from '../queries';
 import { Item } from '../types';
@@ -48,7 +49,7 @@ export default function ItemForm(props: ItemFormProps) {
   const { data: categories } = useAllCategories();
   const categoryOptions =
     categories?.map((category) => ({
-      label: <CategoryPill name={category.name} colorTheme={category.colorTheme} />,
+      label: <CategoryPill {...toCategoryPillProps(category)} />,
       value: category.id,
     })) ?? [];
 

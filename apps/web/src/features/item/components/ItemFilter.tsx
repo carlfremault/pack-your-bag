@@ -11,11 +11,11 @@ import {
   InputSelectOption,
 } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
-import { Tooltip } from '@repo/react-common/tooltip';
 
 import classNames from 'classnames';
 
 import { useAllCategories } from '@/features/category/queries';
+import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 export interface ItemFilterState {
   search: string;
@@ -54,7 +54,7 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
     () =>
       categories.map((category) => ({
         value: category.id,
-        label: <CategoryPill name={category.name} colorTheme={category.colorTheme} />,
+        label: <CategoryPill {...toCategoryPillProps(category)} />,
       })),
     [categories],
   );
