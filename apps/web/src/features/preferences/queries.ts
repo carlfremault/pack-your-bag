@@ -80,7 +80,20 @@ const useUpdatePreferences = () => {
 
   return useMutation({
     mutationFn: updatePreferences,
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ['preferences'] });
+
+      const previousPreferences = queryClient.getQueryData<Preferences | null>(['preferences']);
+
+      queryClient.setQueryData<Preferences | null>(['preferences'], (old) =>
+        old ? { ...old, ...variables } : old,
+      );
+      return { previousPreferences };
+    },
+    onError: (_err, _variables, context) => {
+      queryClient.setQueryData(['preferences'], context?.previousPreferences);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['preferences'] });
     },
   });

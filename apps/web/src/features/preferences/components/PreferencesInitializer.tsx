@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 
-import { deriveDefaultPreferences } from './defaults';
-import { useCreatePreferences, usePreferences } from './queries';
+import { deriveDefaultPreferences } from '../defaults';
+import { useCreatePreferences, usePreferences } from '../queries';
 
 export function PreferencesInitializer() {
   const { data, isLoading } = usePreferences();

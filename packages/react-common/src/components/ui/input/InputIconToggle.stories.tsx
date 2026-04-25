@@ -5,6 +5,12 @@ import { fn } from 'storybook/test';
 
 import { InputIconToggle } from './InputIconToggle';
 
+const optionsWithNull = [
+  { value: 'asc', label: 'Ascending', icon: MdArrowUpward },
+  { value: 'desc', label: 'Descending', icon: MdArrowDownward },
+  { value: null, label: 'Default', icon: MdArrowUpward },
+];
+
 const meta: Meta<typeof InputIconToggle> = {
   component: InputIconToggle,
   args: {
@@ -26,4 +32,12 @@ export const Default: Story = {
 
 export const DescSelected: Story = {
   args: { value: 'desc' },
+};
+
+export const NullOptionSelected: Story = {
+  args: { options: optionsWithNull, value: null },
+};
+
+export const UndefinedValueWithNullOption: Story = {
+  args: { options: optionsWithNull, value: undefined },
 };

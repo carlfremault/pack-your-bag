@@ -16,6 +16,7 @@ import { ActionPanel } from '@/components/Sidebar/ActionPanel';
 import { ToastNotifications } from '@/components/ToastNotifications';
 import { getPreferences } from '@/features/preferences/api';
 import { PreferencesInitializer } from '@/features/preferences/PreferencesInitializer';
+import { ThemeSynchronizer } from '@/features/preferences/ThemeSynchronizer';
 import { Preferences } from '@/features/preferences/types';
 import { getSession } from '@/lib/session';
 
@@ -78,6 +79,7 @@ export default async function RootLayout({
           </div>
           {isLoggedIn && <ActionPanel />}
           {isLoggedIn && <PreferencesInitializer />}
+          {isLoggedIn && <ThemeSynchronizer />}
           <ToastNotifications />
         </Providers>
       </body>

@@ -4,25 +4,25 @@ import classNames from 'classnames';
 
 import { inputLabelClassName, inputWrapperClassName } from './Input';
 
-export interface IconToggleOption<T extends string = string> {
-  value: T;
+export interface IconToggleOption<T extends string | null = string | null> {
+  value: T | null;
   icon: React.ElementType;
   label: string;
 }
 
-export interface InputIconToggleProps<T extends string = string> {
+export interface InputIconToggleProps<T extends string | null = string | null> {
   label: string;
   options: IconToggleOption<T>[];
-  value: T;
-  onChange: (value: T) => void;
+  value: T | null | undefined;
+  onChange: (value: T | null) => void;
 }
 
 const buttonBase =
   'cursor-pointer active:scale-90 active:bg-primary/10 transition-all duration-150 ease-out flex items-center justify-center rounded-md p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ring';
-const activeClass = 'bg-surface text-primary shadow-sm';
+const activeClass = 'bg-surface text-primary shadow-sm dark:bg-primary/20';
 const inactiveClass = 'text-nav-inactive hover:text-nav-inactive-hover';
 
-export function InputIconToggle<T extends string = string>({
+export function InputIconToggle<T extends string | null = string | null>({
   label,
   options,
   value,
@@ -41,7 +41,7 @@ export function InputIconToggle<T extends string = string>({
         className="bg-surface-overlay flex w-fit rounded-md p-1"
       >
         {options.map((option) => {
-          const isActive = option.value === value;
+          const isActive = option.value === (value ?? null);
           return (
             <button
               key={option.value}
