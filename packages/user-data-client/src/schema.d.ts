@@ -37,23 +37,33 @@ export interface components {
       /**
        * @description Units
        * @example metric
+       * @enum {string}
        */
-      units: string;
+      units: 'metric' | 'imperial';
       /**
        * @description Theme
        * @example light
+       * @enum {string|null}
        */
-      theme: string;
+      theme: 'light' | 'dark' | null;
       /**
        * @description Date format
        * @example DD/MM/YYYY
+       * @enum {string}
        */
-      dateFormat: string;
+      dateFormat:
+        | 'DD/MM/YYYY'
+        | 'MM/DD/YYYY'
+        | 'YYYY/MM/DD'
+        | 'DD-MM-YYYY'
+        | 'MM-DD-YYYY'
+        | 'YYYY-MM-DD';
       /**
        * @description Time format
        * @example 12h
+       * @enum {string}
        */
-      timeFormat: string;
+      timeFormat: '12h' | '24h';
       /**
        * Format: date-time
        * @description Created at

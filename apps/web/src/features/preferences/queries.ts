@@ -27,7 +27,7 @@ const usePreferences = (): UseQueryResult<Preferences | null> => {
 };
 
 // -------------------------------
-// Create item
+// Create preferences
 // -------------------------------
 const createPreferences = async (body: CreatePreferencesBody): Promise<Preferences> => {
   const res = await fetch('/api/preferences', {
@@ -57,7 +57,7 @@ const useCreatePreferences = () => {
 };
 
 // -------------------------------
-// Update item
+// Update preferences
 // -------------------------------
 const updatePreferences = async (body: UpdatePreferencesBody): Promise<Preferences> => {
   const res = await fetch('/api/preferences', {
@@ -79,7 +79,7 @@ const useUpdatePreferences = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ body }: { body: UpdatePreferencesBody }) => updatePreferences(body),
+    mutationFn: updatePreferences,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['preferences'] });
     },
