@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { usePreferences } from './queries';
+import { usePreferences } from '../queries';
 
 export function ThemeSynchronizer() {
   const { data } = usePreferences();
