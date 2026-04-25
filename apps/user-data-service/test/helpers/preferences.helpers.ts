@@ -1,12 +1,13 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
+
 import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { CreatePreferencesDto } from '@/preferences/dto/create-preferences.dto';
 import { PreferencesResponseDto } from '@/preferences/dto/preferences-response.dto';
 import { UpdatePreferencesDto } from '@/preferences/dto/update-preferences.dto';
-import { DateFormat, Theme, TimeFormat, Units } from '@/preferences/types/preferences.types';
 
 export class PreferencesHelpers {
   constructor(

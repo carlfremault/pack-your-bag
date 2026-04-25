@@ -1,0 +1,5 @@
+export const NAME_MAX_LENGTH = 128;
+export const CATEGORY_NAME_MAX_LENGTH = 32;
+export const DESCRIPTION_MAX_LENGTH = 1000;
+export const COLOR_CODE_MAX_LENGTH = 64;
+export const REMARKS_MAX_LENGTH = 1000;

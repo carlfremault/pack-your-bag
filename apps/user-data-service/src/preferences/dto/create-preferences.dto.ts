@@ -1,30 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
 
-import { DateFormat, Theme, TimeFormat, Units } from '../types/preferences.types';
+import { IsEnum, IsOptional, ValidateIf } from 'class-validator';
 
 export class CreatePreferencesDto {
-  @ApiProperty({ description: 'Units', example: 'metric' })
-  @IsString()
+  @ApiProperty({ description: 'Units', example: 'metric', enum: Units })
   @IsOptional()
   @IsEnum(Units)
   units: Units;
 
-  @ApiProperty({ description: 'Theme', example: 'light' })
-  @IsString()
+  @ApiProperty({ description: 'Theme', example: 'light', nullable: true, enum: Theme })
   @IsOptional()
+  @ValidateIf((_, value) => value !== null)
   @IsEnum(Theme)
-  theme: Theme;
+  theme?: Theme | null;
 
-  @ApiProperty({ description: 'Date format', example: 'DD/MM/YYYY' })
-  @IsString()
+  @ApiProperty({ description: 'Date format', example: 'DD/MM/YYYY', enum: DateFormat })
   @IsOptional()
   @IsEnum(DateFormat)
   dateFormat: DateFormat;
 
-  @ApiProperty({ description: 'Time format', example: '12h' })
-  @IsString()
+  @ApiProperty({ description: 'Time format', example: '12h', enum: TimeFormat })
   @IsOptional()
   @IsEnum(TimeFormat)
   timeFormat: TimeFormat;
