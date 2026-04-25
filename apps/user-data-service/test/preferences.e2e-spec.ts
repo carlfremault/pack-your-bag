@@ -1,12 +1,13 @@
 import { HttpStatus } from '@nestjs/common';
 
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
+
 import request from 'supertest';
 import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CreatePreferencesDto } from '@/preferences/dto/create-preferences.dto';
 import { UpdatePreferencesDto } from '@/preferences/dto/update-preferences.dto';
-import { DateFormat, Theme, TimeFormat, Units } from '@/preferences/types/preferences.types';
 
 import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';

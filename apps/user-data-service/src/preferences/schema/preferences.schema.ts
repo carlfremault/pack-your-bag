@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { HydratedDocument } from 'mongoose';
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
 
-import { DateFormat, Theme, TimeFormat, Units } from '../types/preferences.types';
+import { HydratedDocument } from 'mongoose';
 
 export type PreferenceDocument = HydratedDocument<Preference>;
 

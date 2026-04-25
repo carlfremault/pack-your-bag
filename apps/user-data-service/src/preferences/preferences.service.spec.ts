@@ -1,12 +1,13 @@
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CreatePreferencesDto } from './dto/create-preferences.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { Preference } from './schema/preferences.schema';
-import { DateFormat, Theme, TimeFormat, Units } from './types/preferences.types';
 import { PreferencesService } from './preferences.service';
 describe('PreferencesService', () => {
   let service: PreferencesService;

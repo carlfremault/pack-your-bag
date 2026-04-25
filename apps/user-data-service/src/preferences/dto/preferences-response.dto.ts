@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Exclude, Expose } from 'class-transformer';
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
 
-import { DateFormat, Theme, TimeFormat, Units } from '../types/preferences.types';
+import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
 export class PreferencesResponseDto {
