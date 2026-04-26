@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import z from 'zod';
 
-import { createPreferences, getPreferences, updatePreferences } from '@/features/preferences/api';
-import { createPreferencesSchema, updatePreferencesSchema } from '@/features/preferences/schema';
+import { createPreferences, getPreferences, updatePreferences } from '@/features/settings/api';
+import { createPreferencesSchema, updatePreferencesSchema } from '@/features/settings/schema';
 import { withErrorHandling } from '@/lib/api-handlers';
 
 export async function GET() {

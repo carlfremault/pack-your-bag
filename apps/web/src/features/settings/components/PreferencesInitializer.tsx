@@ -7,12 +7,12 @@ import { useCreatePreferences, usePreferences } from '../queries';
 
 export function PreferencesInitializer() {
   const { data, isLoading } = usePreferences();
-  const { mutate: create } = useCreatePreferences();
+  const { mutate: create, isPending } = useCreatePreferences();
 
   useEffect(() => {
-    if (isLoading || data !== null) return;
+    if (isLoading || isPending || data !== null) return;
     create(deriveDefaultPreferences(navigator.language));
-  }, [isLoading, data, create]);
+  }, [isLoading, isPending, data, create]);
 
   return null;
 }

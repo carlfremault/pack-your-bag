@@ -9,7 +9,10 @@ export async function getPreferences(): Promise<Preferences | null> {
   const userDataClient = await getUserDataClient();
   const { data, error, response } = await userDataClient.GET('/preferences');
   // Manual error handling since getPreferences should potentially return null for new users
-  if (error) throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
+  if (error) {
+    if (response?.status === 404) return null;
+    throw new ApiError(extractErrorMessage(error), response?.status ?? 500);
+  }
   return data ?? null;
 }
 

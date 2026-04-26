@@ -1,4 +1,8 @@
-import { getPublicAuthClient, getRefreshTokenAuthClient } from '@/lib/clients/auth-client';
+import {
+  getAccessTokenAuthClient,
+  getPublicAuthClient,
+  getRefreshTokenAuthClient,
+} from '@/lib/clients/auth-client';
 import { ApiError } from '@/lib/errors';
 import { extractErrorMessage, extractErrorType } from '@/utils/extractApiErrorDetails';
 
@@ -9,6 +13,7 @@ import {
   PasswordForgottenBody,
   RegisterBody,
   ResendVerificationEmailBody,
+  UpdatePasswordBody,
   VerifyEmailBody,
 } from './types';
 
@@ -38,40 +43,60 @@ export async function logout(): Promise<void> {
 }
 
 export async function register(body: RegisterBody): Promise<void> {
-  await postAuthRequest('/auth/register', body);
+  await postPublicAuthRequest('/auth/register', body);
 }
 
 export async function passwordForgotten(body: PasswordForgottenBody): Promise<void> {
-  await postAuthRequest('/auth/forgot-password', body);
+  await postPublicAuthRequest('/auth/forgot-password', body);
 }
 
 export async function resendVerificationEmail(body: ResendVerificationEmailBody): Promise<void> {
-  await postAuthRequest('/auth/resend-verification-email', body);
+  await postPublicAuthRequest('/auth/resend-verification-email', body);
 }
 
 export async function verifyEmail(body: VerifyEmailBody): Promise<void> {
-  await postAuthRequest('/auth/verify-email', body);
+  await postPublicAuthRequest('/auth/verify-email', body);
+}
+
+export async function updatePassword(body: UpdatePasswordBody): Promise<LoginResponse> {
+  const authClient = await getAccessTokenAuthClient();
+
+  try {
+    const { data, error, response } = await authClient.PATCH('/auth/update-password', {
+      body,
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
+    }
+    if (!data) throw new ApiError('No data returned', 500);
+    return data as LoginResponse;
+  } catch (e) {
+    if (e instanceof ApiError) throw e;
+    throw new ApiError('Authentication service unavailable', 503);
+  }
 }
 
 // ------------------------------------------------------------
 // Helper functions
 // ------------------------------------------------------------
 
-type AuthRequestEndpoints =
+type PublicAuthRequestEndpoints =
   | '/auth/register'
   | '/auth/forgot-password'
   | '/auth/resend-verification-email'
   | '/auth/verify-email';
 
-type AuthRequestBody =
+type PublicAuthRequestBody =
   | RegisterBody
   | PasswordForgottenBody
   | ResendVerificationEmailBody
   | VerifyEmailBody;
 
-async function postAuthRequest(
-  endpoint: AuthRequestEndpoints,
-  body: AuthRequestBody,
+async function postPublicAuthRequest(
+  endpoint: PublicAuthRequestEndpoints,
+  body: PublicAuthRequestBody,
 ): Promise<void> {
   const authClient = await getPublicAuthClient();
 

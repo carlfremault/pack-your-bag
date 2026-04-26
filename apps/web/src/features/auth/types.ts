@@ -6,3 +6,4 @@ export type RegisterBody = RequestBody<'/auth/register', 'post'>;
 export type PasswordForgottenBody = RequestBody<'/auth/forgot-password', 'post'>;
 export type ResendVerificationEmailBody = RequestBody<'/auth/resend-verification-email', 'post'>;
 export type VerifyEmailBody = RequestBody<'/auth/verify-email', 'post'>;
+export type UpdatePasswordBody = RequestBody<'/auth/update-password', 'patch'>;
