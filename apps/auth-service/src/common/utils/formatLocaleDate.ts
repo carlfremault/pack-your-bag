@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from '@repo/constants';
+
 /**
  * Formats a date in a user-friendly format based on locale
  *
@@ -6,7 +8,7 @@
  *
  * @returns {string} The formatted date
  */
-export const formatLocaleDate = (date: Date, locale: string = 'en-GB'): string => {
+export const formatLocaleDate = (date: Date, locale: string = DEFAULT_LOCALE as string): string => {
   const dateObj = new Date(date);
   if (isNaN(dateObj.getTime())) {
     throw new Error('Invalid date provided');

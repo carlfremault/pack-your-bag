@@ -1,14 +1,16 @@
 // Password
-export { PASSWORD_REGEX, PASSWORD_MESSAGE } from '@repo/constants';
-
-export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_MIN_LENGTH_MESSAGE = `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.`;
-export const PASSWORD_MAX_LENGTH = 128;
-export const PASSWORD_MAX_LENGTH_MESSAGE = `Password must not exceed ${PASSWORD_MAX_LENGTH} characters.`;
+export {
+  PASSWORD_REGEX,
+  PASSWORD_MESSAGE,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_MESSAGE,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH_MESSAGE,
+  DEFAULT_LOCALE,
+} from '@repo/constants';
 
 // User
 export const AUTH_DEFAULT_USER_ROLE_ID = 1; // "user"
-export const DEFAULT_LOCALE = 'en-GB';
 export const LOCALE_REGEX = /^[a-z]{2}(-[A-Z]{2})?$/;
 export const LOCALE_MESSAGE = 'Locale must be a valid format (e.g., en, en-GB)';
 

@@ -11,6 +11,7 @@ import {
   passwordForgotten,
   register,
   resendVerificationEmail,
+  resetPassword,
   updatePassword,
 } from './api';
 import { AuthApiError } from './errors';
@@ -19,6 +20,7 @@ import {
   passwordForgottenSchema,
   registerSchema,
   resendVerificationEmailSchema,
+  resetPasswordSchema,
   updatePasswordSchema,
 } from './schema';
 import { LoginResponse } from './types';
@@ -165,7 +167,7 @@ export async function registerAction(
 }
 
 // ============================================
-// PASSWORD RESET
+// PASSWORD FORGOTTEN
 // ============================================
 
 export type PasswordForgottenState = {
@@ -298,6 +300,55 @@ export async function updatePasswordAction(
   try {
     const data = await updatePassword({ currentPassword, newPassword });
     await createSessionFromLoginResponse(data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
+  }
+
+  return { success: true };
+}
+
+// ============================================
+// RESET PASSWORD
+// ============================================
+
+export type ResetPasswordState = {
+  fieldErrors?: {
+    password?: string;
+    confirmPassword?: string;
+  };
+  formError?: string;
+  success?: boolean;
+} | null;
+
+export async function resetPasswordAction(
+  token: string,
+  locale: string | undefined,
+  _prevState: ResetPasswordState,
+  formData: FormData,
+): Promise<ResetPasswordState> {
+  const raw = {
+    token,
+    password: formData.get('password') as string | null,
+    confirmPassword: formData.get('confirmPassword') as string | null,
+    locale,
+  };
+
+  const parsed = resetPasswordSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    const fieldErrors: NonNullable<ResetPasswordState>['fieldErrors'] = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (field === 'password' || field === 'confirmPassword') {
+        fieldErrors[field] ??= issue.message;
+      }
+    }
+    return { fieldErrors };
+  }
+
+  const { password } = parsed.data;
+  try {
+    await resetPassword({ token, password, locale });
   } catch (e) {
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
   }

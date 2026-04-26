@@ -2,6 +2,7 @@
 
 import toast from 'react-hot-toast';
 
+import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from '@repo/constants';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
 import { Spinner } from '@repo/react-common/spinner';
@@ -9,7 +10,6 @@ import { Spinner } from '@repo/react-common/spinner';
 import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
 import { useFormState } from '@/hooks/useFormState';
-import { ITEM_DESCRIPTION_MAX_LENGTH, ITEM_NAME_MAX_LENGTH } from '@/lib/constants';
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import { useAllItems, useCreateItem, useUpdateItem } from '../queries';
@@ -104,7 +104,7 @@ export default function ItemForm(props: ItemFormProps) {
         <Input
           label="Name"
           required
-          maxLength={ITEM_NAME_MAX_LENGTH}
+          maxLength={NAME_MAX_LENGTH}
           value={formValues.name}
           onChange={(e) => handleFieldChange('name', e.target.value)}
           errorMessage={fieldErrors.name}
@@ -113,7 +113,7 @@ export default function ItemForm(props: ItemFormProps) {
         <InputTextarea
           label="Description"
           rows={4}
-          maxLength={ITEM_DESCRIPTION_MAX_LENGTH}
+          maxLength={DESCRIPTION_MAX_LENGTH}
           value={formValues.description}
           onChange={(e) => handleFieldChange('description', e.target.value)}
           errorMessage={fieldErrors.description}

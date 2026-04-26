@@ -20,7 +20,7 @@ export default function PasswordForgottenForm() {
       <div className="flex flex-col gap-4">
         <Alert
           type="success"
-          message="If an account with this email address exists, a reset link has been sent. Please check your inbox or spam folder."
+          message="If an account with this email address exists, a reset link has been sent. The link remains valid for 15 minutes. Please check your inbox or spam folder."
         />
         <LinkButton href="/login" variant="outline" linkAs={Link} className="self-end">
           Back to login

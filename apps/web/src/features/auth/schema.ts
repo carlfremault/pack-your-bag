@@ -1,9 +1,20 @@
 import { schemas } from '@repo/auth-client';
-import { PASSWORD_MESSAGE, PASSWORD_REGEX } from '@repo/constants';
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH_MESSAGE,
+  PASSWORD_MESSAGE,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_MESSAGE,
+  PASSWORD_REGEX,
+} from '@repo/constants';
 
 import { z } from 'zod';
 
-const passwordField = z.string().min(8).max(128).regex(PASSWORD_REGEX, PASSWORD_MESSAGE);
+const passwordField = z
+  .string()
+  .min(PASSWORD_MIN_LENGTH, PASSWORD_MIN_LENGTH_MESSAGE)
+  .max(PASSWORD_MAX_LENGTH, PASSWORD_MAX_LENGTH_MESSAGE)
+  .regex(PASSWORD_REGEX, PASSWORD_MESSAGE);
 
 export const loginSchema = schemas.AuthCredentialsDto.extend({
   password: passwordField,
@@ -22,6 +33,13 @@ export const updatePasswordSchema = schemas.UpdatePasswordDto.extend({
   newPassword: passwordField,
   confirmPassword: passwordField,
 }).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Passwords do not match.',
+  path: ['confirmPassword'],
+});
+export const resetPasswordSchema = schemas.AuthResetPasswordDto.extend({
+  password: passwordField,
+  confirmPassword: passwordField,
+}).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match.',
   path: ['confirmPassword'],
 });
