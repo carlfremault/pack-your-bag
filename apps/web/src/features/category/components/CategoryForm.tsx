@@ -1,13 +1,13 @@
 'use client';
 import toast from 'react-hot-toast';
 
+import { CATEGORY_NAME_MAX_LENGTH } from '@repo/constants';
 import { type ColorTheme, colorThemes } from '@repo/react-common/color-themes';
 import { Input, InputSelect } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useFormState } from '@/hooks/useFormState';
-import { CATEGORY_NAME_MAX_LENGTH } from '@/lib/constants';
 
 import { useCreateCategory, useUpdateCategory } from '../queries';
 import { Category } from '../types';

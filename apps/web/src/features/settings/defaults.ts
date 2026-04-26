@@ -1,4 +1,4 @@
-import { DateFormat, TimeFormat, Units } from '@repo/constants';
+import { DateFormat, DEFAULT_LOCALE, TimeFormat, Units } from '@repo/constants';
 
 export function deriveDefaultPreferences(acceptLanguage: string | null): {
   units: Units;
@@ -7,13 +7,14 @@ export function deriveDefaultPreferences(acceptLanguage: string | null): {
   theme: null;
 } {
   const rawLocale =
-    ((acceptLanguage || 'en-GB').split(',')[0] ?? 'en-GB').split(';')[0]?.trim() ?? 'en-GB';
+    ((acceptLanguage || DEFAULT_LOCALE).split(',')[0] ?? DEFAULT_LOCALE).split(';')[0]?.trim() ??
+    DEFAULT_LOCALE;
 
   let locale: Intl.Locale;
   try {
     locale = new Intl.Locale(rawLocale);
   } catch {
-    locale = new Intl.Locale('en-GB');
+    locale = new Intl.Locale(DEFAULT_LOCALE);
   }
 
   const normalized = locale.toString();

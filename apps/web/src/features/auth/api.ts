@@ -13,6 +13,7 @@ import {
   PasswordForgottenBody,
   RegisterBody,
   ResendVerificationEmailBody,
+  ResetPasswordBody,
   UpdatePasswordBody,
   VerifyEmailBody,
 } from './types';
@@ -58,6 +59,10 @@ export async function verifyEmail(body: VerifyEmailBody): Promise<void> {
   await postPublicAuthRequest('/auth/verify-email', body);
 }
 
+export async function resetPassword(body: ResetPasswordBody): Promise<void> {
+  await postPublicAuthRequest('/auth/reset-password', body);
+}
+
 export async function updatePassword(body: UpdatePasswordBody): Promise<LoginResponse> {
   const authClient = await getAccessTokenAuthClient();
 
@@ -86,13 +91,15 @@ type PublicAuthRequestEndpoints =
   | '/auth/register'
   | '/auth/forgot-password'
   | '/auth/resend-verification-email'
-  | '/auth/verify-email';
+  | '/auth/verify-email'
+  | '/auth/reset-password';
 
 type PublicAuthRequestBody =
   | RegisterBody
   | PasswordForgottenBody
   | ResendVerificationEmailBody
-  | VerifyEmailBody;
+  | VerifyEmailBody
+  | ResetPasswordBody;
 
 async function postPublicAuthRequest(
   endpoint: PublicAuthRequestEndpoints,
