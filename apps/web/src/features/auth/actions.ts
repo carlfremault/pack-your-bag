@@ -5,13 +5,21 @@ import { redirect } from 'next/navigation';
 import { ApiError } from '@/lib/errors';
 import { getSession } from '@/lib/session';
 
-import { login, logout, passwordForgotten, register, resendVerificationEmail } from './api';
+import {
+  login,
+  logout,
+  passwordForgotten,
+  register,
+  resendVerificationEmail,
+  updatePassword,
+} from './api';
 import { AuthApiError } from './errors';
 import {
   loginSchema,
   passwordForgottenSchema,
   registerSchema,
   resendVerificationEmailSchema,
+  updatePasswordSchema,
 } from './schema';
 import { LoginResponse } from './types';
 
@@ -244,6 +252,55 @@ export async function resendVerificationEmailAction(
   const session = await getSession();
   session.pendingVerificationEmail = undefined;
   await session.save();
+
+  return { success: true };
+}
+
+// ============================================
+// UPDATE PASSWORD
+// ============================================
+
+export type UpdatePasswordState = {
+  fieldErrors?: {
+    currentPassword?: string;
+    newPassword?: string;
+    confirmPassword?: string;
+  };
+  formError?: string;
+  success?: boolean;
+} | null;
+
+export async function updatePasswordAction(
+  _prevState: UpdatePasswordState,
+  formData: FormData,
+): Promise<UpdatePasswordState> {
+  const raw = {
+    currentPassword: formData.get('currentPassword') as string | null,
+    newPassword: formData.get('newPassword') as string | null,
+    confirmPassword: formData.get('confirmPassword') as string | null,
+  };
+
+  const parsed = updatePasswordSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    const fieldErrors: NonNullable<UpdatePasswordState>['fieldErrors'] = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (field === 'currentPassword' || field === 'newPassword' || field === 'confirmPassword') {
+        fieldErrors[field] ??= issue.message;
+      }
+    }
+    return { fieldErrors };
+  }
+
+  const { currentPassword, newPassword } = parsed.data;
+
+  try {
+    const data = await updatePassword({ currentPassword, newPassword });
+    await createSessionFromLoginResponse(data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
+  }
 
   return { success: true };
 }

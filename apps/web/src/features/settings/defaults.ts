@@ -7,7 +7,7 @@ export function deriveDefaultPreferences(acceptLanguage: string | null): {
   theme: null;
 } {
   const rawLocale =
-    ((acceptLanguage ?? 'en-GB').split(',')[0] ?? 'en-GB').split(';')[0]?.trim() ?? 'en-GB';
+    ((acceptLanguage || 'en-GB').split(',')[0] ?? 'en-GB').split(';')[0]?.trim() ?? 'en-GB';
 
   let locale: Intl.Locale;
   try {

@@ -91,7 +91,9 @@ const useUpdatePreferences = () => {
       return { previousPreferences };
     },
     onError: (_err, _variables, context) => {
-      queryClient.setQueryData(['preferences'], context?.previousPreferences);
+      if (context?.previousPreferences !== undefined) {
+        queryClient.setQueryData(['preferences'], context.previousPreferences);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['preferences'] });

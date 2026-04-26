@@ -14,10 +14,10 @@ import { Providers } from '@/components/providers';
 import { SidebarSlot } from '@/components/Sidebar';
 import { ActionPanel } from '@/components/Sidebar/ActionPanel';
 import { ToastNotifications } from '@/components/ToastNotifications';
-import { getPreferences } from '@/features/preferences/api';
-import { PreferencesInitializer } from '@/features/preferences/PreferencesInitializer';
-import { ThemeSynchronizer } from '@/features/preferences/ThemeSynchronizer';
-import { Preferences } from '@/features/preferences/types';
+import { getPreferences } from '@/features/settings/api';
+import { PreferencesInitializer } from '@/features/settings/components/PreferencesInitializer';
+import { ThemeSynchronizer } from '@/features/settings/components/ThemeSynchronizer';
+import { Preferences } from '@/features/settings/types';
 import { getSession } from '@/lib/session';
 
 import './globals.css';

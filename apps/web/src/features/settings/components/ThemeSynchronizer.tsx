@@ -5,10 +5,12 @@ import { useEffect } from 'react';
 import { usePreferences } from '../queries';
 
 export function ThemeSynchronizer() {
-  const { data } = usePreferences();
+  const { data, isLoading } = usePreferences();
   const theme = data?.theme ?? null;
 
   useEffect(() => {
+    if (isLoading) return;
+
     const html = document.documentElement;
     html.classList.remove('light', 'dark');
 
@@ -26,7 +28,7 @@ export function ThemeSynchronizer() {
     applySystemTheme(mediaQuery);
     mediaQuery.addEventListener('change', applySystemTheme);
     return () => mediaQuery.removeEventListener('change', applySystemTheme);
-  }, [theme]);
+  }, [theme, isLoading]);
 
   return null;
 }

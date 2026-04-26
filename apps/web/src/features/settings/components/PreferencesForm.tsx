@@ -58,8 +58,8 @@ const TIME_FORMAT_OPTIONS: IconToggleOption<string>[] = [
   { value: TimeFormat.TWENTY_FOUR_HOUR, label: '24-hour clock', icon: makeTextIcon('24h') },
 ];
 
-export function SettingsForm() {
-  const { data: preferences, isLoading } = usePreferences();
+export function PreferencesForm() {
+  const { data: preferences, isLoading, isError } = usePreferences();
   const { mutate: updatePreferences, isPending } = useUpdatePreferences();
 
   const handleChange = (body: UpdatePreferencesBody) => {
@@ -74,6 +74,14 @@ export function SettingsForm() {
     return (
       <div className="flex w-full justify-center p-8">
         <Spinner size="large" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-danger text-danger-foreground border-danger-ring flex w-full flex-col rounded-md border p-4 shadow-sm">
+        Failed to load preferences. Please try again later.
       </div>
     );
   }

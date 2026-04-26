@@ -6408,6 +6408,7 @@ __metadata:
     "@nestjs/testing": "npm:^11.0.1"
     "@nestjs/throttler": "npm:^6.5.0"
     "@prisma/adapter-pg": "npm:^7.2.0"
+    "@repo/constants": "workspace:*"
     "@repo/db": "workspace:*"
     "@repo/eslint-config": "workspace:*"
     "@repo/nestjs-common": "workspace:*"

@@ -73,7 +73,9 @@ const useCreateItem = () => {
       return { previousItems, optimisticId };
     },
     onError: (_error, _body, context) => {
-      queryClient.setQueryData(['items'], context?.previousItems);
+      if (context?.previousItems !== undefined) {
+        queryClient.setQueryData(['items'], context.previousItems);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
@@ -119,7 +121,9 @@ const useUpdateItem = () => {
       return { previousItems };
     },
     onError: (_error, _body, context) => {
-      queryClient.setQueryData(['items'], context?.previousItems);
+      if (context?.previousItems !== undefined) {
+        queryClient.setQueryData(['items'], context.previousItems);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
@@ -157,7 +161,9 @@ const useDeleteItem = () => {
       return { previousItems };
     },
     onError: (_error, _id, context) => {
-      queryClient.setQueryData(['items'], context?.previousItems);
+      if (context?.previousItems !== undefined) {
+        queryClient.setQueryData(['items'], context.previousItems);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });

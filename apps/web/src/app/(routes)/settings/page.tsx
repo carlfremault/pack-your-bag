@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { SettingsForm } from '@/features/preferences/components/SettingsForm';
+import SettingsView from '@/features/settings/components/SettingsView';
 
 export const metadata: Metadata = {
   title: 'Settings',
@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-32 md:p-6">
-      <h1 className="text-primary text-xl font-semibold">Settings</h1>
-      <SettingsForm />
+    <div className="flex min-h-full w-full justify-center pb-32 lg:pb-0">
+      <h1 className="sr-only">Settings</h1>
+      <SettingsView />
     </div>
   );
 }

@@ -1,17 +1,9 @@
 import { schemas } from '@repo/auth-client';
+import { PASSWORD_MESSAGE, PASSWORD_REGEX } from '@repo/constants';
 
 import { z } from 'zod';
 
-// This needs to be aligned with the password validation in the auth-service
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-const passwordField = z
-  .string()
-  .min(8)
-  .max(128)
-  .regex(
-    PASSWORD_REGEX,
-    'Password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long. Special characters are allowed.',
-  );
+const passwordField = z.string().min(8).max(128).regex(PASSWORD_REGEX, PASSWORD_MESSAGE);
 
 export const loginSchema = schemas.AuthCredentialsDto.extend({
   password: passwordField,
@@ -26,3 +18,10 @@ export const registerSchema = loginSchema
   });
 export const passwordForgottenSchema = schemas.AuthForgotPasswordDto;
 export const resendVerificationEmailSchema = schemas.AuthResendVerificationEmailDto;
+export const updatePasswordSchema = schemas.UpdatePasswordDto.extend({
+  newPassword: passwordField,
+  confirmPassword: passwordField,
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Passwords do not match.',
+  path: ['confirmPassword'],
+});

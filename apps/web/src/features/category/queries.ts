@@ -74,7 +74,9 @@ const useCreateCategory = () => {
       return { previousCategories };
     },
     onError: (_error, _body, context) => {
-      queryClient.setQueryData(['categories'], context?.previousCategories);
+      if (context?.previousCategories !== undefined) {
+        queryClient.setQueryData(['categories'], context.previousCategories);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -123,7 +125,9 @@ const useUpdateCategory = () => {
       return { previousCategories };
     },
     onError: (_error, _body, context) => {
-      queryClient.setQueryData(['categories'], context?.previousCategories);
+      if (context?.previousCategories !== undefined) {
+        queryClient.setQueryData(['categories'], context.previousCategories);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -183,7 +187,9 @@ const useDeleteCategory = () => {
       return { previousCategories };
     },
     onError: (_error, _id, context) => {
-      queryClient.setQueryData(['categories'], context?.previousCategories);
+      if (context?.previousCategories !== undefined) {
+        queryClient.setQueryData(['categories'], context.previousCategories);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
