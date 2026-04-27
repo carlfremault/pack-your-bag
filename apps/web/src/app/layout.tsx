@@ -4,8 +4,6 @@ import Link from 'next/link';
 
 import { Sidebar } from '@repo/react-common/sidebar';
 
-import { dehydrate, QueryClient } from '@tanstack/react-query';
-
 import { DesktopNav } from '@/components/Navigation/DesktopNav';
 import { MobileHeader } from '@/components/Navigation/MobileHeader';
 import { MobileNav } from '@/components/Navigation/MobileNav';
@@ -17,7 +15,6 @@ import { ToastNotifications } from '@/components/ToastNotifications';
 import { getPreferences } from '@/features/settings/api';
 import { PreferencesInitializer } from '@/features/settings/components/PreferencesInitializer';
 import { ThemeSynchronizer } from '@/features/settings/components/ThemeSynchronizer';
-import { Preferences } from '@/features/settings/types';
 import { getSession } from '@/lib/session';
 
 import './globals.css';
@@ -40,20 +37,13 @@ export default async function RootLayout({
   const session = await getSession();
   const isLoggedIn = session.isLoggedIn ?? false;
 
-  const queryClient = new QueryClient();
-  if (isLoggedIn) {
-    await queryClient.prefetchQuery({
-      queryKey: ['preferences'],
-      queryFn: getPreferences,
-    });
-  }
-  const dehydratedState = dehydrate(queryClient);
-  const theme = queryClient.getQueryData<Preferences>(['preferences'])?.theme;
+  const preferences = isLoggedIn ? await getPreferences().catch(() => null) : null;
+  const theme = preferences?.theme;
 
   return (
     <html lang="en" className={[inter.variable, theme].filter(Boolean).join(' ')}>
       <body>
-        <Providers dehydratedState={dehydratedState}>
+        <Providers>
           <div className="flex h-screen flex-col lg:flex-row">
             <div className="hidden w-1/4 min-w-80 lg:block">
               <Sidebar linkAs={Link}>
