@@ -11,6 +11,8 @@ import { ApiError } from '../errors';
 
 import { getProductConfig } from './product-config';
 
+import 'server-only';
+
 export async function getProductClient() {
   const { productServiceUrl, bffSecret } = getProductConfig();
 
@@ -19,7 +21,10 @@ export async function getProductClient() {
 
   if (!accessToken) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
 
-  const client = createClient<paths>({ baseUrl: productServiceUrl });
+  const client = createClient<paths>({
+    baseUrl: productServiceUrl,
+    fetch: (input: Request) => fetch(new Request(input, { cache: 'no-store' })),
+  });
   client.use({
     async onRequest({ request }) {
       request.headers.set('Authorization', `Bearer ${accessToken}`);
