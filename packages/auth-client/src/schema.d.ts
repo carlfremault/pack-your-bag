@@ -761,13 +761,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Missing or invalid BFF secret. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Rate limit exceeded. */
       429: {
         headers: {
@@ -805,7 +798,7 @@ export interface operations {
         content?: never;
       };
       /** @description Missing or invalid BFF secret. */
-      403: {
+      401: {
         headers: {
           [name: string]: unknown;
         };

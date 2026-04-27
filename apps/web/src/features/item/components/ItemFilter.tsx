@@ -148,7 +148,8 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
                     options={SORT_FIELD_OPTIONS}
                     value={filterState.sortField}
                     onChange={(v) => {
-                      if (v) onChange({ sortField: v as ItemFilterState['sortField'] });
+                      if (v !== undefined)
+                        onChange({ sortField: v as ItemFilterState['sortField'] });
                     }}
                   />
                 </div>
@@ -157,7 +158,10 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
                     label="Sort order"
                     options={SORT_DIRECTION_OPTIONS}
                     value={filterState.sortDirection}
-                    onChange={(v) => onChange({ sortDirection: v })}
+                    onChange={(v) => {
+                      if (v !== undefined)
+                        onChange({ sortDirection: v as ItemFilterState['sortDirection'] });
+                    }}
                   />
                 </div>
               </div>

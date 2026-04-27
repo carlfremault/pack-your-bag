@@ -8,6 +8,7 @@ import { extractErrorMessage, extractErrorType } from '@/utils/extractApiErrorDe
 
 import { AuthApiError } from './errors';
 import {
+  DeleteAccountBody,
   LoginBody,
   LoginResponse,
   PasswordForgottenBody,
@@ -82,6 +83,23 @@ export async function updatePassword(body: UpdatePasswordBody): Promise<LoginRes
     }
     if (!data) throw new ApiError('No data returned', 500);
     return data as LoginResponse;
+  } catch (e) {
+    if (e instanceof ApiError) throw e;
+    throw new ApiError('Authentication service unavailable', 503);
+  }
+}
+
+export async function deleteAccount(body: DeleteAccountBody): Promise<void> {
+  const authClient = await getAccessTokenAuthClient();
+
+  try {
+    const { error, response } = await authClient.POST('/user/delete', {
+      body,
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) {
+      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
+    }
   } catch (e) {
     if (e instanceof ApiError) throw e;
     throw new ApiError('Authentication service unavailable', 503);

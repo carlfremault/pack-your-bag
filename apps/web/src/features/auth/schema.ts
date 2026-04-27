@@ -43,3 +43,4 @@ export const resetPasswordSchema = schemas.AuthResetPasswordDto.extend({
   message: 'Passwords do not match.',
   path: ['confirmPassword'],
 });
+export const deleteAccountSchema = schemas.DeleteUserDto;

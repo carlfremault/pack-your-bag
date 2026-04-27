@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useId, useRef, useSt
 import { createPortal } from 'react-dom';
 import { MdClose } from 'react-icons/md';
 
-import { Button, ButtonColor, ButtonSize } from '@repo/react-common/button';
+import { Button, ButtonColor, ButtonSize, ButtonVariant } from '@repo/react-common/button';
 
 import classNames from 'classnames';
 
@@ -101,18 +101,19 @@ function ModalRoot(props: RootProps) {
 
 type TriggerProps = {
   color?: ButtonColor;
+  variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
   children: React.ReactNode;
 };
 
 function ModalTrigger(props: TriggerProps) {
-  const { color = 'primary', size = 'medium', className, children } = props;
+  const { color = 'primary', variant = 'solid', size = 'medium', className, children } = props;
 
   const { openModal } = useModal();
 
   return (
-    <Button className={className} onClick={openModal} color={color} size={size}>
+    <Button className={className} onClick={openModal} color={color} variant={variant} size={size}>
       {children}
     </Button>
   );
@@ -124,6 +125,7 @@ function ModalTrigger(props: TriggerProps) {
 
 type ContentProps = {
   title?: string;
+  titleColor?: 'primary' | 'danger';
   className?: string;
   ariaLabel?: string;
   role?: 'dialog' | 'alertdialog';
@@ -137,6 +139,7 @@ const FOCUSABLE =
 function ModalContent(props: ContentProps) {
   const {
     title,
+    titleColor = 'primary',
     className,
     ariaLabel = 'Modal dialog',
     role = 'dialog',
@@ -187,6 +190,10 @@ function ModalContent(props: ContentProps) {
     'bg-surface border-primary-ring max-h-full w-full max-w-lg overflow-y-auto rounded-md border p-4 shadow-lg',
     className,
   );
+  const titleClassName = classNames(
+    'text-xl',
+    titleColor === 'danger' ? 'text-danger' : 'text-primary',
+  );
 
   return createPortal(
     <div
@@ -206,7 +213,7 @@ function ModalContent(props: ContentProps) {
       >
         <div className="mb-4 flex w-full justify-between">
           {title && (
-            <h2 id={titleId} className="text-primary text-xl">
+            <h2 id={titleId} className={titleClassName}>
               {title}
             </h2>
           )}
