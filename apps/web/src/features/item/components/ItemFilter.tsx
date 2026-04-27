@@ -138,7 +138,8 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
                   options={categoryOptions}
                   value={filterState.categoryId}
                   onChange={(v) => onChange({ categoryId: v })}
-                  placeholder="All categories"
+                  placeholder={categories?.length === 0 ? 'No categories yet' : 'All categories'}
+                  disabled={!!categories && categories.length === 0}
                 />
               </div>
               <div className="flex gap-4 md:contents">

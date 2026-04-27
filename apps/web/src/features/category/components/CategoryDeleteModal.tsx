@@ -49,7 +49,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
           onConfirm={confirmDeleteCategory}
           closeForm={onClose}
         >
-          <div id="confirmation-dialog-desc">
+          <div id="confirmation-dialog-desc" className="text-primary">
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <Spinner size="small" />
