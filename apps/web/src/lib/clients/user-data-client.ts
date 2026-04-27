@@ -11,6 +11,8 @@ import { ApiError } from '../errors';
 
 import { getUserDataConfig } from './user-data-config';
 
+import 'server-only';
+
 export async function getUserDataClient() {
   const { userDataServiceUrl, bffSecret } = getUserDataConfig();
 
@@ -19,7 +21,10 @@ export async function getUserDataClient() {
 
   if (!accessToken) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
 
-  const client = createClient<paths>({ baseUrl: userDataServiceUrl });
+  const client = createClient<paths>({
+    baseUrl: userDataServiceUrl,
+    fetch: (input: Request) => fetch(new Request(input, { cache: 'no-store' })),
+  });
   client.use({
     async onRequest({ request }) {
       request.headers.set('Authorization', `Bearer ${accessToken}`);
