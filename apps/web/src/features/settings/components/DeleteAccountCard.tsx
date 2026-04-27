@@ -1,8 +1,7 @@
 'use client';
 
 import { Modal } from '@/components/Modal';
-
-import DeleteAccountForm from './DeleteAccountForm';
+import DeleteAccountForm from '@/features/auth/components/DeleteAccountForm';
 
 interface DeleteAccountCardProps {
   locale?: string;

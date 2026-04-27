@@ -9,3 +9,4 @@ export type VerifyEmailBody = RequestBody<'/auth/verify-email', 'post'>;
 export type UpdatePasswordBody = RequestBody<'/auth/update-password', 'patch'>;
 export type ResetPasswordBody = RequestBody<'/auth/reset-password', 'post'>;
 export type DeleteAccountBody = RequestBody<'/user/delete', 'post'>;
+export type CancelDeletionBody = RequestBody<'/user/cancel-deletion', 'post'>;
