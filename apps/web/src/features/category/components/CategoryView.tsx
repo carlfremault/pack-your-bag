@@ -4,9 +4,9 @@ import { Button } from '@repo/react-common/button';
 
 import { useAllCategories } from '../queries';
 
+import CategoryDeleteModal from './CategoryDeleteModal';
 import { CategoryForm } from './CategoryForm';
 import CategoryTable from './CategoryTable';
-import DeleteCategoryModal from './DeleteCategoryModal';
 
 interface CategoryViewProps {
   onClose: () => void;
@@ -69,7 +69,7 @@ export function CategoryView({ onClose, onTitleChange }: CategoryViewProps) {
           </Button>
         </div>
         {deleteCategoryId && (
-          <DeleteCategoryModal categoryId={deleteCategoryId} onClose={closeDeleteModal} />
+          <CategoryDeleteModal categoryId={deleteCategoryId} onClose={closeDeleteModal} />
         )}
       </>
     );

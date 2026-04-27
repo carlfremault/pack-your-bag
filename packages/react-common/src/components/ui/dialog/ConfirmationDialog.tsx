@@ -28,9 +28,6 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
     <div className="flex flex-col gap-6">
       {children}
       <form onSubmit={handleConfirm} className="flex items-center justify-end gap-2">
-        <SubmitButton color={submitButtonColor} pending={isPending} disabled={disabled}>
-          Confirm
-        </SubmitButton>
         <Button
           variant="outline"
           color="primary"
@@ -40,6 +37,9 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
         >
           Cancel
         </Button>
+        <SubmitButton color={submitButtonColor} pending={isPending} disabled={disabled}>
+          Confirm
+        </SubmitButton>
       </form>
     </div>
   );

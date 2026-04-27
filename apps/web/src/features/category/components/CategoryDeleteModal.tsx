@@ -10,12 +10,12 @@ import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useCategoryDeleteImpact, useDeleteCategory } from '../queries';
 
-interface DeleteCategoryModalProps {
+interface CategoryDeleteModalProps {
   categoryId: string;
   onClose: () => void;
 }
 
-export default function DeleteCategoryModal(props: DeleteCategoryModalProps) {
+export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
   const { categoryId, onClose } = props;
   const { data, isLoading, isError } = useCategoryDeleteImpact(categoryId);
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();

@@ -43,6 +43,11 @@ export async function logout(): Promise<void> {
   await authClient.DELETE('/auth/logout');
 }
 
+export async function logoutAll(): Promise<void> {
+  const authClient = await getAccessTokenAuthClient();
+  await authClient.DELETE('/auth/logout-all');
+}
+
 export async function register(body: RegisterBody): Promise<void> {
   await postPublicAuthRequest('/auth/register', body);
 }

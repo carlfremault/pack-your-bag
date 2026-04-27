@@ -8,6 +8,7 @@ import { getSession } from '@/lib/session';
 import {
   login,
   logout,
+  logoutAll,
   passwordForgotten,
   register,
   resendVerificationEmail,
@@ -99,12 +100,27 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
 export async function logoutAction() {
   const session = await getSession();
 
-  if (session.isLoggedIn && session.refreshToken) {
-    try {
-      await logout();
-    } catch {
-      // Best-effort: destroy the local session regardless of the upstream call
-    }
+  try {
+    await logout();
+  } catch {
+    // Best-effort: destroy the local session regardless of the upstream call
+  }
+
+  session.destroy();
+  redirect('/login');
+}
+
+// ============================================
+// LOGOUT ALL DEVICES
+// ============================================
+
+export async function logoutAllAction() {
+  const session = await getSession();
+
+  try {
+    await logoutAll();
+  } catch {
+    // Best-effort: destroy the local session regardless of the upstream call
   }
 
   session.destroy();
