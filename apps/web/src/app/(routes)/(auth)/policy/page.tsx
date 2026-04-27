@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { BackLink } from '@/components/Navigation/BackLink';
+
 export const metadata: Metadata = {
   title: 'Terms & Privacy Notice',
   description: 'Terms of Service and Privacy Notice for PackYourBag',
@@ -8,6 +10,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="bg-surface flex flex-col gap-4 p-4 pb-32 md:p-6">
+      <BackLink className="mb-4" />
       <h1 className="text-primary text-xl font-semibold">Terms &amp; Privacy Notice</h1>
 
       {/* Terms of Service */}
@@ -75,12 +78,22 @@ export default function Page() {
       </h2>
 
       <section className="flex flex-col gap-2">
-        <h3 className="text-primary font-medium">What we store</h3>
+        <h3 className="text-primary font-medium">Data controller</h3>
+        <p className="text-foreground text-sm">
+          The data controller for PackYourBag is &lt;your name&gt;. You can contact us about privacy
+          matters at &lt;privacy contact email&gt;.
+        </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h3 className="text-primary font-medium">What we store and why</h3>
         <p className="text-foreground text-sm">
           Your email address and a securely hashed password — we never store your password in
-          plaintext. We also store your in-app preferences (display settings, units) and any trips,
-          packs, collections and items you create. All data is stored on servers within the European
-          Union.
+          plaintext. We process this to provide you with your account (legal basis: performance of a
+          contract). We also store your in-app preferences (display settings, units) and any trips,
+          packs, collections and items you create (legal basis: performance of a contract). Security
+          and activity logs are kept to protect your account against unauthorised access (legal
+          basis: legitimate interest). All data is stored on servers within the European Union.
         </p>
       </section>
 
@@ -141,7 +154,31 @@ export default function Page() {
         <h3 className="text-primary font-medium">No tracking or advertising</h3>
         <p className="text-foreground text-sm">
           We use no analytics trackers, advertising networks, or third-party tracking cookies of any
-          kind.
+          kind. We do not use your data for automated decision-making or profiling.
+        </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h3 className="text-primary font-medium">Your rights</h3>
+        <p className="text-foreground text-sm">
+          Under the GDPR you have the right to access the personal data we hold about you, have
+          inaccurate data corrected, request erasure of your data, restrict or object to how we
+          process it, and receive a copy of your data in a portable format. To exercise any of these
+          rights, contact us at &lt;privacy contact email&gt;. We will respond within 30 days.
+        </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h3 className="text-primary font-medium">Right to complain</h3>
+        <p className="text-foreground text-sm">
+          If you believe we are handling your personal data unlawfully, you have the right to lodge
+          a complaint with the Belgian Data Protection Authority (
+          <em>Gegevensbeschermingsautoriteit</em> / <em>Autorité de protection des données</em>):{' '}
+          <a href="https://www.dataprotectionauthority.be" className="underline">
+            www.dataprotectionauthority.be
+          </a>
+          . If you reside in another EU member state, you may also contact your local supervisory
+          authority.
         </p>
       </section>
     </div>

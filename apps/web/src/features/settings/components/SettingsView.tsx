@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import Link from 'next/link';
 
 import PasswordUpdateForm from '@/features/auth/components/PasswordUpdateForm';
 import { extractLocaleFromHeaders } from '@/utils/extractLocaleFromHeaders';
@@ -20,6 +21,12 @@ export default async function SettingsView() {
       <LogoutAllDevicesCard />
       <h2 className="text-primary text-xl font-semibold">Delete account</h2>
       <DeleteAccountCard locale={locale} />
+      <h2 className="text-primary text-xl font-semibold">Legal</h2>
+      <div className="bg-surface border-primary-ring flex w-full flex-col gap-6 rounded-md border p-4 shadow-sm transition-opacity disabled:opacity-50">
+        <Link href="/policy" className="text-primary text-sm underline">
+          Terms &amp; Privacy Notice
+        </Link>
+      </div>
     </div>
   );
 }
