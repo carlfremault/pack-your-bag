@@ -127,7 +127,7 @@ describe('PreferencesService', () => {
 
       expect(mockPreferenceModel.findOneAndUpdate).toHaveBeenCalledWith(
         { userId },
-        { ...dto, userId },
+        { $set: { userId, units: Units.IMPERIAL } },
         { returnDocument: 'after' },
       );
       expect(result).toEqual(mockResult);
@@ -142,10 +142,38 @@ describe('PreferencesService', () => {
 
       expect(mockPreferenceModel.findOneAndUpdate).toHaveBeenCalledWith(
         { userId },
-        { ...dto, userId },
+        { $set: { userId, theme: Theme.DARK } },
         { returnDocument: 'after' },
       );
       expect(result).toBeNull();
+    });
+
+    it('should add null fields to $unset', async () => {
+      const userId = 'user-1';
+      const dto: UpdatePreferencesDto = { theme: null };
+      mockPreferenceModel.findOneAndUpdate.mockResolvedValue({ userId });
+
+      await service.updatePreference(userId, dto);
+
+      expect(mockPreferenceModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { userId },
+        { $set: { userId }, $unset: { theme: 1 } },
+        { returnDocument: 'after' },
+      );
+    });
+
+    it('should separate null fields into $unset and non-null fields into $set', async () => {
+      const userId = 'user-1';
+      const dto: UpdatePreferencesDto = { units: Units.METRIC, theme: null };
+      mockPreferenceModel.findOneAndUpdate.mockResolvedValue({ userId, units: 'metric' });
+
+      await service.updatePreference(userId, dto);
+
+      expect(mockPreferenceModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { userId },
+        { $set: { userId, units: Units.METRIC }, $unset: { theme: 1 } },
+        { returnDocument: 'after' },
+      );
     });
 
     it('should spread all provided fields into the update payload', async () => {
@@ -161,7 +189,14 @@ describe('PreferencesService', () => {
 
       expect(mockPreferenceModel.findOneAndUpdate).toHaveBeenCalledWith(
         { userId },
-        { units: 'metric', theme: 'dark', timeFormat: '12h', userId },
+        {
+          $set: {
+            userId,
+            units: Units.METRIC,
+            theme: Theme.DARK,
+            timeFormat: TimeFormat.TWELVE_HOUR,
+          },
+        },
         { returnDocument: 'after' },
       );
     });

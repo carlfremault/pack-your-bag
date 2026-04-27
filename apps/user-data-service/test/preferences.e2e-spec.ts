@@ -258,6 +258,21 @@ describe('Preferences (e2e)', () => {
       expect(body).not.toHaveProperty('userId');
     });
 
+    it('should unset a nullable field when patched with null', async () => {
+      await ctx.preferencesHelpers.createPreferences({
+        payload: preferencesDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.preferencesHelpers.updatePreferences({
+        payload: { theme: null },
+        accessToken: validAccessToken,
+      });
+
+      expect(body).toMatchObject({ userId });
+      expect(body).not.toHaveProperty('theme');
+    });
+
     it('should return 401 if not authenticated', async () => {
       const { body } = await ctx.preferencesHelpers.updatePreferences({
         payload: { theme: Theme.DARK },
