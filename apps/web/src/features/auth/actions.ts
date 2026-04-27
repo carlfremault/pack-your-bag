@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/errors';
 import { getSession } from '@/lib/session';
 
 import {
+  deleteAccount,
   login,
   logout,
   logoutAll,
@@ -17,6 +18,7 @@ import {
 } from './api';
 import { AuthApiError } from './errors';
 import {
+  deleteAccountSchema,
   loginSchema,
   passwordForgottenSchema,
   registerSchema,
@@ -370,4 +372,49 @@ export async function resetPasswordAction(
   }
 
   return { success: true };
+}
+
+// ============================================
+// DELETE ACCOUNT
+// ============================================
+
+export type DeleteAccountState = {
+  fieldErrors?: {
+    password?: string;
+  };
+  formError?: string;
+} | null;
+export async function deleteAccountAction(
+  locale: string | undefined,
+  _prevState: DeleteAccountState,
+  formData: FormData,
+): Promise<DeleteAccountState> {
+  const raw = {
+    password: formData.get('password') as string | null,
+    locale,
+  };
+
+  const parsed = deleteAccountSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    const fieldErrors: NonNullable<DeleteAccountState>['fieldErrors'] = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (field === 'password') {
+        fieldErrors[field] ??= issue.message;
+      }
+    }
+    return { fieldErrors };
+  }
+
+  const session = await getSession();
+
+  try {
+    await deleteAccount(parsed.data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
+  }
+
+  session.destroy();
+  redirect('/login');
 }

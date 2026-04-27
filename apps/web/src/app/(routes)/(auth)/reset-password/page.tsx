@@ -5,6 +5,7 @@ import { Alert } from '@repo/react-common/alert';
 import { CenteredSurfaceCard } from '@repo/react-common/card';
 
 import ResetPasswordForm from '@/features/auth/components/ResetPasswordForm';
+import { extractLocaleFromHeaders } from '@/utils/extractLocaleFromHeaders';
 
 export const metadata: Metadata = {
   title: 'Reset password',
@@ -19,8 +20,7 @@ export default async function Page({
   const params = await searchParams;
   const token = params.token;
 
-  const rawLocale = (await headers()).get('accept-language')?.split(',')[0]?.split(';')[0]?.trim();
-  const locale = rawLocale?.split('-').slice(0, 2).join('-');
+  const locale = extractLocaleFromHeaders(await headers());
 
   if (!token || typeof token !== 'string') {
     return (
