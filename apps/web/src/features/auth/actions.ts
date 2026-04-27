@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/errors';
 import { getSession } from '@/lib/session';
 
 import {
+  cancelDeletion,
   deleteAccount,
   login,
   logout,
@@ -18,6 +19,7 @@ import {
 } from './api';
 import { AuthApiError } from './errors';
 import {
+  cancelDeletionSchema,
   deleteAccountSchema,
   loginSchema,
   passwordForgottenSchema,
@@ -417,4 +419,48 @@ export async function deleteAccountAction(
 
   session.destroy();
   redirect('/login');
+}
+
+// ============================================
+// CANCEL ACCOUNT DELETION
+// ============================================
+
+export type CancelAccountDeletionState = {
+  fieldErrors?: {
+    password?: string;
+  };
+  formError?: string;
+  success?: boolean;
+} | null;
+
+export async function cancelAccountDeletionAction(
+  token: string,
+  _prevState: CancelAccountDeletionState,
+  formData: FormData,
+): Promise<CancelAccountDeletionState> {
+  const raw = {
+    token,
+    password: formData.get('password') as string | null,
+  };
+
+  const parsed = cancelDeletionSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    const fieldErrors: NonNullable<CancelAccountDeletionState>['fieldErrors'] = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (field === 'password') {
+        fieldErrors[field] ??= issue.message;
+      }
+    }
+    return { fieldErrors };
+  }
+
+  try {
+    await cancelDeletion(parsed.data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
+  }
+
+  return { success: true };
 }

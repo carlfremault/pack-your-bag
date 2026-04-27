@@ -8,6 +8,7 @@ import { extractErrorMessage, extractErrorType } from '@/utils/extractApiErrorDe
 
 import { AuthApiError } from './errors';
 import {
+  CancelDeletionBody,
   DeleteAccountBody,
   LoginBody,
   LoginResponse,
@@ -106,6 +107,10 @@ export async function deleteAccount(body: DeleteAccountBody): Promise<void> {
   }
 }
 
+export async function cancelDeletion(body: CancelDeletionBody): Promise<void> {
+  await postPublicAuthRequest('/user/cancel-deletion', body);
+}
+
 // ------------------------------------------------------------
 // Helper functions
 // ------------------------------------------------------------
@@ -115,14 +120,16 @@ type PublicAuthRequestEndpoints =
   | '/auth/forgot-password'
   | '/auth/resend-verification-email'
   | '/auth/verify-email'
-  | '/auth/reset-password';
+  | '/auth/reset-password'
+  | '/user/cancel-deletion';
 
 type PublicAuthRequestBody =
   | RegisterBody
   | PasswordForgottenBody
   | ResendVerificationEmailBody
   | VerifyEmailBody
-  | ResetPasswordBody;
+  | ResetPasswordBody
+  | CancelDeletionBody;
 
 async function postPublicAuthRequest(
   endpoint: PublicAuthRequestEndpoints,

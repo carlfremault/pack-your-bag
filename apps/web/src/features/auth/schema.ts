@@ -44,3 +44,4 @@ export const resetPasswordSchema = schemas.AuthResetPasswordDto.extend({
   path: ['confirmPassword'],
 });
 export const deleteAccountSchema = schemas.DeleteUserDto;
+export const cancelDeletionSchema = schemas.CancelDeletionDto;

@@ -238,7 +238,7 @@ export class UserService {
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        throw new InvalidTokenException();
+        throw new UnauthorizedException('Invalid password');
       }
 
       await this.updateUser({ id: user.id }, { isDeleted: false, deletedAt: null }, tx);

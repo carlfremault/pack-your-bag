@@ -10,6 +10,7 @@ export const PUBLIC_PATHS = [
   '/verify-email',
   '/email-not-verified',
   '/reset-password',
+  '/cancel-deletion',
 ];
 
 // Public routes where authenticated users should be redirected to /items.
@@ -21,4 +22,5 @@ export const AUTH_REDIRECT_PATHS = [
   '/verify-email',
   '/email-not-verified',
   '/reset-password',
+  '/cancel-deletion',
 ];
