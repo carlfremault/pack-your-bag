@@ -12,22 +12,49 @@ export function ThemeSynchronizer() {
     if (isLoading || isError) return;
 
     const html = document.documentElement;
-    html.classList.remove('light', 'dark');
+
+    function applyTheme(e?: MediaQueryList | MediaQueryListEvent) {
+      html.classList.remove('light', 'dark');
+      if (theme) {
+        html.classList.add(theme);
+      } else {
+        const source = e ?? window.matchMedia('(prefers-color-scheme: dark)');
+        html.classList.add(source.matches ? 'dark' : 'light');
+      }
+    }
+
+    applyTheme();
+
+    // Guard against RSC reconciliation overwriting the theme class between React
+    // commits and the next effect run. The observer corrects the class immediately
+    // (as a microtask, before paint) whenever an external change undoes our work.
+    let guarded = false;
+    const observer = new MutationObserver(() => {
+      if (guarded) return;
+      const prefersDark = !theme && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const expected = theme ?? (prefersDark ? 'dark' : 'light');
+      if (!html.classList.contains(expected)) {
+        guarded = true;
+        applyTheme();
+        queueMicrotask(() => {
+          guarded = false;
+        });
+      }
+    });
+    observer.observe(html, { attributes: true, attributeFilter: ['class'] });
 
     if (theme) {
-      html.classList.add(theme);
-      return;
+      return () => observer.disconnect();
     }
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const applySystemTheme = (e: MediaQueryList | MediaQueryListEvent) => {
-      html.classList.remove('light', 'dark');
-      html.classList.add(e.matches ? 'dark' : 'light');
-    };
+    const onSystemChange = (e: MediaQueryListEvent) => applyTheme(e);
+    mediaQuery.addEventListener('change', onSystemChange);
 
-    applySystemTheme(mediaQuery);
-    mediaQuery.addEventListener('change', applySystemTheme);
-    return () => mediaQuery.removeEventListener('change', applySystemTheme);
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', onSystemChange);
+    };
   }, [theme, isLoading, isError]);
 
   return null;
