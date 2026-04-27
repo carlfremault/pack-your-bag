@@ -131,7 +131,8 @@ export default function ItemForm(props: ItemFormProps) {
         <InputSelect
           label="Category"
           isClearable
-          placeholder="Select a category"
+          placeholder={categories?.length === 0 ? 'No categories yet' : 'Select a category'}
+          disabled={!!categories && categories.length === 0}
           options={categoryOptions}
           value={formValues.categoryId}
           onChange={(value) => handleFieldChange('categoryId', value)}
