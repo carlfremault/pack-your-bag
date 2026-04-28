@@ -40,7 +40,7 @@ export const SidebarProvider = ({ children }: { children: React.ReactNode }) => 
 
 export const SidebarSlot = () => {
   const { setTarget } = useSidebar();
-  return <div ref={setTarget} className="w-full" />;
+  return <div ref={setTarget} className="flex min-h-0 w-full flex-1 flex-col justify-center" />;
 };
 
 // ------------------------------------------------------------

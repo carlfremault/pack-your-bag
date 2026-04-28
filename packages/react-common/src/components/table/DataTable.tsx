@@ -38,7 +38,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
         scrollable && 'flex h-full',
       )}
     >
-      <div className={scrollable ? 'flex-1 overflow-y-auto' : undefined}>
+      <div className={classNames(scrollable && 'flex-1 overflow-y-auto')}>
         <table className="w-full table-fixed border-collapse">
           <thead
             className={classNames(

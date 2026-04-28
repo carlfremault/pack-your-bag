@@ -8,7 +8,7 @@ export function Sidebar(props: SidebarProps) {
   const { linkAs: LinkComponent = 'a', children } = props;
 
   return (
-    <aside className="border-info-ring bg-surface flex h-full min-w-64 flex-1 flex-col border-r px-4 py-3 shadow-sm">
+    <aside className="border-info-ring bg-surface flex h-full min-w-64 flex-1 flex-col gap-16 border-r px-4 py-3 shadow-sm">
       <div className="self-start">
         <LinkComponent
           href="/"
@@ -18,7 +18,7 @@ export function Sidebar(props: SidebarProps) {
           <Logo />
         </LinkComponent>
       </div>
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center">
+      <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col items-center justify-center">
         {children}
       </div>
     </aside>
