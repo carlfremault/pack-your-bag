@@ -55,6 +55,11 @@ export default function CategoryTable(props: CategoryTableProps) {
   return isLoading ? (
     <CategoryTableSkeleton />
   ) : (
-    <DataTable data={categories} columns={columns} emptyStateLabel="No categories found" />
+    <DataTable
+      data={categories}
+      columns={columns}
+      emptyStateLabel="No categories found"
+      scrollable
+    />
   );
 }

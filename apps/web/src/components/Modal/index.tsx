@@ -187,7 +187,7 @@ function ModalContent(props: ContentProps) {
   if (!isOpen || typeof document === 'undefined') return null;
 
   const modalContentClassName = classNames(
-    'bg-surface border-primary-ring max-h-full w-full max-w-lg overflow-y-auto rounded-md border p-4 shadow-lg',
+    'bg-surface border-primary-ring flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-md border p-4 shadow-lg',
     className,
   );
   const titleClassName = classNames(
@@ -197,7 +197,7 @@ function ModalContent(props: ContentProps) {
 
   return createPortal(
     <div
-      className="bg-primary-ring/50 fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="bg-primary-ring/50 fixed inset-0 z-50 flex items-center justify-center px-4 py-16"
       onClick={(e) => {
         if (e.target === e.currentTarget) closeModal();
       }}
@@ -227,7 +227,9 @@ function ModalContent(props: ContentProps) {
             <MdClose size={24} />
           </Button>
         </div>
-        <div>{typeof children === 'function' ? children(closeModal) : children}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          {typeof children === 'function' ? children(closeModal) : children}
+        </div>
       </div>
     </div>,
     document.body,

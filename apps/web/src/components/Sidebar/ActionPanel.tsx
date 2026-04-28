@@ -93,7 +93,7 @@ function ActionPanelInner() {
     return (
       <SidebarPortal>
         {panelContent ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex h-full flex-col gap-4">
             {desktopTitle && <h2 className="text-primary text-xl">{desktopTitle}</h2>}
             {panelContent}
           </div>

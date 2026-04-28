@@ -66,12 +66,14 @@ export function CategoryView({
   if (mode === 'table') {
     content = (
       <>
-        <CategoryTable
-          categories={data}
-          isLoading={isLoading}
-          onEditCategory={handleEditCategory}
-          onDeleteCategory={handleDeleteCategory}
-        />
+        <div className="min-h-0 flex-1">
+          <CategoryTable
+            categories={data}
+            isLoading={isLoading}
+            onEditCategory={handleEditCategory}
+            onDeleteCategory={handleDeleteCategory}
+          />
+        </div>
         <Button className="w-full" onClick={handleAddCategory}>
           Add Category
         </Button>
@@ -100,5 +102,5 @@ export function CategoryView({
     );
   }
 
-  return <div className="flex h-full max-h-[80vh] flex-col justify-center gap-4">{content}</div>;
+  return <div className="flex min-h-0 flex-1 flex-col gap-4">{content}</div>;
 }
