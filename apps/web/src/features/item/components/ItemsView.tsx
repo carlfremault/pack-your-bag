@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -13,15 +13,9 @@ import ItemDeleteModal from './ItemDeleteModal';
 import { ItemFilter, ItemFilterState } from './ItemFilter';
 import MobileItemsList from './MobileItemsList';
 
-const DEFAULT_FILTER_STATE: ItemFilterState = {
-  search: '',
-  categoryId: '',
-  sortField: 'name',
-  sortDirection: 'asc',
-};
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function ItemsView() {
-  // Hooks
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
@@ -29,13 +23,51 @@ export default function ItemsView() {
 
   const { data = [], isLoading } = useAllItems();
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const [filterState, setFilterState] = useState<ItemFilterState>(DEFAULT_FILTER_STATE);
+
+  // searchDraft gives immediate input feedback; URL is updated with debounce
+  const [searchDraft, setSearchDraft] = useState(() => searchParams.get('search') ?? '');
+  const searchDraftRef = useRef(searchDraft);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync searchDraft on browser back/forward (popstate) so the input matches the restored URL
+  useEffect(() => {
+    const handlePopState = () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+      const urlSearch = new URLSearchParams(window.location.search).get('search') ?? '';
+      searchDraftRef.current = urlSearch;
+      setSearchDraft(urlSearch);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+    };
+  }, []);
+
+  const filterState: ItemFilterState = useMemo(() => {
+    const rawSort = searchParams.get('sort');
+    const rawDir = searchParams.get('dir');
+    return {
+      search: searchParams.get('search') ?? '',
+      category: searchParams.get('category') ?? '',
+      sortField: rawSort === 'weight' || rawSort === 'category' ? rawSort : 'name',
+      sortDirection: rawDir === 'desc' ? 'desc' : 'asc',
+    };
+  }, [searchParams]);
+
+  const displayFilterState: ItemFilterState = { ...filterState, search: searchDraft };
 
   const filteredItems = useMemo(() => {
     let result = [...data];
 
-    if (filterState.search) {
-      const term = filterState.search.toLowerCase();
+    if (searchDraft) {
+      const term = searchDraft.toLowerCase();
       result = result.filter(
         (item) =>
           item.name.toLowerCase().includes(term) ||
@@ -43,8 +75,8 @@ export default function ItemsView() {
       );
     }
 
-    if (filterState.categoryId) {
-      result = result.filter((item) => item.category?.id === filterState.categoryId);
+    if (filterState.category) {
+      result = result.filter((item) => item.category?.name === filterState.category);
     }
 
     result.sort((a, b) => {
@@ -64,11 +96,43 @@ export default function ItemsView() {
     });
 
     return result;
-  }, [data, filterState]);
+  }, [data, searchDraft, filterState.category, filterState.sortField, filterState.sortDirection]);
 
   const handleFilterChange = useCallback(
-    (updates: Partial<ItemFilterState>) => setFilterState((prev) => ({ ...prev, ...updates })),
-    [],
+    (updates: Partial<ItemFilterState>) => {
+      if (updates.search !== undefined) {
+        searchDraftRef.current = updates.search;
+        setSearchDraft(updates.search);
+        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = setTimeout(() => {
+          // Read fresh params at fire time to avoid overwriting concurrent filter changes
+          const params = new URLSearchParams(window.location.search);
+          if (searchDraftRef.current) {
+            params.set('search', searchDraftRef.current);
+          } else {
+            params.delete('search');
+          }
+          router.replace(`${pathname}?${params.toString()}`);
+        }, SEARCH_DEBOUNCE_MS);
+        return;
+      }
+
+      const params = new URLSearchParams(searchParams.toString());
+      if (updates.category !== undefined) {
+        if (updates.category) params.set('category', updates.category);
+        else params.delete('category');
+      }
+      if (updates.sortField !== undefined) {
+        if (updates.sortField !== 'name') params.set('sort', updates.sortField);
+        else params.delete('sort');
+      }
+      if (updates.sortDirection !== undefined) {
+        if (updates.sortDirection !== 'asc') params.set('dir', updates.sortDirection);
+        else params.delete('dir');
+      }
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
   );
 
   const handleEditItem = useCallback(
@@ -105,7 +169,7 @@ export default function ItemsView() {
     return (
       <>
         <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
-          <ItemFilter filterState={filterState} onChange={handleFilterChange} />
+          <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
           <MobileItemsList
             items={filteredItems}
             isLoading={isLoading}
@@ -121,7 +185,7 @@ export default function ItemsView() {
   return (
     <>
       <div className="flex h-full w-full flex-col gap-4 p-4">
-        <ItemFilter filterState={filterState} onChange={handleFilterChange} />
+        <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
           <DesktopItemsTable
             items={filteredItems}
