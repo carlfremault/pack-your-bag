@@ -66,7 +66,7 @@ export function CategoryView({
   if (mode === 'table') {
     content = (
       <>
-        <div className="min-h-0 flex-1">
+        <div className="min-h-0 overflow-hidden">
           <CategoryTable
             categories={data}
             isLoading={isLoading}
@@ -74,10 +74,10 @@ export function CategoryView({
             onDeleteCategory={handleDeleteCategory}
           />
         </div>
-        <Button className="w-full" onClick={handleAddCategory}>
+        <Button className="w-full shrink-0" onClick={handleAddCategory}>
           Add Category
         </Button>
-        <div className="hidden lg:block">
+        <div className="hidden shrink-0 lg:block">
           <Button variant="outline" onClick={onClose} className="w-full">
             Back
           </Button>
