@@ -1,8 +1,11 @@
 'use client';
 
 import toast from 'react-hot-toast';
+import { HiOutlineArrowUpRight } from 'react-icons/hi2';
+import { MdArrowRight } from 'react-icons/md';
+import Link from 'next/link';
 
-import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
+import { Button, SubmitButton } from '@repo/react-common/button';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { Modal } from '@/components/Modal';
@@ -38,7 +41,55 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
 
   const impactedItems = data?.items ?? [];
   const impactedItemsCount = impactedItems.length;
-  const impactMessage = `This category is assigned to ${impactedItemsCount} item${impactedItemsCount === 1 ? '' : 's'}.`;
+  const firstThreeImpactedItems = impactedItems.slice(0, 3);
+
+  let dialogContent: React.ReactNode;
+  if (isLoading) {
+    dialogContent = (
+      <div className="flex items-center justify-center">
+        <Spinner size="small" />
+      </div>
+    );
+  } else if (isError) {
+    dialogContent = (
+      <p className="text-danger">
+        Could not load impact data. You may still proceed with deletion.
+      </p>
+    );
+  } else if (impactedItemsCount === 0) {
+    dialogContent = <p>This category is not assigned to any item.</p>;
+  } else {
+    dialogContent = (
+      <>
+        <div>
+          <p>
+            This category is assigned to{' '}
+            <strong>{`${impactedItemsCount} item${impactedItemsCount === 1 ? '' : 's'}`}</strong>.
+          </p>
+          <p>Deleting it will leave them uncategorized:</p>
+        </div>
+
+        <div className="bg-primary-ring/50 border-info rounded-md border p-1">
+          {firstThreeImpactedItems.map((item) => (
+            <div key={item.id} className="flex items-center">
+              <MdArrowRight className="h-4 w-4" />
+              {item.name}
+            </div>
+          ))}
+          {impactedItemsCount > 3 && <div className="">... and {impactedItemsCount - 3} more.</div>}
+        </div>
+        {impactedItemsCount > 3 && (
+          <Link
+            href={`/items?category=${encodeURIComponent(categoryName)}`}
+            className="text-primary flex items-center gap-2 underline"
+          >
+            View all affected items
+            <HiOutlineArrowUpRight />
+          </Link>
+        )}
+      </>
+    );
+  }
 
   return (
     <Modal.Root open onOpenChange={onClose}>
@@ -46,26 +97,33 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
         title="Delete Category"
         role="alertdialog"
         ariaDescribedBy="confirmation-dialog-desc"
+        className="max-w-md"
       >
-        <ConfirmationDialog
-          isPending={isDeleting}
-          disabled={isLoading || isError}
-          onConfirm={confirmDeleteCategory}
-          closeForm={onClose}
-        >
-          <div id="confirmation-dialog-desc" className="text-primary">
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <Spinner size="small" />
-              </div>
-            ) : (
-              <>
-                <p>{impactMessage}</p>
-                <p>Are you sure you want to delete this category?</p>
-              </>
-            )}
+        <>
+          <div id="confirmation-dialog-desc" className="text-primary mb-6 flex flex-col gap-4 py-4">
+            {dialogContent}
           </div>
-        </ConfirmationDialog>
+          <form onSubmit={confirmDeleteCategory} className="flex items-center gap-2 lg:justify-end">
+            <Button
+              variant="outline"
+              color="primary"
+              type="button"
+              onClick={onClose}
+              disabled={isDeleting}
+              className="w-full lg:w-auto"
+            >
+              Cancel
+            </Button>
+            <SubmitButton
+              color="danger"
+              pending={isDeleting}
+              disabled={isLoading}
+              className="w-full lg:w-auto"
+            >
+              Delete
+            </SubmitButton>
+          </form>
+        </>
       </Modal.Content>
     </Modal.Root>
   );
