@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { Button } from '@repo/react-common/button';
 
 import { useAllCategories } from '../queries';
+import { Category } from '../types';
 
 import CategoryDeleteModal from './CategoryDeleteModal';
 import { CategoryForm } from './CategoryForm';
@@ -11,43 +12,54 @@ import CategoryTable from './CategoryTable';
 interface CategoryViewProps {
   onClose: () => void;
   onTitleChange: (title: string) => void;
+  onCategoryRenamed: (oldName: string, newName: string) => void;
+  onCategoryDeleted: (name: string) => void;
 }
 
-export function CategoryView({ onClose, onTitleChange }: CategoryViewProps) {
+export function CategoryView({
+  onClose,
+  onTitleChange,
+  onCategoryRenamed,
+  onCategoryDeleted,
+}: CategoryViewProps) {
   const [mode, setMode] = useState<'table' | 'form'>('table');
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
+  const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
+  const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
   const { data = [], isLoading } = useAllCategories();
-  const editCategory = data.find((category) => category.id === categoryId);
+  const editCategory = data.find((category) => category.id === editCategoryId);
 
   const closeForm = useCallback(() => {
-    setCategoryId(null);
+    setEditCategoryId(null);
     setMode('table');
     onTitleChange('Categories');
   }, [onTitleChange]);
 
   const handleAddCategory = () => {
-    setCategoryId(null);
+    setEditCategoryId(null);
     setMode('form');
     onTitleChange('Add category');
   };
 
   const handleEditCategory = useCallback(
     (id: string) => {
-      setCategoryId(id);
+      setEditCategoryId(id);
       setMode('form');
       onTitleChange('Edit category');
     },
     [onTitleChange],
   );
 
-  const handleDeleteCategory = useCallback((id: string) => {
-    setDeleteCategoryId(id);
-  }, []);
+  const handleDeleteCategory = useCallback(
+    (id: string) => {
+      const category = data.find((c) => c.id === id);
+      if (category) setDeleteCategory(category);
+    },
+    [data],
+  );
 
   const closeDeleteModal = useCallback(() => {
-    setDeleteCategoryId(null);
+    setDeleteCategory(null);
   }, []);
 
   let content: React.ReactNode = null;
@@ -68,13 +80,24 @@ export function CategoryView({ onClose, onTitleChange }: CategoryViewProps) {
             Back
           </Button>
         </div>
-        {deleteCategoryId && (
-          <CategoryDeleteModal categoryId={deleteCategoryId} onClose={closeDeleteModal} />
+        {deleteCategory && (
+          <CategoryDeleteModal
+            categoryId={deleteCategory.id}
+            categoryName={deleteCategory.name}
+            onClose={closeDeleteModal}
+            onCategoryDeleted={onCategoryDeleted}
+          />
         )}
       </>
     );
   } else if (mode === 'form') {
-    content = <CategoryForm category={editCategory} onClose={closeForm} />;
+    content = (
+      <CategoryForm
+        category={editCategory}
+        onClose={closeForm}
+        onCategoryRenamed={onCategoryRenamed}
+      />
+    );
   }
 
   return <div className="flex h-full max-h-[80vh] flex-col justify-center gap-4">{content}</div>;

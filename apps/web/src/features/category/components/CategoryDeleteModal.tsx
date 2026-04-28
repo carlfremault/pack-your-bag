@@ -12,17 +12,21 @@ import { useCategoryDeleteImpact, useDeleteCategory } from '../queries';
 
 interface CategoryDeleteModalProps {
   categoryId: string;
+  categoryName: string;
   onClose: () => void;
+  onCategoryDeleted: (name: string) => void;
 }
 
 export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
-  const { categoryId, onClose } = props;
+  const { categoryId, categoryName, onClose, onCategoryDeleted } = props;
+
   const { data, isLoading, isError } = useCategoryDeleteImpact(categoryId);
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
   const confirmDeleteCategory = () => {
     deleteCategory(categoryId, {
       onSuccess: () => {
+        onCategoryDeleted(categoryName);
         onClose();
         toast.success('Category deleted successfully');
       },

@@ -10,7 +10,7 @@ import classNames from 'classnames';
 
 import { PUBLIC_PATHS } from '@/lib/constants';
 
-import { DrawerNav } from './DrawerNav';
+import ActionNavLinks from './ActionNavLinks';
 
 export function MobileNavDrawer() {
   const [isOpen, setIsOpen] = useState(false);
@@ -86,7 +86,9 @@ export function MobileNavDrawer() {
                 <MdOutlineClose size={24} />
               </Button>
             </div>
-            <DrawerNav onNavigate={close} />
+            <div className="flex flex-col gap-4">
+              <ActionNavLinks onNavigate={close} />
+            </div>
           </div>
         </>
       ) : null}

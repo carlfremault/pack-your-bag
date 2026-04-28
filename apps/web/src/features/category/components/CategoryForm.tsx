@@ -1,4 +1,5 @@
 'use client';
+
 import toast from 'react-hot-toast';
 
 import { CATEGORY_NAME_MAX_LENGTH } from '@repo/constants';
@@ -15,6 +16,7 @@ import { Category } from '../types';
 export interface CategoryFormProps {
   category?: Category;
   onClose: () => void;
+  onCategoryRenamed: (oldName: string, newName: string) => void;
 }
 
 export type CategoryFieldErrors = {
@@ -30,7 +32,7 @@ const getInitialFormValues = (category?: Category) => ({
 const CATEGORY_FORM_FIELDS: (keyof CategoryFieldErrors)[] = ['name', 'colorTheme'];
 
 export function CategoryForm(props: CategoryFormProps) {
-  const { category, onClose } = props;
+  const { category, onClose, onCategoryRenamed } = props;
   const editMode = category !== undefined;
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
@@ -47,6 +49,9 @@ export function CategoryForm(props: CategoryFormProps) {
   const handleSuccess = () => {
     setFieldErrors({});
     toast.success(editMode ? 'Category updated successfully' : 'Category created successfully');
+    if (editMode && category && formValues.name !== category.name) {
+      onCategoryRenamed(category.name, formValues.name);
+    }
     onClose();
   };
 

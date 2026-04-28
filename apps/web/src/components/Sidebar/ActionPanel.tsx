@@ -46,6 +46,27 @@ function ActionPanelInner() {
     router.replace(next ? `${pathname}?${next}` : pathname);
   }, [searchParams, pathname, router]);
 
+  const handleCategoryRenamed = useCallback(
+    (oldName: string, newName: string) => {
+      if (searchParams.get('category') !== oldName) return;
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('category', newName);
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [searchParams, pathname, router],
+  );
+
+  const handleCategoryDeleted = useCallback(
+    (name: string) => {
+      if (searchParams.get('category') !== name) return;
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('category');
+      const next = params.toString();
+      router.replace(next ? `${pathname}?${next}` : pathname);
+    },
+    [searchParams, pathname, router],
+  );
+
   let panelContent: React.ReactNode = null;
   let desktopTitle: string | null = null;
   if (action === 'add-item') {
@@ -55,7 +76,14 @@ function ActionPanelInner() {
     panelContent = <ItemForm key={`edit-${itemId}`} itemId={itemId} onClose={closeAction} />;
     desktopTitle = 'Edit item';
   } else if (action === 'manage-categories') {
-    panelContent = <CategoryView onClose={closeAction} onTitleChange={setCategoryTitle} />;
+    panelContent = (
+      <CategoryView
+        onClose={closeAction}
+        onTitleChange={setCategoryTitle}
+        onCategoryRenamed={handleCategoryRenamed}
+        onCategoryDeleted={handleCategoryDeleted}
+      />
+    );
     desktopTitle = categoryTitle;
   }
 

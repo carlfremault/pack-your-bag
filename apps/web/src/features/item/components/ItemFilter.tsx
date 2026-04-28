@@ -19,7 +19,7 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 export interface ItemFilterState {
   search: string;
-  categoryId: string;
+  category: string;
   sortField: 'name' | 'weight' | 'category';
   sortDirection: 'asc' | 'desc';
 }
@@ -46,14 +46,14 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
   const { data: categories = [] } = useAllCategories();
 
   const hasActiveFilters =
-    filterState.categoryId !== '' ||
+    filterState.category !== '' ||
     filterState.sortField !== 'name' ||
     filterState.sortDirection !== 'asc';
 
   const categoryOptions = useMemo<InputSelectOption[]>(
     () =>
       categories.map((category) => ({
-        value: category.id,
+        value: category.name,
         label: <CategoryPill {...toCategoryPillProps(category)} />,
       })),
     [categories],
@@ -136,8 +136,8 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
                   label="Category"
                   isClearable
                   options={categoryOptions}
-                  value={filterState.categoryId}
-                  onChange={(v) => onChange({ categoryId: v })}
+                  value={filterState.category}
+                  onChange={(v) => onChange({ category: v })}
                   placeholder={categories?.length === 0 ? 'No categories yet' : 'All categories'}
                   disabled={!!categories && categories.length === 0}
                 />
