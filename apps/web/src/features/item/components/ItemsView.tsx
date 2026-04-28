@@ -92,6 +92,9 @@ export default function ItemsView() {
       } else {
         cmp = 0;
       }
+      if (cmp === 0 && filterState.sortField !== 'name') {
+        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      }
       return filterState.sortDirection === 'asc' ? cmp : -cmp;
     });
 
