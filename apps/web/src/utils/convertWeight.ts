@@ -6,6 +6,5 @@ export function convertGramsToOunces(grams: number): number {
 }
 
 export function convertOuncesToGrams(ounces: number): number {
-  const grams = ounces * GRAMS_PER_OUNCE;
-  return Math.round(grams);
+  return ounces * GRAMS_PER_OUNCE;
 }
