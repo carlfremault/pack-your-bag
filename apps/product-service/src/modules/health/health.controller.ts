@@ -29,7 +29,7 @@ export class HealthController {
     private readonly memory: MemoryHealthIndicator,
     private readonly configService: ConfigService,
   ) {
-    this.storagePath = this.configService.get<string>('AUTH_HEALTH_DISK_PATH', '/');
+    this.storagePath = this.configService.get<string>('PRODUCT_HEALTH_DISK_PATH', '/');
   }
 
   @Get()
