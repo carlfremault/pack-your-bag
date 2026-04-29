@@ -16,6 +16,7 @@ import DesktopItemsTableSkeleton from './DesktopItemsTableSkeleton';
 
 export interface DesktopItemsTableProps {
   items: Item[];
+  weightUnit?: string;
   isLoading: boolean;
   onEditItem: (id: string) => void;
   onDeleteItem: (id: string) => void;
@@ -24,7 +25,7 @@ export interface DesktopItemsTableProps {
 const columnHelper = createColumnHelper<Item>();
 
 export default function DesktopItemsTable(props: DesktopItemsTableProps) {
-  const { items, isLoading, onEditItem, onDeleteItem } = props;
+  const { items, weightUnit, isLoading, onEditItem, onDeleteItem } = props;
 
   const columns = useMemo(
     () => [
@@ -44,6 +45,14 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
       }),
       columnHelper.accessor('weight', {
         header: 'Weight',
+        cell: ({ row }) => {
+          return row.original.weight != null ? (
+            <div className="text-sm leading-normal">
+              {row.original.weight}
+              {weightUnit ? ` ${weightUnit}` : ''}
+            </div>
+          ) : null;
+        },
         size: 100,
         minSize: 100,
         maxSize: 100,
@@ -74,7 +83,7 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         },
       }),
     ],
-    [onEditItem, onDeleteItem],
+    [onEditItem, onDeleteItem, weightUnit],
   );
 
   return (

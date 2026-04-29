@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
+
+import { usePreferences } from '@/features/settings/queries';
+import { convertGramsToOunces } from '@/utils/convertWeight';
 
 import { useAllItems } from '../queries';
 
@@ -15,14 +19,18 @@ import MobileItemsList from './MobileItemsList';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+const getWeightUnit = (units?: string) => (units ? (units === Units.METRIC ? 'g' : 'oz') : '');
+
 export default function ItemsView() {
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { data = [], isLoading } = useAllItems();
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const { data = [], isLoading: isItemsLoading } = useAllItems();
+  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const isLoading = isItemsLoading || isPreferencesLoading;
 
   // searchDraft gives immediate input feedback; URL is updated with debounce
   const [searchDraft, setSearchDraft] = useState(() => searchParams.get('search') ?? '');
@@ -63,6 +71,16 @@ export default function ItemsView() {
     };
   }, []);
 
+  const parsedData = useMemo(() => {
+    return data.map((item) => ({
+      ...item,
+      weight:
+        preferences?.units === Units.IMPERIAL && item.weight
+          ? convertGramsToOunces(Number(item.weight))
+          : item.weight,
+    }));
+  }, [data, preferences?.units]);
+
   const filterState: ItemFilterState = useMemo(() => {
     const rawSort = searchParams.get('sort');
     const rawDir = searchParams.get('dir');
@@ -77,7 +95,7 @@ export default function ItemsView() {
   const displayFilterState: ItemFilterState = { ...filterState, search: searchDraft };
 
   const filteredItems = useMemo(() => {
-    let result = [...data];
+    let result = [...parsedData];
 
     if (searchDraft) {
       const term = searchDraft.toLowerCase();
@@ -112,7 +130,13 @@ export default function ItemsView() {
     });
 
     return result;
-  }, [data, searchDraft, filterState.category, filterState.sortField, filterState.sortDirection]);
+  }, [
+    parsedData,
+    searchDraft,
+    filterState.category,
+    filterState.sortField,
+    filterState.sortDirection,
+  ]);
 
   const handleFilterChange = useCallback(
     (updates: Partial<ItemFilterState>) => {
@@ -193,6 +217,7 @@ export default function ItemsView() {
             isLoading={isLoading}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
+            weightUnit={getWeightUnit(preferences?.units)}
           />
         </div>
         {deleteItemModal}
@@ -210,6 +235,7 @@ export default function ItemsView() {
             isLoading={isLoading}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
+            weightUnit={getWeightUnit(preferences?.units)}
           />
         </div>
       </div>

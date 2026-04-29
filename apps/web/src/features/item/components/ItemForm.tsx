@@ -2,7 +2,7 @@
 
 import toast from 'react-hot-toast';
 
-import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from '@repo/constants';
+import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, Units } from '@repo/constants';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
 import { Spinner } from '@repo/react-common/spinner';
@@ -11,12 +11,14 @@ import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
 import { useFormState } from '@/hooks/useFormState';
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
+import { convertGramsToOunces, convertOuncesToGrams } from '@/utils/convertWeight';
 
 import { useAllItems, useCreateItem, useUpdateItem } from '../queries';
 import { Item } from '../types';
 
 export interface ItemFormProps {
   itemId?: string;
+  units: Units;
   onClose: () => void;
 }
 
@@ -27,20 +29,28 @@ export type ItemFieldErrors = {
   categoryId?: string;
 };
 
-const getInitialFormValues = (item?: Item) => ({
-  name: item?.name ?? '',
-  description: item?.description ?? '',
-  weight: item?.weight?.toString() ?? '',
-  categoryId: item?.category?.id ?? '',
-});
+const getInitialFormValues = (item?: Item, units?: Units) => {
+  const convertedWeight =
+    units === Units.IMPERIAL && item?.weight
+      ? convertGramsToOunces(Number(item?.weight))
+      : item?.weight;
+
+  return {
+    name: item?.name ?? '',
+    description: item?.description ?? '',
+    weight: convertedWeight?.toString() ?? '',
+    categoryId: item?.category?.id ?? '',
+  };
+};
 
 const ITEM_FORM_FIELDS: (keyof ItemFieldErrors)[] = ['name', 'description', 'weight', 'categoryId'];
 
 export default function ItemForm(props: ItemFormProps) {
-  const { itemId, onClose } = props;
+  const { itemId, units, onClose } = props;
   const editMode = itemId !== undefined;
 
   const { data: items = [], isLoading: isItemsLoading } = useAllItems();
+
   const itemToEdit: Item | undefined = itemId ? items.find((i) => i.id === itemId) : undefined;
 
   const { mutate: createItem, isPending: isCreating } = useCreateItem();
@@ -54,7 +64,7 @@ export default function ItemForm(props: ItemFormProps) {
     })) ?? [];
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
-    useFormState(getInitialFormValues(itemToEdit), ITEM_FORM_FIELDS);
+    useFormState(getInitialFormValues(itemToEdit, units), ITEM_FORM_FIELDS);
 
   const handleSuccess = () => {
     setFieldErrors({});
@@ -71,10 +81,15 @@ export default function ItemForm(props: ItemFormProps) {
       return;
     }
 
+    const parsedWeight =
+      units === Units.METRIC
+        ? Number(formValues.weight)
+        : convertOuncesToGrams(Number(formValues.weight));
+
     const payload = {
       name: trimmedName,
       description: formValues.description,
-      weight: formValues.weight ? Number(formValues.weight) : editMode ? null : undefined,
+      weight: formValues.weight ? parsedWeight : editMode ? null : undefined,
       categoryId: formValues.categoryId ? formValues.categoryId : editMode ? null : undefined,
     };
 
@@ -120,7 +135,7 @@ export default function ItemForm(props: ItemFormProps) {
           className="rounded-md border border-gray-300 p-2"
         />
         <Input
-          label="Weight"
+          label={`Weight (${units === Units.METRIC ? 'in grams' : 'in ounces'})`}
           type="number"
           step="0.01"
           value={formValues.weight}
