@@ -29,6 +29,19 @@ export default function ItemsView() {
   const searchDraftRef = useRef(searchDraft);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // On mount: if URL has no sort params, restore last saved sort from sessionStorage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sort') || params.get('dir')) return;
+    const savedSort = sessionStorage.getItem('itemSortField');
+    const savedDir = sessionStorage.getItem('itemSortDir');
+    if (!savedSort && !savedDir) return;
+    if (savedSort && savedSort !== 'name') params.set('sort', savedSort);
+    if (savedDir && savedDir !== 'asc') params.set('dir', savedDir);
+    const qs = params.toString();
+    if (qs) router.replace(`${pathname}?${qs}`);
+  }, [pathname, router]);
+
   // Sync searchDraft on browser back/forward (popstate) so the input matches the restored URL
   useEffect(() => {
     const handlePopState = () => {
@@ -128,10 +141,12 @@ export default function ItemsView() {
       if (updates.sortField !== undefined) {
         if (updates.sortField !== 'name') params.set('sort', updates.sortField);
         else params.delete('sort');
+        sessionStorage.setItem('itemSortField', updates.sortField);
       }
       if (updates.sortDirection !== undefined) {
         if (updates.sortDirection !== 'asc') params.set('dir', updates.sortDirection);
         else params.delete('dir');
+        sessionStorage.setItem('itemSortDir', updates.sortDirection);
       }
       router.replace(`${pathname}?${params.toString()}`);
     },
