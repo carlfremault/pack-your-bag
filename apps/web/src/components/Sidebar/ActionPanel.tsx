@@ -3,11 +3,13 @@
 import { Suspense, useCallback, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 
 import { Modal } from '@/components/Modal';
 import { CategoryView } from '@/features/category/components/CategoryView';
 import ItemForm from '@/features/item/components/ItemForm';
+import { usePreferences } from '@/features/settings/queries';
 
 import { SidebarNav } from '../Navigation/SidebarNav';
 
@@ -26,11 +28,18 @@ function isSidebarAction(value: string | null): value is SidebarAction {
   return SIDEBAR_ACTIONS.includes(value as SidebarAction);
 }
 
+function isValidUnits(value: unknown): value is Units {
+  return Object.values(Units).includes(value as Units);
+}
+
 function ActionPanelInner() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const { isReady, isDesktop } = useBreakpoint();
+
+  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const units = isValidUnits(preferences?.units) ? preferences.units : Units.METRIC;
 
   const rawAction = searchParams.get('action');
   const action = isSidebarAction(rawAction) ? rawAction : null;
@@ -67,13 +76,17 @@ function ActionPanelInner() {
     [searchParams, pathname, router],
   );
 
+  if (!isReady || isPreferencesLoading) return null;
+
   let panelContent: React.ReactNode = null;
   let desktopTitle: string | null = null;
   if (action === 'add-item') {
-    panelContent = <ItemForm key="add" onClose={closeAction} />;
+    panelContent = <ItemForm key="add" units={units} onClose={closeAction} />;
     desktopTitle = 'Add item';
   } else if (action === 'edit-item' && itemId) {
-    panelContent = <ItemForm key={`edit-${itemId}`} itemId={itemId} onClose={closeAction} />;
+    panelContent = (
+      <ItemForm key={`edit-${itemId}`} itemId={itemId} units={units} onClose={closeAction} />
+    );
     desktopTitle = 'Edit item';
   } else if (action === 'manage-categories') {
     panelContent = (
@@ -86,8 +99,6 @@ function ActionPanelInner() {
     );
     desktopTitle = categoryTitle;
   }
-
-  if (!isReady) return null;
 
   if (isDesktop) {
     return (
