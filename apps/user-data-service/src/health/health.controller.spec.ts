@@ -3,18 +3,16 @@ import {
   DiskHealthIndicator,
   HealthCheckService,
   MemoryHealthIndicator,
-  PrismaHealthIndicator,
+  MongooseHealthIndicator,
 } from '@nestjs/terminus';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { PrismaService } from '@/prisma/prisma.service';
-
 import { HealthController } from './health.controller';
 
 const MOCK_CONFIG = {
-  PRODUCT_HEALTH_DISK_PATH: '/',
+  USER_DATA_HEALTH_DISK_PATH: '/',
 } as const;
 
 describe('HealthController', () => {
@@ -37,11 +35,7 @@ describe('HealthController', () => {
           useValue: {},
         },
         {
-          provide: PrismaHealthIndicator,
-          useValue: {},
-        },
-        {
-          provide: PrismaService,
+          provide: MongooseHealthIndicator,
           useValue: {},
         },
         {
