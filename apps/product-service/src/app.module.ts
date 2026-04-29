@@ -17,6 +17,7 @@ import Joi from 'joi';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { CategoryModule } from './modules/category/category.module';
+import { HealthModule } from './modules/health/health.module';
 import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
 import { ItemPackModule } from './modules/item-pack/item-pack.module';
@@ -102,6 +103,7 @@ const validationSchema = Joi.object({
     ItemListModule,
     ItemPackModule,
     ListPackModule,
+    HealthModule,
   ],
   providers: [
     {
