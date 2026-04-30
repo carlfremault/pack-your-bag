@@ -10,22 +10,21 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
-import { Item } from '../types';
+import { ItemForDisplay } from '../types';
 
 import DesktopItemsTableSkeleton from './DesktopItemsTableSkeleton';
 
 export interface DesktopItemsTableProps {
-  items: Item[];
-  weightUnit?: string;
+  items: ItemForDisplay[];
   isLoading: boolean;
   onEditItem: (id: string) => void;
   onDeleteItem: (id: string) => void;
 }
 
-const columnHelper = createColumnHelper<Item>();
+const columnHelper = createColumnHelper<ItemForDisplay>();
 
 export default function DesktopItemsTable(props: DesktopItemsTableProps) {
-  const { items, weightUnit, isLoading, onEditItem, onDeleteItem } = props;
+  const { items, isLoading, onEditItem, onDeleteItem } = props;
 
   const columns = useMemo(
     () => [
@@ -43,13 +42,15 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
           ) : null;
         },
       }),
-      columnHelper.accessor('weight', {
+      columnHelper.display({
+        id: 'weight',
         header: 'Weight',
         cell: ({ row }) => {
-          return row.original.weight != null ? (
+          const { displayWeight, displayUnit } = row.original;
+          return displayWeight !== null ? (
             <div className="text-sm leading-normal">
-              {row.original.weight}
-              {weightUnit ? ` ${weightUnit}` : ''}
+              {displayWeight}
+              {displayUnit ? ` ${displayUnit}` : ''}
             </div>
           ) : null;
         },
@@ -83,7 +84,7 @@ export default function DesktopItemsTable(props: DesktopItemsTableProps) {
         },
       }),
     ],
-    [onEditItem, onDeleteItem, weightUnit],
+    [onEditItem, onDeleteItem],
   );
 
   return (

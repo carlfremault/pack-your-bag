@@ -12,7 +12,7 @@ export interface ItemCardProps {
   name: string;
   description?: string;
   category: CategoryPillProps | null;
-  weight?: number;
+  weight?: string;
   weightUnit?: string;
   onEditItem: (id: string) => void;
   onDeleteItem: (id: string) => void;
