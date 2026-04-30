@@ -13,7 +13,7 @@ import { FormWrapper } from '@/components/FormWrapper';
 import { useFormState } from '@/hooks/useFormState';
 
 import { useAllCollections, useCreateCollection } from '../queries';
-import { Collection } from '../types';
+import { Collection, CollectionType } from '../types';
 
 export interface CollectionFormProps {
   collectionId?: string;
@@ -27,7 +27,7 @@ export type CollectionFieldErrors = {
   type?: string;
 };
 
-const TYPE_OPTIONS: InputSelectOption[] = [
+const TYPE_OPTIONS: InputSelectOption<CollectionType>[] = [
   {
     value: 'list',
     label: (
@@ -68,8 +68,8 @@ export default function CollectionForm(props: CollectionFormProps) {
   const { collectionId, onClose } = props;
   const editMode = collectionId !== undefined;
 
-  // TODO: when implementing update, make useCollection(id) hook? To consider.
-  // useAllCollections is definitely cached vs. a new hook would trigger a new request
+  // TODO: when implementing update, disable type select
+  // lists cannot be modified to packs, and vice versa
   const { data: collections = [], isLoading: isCollectionsLoading } = useAllCollections();
   const { mutate: createCollection, isPending: isCreating } = useCreateCollection();
   // TODO: implement update

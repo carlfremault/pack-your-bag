@@ -16,7 +16,10 @@ export const settingsLink: NavItem = {
   href: '/settings',
 };
 
+const collectionsPatterns = ['/collections', '/list', '/pack'];
+
 export function getActiveTabFromPathname(pathname: string): NavItem['id'] | undefined {
+  if (collectionsPatterns.some((p) => pathname.startsWith(p))) return 'collections';
   const tab = navTabs.find((t) => pathname.startsWith(t.href));
   return tab?.id;
 }

@@ -9,6 +9,22 @@ import {
 
 import { Collection, CreateListBody, CreatePackBody, List, Pack } from './types';
 
+export async function getList(id: string): Promise<List> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.GET('/list/{id}', {
+    params: { path: { id } },
+  });
+  return handleApiResponse(data, error, response);
+}
+
+export async function getPack(id: string): Promise<Pack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.GET('/pack/{id}', {
+    params: { path: { id } },
+  });
+  return handleApiResponse(data, error, response);
+}
+
 export async function getAllLists(): Promise<List[]> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.GET('/list');

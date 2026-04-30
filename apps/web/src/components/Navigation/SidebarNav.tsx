@@ -10,12 +10,19 @@ export interface SidebarNavProps {
 export function SidebarNav(props: SidebarNavProps) {
   const { pathname } = props;
 
+  const collectionsView =
+    pathname.startsWith('/collections') ||
+    pathname.startsWith('/list') ||
+    pathname.startsWith('/pack');
+  const tripsView = pathname.startsWith('/trips');
+  const settingsView = pathname.startsWith('/settings');
+
   let icon: React.ReactNode;
-  if (pathname.startsWith('/collections')) {
+  if (collectionsView) {
     icon = <MdOutlineShoppingBag size={64} className="text-primary" aria-hidden="true" />;
-  } else if (pathname.startsWith('/trips')) {
+  } else if (tripsView) {
     icon = <MdHiking size={64} className="text-primary" aria-hidden="true" />;
-  } else if (pathname.startsWith('/settings')) {
+  } else if (settingsView) {
     icon = <MdOutlineSettings size={64} className="text-primary" aria-hidden="true" />;
   } else {
     icon = <IoShirtOutline size={64} className="text-primary" aria-hidden="true" />;

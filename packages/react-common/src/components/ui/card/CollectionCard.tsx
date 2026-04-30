@@ -15,7 +15,8 @@ export interface CollectionCardProps {
   numberOfItems: number;
   totalWeight: string;
   weightUnit?: string;
-  onOpenCollection: (id: string) => void;
+  href: string;
+  linkAs?: React.ElementType;
   className?: string;
 }
 
@@ -24,21 +25,22 @@ export function CollectionCard(props: CollectionCardProps) {
     id,
     name,
     description,
-    colorTheme = 'slate',
+    colorTheme = 'default',
     type,
     numberOfItems,
     totalWeight,
     weightUnit,
-    onOpenCollection,
+    href,
+    linkAs: LinkComponent = 'a',
     className,
   } = props;
 
-  const { className: colorThemeClassName } = colorThemes[colorTheme] ?? {
-    className: 'bg-surface border-primary-ring text-primary',
-  };
+  const { className: colorThemeClassName, focusClassName } =
+    colorThemes[colorTheme] ?? colorThemes['default'];
   const collectionCardClassName = classNames(
-    'flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm min-h-50 transition-transform duration-150 hover:-translate-y-0.5 ease-out cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] active:translate-y-0.5',
+    'flex w-full flex-col items-start justify-between gap-2 rounded-md border p-3 text-left shadow-sm min-h-50 transition-transform duration-150 hover:-translate-y-0.5 ease-out cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0.5',
     colorThemeClassName,
+    focusClassName,
     className,
   );
 
@@ -54,9 +56,8 @@ export function CollectionCard(props: CollectionCardProps) {
     : `${countId} ${weightId}`;
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpenCollection(id)}
+    <LinkComponent
+      href={href}
       aria-labelledby={nameId}
       aria-describedby={describedBy}
       className={collectionCardClassName}
@@ -81,6 +82,6 @@ export function CollectionCard(props: CollectionCardProps) {
           </div>
         </div>
       </div>
-    </button>
+    </LinkComponent>
   );
 }

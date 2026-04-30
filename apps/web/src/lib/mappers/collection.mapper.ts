@@ -5,8 +5,11 @@ import { CollectionForDisplay } from '@/features/collection/types';
 
 export function toCollectionCardProps(
   collection: CollectionForDisplay,
-  handlers: Pick<CollectionCardProps, 'onOpenCollection'>,
+  linkAs?: React.ElementType,
+  actionQuery?: string,
 ): CollectionCardProps {
+  const basePath = `/${collection.type}/${collection.id}`;
+
   return {
     id: collection.id,
     name: collection.name,
@@ -16,6 +19,7 @@ export function toCollectionCardProps(
     totalWeight: collection.displayWeight,
     weightUnit: collection.displayUnit,
     numberOfItems: collection.numberOfItems,
-    ...handlers,
+    href: actionQuery ? `${basePath}?${actionQuery}` : basePath,
+    linkAs,
   };
 }

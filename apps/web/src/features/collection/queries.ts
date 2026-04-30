@@ -25,6 +25,48 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
 };
 
 // -------------------------------
+// Fetch list
+// -------------------------------
+const fetchList = async (id: string): Promise<List> => {
+  const res = await fetch(`/api/list/${id}`);
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useList = (id: string): UseQueryResult<List> => {
+  return useQuery({
+    queryKey: ['list', id],
+    queryFn: () => fetchList(id),
+    enabled: !!id,
+  });
+};
+
+// -------------------------------
+// Fetch pack
+// -------------------------------
+const fetchPack = async (id: string): Promise<Pack> => {
+  const res = await fetch(`/api/pack/${id}`);
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const usePack = (id: string): UseQueryResult<Pack> => {
+  return useQuery({
+    queryKey: ['pack', id],
+    queryFn: () => fetchPack(id),
+    enabled: !!id,
+  });
+};
+
+// -------------------------------
 // Create Collection (List or Pack)
 // -------------------------------
 
@@ -94,4 +136,4 @@ const useCreateCollection = () => {
   });
 };
 
-export { useAllCollections, useCreateCollection };
+export { useAllCollections, useList, usePack, useCreateCollection };

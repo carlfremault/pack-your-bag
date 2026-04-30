@@ -6,9 +6,11 @@ import { InputSelect, InputSelectOption } from '@repo/react-common/input';
 
 import { FilterWrapper } from '@/components/FilterWrapper';
 
+import { CollectionType } from '../types';
+
 export interface CollectionFilterState {
   search: string;
-  type: 'list' | 'pack' | 'all';
+  type: CollectionType | 'all';
   sortField: 'name' | 'type' | 'weight';
   sortDirection: 'asc' | 'desc';
 }
@@ -18,7 +20,7 @@ interface CollectionFilterProps {
   onChange: (updates: Partial<CollectionFilterState>) => void;
 }
 
-const TYPE_OPTIONS: InputSelectOption[] = [
+const TYPE_OPTIONS: InputSelectOption<CollectionType | 'all'>[] = [
   {
     value: 'all',
     label: (

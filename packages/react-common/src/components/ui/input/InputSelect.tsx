@@ -10,25 +10,25 @@ import {
   inputWrapperClassName,
 } from './Input';
 
-export interface InputSelectOption {
+export interface InputSelectOption<T = string> {
   label: string | React.ReactNode;
-  value: string;
+  value: T;
 }
 
-export interface InputSelectProps {
+export interface InputSelectProps<T = string> {
   label: string;
-  options: InputSelectOption[];
-  value: string;
-  onChange: (value: string) => void;
+  options: InputSelectOption<T>[];
+  value: T;
+  onChange: (value: T) => void;
   placeholder?: string;
   errorMessage?: string;
   required?: boolean;
   disabled?: boolean;
   isClearable?: boolean;
-  clearValue?: string;
+  clearValue?: T;
 }
 
-export function InputSelect(props: InputSelectProps) {
+export function InputSelect<T = string>(props: InputSelectProps<T>) {
   const {
     label,
     options,
@@ -39,7 +39,7 @@ export function InputSelect(props: InputSelectProps) {
     required = false,
     disabled = false,
     isClearable = false,
-    clearValue = '',
+    clearValue = '' as T,
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -76,7 +76,7 @@ export function InputSelect(props: InputSelectProps) {
     }
   }, [isOpen, focusedIndex, optionIdPrefix]);
 
-  const handleSelect = (optionValue: string) => {
+  const handleSelect = (optionValue: T) => {
     onChange(optionValue);
     close();
     buttonRef.current?.focus();
@@ -177,7 +177,7 @@ export function InputSelect(props: InputSelectProps) {
           >
             {options.map((option, index) => (
               <li
-                key={option.value}
+                key={option.value as string}
                 id={`${optionIdPrefix}-${index}`}
                 role="option"
                 aria-selected={option.value === value}

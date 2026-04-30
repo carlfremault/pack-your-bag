@@ -28,11 +28,17 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     return params.toString();
   }, [searchParams]);
 
+  const itemsView = pathname.startsWith('/items');
+  const collectionsView =
+    pathname.startsWith('/collections') ||
+    pathname.startsWith('/list') ||
+    pathname.startsWith('/pack');
+
   return (
     <>
       <LinkButton
         href={`?action=add-item${query ? `&${query}` : ''}`}
-        variant={pathname.startsWith('/items') ? 'solid' : 'outline'}
+        variant={itemsView ? 'solid' : 'outline'}
         color="primary"
         size="large"
         className="w-full"
@@ -43,7 +49,7 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
       </LinkButton>
       <LinkButton
         href={`?action=add-collection${query ? `&${query}` : ''}`}
-        variant={pathname.startsWith('/collections') ? 'solid' : 'outline'}
+        variant={collectionsView ? 'solid' : 'outline'}
         color="primary"
         size="large"
         className="w-full"
