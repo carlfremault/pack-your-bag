@@ -1,6 +1,6 @@
 import { Suspense, useMemo } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import { LinkButton } from '@repo/react-common/button';
 
@@ -10,6 +10,7 @@ interface ActionNavLinksProps {
 
 function ActionNavLinksInner(props: ActionNavLinksProps) {
   const { onNavigate } = props;
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const query = useMemo(() => {
@@ -31,7 +32,7 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     <>
       <LinkButton
         href={`?action=add-item${query ? `&${query}` : ''}`}
-        variant="solid"
+        variant={pathname.startsWith('/items') ? 'solid' : 'outline'}
         color="primary"
         size="large"
         className="w-full"
@@ -39,6 +40,17 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
         onClick={onNavigate}
       >
         Add new item
+      </LinkButton>
+      <LinkButton
+        href={`?action=add-collection${query ? `&${query}` : ''}`}
+        variant={pathname.startsWith('/collections') ? 'solid' : 'outline'}
+        color="primary"
+        size="large"
+        className="w-full"
+        linkAs={Link}
+        onClick={onNavigate}
+      >
+        Add new collection
       </LinkButton>
       <LinkButton
         href={`?action=manage-categories${query ? `&${query}` : ''}`}

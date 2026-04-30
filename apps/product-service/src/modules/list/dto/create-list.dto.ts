@@ -9,13 +9,23 @@ import {
 } from '@/common/constants/product.constants';
 
 export class CreateListDto {
-  @ApiProperty({ description: 'List name', example: 'List name' })
+  @ApiProperty({
+    description: 'List name',
+    example: 'List name',
+    maxLength: NAME_MAX_LENGTH,
+    minLength: 1,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(NAME_MAX_LENGTH)
   name: string;
 
-  @ApiProperty({ description: 'List description', example: 'List description', required: false })
+  @ApiProperty({
+    description: 'List description',
+    example: 'List description',
+    required: false,
+    maxLength: DESCRIPTION_MAX_LENGTH,
+  })
   @IsString()
   @IsOptional()
   @MaxLength(DESCRIPTION_MAX_LENGTH)

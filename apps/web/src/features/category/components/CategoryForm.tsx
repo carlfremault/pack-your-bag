@@ -98,7 +98,6 @@ export function CategoryForm(props: CategoryFormProps) {
         value={formValues.name}
         onChange={(e) => handleFieldChange('name', e.target.value)}
         errorMessage={fieldErrors.name}
-        className="rounded-md border border-gray-300 p-2"
       />
       <InputSelect
         label="Color"

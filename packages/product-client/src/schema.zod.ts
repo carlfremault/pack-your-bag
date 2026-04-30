@@ -102,8 +102,8 @@ export const UpdateCategoryDto = z
   .passthrough();
 export const CreateListDto = z
   .object({
-    name: z.string(),
-    description: z.string().optional(),
+    name: z.string().min(1).max(128),
+    description: z.string().max(1000).optional(),
     colorTheme: z.string().optional(),
   })
   .passthrough();
@@ -126,13 +126,17 @@ export const ListDeleteImpactDto = z
   })
   .passthrough();
 export const UpdateListDto = z
-  .object({ name: z.string(), description: z.string(), colorTheme: z.string() })
+  .object({
+    name: z.string().min(1).max(128),
+    description: z.string().max(1000),
+    colorTheme: z.string(),
+  })
   .partial()
   .passthrough();
 export const CreatePackDto = z
   .object({
-    name: z.string(),
-    description: z.string().optional(),
+    name: z.string().min(1).max(128),
+    description: z.string().max(1000).optional(),
     colorTheme: z.string().optional(),
   })
   .passthrough();
@@ -152,7 +156,11 @@ export const PackDeleteImpactDto = z
   .object({ pack: PackSummaryResponseDto, trips: z.array(TripResponseDto) })
   .passthrough();
 export const UpdatePackDto = z
-  .object({ name: z.string(), description: z.string(), colorTheme: z.string() })
+  .object({
+    name: z.string().min(1).max(128),
+    description: z.string().max(1000),
+    colorTheme: z.string(),
+  })
   .partial()
   .passthrough();
 export const CreateTripDto = z

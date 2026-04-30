@@ -7,7 +7,7 @@ import {
   getTotalWeightInPack,
 } from '@/utils/collectionsUtils';
 
-import { Collection, List, Pack } from './types';
+import { Collection, CreateListBody, CreatePackBody, List, Pack } from './types';
 
 export async function getAllLists(): Promise<List[]> {
   const productClient = await getProductClient();
@@ -39,4 +39,16 @@ export async function getAllCollections(): Promise<Collection[]> {
   }));
 
   return [...mappedLists, ...mappedPacks];
+}
+
+export async function createList(body: CreateListBody): Promise<List> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/list', { body });
+  return handleApiResponse(data, error, response);
+}
+
+export async function createPack(body: CreatePackBody): Promise<Pack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/pack', { body });
+  return handleApiResponse(data, error, response);
 }
