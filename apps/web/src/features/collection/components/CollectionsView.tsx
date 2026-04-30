@@ -3,32 +3,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { usePreferences } from '@/features/settings/queries';
-import { convertGramsToOunces, getWeightUnit } from '@/utils/weightUtils';
+import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { useAllItems } from '../queries';
+import { useAllCollections } from '../queries';
+import { CollectionForDisplay } from '../types';
 
-import DesktopItemsTable from './DesktopItemsTable';
-import ItemDeleteModal from './ItemDeleteModal';
-import { ItemFilter, ItemFilterState } from './ItemFilter';
-import MobileItemsList from './MobileItemsList';
+import { CollectionFilter, CollectionFilterState } from './CollectionFilter';
+import CollectionsList from './CollectionsList';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export default function ItemsView() {
+export default function CollectionsView() {
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const { data = [], isLoading: isItemsLoading } = useAllItems();
+  const { data: collections = [], isLoading: isCollectionsLoading } = useAllCollections();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
-  const isLoading = isItemsLoading || isPreferencesLoading;
+  const isLoading = isCollectionsLoading || isPreferencesLoading;
 
   // searchDraft gives immediate input feedback; URL is updated with debounce
   const [searchDraft, setSearchDraft] = useState(() => searchParams.get('search') ?? '');
@@ -39,8 +36,8 @@ export default function ItemsView() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('sort') || params.get('dir')) return;
-    const savedSort = sessionStorage.getItem('itemSortField');
-    const savedDir = sessionStorage.getItem('itemSortDir');
+    const savedSort = sessionStorage.getItem('collectionSortField');
+    const savedDir = sessionStorage.getItem('collectionSortDir');
     if (!savedSort && !savedDir) return;
     if (savedSort && savedSort !== 'name') params.set('sort', savedSort);
     if (savedDir && savedDir !== 'asc') params.set('dir', savedDir);
@@ -69,55 +66,50 @@ export default function ItemsView() {
     };
   }, []);
 
-  const parsedData = useMemo(() => {
-    return data.map((item) => ({
-      ...item,
-      weight:
-        preferences?.units === Units.IMPERIAL && item.weight
-          ? convertGramsToOunces(Number(item.weight))
-          : item.weight,
-    }));
-  }, [data, preferences?.units]);
+  const collectionsForDisplay: CollectionForDisplay[] = useMemo(() => {
+    return collections.map((collection) => {
+      const { value, unit } = formatWeightForDisplay(collection.totalWeight, preferences?.units);
+      return { ...collection, displayWeight: value, displayUnit: unit };
+    });
+  }, [collections, preferences?.units]);
 
-  const filterState: ItemFilterState = useMemo(() => {
+  const filterState: CollectionFilterState = useMemo(() => {
     const rawSort = searchParams.get('sort');
     const rawDir = searchParams.get('dir');
     return {
       search: searchParams.get('search') ?? '',
-      category: searchParams.get('category') ?? '',
-      sortField: rawSort === 'weight' || rawSort === 'category' ? rawSort : 'name',
+      type: (searchParams.get('type') ?? 'all') as CollectionFilterState['type'],
+      sortField: rawSort === 'type' || rawSort === 'weight' ? rawSort : 'name',
       sortDirection: rawDir === 'desc' ? 'desc' : 'asc',
     };
   }, [searchParams]);
 
-  const displayFilterState: ItemFilterState = { ...filterState, search: searchDraft };
+  const displayFilterState: CollectionFilterState = { ...filterState, search: searchDraft };
 
-  const filteredItems = useMemo(() => {
-    let result = [...parsedData];
+  const filteredCollections = useMemo(() => {
+    let result = [...collectionsForDisplay];
 
     if (searchDraft) {
       const term = searchDraft.toLowerCase();
       result = result.filter(
-        (item) =>
-          item.name.toLowerCase().includes(term) ||
-          (item.description?.toLowerCase().includes(term) ?? false),
+        (collection) =>
+          collection.name.toLowerCase().includes(term) ||
+          (collection.description?.toLowerCase().includes(term) ?? false),
       );
     }
 
-    if (filterState.category) {
-      result = result.filter((item) => item.category?.name === filterState.category);
+    if (filterState.type && filterState.type !== 'all') {
+      result = result.filter((collection) => collection.type === filterState.type);
     }
 
     result.sort((a, b) => {
       let cmp: number;
-      if (filterState.sortField === 'weight') {
-        cmp = (a.weight ?? 0) - (b.weight ?? 0);
-      } else if (filterState.sortField === 'name') {
+      if (filterState.sortField === 'name') {
         cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      } else if (filterState.sortField === 'category') {
-        cmp = (a.category?.name ?? '')
-          .toLowerCase()
-          .localeCompare((b.category?.name ?? '').toLowerCase());
+      } else if (filterState.sortField === 'type') {
+        cmp = a.type.localeCompare(b.type);
+      } else if (filterState.sortField === 'weight') {
+        cmp = a.totalWeight - b.totalWeight;
       } else {
         cmp = 0;
       }
@@ -129,15 +121,15 @@ export default function ItemsView() {
 
     return result;
   }, [
-    parsedData,
+    collectionsForDisplay,
     searchDraft,
-    filterState.category,
+    filterState.type,
     filterState.sortField,
     filterState.sortDirection,
   ]);
 
   const handleFilterChange = useCallback(
-    (updates: Partial<ItemFilterState>) => {
+    (updates: Partial<CollectionFilterState>) => {
       if (updates.search !== undefined) {
         searchDraftRef.current = updates.search;
         setSearchDraft(updates.search);
@@ -156,42 +148,24 @@ export default function ItemsView() {
       }
 
       const params = new URLSearchParams(searchParams.toString());
-      if (updates.category !== undefined) {
-        if (updates.category) params.set('category', updates.category);
-        else params.delete('category');
+      if (updates.type !== undefined) {
+        if (updates.type) params.set('type', updates.type);
+        else params.delete('type');
       }
       if (updates.sortField !== undefined) {
         if (updates.sortField !== 'name') params.set('sort', updates.sortField);
         else params.delete('sort');
-        sessionStorage.setItem('itemSortField', updates.sortField);
+        sessionStorage.setItem('collectionSortField', updates.sortField);
       }
       if (updates.sortDirection !== undefined) {
         if (updates.sortDirection !== 'asc') params.set('dir', updates.sortDirection);
         else params.delete('dir');
-        sessionStorage.setItem('itemSortDir', updates.sortDirection);
+        sessionStorage.setItem('collectionSortDir', updates.sortDirection);
       }
       router.replace(`${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams],
   );
-
-  const handleEditItem = useCallback(
-    (id: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('action', 'edit-item');
-      params.set('id', id);
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
-
-  const handleDeleteItem = useCallback((id: string) => {
-    setDeleteItemId(id);
-  }, []);
-
-  const closeDeleteModal = useCallback(() => {
-    setDeleteItemId(null);
-  }, []);
 
   if (!isReady) {
     return (
@@ -201,43 +175,29 @@ export default function ItemsView() {
     );
   }
 
-  const deleteItemModal = deleteItemId && (
-    <ItemDeleteModal itemId={deleteItemId} onClose={closeDeleteModal} />
-  );
-
   if (!isDesktop) {
     return (
-      <>
-        <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
-          <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-          <MobileItemsList
-            items={filteredItems}
-            isLoading={isLoading}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-            weightUnit={getWeightUnit(preferences?.units)}
-          />
-        </div>
-        {deleteItemModal}
-      </>
+      <div className="flex w-full max-w-3xl flex-col gap-4 p-4 lg:p-8">
+        <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
+        <CollectionsList
+          collections={filteredCollections}
+          isLoading={isLoading}
+          onOpenCollection={() => {}}
+        />
+      </div>
     );
   }
 
   return (
-    <>
-      <div className="flex h-full w-full flex-col gap-4 p-4">
-        <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-        <div className="min-h-0 flex-1">
-          <DesktopItemsTable
-            items={filteredItems}
-            isLoading={isLoading}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-            weightUnit={getWeightUnit(preferences?.units)}
-          />
-        </div>
+    <div className="flex h-full w-full flex-col gap-4 p-4">
+      <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
+      <div className="min-h-0 flex-1">
+        <CollectionsList
+          collections={filteredCollections}
+          isLoading={isLoading}
+          onOpenCollection={() => {}}
+        />
       </div>
-      {deleteItemModal}
-    </>
+    </div>
   );
 }

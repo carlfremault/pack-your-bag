@@ -25,6 +25,7 @@ export interface InputSelectProps {
   required?: boolean;
   disabled?: boolean;
   isClearable?: boolean;
+  clearValue?: string;
 }
 
 export function InputSelect(props: InputSelectProps) {
@@ -38,6 +39,7 @@ export function InputSelect(props: InputSelectProps) {
     required = false,
     disabled = false,
     isClearable = false,
+    clearValue = '',
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -160,7 +162,7 @@ export function InputSelect(props: InputSelectProps) {
             aria-label="Clear selection"
             className="text-primary/40 hover:text-primary absolute inset-y-0 right-8 flex items-center px-1"
             onClick={() => {
-              onChange('');
+              onChange(clearValue);
               buttonRef.current?.focus();
             }}
           >
