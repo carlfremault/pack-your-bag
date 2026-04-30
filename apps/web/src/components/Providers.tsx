@@ -36,7 +36,8 @@ function makeQueryClient() {
     mutationCache: new MutationCache({ onError: onQueryError }),
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
       },
     },
   });

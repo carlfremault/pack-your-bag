@@ -21,8 +21,6 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
   return useQuery({
     queryKey: ['collections'],
     queryFn: fetchAllCollections,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
   });
 };
 

@@ -21,8 +21,6 @@ const usePreferences = (): UseQueryResult<Preferences | null> => {
   return useQuery({
     queryKey: ['preferences'],
     queryFn: fetchPreferences,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
   });
 };
 
