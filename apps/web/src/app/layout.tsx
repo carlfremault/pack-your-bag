@@ -4,6 +4,8 @@ import Link from 'next/link';
 
 import { Sidebar } from '@repo/react-common/sidebar';
 
+import { dehydrate, QueryClient } from '@tanstack/react-query';
+
 import { DesktopNav } from '@/components/Navigation/DesktopNav';
 import { MobileHeader } from '@/components/Navigation/MobileHeader';
 import { MobileNav } from '@/components/Navigation/MobileNav';
@@ -40,10 +42,16 @@ export default async function RootLayout({
   const preferences = isLoggedIn ? await getPreferences().catch(() => null) : null;
   const theme = preferences?.theme;
 
+  const queryClient = new QueryClient();
+  if (isLoggedIn) {
+    queryClient.setQueryData(['preferences'], preferences);
+  }
+  const dehydratedState = dehydrate(queryClient);
+
   return (
     <html lang="en" className={[inter.variable, theme].filter(Boolean).join(' ')}>
       <body>
-        <Providers>
+        <Providers dehydratedState={dehydratedState}>
           <div className="flex h-screen flex-col lg:flex-row">
             <div className="hidden w-1/4 min-w-80 lg:block">
               <Sidebar linkAs={Link}>
