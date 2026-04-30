@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { usePreferences } from '@/features/settings/queries';
+import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
+import { useSearchDraft } from '@/hooks/useSearchDraft';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useAllCollections } from '../queries';
@@ -15,56 +17,22 @@ import { CollectionForDisplay } from '../types';
 import { CollectionFilter, CollectionFilterState } from './CollectionFilter';
 import CollectionsList from './CollectionsList';
 
-const SEARCH_DEBOUNCE_MS = 300;
-
 export default function CollectionsView() {
   const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const { searchDraft, handleSearchChange } = useSearchDraft();
+  useRestoreSortFromSession({
+    sortFieldKey: 'collectionSortField',
+    sortDirKey: 'collectionSortDir',
+    defaultSortField: 'name',
+  });
+
   const { data: collections = [], isLoading: isCollectionsLoading } = useAllCollections();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isCollectionsLoading || isPreferencesLoading;
-
-  // searchDraft gives immediate input feedback; URL is updated with debounce
-  const [searchDraft, setSearchDraft] = useState(() => searchParams.get('search') ?? '');
-  const searchDraftRef = useRef(searchDraft);
-  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // On mount: if URL has no sort params, restore last saved sort from sessionStorage
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('sort') || params.get('dir')) return;
-    const savedSort = sessionStorage.getItem('collectionSortField');
-    const savedDir = sessionStorage.getItem('collectionSortDir');
-    if (!savedSort && !savedDir) return;
-    if (savedSort && savedSort !== 'name') params.set('sort', savedSort);
-    if (savedDir && savedDir !== 'asc') params.set('dir', savedDir);
-    const qs = params.toString();
-    if (qs) router.replace(`${pathname}?${qs}`);
-  }, [pathname, router]);
-
-  // Sync searchDraft on browser back/forward (popstate) so the input matches the restored URL
-  useEffect(() => {
-    const handlePopState = () => {
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current);
-        searchDebounceRef.current = null;
-      }
-      const urlSearch = new URLSearchParams(window.location.search).get('search') ?? '';
-      searchDraftRef.current = urlSearch;
-      setSearchDraft(urlSearch);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current);
-        searchDebounceRef.current = null;
-      }
-    };
-  }, []);
 
   const collectionsForDisplay: CollectionForDisplay[] = useMemo(() => {
     return collections.map((collection) => {
@@ -131,19 +99,7 @@ export default function CollectionsView() {
   const handleFilterChange = useCallback(
     (updates: Partial<CollectionFilterState>) => {
       if (updates.search !== undefined) {
-        searchDraftRef.current = updates.search;
-        setSearchDraft(updates.search);
-        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-        searchDebounceRef.current = setTimeout(() => {
-          // Read fresh params at fire time to avoid overwriting concurrent filter changes
-          const params = new URLSearchParams(window.location.search);
-          if (searchDraftRef.current) {
-            params.set('search', searchDraftRef.current);
-          } else {
-            params.delete('search');
-          }
-          router.replace(`${pathname}?${params.toString()}`);
-        }, SEARCH_DEBOUNCE_MS);
+        handleSearchChange(updates.search);
         return;
       }
 
@@ -164,7 +120,7 @@ export default function CollectionsView() {
       }
       router.replace(`${pathname}?${params.toString()}`);
     },
-    [pathname, router, searchParams],
+    [handleSearchChange, pathname, router, searchParams],
   );
 
   if (!isReady) {
