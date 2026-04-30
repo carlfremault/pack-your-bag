@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 
 import { colorThemes } from '../../../lib/colorThemes';
 import { LONG_DESCRIPTION } from '../../../lib/constants';
@@ -28,7 +27,7 @@ export const ListWith10Items: Story = {
     colorTheme: 'ocean',
     type: 'list',
     numberOfItems: 10,
-    onOpenCollection: fn(),
+    href: '/',
   },
 };
 
@@ -40,7 +39,7 @@ export const PackWith1Item: Story = {
     colorTheme: 'jungle',
     type: 'pack',
     numberOfItems: 1,
-    onOpenCollection: fn(),
+    href: '/',
   },
 };
 
@@ -52,7 +51,7 @@ export const PackWithoutItems: Story = {
     colorTheme: 'lagoon',
     type: 'pack',
     numberOfItems: 0,
-    onOpenCollection: fn(),
+    href: '/',
   },
 };
 
@@ -63,7 +62,7 @@ export const ListWithoutDescription: Story = {
     colorTheme: 'lavender',
     type: 'list',
     numberOfItems: 10,
-    onOpenCollection: fn(),
+    href: '/',
   },
 };
 
@@ -75,7 +74,7 @@ export const ListWithLongDescription: Story = {
     colorTheme: 'slate',
     type: 'list',
     numberOfItems: 10,
-    onOpenCollection: fn(),
+    href: '/',
   },
 };
 
@@ -88,7 +87,7 @@ export const WeightInKg: Story = {
     numberOfItems: 12,
     totalWeight: '2.35',
     weightUnit: 'kg',
-    onOpenCollection: fn(),
+    href: '/',
   },
 };
 
@@ -101,6 +100,6 @@ export const WeightInLbs: Story = {
     numberOfItems: 8,
     totalWeight: '5.18',
     weightUnit: 'lbs',
-    onOpenCollection: fn(),
+    href: '/',
   },
 };

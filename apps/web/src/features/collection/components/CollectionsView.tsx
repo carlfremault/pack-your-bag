@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -40,6 +41,16 @@ export default function CollectionsView() {
       return { ...collection, displayWeight: value, displayUnit: unit };
     });
   }, [collections, preferences?.units]);
+
+  const actionQuery = useMemo(() => {
+    const action = searchParams.get('action');
+    if (!action) return undefined;
+    const params = new URLSearchParams();
+    params.set('action', action);
+    const id = searchParams.get('id');
+    if (id) params.set('id', id);
+    return params.toString();
+  }, [searchParams]);
 
   const filterState: CollectionFilterState = useMemo(() => {
     const rawSort = searchParams.get('sort');
@@ -138,7 +149,8 @@ export default function CollectionsView() {
         <CollectionsList
           collections={filteredCollections}
           isLoading={isLoading}
-          onOpenCollection={() => {}}
+          linkAs={Link}
+          actionQuery={actionQuery}
         />
       </div>
     );
@@ -151,7 +163,8 @@ export default function CollectionsView() {
         <CollectionsList
           collections={filteredCollections}
           isLoading={isLoading}
-          onOpenCollection={() => {}}
+          linkAs={Link}
+          actionQuery={actionQuery}
         />
       </div>
     </div>

@@ -6,14 +6,15 @@ import { CollectionForDisplay } from '../types';
 
 import CollectionsListSkeleton from './CollectionsListSkeleton';
 
-export interface MobileCollectionsListProps {
+export interface CollectionsListProps {
   collections: CollectionForDisplay[];
   isLoading: boolean;
-  onOpenCollection?: (id: string) => void;
+  linkAs: React.ElementType;
+  actionQuery?: string;
 }
 
-export default function CollectionsList(props: MobileCollectionsListProps) {
-  const { collections, isLoading, onOpenCollection = () => {} } = props;
+export default function CollectionsList(props: CollectionsListProps) {
+  const { collections, isLoading, linkAs, actionQuery } = props;
 
   const containerClassName = 'grid w-full gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4';
 
@@ -40,7 +41,7 @@ export default function CollectionsList(props: MobileCollectionsListProps) {
       {collections.map((collection) => (
         <CollectionCard
           key={collection.id}
-          {...toCollectionCardProps(collection, { onOpenCollection })}
+          {...toCollectionCardProps(collection, linkAs, actionQuery)}
         />
       ))}
     </div>

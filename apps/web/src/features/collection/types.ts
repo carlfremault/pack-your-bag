@@ -14,3 +14,5 @@ export type CollectionForDisplay = Collection & {
   displayWeight: string;
   displayUnit: string;
 };
+
+export type CollectionType = Collection['type'];
