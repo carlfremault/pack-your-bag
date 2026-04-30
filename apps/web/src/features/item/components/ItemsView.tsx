@@ -3,14 +3,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { usePreferences } from '@/features/settings/queries';
 import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
 import { useSearchDraft } from '@/hooks/useSearchDraft';
-import { convertGramsToOunces, getWeightUnit } from '@/utils/weightUtils';
+import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useAllItems } from '../queries';
 
@@ -37,14 +36,14 @@ export default function ItemsView() {
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isItemsLoading || isPreferencesLoading;
 
-  const parsedData = useMemo(() => {
-    return data.map((item) => ({
-      ...item,
-      weight:
-        preferences?.units === Units.IMPERIAL && item.weight
-          ? convertGramsToOunces(Number(item.weight))
-          : item.weight,
-    }));
+  const itemsForDisplay = useMemo(() => {
+    return data.map((item) => {
+      const hasWeight = item.weight != null;
+      const { value, unit } = hasWeight
+        ? formatWeightForDisplay(Number(item.weight), preferences?.units)
+        : { value: null, unit: null };
+      return { ...item, displayWeight: value, displayUnit: unit };
+    });
   }, [data, preferences?.units]);
 
   const filterState: ItemFilterState = useMemo(() => {
@@ -61,7 +60,7 @@ export default function ItemsView() {
   const displayFilterState: ItemFilterState = { ...filterState, search: searchDraft };
 
   const filteredItems = useMemo(() => {
-    let result = [...parsedData];
+    let result = [...itemsForDisplay];
 
     if (searchDraft) {
       const term = searchDraft.toLowerCase();
@@ -79,7 +78,7 @@ export default function ItemsView() {
     result.sort((a, b) => {
       let cmp: number;
       if (filterState.sortField === 'weight') {
-        cmp = (a.weight ?? 0) - (b.weight ?? 0);
+        cmp = (a.weight != null ? Number(a.weight) : 0) - (b.weight != null ? Number(b.weight) : 0);
       } else if (filterState.sortField === 'name') {
         cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
       } else if (filterState.sortField === 'category') {
@@ -97,7 +96,7 @@ export default function ItemsView() {
 
     return result;
   }, [
-    parsedData,
+    itemsForDisplay,
     searchDraft,
     filterState.category,
     filterState.sortField,
@@ -171,7 +170,6 @@ export default function ItemsView() {
             isLoading={isLoading}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
-            weightUnit={getWeightUnit(preferences?.units)}
           />
         </div>
         {itemDeleteModal}
@@ -189,7 +187,6 @@ export default function ItemsView() {
             isLoading={isLoading}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
-            weightUnit={getWeightUnit(preferences?.units)}
           />
         </div>
       </div>

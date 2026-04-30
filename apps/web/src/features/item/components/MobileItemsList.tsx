@@ -2,20 +2,19 @@ import { ItemCard } from '@repo/react-common/card';
 
 import { toItemCardProps } from '@/lib/mappers/item.mapper';
 
-import { Item } from '../types';
+import { ItemForDisplay } from '../types';
 
 import MobileItemsListSkeleton from './MobileItemsListSkeleton';
 
 export interface MobileItemsListProps {
-  items: Item[];
-  weightUnit?: string;
+  items: ItemForDisplay[];
   isLoading: boolean;
   onEditItem: (id: string) => void;
   onDeleteItem: (id: string) => void;
 }
 
 export default function MobileItemsList(props: MobileItemsListProps) {
-  const { items, weightUnit, isLoading, onEditItem, onDeleteItem } = props;
+  const { items, isLoading, onEditItem, onDeleteItem } = props;
 
   const containerClassName = 'flex w-full flex-col gap-2';
 
@@ -42,7 +41,7 @@ export default function MobileItemsList(props: MobileItemsListProps) {
       {items.map((item) => (
         <ItemCard
           key={item.id}
-          {...toItemCardProps(item, { onEditItem, onDeleteItem }, weightUnit)}
+          {...toItemCardProps(item, { onEditItem, onDeleteItem })}
           className="last:mb-[25vh]"
         />
       ))}
