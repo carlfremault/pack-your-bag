@@ -21,8 +21,6 @@ const useAllCategories = (): UseQueryResult<Category[]> => {
   return useQuery({
     queryKey: ['categories'],
     queryFn: fetchAllCategories,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
   });
 };
 

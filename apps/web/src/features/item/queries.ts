@@ -21,8 +21,6 @@ const useAllItems = (): UseQueryResult<Item[]> => {
   return useQuery({
     queryKey: ['items'],
     queryFn: fetchAllItems,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
   });
 };
 
