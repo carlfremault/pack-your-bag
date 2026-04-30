@@ -148,7 +148,6 @@ export default function CollectionForm(props: CollectionFormProps) {
         value={formValues.name}
         onChange={(e) => handleFieldChange('name', e.target.value)}
         errorMessage={fieldErrors.name}
-        // className="rounded-md border border-gray-300 p-2"
       />
       <InputTextarea
         label="Description"
@@ -157,7 +156,6 @@ export default function CollectionForm(props: CollectionFormProps) {
         value={formValues.description}
         onChange={(e) => handleFieldChange('description', e.target.value)}
         errorMessage={fieldErrors.description}
-        // className="rounded-md border border-gray-300 p-2"
       />
       <InputSelect
         label="Color"
