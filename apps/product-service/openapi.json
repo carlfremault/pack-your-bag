@@ -1597,6 +1597,175 @@
           "list-pack"
         ]
       }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check service health (database, disk, memory)",
+        "tags": [
+          "health"
+        ]
+      }
     }
   },
   "info": {
@@ -2190,12 +2359,15 @@
           "name": {
             "type": "string",
             "description": "List name",
-            "example": "List name"
+            "example": "List name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "List description",
-            "example": "List description"
+            "example": "List description",
+            "maxLength": 1000
           },
           "colorTheme": {
             "type": "string",
@@ -2213,12 +2385,15 @@
           "name": {
             "type": "string",
             "description": "List name",
-            "example": "List name"
+            "example": "List name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "List description",
-            "example": "List description"
+            "example": "List description",
+            "maxLength": 1000
           },
           "colorTheme": {
             "type": "string",
@@ -2310,12 +2485,15 @@
           "name": {
             "type": "string",
             "description": "Pack name",
-            "example": "Pack name"
+            "example": "Pack name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Pack description",
-            "example": "Pack description"
+            "example": "Pack description",
+            "maxLength": 1000
           },
           "colorTheme": {
             "type": "string",
@@ -2333,12 +2511,15 @@
           "name": {
             "type": "string",
             "description": "Pack name",
-            "example": "Pack name"
+            "example": "Pack name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Pack description",
-            "example": "Pack description"
+            "example": "Pack description",
+            "maxLength": 1000
           },
           "colorTheme": {
             "type": "string",

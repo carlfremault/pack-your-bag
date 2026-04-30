@@ -1,7 +1,9 @@
-import type { SuccessResponse } from '@repo/product-client';
+import type { RequestBody, SuccessResponse } from '@repo/product-client';
 
 export type List = SuccessResponse<'/list/{id}', 'get'>;
 export type Pack = SuccessResponse<'/pack/{id}', 'get'>;
+export type CreateListBody = RequestBody<'/list', 'post'>;
+export type CreatePackBody = RequestBody<'/pack', 'post'>;
 
 export type Collection = ((List & { type: 'list' }) | (Pack & { type: 'pack' })) & {
   numberOfItems: number;

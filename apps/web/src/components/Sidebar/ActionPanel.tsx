@@ -8,6 +8,7 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 
 import { Modal } from '@/components/Modal';
 import { CategoryView } from '@/features/category/components/CategoryView';
+import CollectionForm from '@/features/collection/components/CollectionForm';
 import ItemForm from '@/features/item/components/ItemForm';
 import { usePreferences } from '@/features/settings/queries';
 
@@ -15,12 +16,13 @@ import { SidebarNav } from '../Navigation/SidebarNav';
 
 import { SidebarPortal } from '.';
 
-const SIDEBAR_ACTIONS = ['add-item', 'edit-item', 'manage-categories'] as const;
+const SIDEBAR_ACTIONS = ['add-item', 'edit-item', 'add-collection', 'manage-categories'] as const;
 type SidebarAction = (typeof SIDEBAR_ACTIONS)[number];
 
 const MODAL_TITLES: Record<SidebarAction, string> = {
   'add-item': 'Add item',
   'edit-item': 'Edit item',
+  'add-collection': 'Add collection',
   'manage-categories': 'Categories',
 };
 
@@ -81,13 +83,16 @@ function ActionPanelInner() {
   let panelContent: React.ReactNode = null;
   let desktopTitle: string | null = null;
   if (action === 'add-item') {
-    panelContent = <ItemForm key="add" units={units} onClose={closeAction} />;
+    panelContent = <ItemForm key="addItem" units={units} onClose={closeAction} />;
     desktopTitle = 'Add item';
   } else if (action === 'edit-item' && itemId) {
     panelContent = (
       <ItemForm key={`edit-${itemId}`} itemId={itemId} units={units} onClose={closeAction} />
     );
     desktopTitle = 'Edit item';
+  } else if (action === 'add-collection') {
+    panelContent = <CollectionForm key="addCollection" onClose={closeAction} />;
+    desktopTitle = 'Add collection';
   } else if (action === 'manage-categories') {
     panelContent = (
       <CategoryView
@@ -109,7 +114,7 @@ function ActionPanelInner() {
             {panelContent}
           </div>
         ) : (
-          <SidebarNav />
+          <SidebarNav pathname={pathname} />
         )}
       </SidebarPortal>
     );

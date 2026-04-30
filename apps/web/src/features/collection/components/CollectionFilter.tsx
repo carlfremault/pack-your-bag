@@ -1,4 +1,6 @@
 'use client';
+import { BsBackpack } from 'react-icons/bs';
+import { MdOutlineFormatListBulleted, MdOutlineShoppingBag } from 'react-icons/md';
 
 import { InputSelect, InputSelectOption } from '@repo/react-common/input';
 
@@ -17,9 +19,33 @@ interface CollectionFilterProps {
 }
 
 const TYPE_OPTIONS: InputSelectOption[] = [
-  { value: 'list', label: 'Lists' },
-  { value: 'pack', label: 'Packs' },
-  { value: 'all', label: 'Lists & Packs' },
+  {
+    value: 'all',
+    label: (
+      <div className="flex items-center gap-1">
+        <MdOutlineShoppingBag className="h-4 w-4" aria-hidden="true" />
+        <span>Lists & Packs</span>
+      </div>
+    ),
+  },
+  {
+    value: 'list',
+    label: (
+      <div className="flex items-center gap-1">
+        <MdOutlineFormatListBulleted className="h-4 w-4" aria-hidden="true" />
+        <span>Lists</span>
+      </div>
+    ),
+  },
+  {
+    value: 'pack',
+    label: (
+      <div className="flex items-center gap-1">
+        <BsBackpack className="h-4 w-4" aria-hidden="true" />
+        <span>Packs</span>
+      </div>
+    ),
+  },
 ];
 
 const SORT_FIELD_OPTIONS: InputSelectOption[] = [

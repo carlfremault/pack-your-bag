@@ -109,51 +109,46 @@ export default function ItemForm(props: ItemFormProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <FormWrapper
-        onSubmit={handleSubmit}
-        onReset={handleReset}
-        onClose={onClose}
-        isPending={isCreating || isUpdating}
-      >
-        <Input
-          label="Name"
-          required
-          maxLength={NAME_MAX_LENGTH}
-          value={formValues.name}
-          onChange={(e) => handleFieldChange('name', e.target.value)}
-          errorMessage={fieldErrors.name}
-          className="rounded-md border border-gray-300 p-2"
-        />
-        <InputTextarea
-          label="Description"
-          rows={4}
-          maxLength={DESCRIPTION_MAX_LENGTH}
-          value={formValues.description}
-          onChange={(e) => handleFieldChange('description', e.target.value)}
-          errorMessage={fieldErrors.description}
-          className="rounded-md border border-gray-300 p-2"
-        />
-        <Input
-          label={`Weight (${units === Units.METRIC ? 'in grams' : 'in ounces'})`}
-          type="number"
-          step="0.01"
-          value={formValues.weight}
-          onChange={(e) => handleFieldChange('weight', e.target.value)}
-          errorMessage={fieldErrors.weight}
-          className="rounded-md border border-gray-300 p-2"
-        />
-        <InputSelect
-          label="Category"
-          isClearable
-          placeholder={categories?.length === 0 ? 'No categories yet' : 'Select a category'}
-          disabled={!!categories && categories.length === 0}
-          options={categoryOptions}
-          value={formValues.categoryId}
-          onChange={(value) => handleFieldChange('categoryId', value)}
-          errorMessage={fieldErrors.categoryId}
-        />
-      </FormWrapper>
-    </div>
+    <FormWrapper
+      onSubmit={handleSubmit}
+      onReset={handleReset}
+      onClose={onClose}
+      isPending={isCreating || isUpdating}
+    >
+      <Input
+        label="Name"
+        required
+        maxLength={NAME_MAX_LENGTH}
+        value={formValues.name}
+        onChange={(e) => handleFieldChange('name', e.target.value)}
+        errorMessage={fieldErrors.name}
+      />
+      <InputTextarea
+        label="Description"
+        rows={4}
+        maxLength={DESCRIPTION_MAX_LENGTH}
+        value={formValues.description}
+        onChange={(e) => handleFieldChange('description', e.target.value)}
+        errorMessage={fieldErrors.description}
+      />
+      <Input
+        label={`Weight (${units === Units.METRIC ? 'in grams' : 'in ounces'})`}
+        type="number"
+        step="0.01"
+        value={formValues.weight}
+        onChange={(e) => handleFieldChange('weight', e.target.value)}
+        errorMessage={fieldErrors.weight}
+      />
+      <InputSelect
+        label="Category"
+        isClearable
+        placeholder={categories?.length === 0 ? 'No categories yet' : 'Select a category'}
+        disabled={!!categories && categories.length === 0}
+        options={categoryOptions}
+        value={formValues.categoryId}
+        onChange={(value) => handleFieldChange('categoryId', value)}
+        errorMessage={fieldErrors.categoryId}
+      />
+    </FormWrapper>
   );
 }
