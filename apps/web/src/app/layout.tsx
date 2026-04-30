@@ -8,7 +8,7 @@ import { DesktopNav } from '@/components/Navigation/DesktopNav';
 import { MobileHeader } from '@/components/Navigation/MobileHeader';
 import { MobileNav } from '@/components/Navigation/MobileNav';
 import { MobileNavDrawer } from '@/components/Navigation/MobileNavDrawer';
-import { Providers } from '@/components/providers';
+import { Providers } from '@/components/Providers';
 import { SidebarSlot } from '@/components/Sidebar';
 import { ActionPanel } from '@/components/Sidebar/ActionPanel';
 import { ToastNotifications } from '@/components/ToastNotifications';
