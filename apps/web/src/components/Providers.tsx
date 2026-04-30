@@ -3,7 +3,9 @@
 import toast from 'react-hot-toast';
 
 import {
+  type DehydratedState,
   environmentManager,
+  HydrationBoundary,
   MutationCache,
   QueryCache,
   QueryClient,
@@ -45,22 +47,29 @@ let browserQueryClient: QueryClient | undefined = undefined;
 function getQueryClient() {
   if (environmentManager.isServer()) {
     return makeQueryClient();
-  } else {
-    if (!browserQueryClient) browserQueryClient = makeQueryClient();
-    return browserQueryClient;
   }
+  if (!browserQueryClient) browserQueryClient = makeQueryClient();
+  return browserQueryClient;
 }
 
 // --------------------------------
 // Providers
 // --------------------------------
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  dehydratedState,
+}: {
+  children: React.ReactNode;
+  dehydratedState?: DehydratedState;
+}) {
   const queryClient = getQueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>{children}</SidebarProvider>
+      <HydrationBoundary state={dehydratedState}>
+        <SidebarProvider>{children}</SidebarProvider>
+      </HydrationBoundary>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
