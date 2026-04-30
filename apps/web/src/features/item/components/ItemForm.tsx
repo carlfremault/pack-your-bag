@@ -11,7 +11,7 @@ import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
 import { useFormState } from '@/hooks/useFormState';
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
-import { convertGramsToOunces, convertOuncesToGrams } from '@/utils/convertWeight';
+import { convertGramsToOunces, convertOuncesToGrams } from '@/utils/weightUtils';
 
 import { useAllItems, useCreateItem, useUpdateItem } from '../queries';
 import { Item } from '../types';

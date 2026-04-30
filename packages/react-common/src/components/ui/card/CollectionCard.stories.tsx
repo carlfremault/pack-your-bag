@@ -78,3 +78,29 @@ export const ListWithLongDescription: Story = {
     onOpenCollection: fn(),
   },
 };
+
+export const WeightInKg: Story = {
+  args: {
+    id: 'collection-6',
+    name: 'Heavy Pack',
+    colorTheme: 'ocean',
+    type: 'pack',
+    numberOfItems: 12,
+    totalWeight: '2.35',
+    weightUnit: 'kg',
+    onOpenCollection: fn(),
+  },
+};
+
+export const WeightInLbs: Story = {
+  args: {
+    id: 'collection-7',
+    name: 'Heavy List',
+    colorTheme: 'jungle',
+    type: 'list',
+    numberOfItems: 8,
+    totalWeight: '5.18',
+    weightUnit: 'lbs',
+    onOpenCollection: fn(),
+  },
+};
