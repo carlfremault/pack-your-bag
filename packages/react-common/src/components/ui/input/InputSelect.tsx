@@ -160,7 +160,7 @@ export function InputSelect<T = string>(props: InputSelectProps<T>) {
           <button
             type="button"
             aria-label="Clear selection"
-            className="text-primary/40 hover:text-primary absolute inset-y-0 right-8 flex items-center px-1"
+            className="text-primary/40 hover:text-primary focus:ring-info-ring absolute inset-y-0 right-8 flex items-center px-1 focus:ring-2 focus:outline-none"
             onClick={() => {
               onChange(clearValue);
               buttonRef.current?.focus();
