@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
-import { PackSummaryResponseDto } from '@/modules/pack/dto/pack-response.dto';
+import { PackBaseResponseDto } from '@/modules/pack/dto/pack-response.dto';
 import { UpdatePackDto } from '@/modules/pack/dto/update-pack.dto';
 
 import {
@@ -320,10 +320,20 @@ describe('Pack (e2e)', () => {
 
       expect(packs).toHaveLength(2);
       expect(packs).toContainEqual(
-        expect.objectContaining({ id: pack1.id, name: pack1.name, itemCount: 0, listCount: 0 }),
+        expect.objectContaining({
+          id: pack1.id,
+          name: pack1.name,
+          itemCount: 0,
+          totalWeight: 0,
+        }),
       );
       expect(packs).toContainEqual(
-        expect.objectContaining({ id: pack2.id, name: pack2.name, itemCount: 0, listCount: 0 }),
+        expect.objectContaining({
+          id: pack2.id,
+          name: pack2.name,
+          itemCount: 0,
+          totalWeight: 0,
+        }),
       );
     });
 
@@ -336,12 +346,13 @@ describe('Pack (e2e)', () => {
       });
 
       expect(packs).toHaveLength(2);
+      // 1 direct item (weight=1, qty=1), 1 empty list (qty=1) → itemCount:1, totalWeight:1
       expect(packs).toContainEqual(
         expect.objectContaining({
           id: pack1.id,
           name: pack1.name,
           itemCount: 1,
-          listCount: 1,
+          totalWeight: 1,
         }),
       );
       expect(packs).toContainEqual(
@@ -349,7 +360,7 @@ describe('Pack (e2e)', () => {
           id: pack2.id,
           name: pack2.name,
           itemCount: 1,
-          listCount: 1,
+          totalWeight: 1,
         }),
       );
     });
@@ -379,7 +390,7 @@ describe('Pack (e2e)', () => {
 
       expect(packsUser1).toHaveLength(1);
       expect(packsUser1).toContainEqual(
-        expect.objectContaining({ id: pack.id, name: pack.name, itemCount: 0, listCount: 0 }),
+        expect.objectContaining({ id: pack.id, name: pack.name, itemCount: 0, totalWeight: 0 }),
       );
 
       expect(packsUser2).toEqual([]);
@@ -750,9 +761,7 @@ describe('Pack (e2e)', () => {
           colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 0,
-          listCount: 0,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
         trips: [],
       });
     });
@@ -773,9 +782,7 @@ describe('Pack (e2e)', () => {
           colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 0,
-          listCount: 0,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
         trips: [{ id: trip.id, name: trip.name, date: trip.date, remarks: trip.remarks }],
       });
     });
@@ -796,9 +803,7 @@ describe('Pack (e2e)', () => {
           colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 1,
-          listCount: 1,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
         trips: [{ id: trip.id, name: trip.name, date: trip.date, remarks: trip.remarks }],
       });
     });
@@ -819,9 +824,7 @@ describe('Pack (e2e)', () => {
           colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 0,
-          listCount: 0,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
       });
       expect(impact.trips).toHaveLength(2);
       expect(impact.trips).toEqual(

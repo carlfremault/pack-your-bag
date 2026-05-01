@@ -5,14 +5,14 @@ import { Exclude, Expose, Type } from 'class-transformer';
 import { PackResponseDto } from '@/modules/pack/dto/pack-response.dto';
 import { TripResponseDto } from '@/modules/trip/dto/trip-response.dto';
 
-import { ListSummaryResponseDto } from './list-response.dto';
+import { ListBaseResponseDto } from './list-response.dto';
 
 @Exclude()
 export class ListDeleteImpactDto {
-  @ApiProperty({ type: ListSummaryResponseDto })
+  @ApiProperty({ type: ListBaseResponseDto })
   @Expose()
-  @Type(() => ListSummaryResponseDto)
-  list: ListSummaryResponseDto;
+  @Type(() => ListBaseResponseDto)
+  list: ListBaseResponseDto;
   @ApiProperty({ type: [PackResponseDto] })
   @Expose()
   @Type(() => PackResponseDto)

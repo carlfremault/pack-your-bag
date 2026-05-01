@@ -100,13 +100,6 @@ export const UpdateCategoryDto = z
   .object({ name: z.string().min(1).max(32), description: z.string(), colorTheme: z.string() })
   .partial()
   .passthrough();
-export const CreateListDto = z
-  .object({
-    name: z.string().min(1).max(128),
-    description: z.string().max(1000).optional(),
-    colorTheme: z.string().optional(),
-  })
-  .passthrough();
 export const ListSummaryResponseDto = z
   .object({
     id: z.string(),
@@ -116,11 +109,29 @@ export const ListSummaryResponseDto = z
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     itemCount: z.number(),
+    totalWeight: z.number(),
+  })
+  .passthrough();
+export const CreateListDto = z
+  .object({
+    name: z.string().min(1).max(128),
+    description: z.string().max(1000).optional(),
+    colorTheme: z.string().optional(),
+  })
+  .passthrough();
+export const ListBaseResponseDto = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    colorTheme: z.string().nullable(),
+    createdAt: z.string().datetime({ offset: true }),
+    updatedAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
 export const ListDeleteImpactDto = z
   .object({
-    list: ListSummaryResponseDto,
+    list: ListBaseResponseDto,
     packs: z.array(PackResponseDto),
     trips: z.array(TripResponseDto),
   })
@@ -133,13 +144,6 @@ export const UpdateListDto = z
   })
   .partial()
   .passthrough();
-export const CreatePackDto = z
-  .object({
-    name: z.string().min(1).max(128),
-    description: z.string().max(1000).optional(),
-    colorTheme: z.string().optional(),
-  })
-  .passthrough();
 export const PackSummaryResponseDto = z
   .object({
     id: z.string(),
@@ -149,11 +153,28 @@ export const PackSummaryResponseDto = z
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     itemCount: z.number(),
-    listCount: z.number(),
+    totalWeight: z.number(),
+  })
+  .passthrough();
+export const CreatePackDto = z
+  .object({
+    name: z.string().min(1).max(128),
+    description: z.string().max(1000).optional(),
+    colorTheme: z.string().optional(),
+  })
+  .passthrough();
+export const PackBaseResponseDto = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    colorTheme: z.string().nullable(),
+    createdAt: z.string().datetime({ offset: true }),
+    updatedAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
 export const PackDeleteImpactDto = z
-  .object({ pack: PackSummaryResponseDto, trips: z.array(TripResponseDto) })
+  .object({ pack: PackBaseResponseDto, trips: z.array(TripResponseDto) })
   .passthrough();
 export const UpdatePackDto = z
   .object({

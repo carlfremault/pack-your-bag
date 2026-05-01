@@ -703,13 +703,52 @@ export interface components {
        */
       updatedAt: string;
       /**
-       * @description List item count
-       * @example 1
+       * @description Total quantity of items in the list
+       * @example 3
        */
       itemCount: number;
+      /**
+       * @description Total weight of all items in the list in grams
+       * @example 1500
+       */
+      totalWeight: number;
+    };
+    ListBaseResponseDto: {
+      /**
+       * @description List uuid
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description List name
+       * @example List name
+       */
+      name: string;
+      /**
+       * @description List description
+       * @example List description
+       */
+      description: string | null;
+      /**
+       * @description List color code
+       * @example #000000
+       */
+      colorTheme: string | null;
+      /**
+       * Format: date-time
+       * @description List created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description List updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ListDeleteImpactDto: {
-      list: components['schemas']['ListSummaryResponseDto'];
+      list: components['schemas']['ListBaseResponseDto'];
       packs: components['schemas']['PackResponseDto'][];
       trips: components['schemas']['TripResponseDto'][];
     };
@@ -781,18 +820,52 @@ export interface components {
        */
       updatedAt: string;
       /**
-       * @description Pack item count
-       * @example 1
+       * @description Total quantity of all items in the pack, including items in lists
+       * @example 30
        */
       itemCount: number;
       /**
-       * @description Pack list count
-       * @example 1
+       * @description Total weight of all items in the pack in grams
+       * @example 2500
        */
-      listCount: number;
+      totalWeight: number;
+    };
+    PackBaseResponseDto: {
+      /**
+       * @description Pack uuid
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description Pack name
+       * @example Pack name
+       */
+      name: string;
+      /**
+       * @description Pack description
+       * @example Pack description
+       */
+      description: string | null;
+      /**
+       * @description Pack color theme
+       * @example slate
+       */
+      colorTheme: string | null;
+      /**
+       * Format: date-time
+       * @description Pack created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Pack updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     PackDeleteImpactDto: {
-      pack: components['schemas']['PackSummaryResponseDto'];
+      pack: components['schemas']['PackBaseResponseDto'];
       trips: components['schemas']['TripResponseDto'][];
     };
     CreatePackDto: {
@@ -1512,7 +1585,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ListResponseDto'][];
+          'application/json': components['schemas']['ListSummaryResponseDto'][];
         };
       };
       /** @description Unauthorized. */
@@ -1793,7 +1866,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['PackResponseDto'][];
+          'application/json': components['schemas']['PackSummaryResponseDto'][];
         };
       };
       /** @description Unauthorized. */

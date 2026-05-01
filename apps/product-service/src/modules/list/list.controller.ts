@@ -25,7 +25,7 @@ import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.con
 
 import { CreateListDto } from './dto/create-list.dto';
 import { ListDeleteImpactDto } from './dto/list-delete-impact.dto';
-import { ListResponseDto } from './dto/list-response.dto';
+import { ListResponseDto, ListSummaryResponseDto } from './dto/list-response.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ListService } from './list.service';
 
@@ -46,7 +46,7 @@ export class ListController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Lists retrieved successfully.',
-    type: [ListResponseDto],
+    type: [ListSummaryResponseDto],
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LISTS.GET_ALL, ttl: THROTTLE_TTL_MS } })
