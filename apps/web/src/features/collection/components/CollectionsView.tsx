@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
@@ -31,7 +32,11 @@ export default function CollectionsView() {
     defaultSortField: 'name',
   });
 
-  const { data: collections = [], isLoading: isCollectionsLoading } = useAllCollections();
+  const {
+    data: collections = [],
+    isLoading: isCollectionsLoading,
+    isError: isCollectionsError,
+  } = useAllCollections();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isCollectionsLoading || isPreferencesLoading;
 
@@ -138,6 +143,14 @@ export default function CollectionsView() {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Spinner size="large" />
+      </div>
+    );
+  }
+
+  if (isCollectionsError && !collections.length) {
+    return (
+      <div className="flex h-full w-full items-center justify-center p-8">
+        <Alert type="error" message="Failed to load collections. Please try again later." />
       </div>
     );
   }

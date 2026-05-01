@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
 
 import { Modal } from '@/components/Modal';
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useDeleteItem } from '../queries';
 
@@ -23,9 +22,6 @@ export default function ItemDeleteModal(props: ItemDeleteModalProps) {
       onSuccess: () => {
         toast.success('Item deleted successfully');
         onClose();
-      },
-      onError: (error) => {
-        toast.error(`Error: ${extractErrorMessage(error)}`);
       },
     });
   };
