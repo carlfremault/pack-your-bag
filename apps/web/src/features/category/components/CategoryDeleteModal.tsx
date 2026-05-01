@@ -48,7 +48,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
     );
   } else if (isError) {
     dialogContent = (
-      <>
+      <div className="bg-danger/10 border-danger flex flex-col gap-2 rounded-md border p-4">
         <p className="text-danger">
           Could not load impact data. Any item which has this category assigned will be
           uncategorized. You can check manually on the items page or try again later.
@@ -61,7 +61,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
           <HiOutlineArrowUpRight />
         </Link>
         <p className="text-danger">If you are sure you may still proceed with deletion.</p>
-      </>
+      </div>
     );
   } else if (impactedItemsCount === 0) {
     dialogContent = <p>This category is not assigned to any item.</p>;
