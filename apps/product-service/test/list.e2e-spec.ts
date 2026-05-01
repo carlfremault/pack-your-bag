@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CreateListDto } from '@/modules/list/dto/create-list.dto';
-import { ListSummaryResponseDto } from '@/modules/list/dto/list-response.dto';
+import { ListBaseResponseDto } from '@/modules/list/dto/list-response.dto';
 import { UpdateListDto } from '@/modules/list/dto/update-list.dto';
 
 import {
@@ -208,10 +208,10 @@ describe('List (e2e)', () => {
 
       expect(lists).toHaveLength(2);
       expect(lists).toContainEqual(
-        expect.objectContaining({ id: list1.id, name: list1.name, itemCount: 0 }),
+        expect.objectContaining({ id: list1.id, name: list1.name, itemCount: 0, totalWeight: 0 }),
       );
       expect(lists).toContainEqual(
-        expect.objectContaining({ id: list2.id, name: list2.name, itemCount: 0 }),
+        expect.objectContaining({ id: list2.id, name: list2.name, itemCount: 0, totalWeight: 0 }),
       );
     });
 
@@ -224,11 +224,13 @@ describe('List (e2e)', () => {
       });
 
       expect(lists).toHaveLength(2);
+      // 1 item, weight=1, qty=1 → itemCount:1, totalWeight:1
       expect(lists).toContainEqual(
-        expect.objectContaining({ id: list1.id, name: list1.name, itemCount: 1 }),
+        expect.objectContaining({ id: list1.id, name: list1.name, itemCount: 1, totalWeight: 1 }),
       );
+      // 2 items, each weight=1, qty=1 → itemCount:2, totalWeight:2
       expect(lists).toContainEqual(
-        expect.objectContaining({ id: list2.id, name: list2.name, itemCount: 2 }),
+        expect.objectContaining({ id: list2.id, name: list2.name, itemCount: 2, totalWeight: 2 }),
       );
     });
 
@@ -257,7 +259,7 @@ describe('List (e2e)', () => {
 
       expect(listsUser1).toHaveLength(1);
       expect(listsUser1).toContainEqual(
-        expect.objectContaining({ id: list.id, name: list.name, itemCount: 0 }),
+        expect.objectContaining({ id: list.id, name: list.name, itemCount: 0, totalWeight: 0 }),
       );
 
       expect(listsUser2).toEqual([]);
@@ -630,7 +632,7 @@ describe('List (e2e)', () => {
       });
 
       expect(impact).toMatchObject({
-        list: expect.objectContaining({ itemCount: 1 }) as ListSummaryResponseDto,
+        list: expect.objectContaining({ id: list.id }) as ListBaseResponseDto,
         packs: [],
         trips: [],
       });

@@ -25,7 +25,7 @@ import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.con
 
 import { CreatePackDto } from './dto/create-pack.dto';
 import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
-import { PackResponseDto } from './dto/pack-response.dto';
+import { PackResponseDto, PackSummaryResponseDto } from './dto/pack-response.dto';
 import { UpdatePackDto } from './dto/update-pack.dto';
 import { PackService } from './pack.service';
 
@@ -46,7 +46,7 @@ export class PackController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Packs retrieved successfully.',
-    type: [PackResponseDto],
+    type: [PackSummaryResponseDto],
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.GET_ALL, ttl: THROTTLE_TTL_MS } })

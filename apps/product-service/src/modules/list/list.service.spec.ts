@@ -8,6 +8,16 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 import { ListService } from './list.service';
 
+const makeItem = (id: string, weight: number | null = null) => ({
+  id,
+  name: 'Item',
+  description: null,
+  weight,
+  category: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
+
 describe('ListService', () => {
   let service: ListService;
   let prisma: PrismaService;
@@ -48,6 +58,85 @@ describe('ListService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
+  });
+
+  describe('getLists', () => {
+    it('should query with items include', async () => {
+      mockPrismaService.list.findMany.mockResolvedValue([]);
+
+      await service.getLists({ userId: 'user-1' });
+
+      expect(mockPrismaService.list.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        include: { items: { include: { item: true } } },
+      });
+    });
+
+    it('should return itemCount as sum of item quantities', async () => {
+      const now = new Date();
+      mockPrismaService.list.findMany.mockResolvedValue([
+        {
+          id: 'list-1',
+          name: 'Test List',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [
+            { quantity: 2, item: makeItem('i-1') },
+            { quantity: 3, item: makeItem('i-2') },
+          ],
+        },
+      ]);
+
+      const result = await service.getLists({ userId: 'user-1' });
+
+      expect(result[0]?.itemCount).toBe(5);
+    });
+
+    it('should return totalWeight as sum of quantity times item weight', async () => {
+      const now = new Date();
+      mockPrismaService.list.findMany.mockResolvedValue([
+        {
+          id: 'list-1',
+          name: 'Test List',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [
+            { quantity: 2, item: makeItem('i-1', 1000) },
+            { quantity: 3, item: makeItem('i-2', 500) },
+          ],
+        },
+      ]);
+
+      const result = await service.getLists({ userId: 'user-1' });
+
+      expect(result[0]?.totalWeight).toBe(3500); // 2*1000 + 3*500
+    });
+
+    it('should treat null item weight as 0 in totalWeight', async () => {
+      const now = new Date();
+      mockPrismaService.list.findMany.mockResolvedValue([
+        {
+          id: 'list-1',
+          name: 'Test List',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [{ quantity: 2, item: makeItem('i-1', null) }],
+        },
+      ]);
+
+      const result = await service.getLists({ userId: 'user-1' });
+
+      expect(result[0]?.totalWeight).toBe(0);
+    });
   });
 
   describe('createList', () => {
@@ -145,14 +234,17 @@ describe('ListService', () => {
     it('should return the list, packs, and trips', async () => {
       const userId = 'user-1';
       const id = 'list-1';
+      const now = new Date();
+      const tripDate = new Date();
 
       const list = {
         id,
         name: 'Test List',
         description: 'Test Description',
         colorTheme: 'slate',
+        createdAt: now,
+        updatedAt: now,
         userId,
-        _count: { items: 2 },
       };
       const pack = {
         id: 'pack-1',
@@ -164,7 +256,7 @@ describe('ListService', () => {
       const trip = {
         id: 'trip-1',
         name: 'Test Trip',
-        date: new Date(),
+        date: tripDate,
         remarks: 'Test Remarks',
         userId,
       };
@@ -176,11 +268,6 @@ describe('ListService', () => {
 
       expect(mockPrismaService.list.findUnique).toHaveBeenCalledWith({
         where: { id, userId },
-        include: {
-          _count: {
-            select: { items: true },
-          },
-        },
       });
       expect(mockPrismaService.pack.findMany).toHaveBeenCalledWith({
         where: { lists: { some: { listId: id } } },
@@ -195,7 +282,6 @@ describe('ListService', () => {
           name: 'Test List',
           description: 'Test Description',
           colorTheme: 'slate',
-          itemCount: 2,
         },
         packs: [
           {
@@ -211,7 +297,7 @@ describe('ListService', () => {
           {
             id: 'trip-1',
             name: 'Test Trip',
-            date: trip.date,
+            date: tripDate,
             remarks: 'Test Remarks',
             pack: undefined,
           },
@@ -262,7 +348,7 @@ describe('ListService', () => {
       expect(result.trips).toEqual([trip1]);
     });
 
-    it('should return empty Trips when list is in packs but those packs have no trips', async () => {
+    it('should return empty trips when list is in packs but those packs have no trips', async () => {
       const id = 'list-1';
       const userId = 'user-1';
       const pack1 = { id: 'p1' } as Pack;
@@ -314,7 +400,6 @@ describe('ListService', () => {
           name: 'Test List',
           description: 'Test Description',
           colorTheme: 'slate',
-          itemCount: 0,
         },
         packs: [
           {

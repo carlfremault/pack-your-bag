@@ -28,6 +28,12 @@ yarn generate:auth-client / generate:product-client / generate:user-data-client
 yarn storybook
 ```
 
+## Testing
+
+- Always run unit tests with the full env setup and a scoped path to avoid hitting the production database or triggering e2e specs:  
+  `cross-env NODE_ENV=test dotenv -e .env.test -o -- yarn workspace <name> test src/`
+- Never run e2e tests (`test/` directory) without explicit user instruction. E2e tests call `resetDb()` on every test and will wipe whichever database the environment points to.
+
 ## Architecture
 
 ### BFF Pattern

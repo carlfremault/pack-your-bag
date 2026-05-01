@@ -11,7 +11,11 @@ import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
 import { CreatePackDto } from './dto/create-pack.dto';
 import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
-import { PackResponseDto, PackSummaryResponseDto } from './dto/pack-response.dto';
+import {
+  PackBaseResponseDto,
+  PackResponseDto,
+  PackSummaryResponseDto,
+} from './dto/pack-response.dto';
 import { UpdatePackDto } from './dto/update-pack.dto';
 
 @Injectable()
@@ -26,9 +30,8 @@ export class PackService {
     const result = await this.prisma.pack.findMany({
       where,
       include: {
-        _count: {
-          select: { items: true, lists: true },
-        },
+        items: { include: { item: true } },
+        lists: { include: { list: { include: { items: { include: { item: true } } } } } },
       },
     });
 
@@ -102,11 +105,6 @@ export class PackService {
   async getPackDeleteImpact(id: string, userId: string): Promise<PackDeleteImpactDto> {
     const pack = await this.prisma.pack.findUnique({
       where: { id, userId },
-      include: {
-        _count: {
-          select: { items: true, lists: true },
-        },
-      },
     });
     if (!pack) {
       throw new NotFoundException('Pack not found');
@@ -115,7 +113,7 @@ export class PackService {
     const trips = await this.prisma.trip.findMany({ where: { packId: id } });
 
     return {
-      pack: plainToInstance(PackSummaryResponseDto, pack),
+      pack: plainToInstance(PackBaseResponseDto, pack),
       trips: plainToInstance(TripResponseDto, trips),
     };
   }

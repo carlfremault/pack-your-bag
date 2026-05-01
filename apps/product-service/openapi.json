@@ -567,7 +567,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ListResponseDto"
+                    "$ref": "#/components/schemas/ListSummaryResponseDto"
                   }
                 }
               }
@@ -844,7 +844,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PackResponseDto"
+                    "$ref": "#/components/schemas/PackSummaryResponseDto"
                   }
                 }
               }
@@ -2314,8 +2314,13 @@
           },
           "itemCount": {
             "type": "number",
-            "description": "List item count",
-            "example": 1
+            "description": "Total quantity of items in the list",
+            "example": 3
+          },
+          "totalWeight": {
+            "type": "number",
+            "description": "Total weight of all items in the list in grams",
+            "example": 1500
           }
         },
         "required": [
@@ -2325,14 +2330,62 @@
           "colorTheme",
           "createdAt",
           "updatedAt",
-          "itemCount"
+          "itemCount",
+          "totalWeight"
+        ]
+      },
+      "ListBaseResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name"
+          },
+          "description": {
+            "type": "string",
+            "description": "List description",
+            "example": "List description",
+            "nullable": true
+          },
+          "colorTheme": {
+            "type": "string",
+            "description": "List color code",
+            "example": "#000000",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorTheme",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "ListDeleteImpactDto": {
         "type": "object",
         "properties": {
           "list": {
-            "$ref": "#/components/schemas/ListSummaryResponseDto"
+            "$ref": "#/components/schemas/ListBaseResponseDto"
           },
           "packs": {
             "type": "array",
@@ -2441,13 +2494,13 @@
           },
           "itemCount": {
             "type": "number",
-            "description": "Pack item count",
-            "example": 1
+            "description": "Total quantity of all items in the pack, including items in lists",
+            "example": 30
           },
-          "listCount": {
+          "totalWeight": {
             "type": "number",
-            "description": "Pack list count",
-            "example": 1
+            "description": "Total weight of all items in the pack in grams",
+            "example": 2500
           }
         },
         "required": [
@@ -2458,14 +2511,61 @@
           "createdAt",
           "updatedAt",
           "itemCount",
-          "listCount"
+          "totalWeight"
+        ]
+      },
+      "PackBaseResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Pack description",
+            "example": "Pack description",
+            "nullable": true
+          },
+          "colorTheme": {
+            "type": "string",
+            "description": "Pack color theme",
+            "example": "slate",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorTheme",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "PackDeleteImpactDto": {
         "type": "object",
         "properties": {
           "pack": {
-            "$ref": "#/components/schemas/PackSummaryResponseDto"
+            "$ref": "#/components/schemas/PackBaseResponseDto"
           },
           "trips": {
             "type": "array",

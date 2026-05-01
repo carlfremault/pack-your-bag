@@ -8,6 +8,21 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 import { PackService } from './pack.service';
 
+const makeItem = (id: string, weight: number | null = null) => ({
+  id,
+  name: 'Item',
+  description: null,
+  weight,
+  category: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
+
+const PACK_INCLUDE = {
+  items: { include: { item: true } },
+  lists: { include: { list: { include: { items: { include: { item: true } } } } } },
+};
+
 describe('PackService', () => {
   let service: PackService;
   let prisma: PrismaService;
@@ -42,6 +57,123 @@ describe('PackService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
+  });
+
+  describe('getPacks', () => {
+    it('should query with items and lists include', async () => {
+      mockPrismaService.pack.findMany.mockResolvedValue([]);
+
+      await service.getPacks({ userId: 'user-1' });
+
+      expect(mockPrismaService.pack.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        include: PACK_INCLUDE,
+      });
+    });
+
+    it('should return itemCount as sum of direct item quantities when no lists', async () => {
+      const now = new Date();
+      mockPrismaService.pack.findMany.mockResolvedValue([
+        {
+          id: 'pack-1',
+          name: 'Test Pack',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [
+            { quantity: 2, item: makeItem('i-1') },
+            { quantity: 3, item: makeItem('i-2') },
+          ],
+          lists: [],
+        },
+      ]);
+
+      const result = await service.getPacks({ userId: 'user-1' });
+
+      expect(result[0]?.itemCount).toBe(5);
+    });
+
+    it('should include items from lists in itemCount', async () => {
+      const now = new Date();
+      mockPrismaService.pack.findMany.mockResolvedValue([
+        {
+          id: 'pack-1',
+          name: 'Test Pack',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [{ quantity: 5, item: makeItem('i-1') }], // 5 direct
+          lists: [
+            {
+              quantity: 5,
+              list: { items: [{ quantity: 5, item: makeItem('i-2') }] }, // 5 lists × 5 items = 25
+            },
+          ],
+        },
+      ]);
+
+      const result = await service.getPacks({ userId: 'user-1' });
+
+      expect(result[0]?.itemCount).toBe(30);
+    });
+
+    it('should compute totalWeight from direct items and list items', async () => {
+      const now = new Date();
+      mockPrismaService.pack.findMany.mockResolvedValue([
+        {
+          id: 'pack-1',
+          name: 'Test Pack',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [{ quantity: 2, item: makeItem('i-1', 500) }], // 2 * 500 = 1000
+          lists: [
+            {
+              quantity: 2,
+              list: {
+                items: [{ quantity: 3, item: makeItem('i-2', 200) }], // 2 * 3 * 200 = 1200
+              },
+            },
+          ],
+        },
+      ]);
+
+      const result = await service.getPacks({ userId: 'user-1' });
+
+      expect(result[0]?.totalWeight).toBe(2200);
+    });
+
+    it('should treat null item weight as 0 in totalWeight', async () => {
+      const now = new Date();
+      mockPrismaService.pack.findMany.mockResolvedValue([
+        {
+          id: 'pack-1',
+          name: 'Test Pack',
+          description: null,
+          colorTheme: null,
+          createdAt: now,
+          updatedAt: now,
+          userId: 'user-1',
+          items: [{ quantity: 1, item: makeItem('i-1', null) }],
+          lists: [
+            {
+              quantity: 1,
+              list: { items: [{ quantity: 1, item: makeItem('i-2', null) }] },
+            },
+          ],
+        },
+      ]);
+
+      const result = await service.getPacks({ userId: 'user-1' });
+
+      expect(result[0]?.totalWeight).toBe(0);
+    });
   });
 
   describe('createPack', () => {
@@ -147,11 +279,6 @@ describe('PackService', () => {
 
       expect(mockPrismaService.pack.findUnique).toHaveBeenCalledWith({
         where: { id, userId },
-        include: {
-          _count: {
-            select: { items: true, lists: true },
-          },
-        },
       });
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
         where: { packId: id },
