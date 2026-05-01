@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { Spinner } from '@repo/react-common/spinner';
 
@@ -32,7 +33,7 @@ export default function ItemsView() {
   });
 
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const { data = [], isLoading: isItemsLoading } = useAllItems();
+  const { data = [], isLoading: isItemsLoading, isError: isItemsError } = useAllItems();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isItemsLoading || isPreferencesLoading;
 
@@ -152,6 +153,14 @@ export default function ItemsView() {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Spinner size="large" />
+      </div>
+    );
+  }
+
+  if (isItemsError && !data.length) {
+    return (
+      <div className="flex h-full w-full items-center justify-center p-8">
+        <Alert type="error" message="Failed to load items. Please try again later." />
       </div>
     );
   }

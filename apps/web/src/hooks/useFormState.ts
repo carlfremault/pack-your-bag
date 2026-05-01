@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 import { getFieldErrorsFromHttpError } from '@/utils/getFieldErrors';
 
 export function useFormState<TValues extends Record<string, string>>(
@@ -33,7 +31,6 @@ export function useFormState<TValues extends Record<string, string>>(
       return;
     }
     setFieldErrors({});
-    toast.error(`Error: ${extractErrorMessage(error)}`);
   };
 
   return { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError };

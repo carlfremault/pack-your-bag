@@ -9,7 +9,6 @@ import { Button, SubmitButton } from '@repo/react-common/button';
 import { Spinner } from '@repo/react-common/spinner';
 
 import { Modal } from '@/components/Modal';
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { useCategoryDeleteImpact, useDeleteCategory } from '../queries';
 
@@ -33,9 +32,6 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
         onClose();
         toast.success('Category deleted successfully');
       },
-      onError: (error) => {
-        toast.error(`Error: ${extractErrorMessage(error)}`);
-      },
     });
   };
 
@@ -52,9 +48,20 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
     );
   } else if (isError) {
     dialogContent = (
-      <p className="text-danger">
-        Could not load impact data. You may still proceed with deletion.
-      </p>
+      <>
+        <p className="text-danger">
+          Could not load impact data. Any item which has this category assigned will be
+          uncategorized. You can check manually on the items page or try again later.
+        </p>
+        <Link
+          href={`/items?category=${encodeURIComponent(categoryName)}`}
+          className="text-primary flex items-center gap-2 underline"
+        >
+          View all affected items
+          <HiOutlineArrowUpRight />
+        </Link>
+        <p className="text-danger">If you are sure you may still proceed with deletion.</p>
+      </>
     );
   } else if (impactedItemsCount === 0) {
     dialogContent = <p>This category is not assigned to any item.</p>;

@@ -1,16 +1,14 @@
 'use client';
 
 import { ComponentType } from 'react';
-import toast from 'react-hot-toast';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 
 import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
+import { Alert } from '@repo/react-common/alert';
 import { IconToggleOption, InputIconToggle } from '@repo/react-common/input';
 import { Spinner } from '@repo/react-common/spinner';
 
 import classNames from 'classnames';
-
-import { extractErrorMessage } from '@/utils/extractApiErrorDetails';
 
 import { usePreferences, useUpdatePreferences } from '../queries';
 import { UpdatePreferencesBody } from '../types';
@@ -63,11 +61,7 @@ export function PreferencesForm() {
   const { mutate: updatePreferences, isPending } = useUpdatePreferences();
 
   const handleChange = (body: UpdatePreferencesBody) => {
-    updatePreferences(body, {
-      onError: (error) => {
-        toast.error(`Could not update preferences: ${extractErrorMessage(error)}`);
-      },
-    });
+    updatePreferences(body);
   };
 
   if (isLoading || !preferences) {
@@ -80,8 +74,8 @@ export function PreferencesForm() {
 
   if (isError) {
     return (
-      <div className="bg-danger text-danger-foreground border-danger-ring flex w-full flex-col rounded-md border p-4 shadow-sm">
-        Failed to load preferences. Please try again later.
+      <div className="flex h-full w-full items-center justify-center">
+        <Alert type="error" message="Failed to load preferences. Please try again later." />
       </div>
     );
   }
