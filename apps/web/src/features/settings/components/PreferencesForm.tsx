@@ -6,7 +6,7 @@ import { MdDarkMode, MdLightMode } from 'react-icons/md';
 import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
 import { Alert } from '@repo/react-common/alert';
 import { IconToggleOption, InputIconToggle } from '@repo/react-common/input';
-import { Spinner } from '@repo/react-common/spinner';
+import { SectionNotReady } from '@repo/react-common/utils';
 
 import classNames from 'classnames';
 
@@ -65,11 +65,7 @@ export function PreferencesForm() {
   };
 
   if (isLoading || !preferences) {
-    return (
-      <div className="flex w-full justify-center p-8">
-        <Spinner size="large" />
-      </div>
-    );
+    return <SectionNotReady />;
   }
 
   if (isError) {

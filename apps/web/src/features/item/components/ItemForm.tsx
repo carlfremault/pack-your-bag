@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, Units } from '@repo/constants';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
-import { Spinner } from '@repo/react-common/spinner';
+import { FormNotReady } from '@repo/react-common/utils';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
@@ -154,11 +154,7 @@ export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
   const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
 
   if (itemId && isLoading && !itemToEdit) {
-    return (
-      <div className="text-center">
-        <Spinner size="small" />
-      </div>
-    );
+    return <FormNotReady />;
   }
 
   return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;

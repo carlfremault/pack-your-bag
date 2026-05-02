@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
-import { Spinner } from '@repo/react-common/spinner';
+import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
 import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
@@ -142,11 +142,7 @@ export default function CollectionsView() {
   );
 
   if (!isReady) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Spinner size="large" />
-      </div>
-    );
+    return <PageNotReady />;
   }
 
   if (isCollectionsError && !collections.length) {

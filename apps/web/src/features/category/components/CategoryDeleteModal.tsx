@@ -6,7 +6,7 @@ import { MdArrowRight } from 'react-icons/md';
 import Link from 'next/link';
 
 import { Button, SubmitButton } from '@repo/react-common/button';
-import { Spinner } from '@repo/react-common/spinner';
+import { FormNotReady } from '@repo/react-common/utils';
 
 import { Modal } from '@/components/Modal';
 
@@ -41,11 +41,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
 
   let dialogContent: React.ReactNode;
   if (isLoading) {
-    dialogContent = (
-      <div className="flex items-center justify-center">
-        <Spinner size="small" />
-      </div>
-    );
+    dialogContent = <FormNotReady />;
   } else if (isError) {
     dialogContent = (
       <div className="bg-danger/10 border-danger flex flex-col gap-2 rounded-md border p-4">
