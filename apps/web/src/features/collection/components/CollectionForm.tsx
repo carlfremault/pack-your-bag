@@ -7,7 +7,7 @@ import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from '@repo/constants';
 import { type ColorTheme, colorThemes } from '@repo/react-common/color-themes';
 import { Input, InputSelect, InputSelectOption, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
-import { Spinner } from '@repo/react-common/spinner';
+import { FormNotReady } from '@repo/react-common/utils';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useFormState } from '@/hooks/useFormState';
@@ -175,11 +175,7 @@ export default function CollectionForm({
   const { data: collectionToEdit, isLoading } = useCollection(collectionId, collectionType);
 
   if (collectionId && isLoading && !collectionToEdit) {
-    return (
-      <div className="text-center">
-        <Spinner size="small" />
-      </div>
-    );
+    return <FormNotReady />;
   }
 
   return <CollectionFormInner collection={collectionToEdit} onClose={onClose} />;
