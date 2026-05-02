@@ -82,7 +82,6 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
       <div className="flex flex-1 flex-col justify-between gap-4">
         <div className="flex flex-col gap-4 sm:p-8">
           <h2 className="text-primary text-xl">{name}</h2>
-
           {description && <ExpandableText text={description} maxLines={3} />}
         </div>
         <div className="flex justify-end gap-8 px-4 sm:p-4">
