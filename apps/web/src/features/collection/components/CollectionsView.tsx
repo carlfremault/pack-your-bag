@@ -53,7 +53,9 @@ export default function CollectionsView() {
     const params = new URLSearchParams();
     params.set('action', action);
     const id = searchParams.get('id');
+    const editCollectionType = searchParams.get('edit-type');
     if (id) params.set('id', id);
+    if (editCollectionType) params.set('edit-type', editCollectionType);
     return params.toString();
   }, [searchParams]);
 

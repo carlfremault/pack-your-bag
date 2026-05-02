@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
 import { CollectionHeaderCard } from '@repo/react-common/card';
@@ -28,6 +29,10 @@ export interface CollectionDetailsProps {
 
 export default function CollectionDetails(props: CollectionDetailsProps) {
   const { type, id } = props;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const { data: collection, isLoading: isCollectionLoading, isError } = useCollection(id, type);
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
@@ -61,8 +66,18 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     } as CollectionForHeaderDisplay;
   }, [collection, preferences?.units]);
 
-  // TODO: Implement edit and delete collection
-  const handleEditCollection = () => {};
+  const handleEditCollection = useCallback(
+    (id: string, type: CollectionType) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('action', 'edit-collection');
+      params.set('id', id);
+      params.set('edit-type', type);
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
+
+  // TODO: Implement delete collection
   const handleDeleteCollection = () => {};
 
   if (isLoading) {

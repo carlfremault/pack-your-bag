@@ -9,6 +9,8 @@ import {
   ListSummary,
   Pack,
   PackSummary,
+  UpdateListBody,
+  UpdatePackBody,
 } from './types';
 
 export async function getList(id: string): Promise<List> {
@@ -64,5 +66,23 @@ export async function createList(body: CreateListBody): Promise<List> {
 export async function createPack(body: CreatePackBody): Promise<Pack> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.POST('/pack', { body });
+  return handleApiResponse(data, error, response);
+}
+
+export async function updateList(id: string, body: UpdateListBody): Promise<List> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.PATCH('/list/{id}', {
+    params: { path: { id } },
+    body,
+  });
+  return handleApiResponse(data, error, response);
+}
+
+export async function updatePack(id: string, body: UpdatePackBody): Promise<Pack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.PATCH('/pack/{id}', {
+    params: { path: { id } },
+    body,
+  });
   return handleApiResponse(data, error, response);
 }

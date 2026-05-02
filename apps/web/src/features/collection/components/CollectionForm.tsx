@@ -12,15 +12,21 @@ import { Spinner } from '@repo/react-common/spinner';
 import { FormWrapper } from '@/components/FormWrapper';
 import { useFormState } from '@/hooks/useFormState';
 
-import { useAllCollections, useCreateCollection } from '../queries';
-import { Collection, CollectionType } from '../types';
+import { useCollection, useCreateCollection, useUpdateCollection } from '../queries';
+import { CollectionDetail, CollectionType } from '../types';
 
 export interface CollectionFormProps {
   collectionId?: string;
+  collectionType?: CollectionType;
   onClose: () => void;
 }
 
-export type CollectionFieldErrors = {
+interface CollectionFormInnerProps {
+  collection?: CollectionDetail;
+  onClose: () => void;
+}
+
+type CollectionFieldErrors = {
   name?: string;
   description?: string;
   colorTheme?: string;
@@ -48,7 +54,7 @@ const TYPE_OPTIONS: InputSelectOption<CollectionType>[] = [
   },
 ];
 
-const getInitialFormValues = (collection?: Collection) => {
+const getInitialFormValues = (collection?: CollectionDetail) => {
   return {
     name: collection?.name ?? '',
     description: collection?.description ?? '',
@@ -64,23 +70,14 @@ const COLLECTION_FORM_FIELDS: (keyof CollectionFieldErrors)[] = [
   'type',
 ];
 
-export default function CollectionForm(props: CollectionFormProps) {
-  const { collectionId, onClose } = props;
-  const editMode = collectionId !== undefined;
+function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) {
+  const editMode = collection !== undefined;
 
-  // TODO: when implementing update, disable type select
-  // lists cannot be modified to packs, and vice versa
-  const { data: collections = [], isLoading: isCollectionsLoading } = useAllCollections();
   const { mutate: createCollection, isPending: isCreating } = useCreateCollection();
-  // TODO: implement update
-  const isUpdating = false;
-
-  const collectionToEdit: Collection | undefined = collectionId
-    ? collections.find((i) => i.id === collectionId)
-    : undefined;
+  const { mutate: updateCollection, isPending: isUpdating } = useUpdateCollection();
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
-    useFormState(getInitialFormValues(collectionToEdit), COLLECTION_FORM_FIELDS);
+    useFormState(getInitialFormValues(collection), COLLECTION_FORM_FIELDS);
 
   const colorThemeOptions = Object.entries(colorThemes).map(([key, config]) => ({
     label: <CategoryPill name={config.label} colorTheme={key as ColorTheme} />,
@@ -114,16 +111,14 @@ export default function CollectionForm(props: CollectionFormProps) {
     };
 
     if (editMode) {
-      if (!collectionToEdit) return;
-      console.log('todo edit collection');
+      updateCollection(
+        { id: collection.id, type, body: payload },
+        { onSuccess: handleSuccess, onError: handleError },
+      );
     } else {
       createCollection({ type, body: payload }, { onSuccess: handleSuccess, onError: handleError });
     }
   };
-
-  if (editMode && isCollectionsLoading && !collectionToEdit) {
-    return <Spinner size="small" />;
-  }
 
   return (
     <FormWrapper
@@ -132,15 +127,17 @@ export default function CollectionForm(props: CollectionFormProps) {
       onClose={onClose}
       isPending={isCreating || isUpdating}
     >
-      <InputSelect
-        label="Type"
-        required
-        placeholder="Select a type"
-        options={TYPE_OPTIONS}
-        value={formValues.type}
-        onChange={(value) => handleFieldChange('type', value)}
-        errorMessage={fieldErrors.type}
-      />
+      {!editMode && (
+        <InputSelect
+          label="Type"
+          required
+          placeholder="Select a type"
+          options={TYPE_OPTIONS}
+          value={formValues.type}
+          onChange={(value) => handleFieldChange('type', value)}
+          errorMessage={fieldErrors.type}
+        />
+      )}
       <Input
         label="Name"
         required
@@ -168,4 +165,22 @@ export default function CollectionForm(props: CollectionFormProps) {
       />
     </FormWrapper>
   );
+}
+
+export default function CollectionForm({
+  collectionId,
+  collectionType,
+  onClose,
+}: CollectionFormProps) {
+  const { data: collectionToEdit, isLoading } = useCollection(collectionId, collectionType);
+
+  if (collectionId && isLoading && !collectionToEdit) {
+    return (
+      <div className="text-center">
+        <Spinner size="small" />
+      </div>
+    );
+  }
+
+  return <CollectionFormInner collection={collectionToEdit} onClose={onClose} />;
 }

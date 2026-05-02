@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
 import { getList } from '@/features/collection/api';
@@ -9,14 +11,16 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   await queryClient.prefetchQuery({
     queryKey: ['list', id],
-    queryFn: () => getList(id),
+    queryFn: async () => ({ ...(await getList(id)), type: 'list' as const }),
   });
 
   return (
     <div className="flex h-full w-full justify-center">
       <h1 className="sr-only">List details</h1>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <CollectionDetails type="list" id={id} />
+        <Suspense>
+          <CollectionDetails type="list" id={id} />
+        </Suspense>
       </HydrationBoundary>
     </div>
   );

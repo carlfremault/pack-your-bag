@@ -22,7 +22,13 @@ export interface ItemFormProps {
   onClose: () => void;
 }
 
-export type ItemFieldErrors = {
+interface ItemFormInnerProps {
+  item?: Item;
+  units: Units;
+  onClose: () => void;
+}
+
+type ItemFieldErrors = {
   name?: string;
   description?: string;
   weight?: string;
@@ -45,13 +51,8 @@ const getInitialFormValues = (item?: Item, units?: Units) => {
 
 const ITEM_FORM_FIELDS: (keyof ItemFieldErrors)[] = ['name', 'description', 'weight', 'categoryId'];
 
-export default function ItemForm(props: ItemFormProps) {
-  const { itemId, units, onClose } = props;
-  const editMode = itemId !== undefined;
-
-  const { data: items = [], isLoading: isItemsLoading } = useAllItems();
-
-  const itemToEdit: Item | undefined = itemId ? items.find((i) => i.id === itemId) : undefined;
+function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
+  const editMode = item !== undefined;
 
   const { mutate: createItem, isPending: isCreating } = useCreateItem();
   const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
@@ -64,7 +65,7 @@ export default function ItemForm(props: ItemFormProps) {
     })) ?? [];
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
-    useFormState(getInitialFormValues(itemToEdit, units), ITEM_FORM_FIELDS);
+    useFormState(getInitialFormValues(item, units), ITEM_FORM_FIELDS);
 
   const handleSuccess = () => {
     setFieldErrors({});
@@ -94,19 +95,14 @@ export default function ItemForm(props: ItemFormProps) {
     };
 
     if (editMode) {
-      if (!itemToEdit) return;
       updateItem(
-        { id: itemToEdit.id, body: payload },
+        { id: item.id, body: payload },
         { onSuccess: handleSuccess, onError: handleError },
       );
     } else {
       createItem(payload, { onSuccess: handleSuccess, onError: handleError });
     }
   };
-
-  if (editMode && isItemsLoading && !itemToEdit) {
-    return <Spinner size="small" />;
-  }
 
   return (
     <FormWrapper
@@ -151,4 +147,19 @@ export default function ItemForm(props: ItemFormProps) {
       />
     </FormWrapper>
   );
+}
+
+export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
+  const { data: items = [], isLoading } = useAllItems();
+  const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
+
+  if (itemId && isLoading && !itemToEdit) {
+    return (
+      <div className="text-center">
+        <Spinner size="small" />
+      </div>
+    );
+  }
+
+  return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;
 }
