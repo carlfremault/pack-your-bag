@@ -1,3 +1,6 @@
+import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
+
+import { Button } from '@repo/react-common/button';
 import { ItemCard } from '@repo/react-common/card';
 
 import { toItemCardProps } from '@/lib/mappers/item.mapper';
@@ -36,12 +39,33 @@ export default function MobileItemsList(props: MobileItemsListProps) {
     );
   }
 
+  const cardActions = (id: string, name: string) => (
+    <div className="flex gap-8">
+      <Button
+        variant="unstyledIcon"
+        color="primary"
+        aria-label={`Edit ${name}`}
+        onClick={() => onEditItem(id)}
+      >
+        <MdOutlineEdit className="h-5 w-5" aria-hidden="true" />
+      </Button>
+      <Button
+        variant="unstyledIcon"
+        color="danger"
+        aria-label={`Delete ${name}`}
+        onClick={() => onDeleteItem(id)}
+      >
+        <MdDeleteOutline className="h-5 w-5" aria-hidden="true" />
+      </Button>
+    </div>
+  );
+
   return (
     <div className={containerClassName}>
       {items.map((item) => (
         <ItemCard
           key={item.id}
-          {...toItemCardProps(item, { onEditItem, onDeleteItem })}
+          {...toItemCardProps(item, cardActions(item.id, item.name))}
           className="last:mb-[25vh]"
         />
       ))}
