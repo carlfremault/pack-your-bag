@@ -2,7 +2,15 @@ import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack
 
 import { toHttpError } from '@/utils/http-error';
 
-import { Collection, CreateListBody, CreatePackBody, List, Pack } from './types';
+import {
+  Collection,
+  CollectionDetail,
+  CollectionType,
+  CreateListBody,
+  CreatePackBody,
+  List,
+  Pack,
+} from './types';
 
 // -------------------------------
 // Fetch all collections
@@ -25,44 +33,23 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
 };
 
 // -------------------------------
-// Fetch list
+// Fetch collection
 // -------------------------------
-const fetchList = async (id: string): Promise<List> => {
-  const res = await fetch(`/api/list/${id}`);
+const fetchCollection = async (id: string, type: CollectionType): Promise<CollectionDetail> => {
+  const res = await fetch(`/api/${type}/${id}`);
 
   if (!res.ok) {
     throw await toHttpError(res);
   }
   const { data } = await res.json();
-  return data;
+  return { ...data, type };
 };
 
-const useList = (id: string): UseQueryResult<List> => {
+const useCollection = (id: string, type: CollectionType): UseQueryResult<CollectionDetail> => {
   return useQuery({
-    queryKey: ['list', id],
-    queryFn: () => fetchList(id),
-    enabled: !!id,
-  });
-};
-
-// -------------------------------
-// Fetch pack
-// -------------------------------
-const fetchPack = async (id: string): Promise<Pack> => {
-  const res = await fetch(`/api/pack/${id}`);
-
-  if (!res.ok) {
-    throw await toHttpError(res);
-  }
-  const { data } = await res.json();
-  return data;
-};
-
-const usePack = (id: string): UseQueryResult<Pack> => {
-  return useQuery({
-    queryKey: ['pack', id],
-    queryFn: () => fetchPack(id),
-    enabled: !!id,
+    queryKey: [type, id],
+    queryFn: () => fetchCollection(id, type),
+    enabled: !!id && !!type,
   });
 };
 
@@ -106,13 +93,13 @@ const useCreateCollection = () => {
       const previousCollections = queryClient.getQueryData<Collection[]>(['collections']) ?? [];
 
       const optimisticId = nextOptimisticCollectionId();
-      const optimisticCollection: Collection = {
+      const optimisticCollection = {
         id: optimisticId,
         type,
         name: body.name,
         description: body.description ?? null,
         colorTheme: body.colorTheme ?? null,
-        numberOfItems: 0,
+        itemCount: 0,
         totalWeight: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -136,4 +123,4 @@ const useCreateCollection = () => {
   });
 };
 
-export { useAllCollections, useList, usePack, useCreateCollection };
+export { useAllCollections, useCollection, useCreateCollection };

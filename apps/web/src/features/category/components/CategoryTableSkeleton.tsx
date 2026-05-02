@@ -26,7 +26,7 @@ export function CategoryTableSkeleton() {
               className={index % 2 === 0 ? 'bg-surface' : 'bg-surface-overlay/70'}
             >
               <td className="px-4 py-3">
-                <div className="bg-surface-overlay h-6 w-24 animate-pulse rounded-full" />
+                <div className="bg-surface-overlay h-6 w-56 animate-pulse rounded-full" />
               </td>
               <td className="px-4 py-3">
                 <div className="bg-surface-overlay h-6 w-16 animate-pulse rounded" />

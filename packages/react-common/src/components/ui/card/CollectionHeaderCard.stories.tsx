@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 
 import { colorThemes } from '../../../lib/colorThemes';
 import { LONG_DESCRIPTION } from '../../../lib/constants';
 
-import { CollectionCard } from './CollectionCard';
+import { CollectionHeaderCard } from './CollectionHeaderCard';
 
-const meta: Meta<typeof CollectionCard> = {
-  title: 'Components/CollectionCard',
-  component: CollectionCard,
+const meta: Meta<typeof CollectionHeaderCard> = {
+  title: 'Components/CollectionHeaderCard',
+  component: CollectionHeaderCard,
   argTypes: {
     colorTheme: {
       control: 'select',
@@ -21,85 +22,103 @@ type Story = StoryObj<typeof meta>;
 
 export const ListWith10Items: Story = {
   args: {
-    id: 'collection-1',
     name: 'List 1',
     description: 'Collection 1 description',
     colorTheme: 'ocean',
     type: 'list',
     itemCount: 10,
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };
 
 export const PackWith1Item: Story = {
   args: {
-    id: 'collection-2',
     name: 'Pack 1',
     description: 'Collection 1 description',
     colorTheme: 'jungle',
     type: 'pack',
     itemCount: 1,
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };
 
 export const PackWithoutItems: Story = {
   args: {
-    id: 'collection-3',
     name: 'Pack 1',
     description: 'Collection 1 description',
     colorTheme: 'lagoon',
     type: 'pack',
     itemCount: 0,
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };
 
 export const ListWithoutDescription: Story = {
   args: {
-    id: 'collection-4',
     name: 'List 1',
     colorTheme: 'lavender',
     type: 'list',
     itemCount: 10,
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };
 
 export const ListWithLongDescription: Story = {
   args: {
-    id: 'collection-5',
     name: 'List 1',
     description: LONG_DESCRIPTION,
     colorTheme: 'slate',
     type: 'list',
     itemCount: 10,
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };
 
 export const WeightInKg: Story = {
   args: {
-    id: 'collection-6',
     name: 'Heavy Pack',
     colorTheme: 'ocean',
     type: 'pack',
     itemCount: 12,
     totalWeight: '2.35',
     weightUnit: 'kg',
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };
 
 export const WeightInLbs: Story = {
   args: {
-    id: 'collection-7',
     name: 'Heavy List',
     colorTheme: 'jungle',
     type: 'list',
     itemCount: 8,
     totalWeight: '5.18',
     weightUnit: 'lbs',
-    href: '/',
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
+  },
+};
+
+export const WithCategoryWeights: Story = {
+  args: {
+    name: 'Pack with Categories',
+    colorTheme: 'ocean',
+    type: 'pack',
+    itemCount: 12,
+    totalWeight: '2.35',
+    weightUnit: 'kg',
+    categoryWeights: [
+      { category: { name: 'Shelter', colorTheme: 'jungle' }, weight: '1.20' },
+      { category: { name: 'Clothing', colorTheme: 'sand' }, weight: '0.80' },
+      { category: { name: 'Electronics', colorTheme: 'lavender' }, weight: '0.35' },
+    ],
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
   },
 };

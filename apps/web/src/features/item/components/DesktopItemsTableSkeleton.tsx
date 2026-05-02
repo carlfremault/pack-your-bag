@@ -23,6 +23,9 @@ export default function DesktopItemsTableSkeleton() {
             <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase">
               Category
             </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -32,7 +35,7 @@ export default function DesktopItemsTableSkeleton() {
               className={index % 2 === 0 ? 'bg-surface' : 'bg-surface-overlay/70'}
             >
               <td className="px-4 py-3">
-                <div className="bg-surface-overlay h-4 w-28 animate-pulse rounded" />
+                <div className="bg-surface-overlay h-4 w-32 animate-pulse rounded" />
               </td>
               <td className="px-4 py-3">
                 <div className="bg-surface-overlay h-4 w-full max-w-sm animate-pulse rounded" />
@@ -41,7 +44,10 @@ export default function DesktopItemsTableSkeleton() {
                 <div className="bg-surface-overlay h-4 w-16 animate-pulse rounded" />
               </td>
               <td className="px-4 py-3">
-                <div className="bg-surface-overlay h-6 w-20 animate-pulse rounded-full" />
+                <div className="bg-surface-overlay h-6 w-24 animate-pulse rounded-full" />
+              </td>
+              <td className="px-4 py-3">
+                <div className="bg-surface-overlay h-6 w-8 animate-pulse rounded-full" />
               </td>
             </tr>
           ))}

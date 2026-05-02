@@ -46,11 +46,7 @@ export function ItemCard(props: ItemCardProps) {
           <h3 className="text-sm font-bold wrap-anywhere">{name}</h3>
           {category && <CategoryPill {...category} />}
         </div>
-        {description && (
-          <div className="text-xs font-light">
-            <ExpandableText text={description} />
-          </div>
-        )}
+        {description && <ExpandableText text={description} />}
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-1 text-xs">
             <HiOutlineScale className="h-3 w-3" />
@@ -68,7 +64,7 @@ export function ItemCard(props: ItemCardProps) {
           aria-label={`Edit ${name}`}
           onClick={() => onEditItem(id)}
         >
-          <MdOutlineEdit className="h-5 w-5" />
+          <MdOutlineEdit className="h-5 w-5" aria-hidden="true" />
         </Button>
         <Button
           variant="unstyledIcon"
@@ -76,7 +72,7 @@ export function ItemCard(props: ItemCardProps) {
           aria-label={`Delete ${name}`}
           onClick={() => onDeleteItem(id)}
         >
-          <MdDeleteOutline className="h-5 w-5" />
+          <MdDeleteOutline className="h-5 w-5" aria-hidden="true" />
         </Button>
       </div>
     </div>
