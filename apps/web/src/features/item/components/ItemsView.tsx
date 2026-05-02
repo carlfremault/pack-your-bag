@@ -136,7 +136,7 @@ export default function ItemsView() {
       const params = new URLSearchParams(searchParams.toString());
       params.set('action', 'edit-item');
       params.set('id', id);
-      router.push(`${pathname}?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams],
   );

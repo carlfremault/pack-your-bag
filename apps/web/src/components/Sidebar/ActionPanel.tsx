@@ -9,6 +9,7 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 import { Modal } from '@/components/Modal';
 import { CategoryView } from '@/features/category/components/CategoryView';
 import CollectionForm from '@/features/collection/components/CollectionForm';
+import { CollectionType } from '@/features/collection/types';
 import ItemForm from '@/features/item/components/ItemForm';
 import { usePreferences } from '@/features/settings/queries';
 
@@ -16,13 +17,20 @@ import { SidebarNav } from '../Navigation/SidebarNav';
 
 import { SidebarPortal } from '.';
 
-const SIDEBAR_ACTIONS = ['add-item', 'edit-item', 'add-collection', 'manage-categories'] as const;
+const SIDEBAR_ACTIONS = [
+  'add-item',
+  'edit-item',
+  'add-collection',
+  'edit-collection',
+  'manage-categories',
+] as const;
 type SidebarAction = (typeof SIDEBAR_ACTIONS)[number];
 
 const MODAL_TITLES: Record<SidebarAction, string> = {
   'add-item': 'Add item',
   'edit-item': 'Edit item',
   'add-collection': 'Add collection',
+  'edit-collection': 'Edit collection',
   'manage-categories': 'Categories',
 };
 
@@ -32,6 +40,11 @@ function isSidebarAction(value: string | null): value is SidebarAction {
 
 function isValidUnits(value: unknown): value is Units {
   return Object.values(Units).includes(value as Units);
+}
+
+const COLLECTION_TYPES = ['list', 'pack'] as const;
+function isCollectionType(v: string | undefined): v is CollectionType {
+  return COLLECTION_TYPES.includes(v as CollectionType);
 }
 
 function ActionPanelInner() {
@@ -45,7 +58,8 @@ function ActionPanelInner() {
 
   const rawAction = searchParams.get('action');
   const action = isSidebarAction(rawAction) ? rawAction : null;
-  const itemId = searchParams.get('id') ?? undefined;
+  const id = searchParams.get('id') ?? undefined;
+  const editCollectionType = searchParams.get('edit-type') ?? undefined;
 
   const [categoryTitle, setCategoryTitle] = useState('Categories');
 
@@ -53,6 +67,7 @@ function ActionPanelInner() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('action');
     params.delete('id');
+    params.delete('edit-type');
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname);
   }, [searchParams, pathname, router]);
@@ -85,14 +100,22 @@ function ActionPanelInner() {
   if (action === 'add-item') {
     panelContent = <ItemForm key="addItem" units={units} onClose={closeAction} />;
     desktopTitle = 'Add item';
-  } else if (action === 'edit-item' && itemId) {
-    panelContent = (
-      <ItemForm key={`edit-${itemId}`} itemId={itemId} units={units} onClose={closeAction} />
-    );
+  } else if (action === 'edit-item' && id) {
+    panelContent = <ItemForm key={`edit-${id}`} itemId={id} units={units} onClose={closeAction} />;
     desktopTitle = 'Edit item';
   } else if (action === 'add-collection') {
     panelContent = <CollectionForm key="addCollection" onClose={closeAction} />;
     desktopTitle = 'Add collection';
+  } else if (action === 'edit-collection' && id && isCollectionType(editCollectionType)) {
+    panelContent = (
+      <CollectionForm
+        key={`edit-${id}`}
+        collectionId={id}
+        collectionType={editCollectionType}
+        onClose={closeAction}
+      />
+    );
+    desktopTitle = 'Edit collection';
   } else if (action === 'manage-categories') {
     panelContent = (
       <CategoryView

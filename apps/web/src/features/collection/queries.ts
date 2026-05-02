@@ -10,6 +10,8 @@ import {
   CreatePackBody,
   List,
   Pack,
+  UpdateListBody,
+  UpdatePackBody,
 } from './types';
 
 // -------------------------------
@@ -35,7 +37,7 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
 // -------------------------------
 // Fetch collection
 // -------------------------------
-const fetchCollection = async (id: string, type: CollectionType): Promise<CollectionDetail> => {
+const fetchCollection = async (id?: string, type?: CollectionType): Promise<CollectionDetail> => {
   const res = await fetch(`/api/${type}/${id}`);
 
   if (!res.ok) {
@@ -45,7 +47,7 @@ const fetchCollection = async (id: string, type: CollectionType): Promise<Collec
   return { ...data, type };
 };
 
-const useCollection = (id: string, type: CollectionType): UseQueryResult<CollectionDetail> => {
+const useCollection = (id?: string, type?: CollectionType): UseQueryResult<CollectionDetail> => {
   return useQuery({
     queryKey: [type, id],
     queryFn: () => fetchCollection(id, type),
@@ -123,4 +125,63 @@ const useCreateCollection = () => {
   });
 };
 
-export { useAllCollections, useCollection, useCreateCollection };
+// -------------------------------
+// Update Collection
+// -------------------------------
+
+type UpdateCollectionVariables =
+  | { id: string; type: 'list'; body: UpdateListBody }
+  | { id: string; type: 'pack'; body: UpdatePackBody };
+
+const updateCollection = async ({
+  id,
+  type,
+  body,
+}: UpdateCollectionVariables): Promise<List | Pack> => {
+  const res = await fetch(`/api/${type}/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useUpdateCollection = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateCollection,
+    onMutate: async ({ id, type, body }) => {
+      await queryClient.cancelQueries({ queryKey: ['collections'] });
+      await queryClient.cancelQueries({ queryKey: [type, id] });
+
+      const previousCollection = queryClient.getQueryData<CollectionDetail>([type, id]);
+
+      queryClient.setQueryData([type, id], (old: CollectionDetail) => ({
+        ...old,
+        ...body,
+        updatedAt: new Date().toISOString(),
+      }));
+
+      return { previousCollection, type, id };
+    },
+    onError: (_error, _body, context) => {
+      if (context?.previousCollection !== undefined) {
+        queryClient.setQueryData([context.type, context.id], context.previousCollection);
+      }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: [variables.type, variables.id] });
+    },
+  });
+};
+
+export { useAllCollections, useCollection, useCreateCollection, useUpdateCollection };

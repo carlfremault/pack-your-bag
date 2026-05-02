@@ -7,6 +7,8 @@ export type List = SuccessResponse<'/list/{id}', 'get'>;
 export type Pack = SuccessResponse<'/pack/{id}', 'get'>;
 export type CreateListBody = RequestBody<'/list', 'post'>;
 export type CreatePackBody = RequestBody<'/pack', 'post'>;
+export type UpdateListBody = RequestBody<'/list/{id}', 'patch'>;
+export type UpdatePackBody = RequestBody<'/pack/{id}', 'patch'>;
 
 export type Collection = (ListSummary & { type: 'list' }) | (PackSummary & { type: 'pack' });
 
