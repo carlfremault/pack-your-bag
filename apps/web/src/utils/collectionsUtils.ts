@@ -1,5 +1,74 @@
 import { List, Pack } from '@/features/collection/types';
 
+export type CategoryWeightEntry = {
+  category: { id: string; name: string; colorTheme: string };
+  weight: number;
+};
+
+type ItemEntry = {
+  quantity: number;
+  item: {
+    weight: number | null;
+    category: { id: string; name: string; colorTheme: string } | null;
+  };
+};
+
+const OTHER_CATEGORY = { id: '__other__', name: 'other', colorTheme: 'default' };
+
+const accumulateCategoryWeights = (
+  acc: Map<string, CategoryWeightEntry>,
+  items: ItemEntry[],
+  multiplier: number = 1,
+): number => {
+  let uncategorizedWeight = 0;
+  items.forEach((entry) => {
+    if (!entry.item.category) {
+      uncategorizedWeight += (entry.item.weight ?? 0) * entry.quantity * multiplier;
+      return;
+    }
+    const { category } = entry.item;
+    const entryWeight = (entry.item.weight ?? 0) * entry.quantity * multiplier;
+    const existing = acc.get(category.id);
+    if (existing) {
+      existing.weight += entryWeight;
+    } else {
+      acc.set(category.id, { category, weight: entryWeight });
+    }
+  });
+  return uncategorizedWeight;
+};
+
+/**
+ * Calculates the total weight per category of all items in a list
+ */
+export const getCategoryWeightsInList = (list: List): CategoryWeightEntry[] => {
+  const acc = new Map<string, CategoryWeightEntry>();
+  const uncategorizedWeight = accumulateCategoryWeights(acc, list.items ?? []);
+  const result = Array.from(acc.values());
+  if (uncategorizedWeight > 0)
+    result.push({ category: OTHER_CATEGORY, weight: uncategorizedWeight });
+  return result;
+};
+
+/**
+ * Calculates the total weight per category of all items in a pack
+ */
+export const getCategoryWeightsInPack = (pack: Pack): CategoryWeightEntry[] => {
+  const acc = new Map<string, CategoryWeightEntry>();
+  let uncategorizedWeight = accumulateCategoryWeights(acc, pack.items ?? []);
+  pack.lists?.forEach((listEntry) => {
+    uncategorizedWeight += accumulateCategoryWeights(
+      acc,
+      listEntry.list.items ?? [],
+      listEntry.quantity,
+    );
+  });
+  const result = Array.from(acc.values());
+  if (uncategorizedWeight > 0)
+    result.push({ category: OTHER_CATEGORY, weight: uncategorizedWeight });
+  return result;
+};
+
 /**
  * Calculates the total quantity of all items within a list,
  */

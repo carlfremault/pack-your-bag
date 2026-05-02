@@ -1,13 +1,15 @@
 import { handleApiResponse } from '@/lib/api-handlers';
 import { getProductClient } from '@/lib/clients/product-client';
-import {
-  getTotalItemQuantityInList,
-  getTotalItemQuantityInPack,
-  getTotalWeightInList,
-  getTotalWeightInPack,
-} from '@/utils/collectionsUtils';
 
-import { Collection, CreateListBody, CreatePackBody, List, Pack } from './types';
+import {
+  Collection,
+  CreateListBody,
+  CreatePackBody,
+  List,
+  ListSummary,
+  Pack,
+  PackSummary,
+} from './types';
 
 export async function getList(id: string): Promise<List> {
   const productClient = await getProductClient();
@@ -25,13 +27,13 @@ export async function getPack(id: string): Promise<Pack> {
   return handleApiResponse(data, error, response);
 }
 
-export async function getAllLists(): Promise<List[]> {
+export async function getAllLists(): Promise<ListSummary[]> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.GET('/list');
   return handleApiResponse(data, error, response);
 }
 
-export async function getAllPacks(): Promise<Pack[]> {
+export async function getAllPacks(): Promise<PackSummary[]> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.GET('/pack');
   return handleApiResponse(data, error, response);
@@ -43,15 +45,11 @@ export async function getAllCollections(): Promise<Collection[]> {
   const mappedLists: Collection[] = lists.map((list) => ({
     ...list,
     type: 'list' as const,
-    totalWeight: getTotalWeightInList(list),
-    numberOfItems: getTotalItemQuantityInList(list),
   }));
 
   const mappedPacks: Collection[] = packs.map((pack) => ({
     ...pack,
     type: 'pack' as const,
-    totalWeight: getTotalWeightInPack(pack),
-    numberOfItems: getTotalItemQuantityInPack(pack),
   }));
 
   return [...mappedLists, ...mappedPacks];

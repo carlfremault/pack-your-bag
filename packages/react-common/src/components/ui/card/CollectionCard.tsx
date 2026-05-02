@@ -12,7 +12,7 @@ export interface CollectionCardProps {
   description?: string;
   colorTheme?: ColorTheme;
   type: 'list' | 'pack';
-  numberOfItems: number;
+  itemCount: number;
   totalWeight: string;
   weightUnit?: string;
   href: string;
@@ -27,7 +27,7 @@ export function CollectionCard(props: CollectionCardProps) {
     description,
     colorTheme = 'default',
     type,
-    numberOfItems,
+    itemCount,
     totalWeight,
     weightUnit,
     href,
@@ -74,7 +74,7 @@ export function CollectionCard(props: CollectionCardProps) {
         )}
         <div className="flex w-full items-center justify-between">
           <div id={countId} className="flex items-center gap-1 text-xs">
-            {`${numberOfItems} ${numberOfItems === 1 ? 'item' : 'items'}`}
+            {`${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
           </div>
           <div id={weightId} className="flex items-center gap-1 text-xs">
             <HiOutlineScale className="h-3 w-3" aria-hidden="true" />

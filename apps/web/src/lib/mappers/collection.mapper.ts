@@ -1,7 +1,7 @@
-import type { CollectionCardProps } from '@repo/react-common/card';
+import type { CollectionCardProps, CollectionHeaderCardProps } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
-import { CollectionForDisplay } from '@/features/collection/types';
+import { CollectionForDisplay, CollectionForHeaderDisplay } from '@/features/collection/types';
 
 export function toCollectionCardProps(
   collection: CollectionForDisplay,
@@ -18,8 +18,26 @@ export function toCollectionCardProps(
     type: collection.type,
     totalWeight: collection.displayWeight,
     weightUnit: collection.displayUnit,
-    numberOfItems: collection.numberOfItems,
+    itemCount: collection.itemCount,
     href: actionQuery ? `${basePath}?${actionQuery}` : basePath,
     linkAs,
+  };
+}
+
+export function toCollectionHeaderCardProps(
+  collection: CollectionForHeaderDisplay,
+  handlers: Pick<CollectionHeaderCardProps, 'onEditCollection' | 'onDeleteCollection'>,
+): CollectionHeaderCardProps {
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description ?? undefined,
+    colorTheme: collection.colorTheme as ColorTheme,
+    type: collection.type,
+    totalWeight: collection.displayWeight,
+    weightUnit: collection.displayUnit,
+    itemCount: collection.itemCount,
+    categoryWeights: collection.categoryWeights,
+    ...handlers,
   };
 }
