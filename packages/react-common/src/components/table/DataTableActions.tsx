@@ -21,7 +21,7 @@ export function DataTableActions(props: DataTableActionsProps) {
         aria-label={`Edit ${rowName}`}
         onClick={() => onEdit(rowId)}
       >
-        <MdOutlineEdit className="h-5 w-5" />
+        <MdOutlineEdit className="h-5 w-5" aria-hidden="true" />
       </Button>
       <Button
         type="button"
@@ -30,7 +30,7 @@ export function DataTableActions(props: DataTableActionsProps) {
         aria-label={`Delete ${rowName}`}
         onClick={() => onDelete(rowId)}
       >
-        <MdDeleteOutline className="h-5 w-5" />
+        <MdDeleteOutline className="h-5 w-5" aria-hidden="true" />
       </Button>
     </div>
   );

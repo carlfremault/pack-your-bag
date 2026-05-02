@@ -43,7 +43,7 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
 
   const { className: colorThemeClassName } = colorThemes[colorTheme] ?? colorThemes['default'];
   const collectionHeaderCardClassName = classNames(
-    'flex w-full flex-col sm:flex-row rounded-md border gap-4 sm:gap-0 shadow-sm p-4',
+    'flex w-full flex-col sm:flex-row rounded-md border gap-6 sm:gap-8 shadow-sm p-4',
     colorThemeClassName,
   );
 
@@ -51,8 +51,8 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
 
   return (
     <div className={collectionHeaderCardClassName}>
-      <div className="flex flex-none flex-row justify-between gap-4 p-4 sm:flex-col">
-        <div className="self-center sm:p-4">
+      <div className="flex flex-none flex-row justify-between gap-4 sm:flex-col">
+        <div className="self-center p-4">
           <Icon size={36} className="text-primary" aria-hidden="true" />
         </div>
         <div className="flex flex-col gap-4">
@@ -80,11 +80,11 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
         </div>
       </div>
       <div className="flex flex-1 flex-col justify-between gap-4">
-        <div className="flex flex-col gap-4 sm:p-8">
-          <h2 className="text-primary text-xl">{name}</h2>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-primary text-xl sm:pt-4">{name}</h2>
           {description && <ExpandableText text={description} maxLines={3} />}
         </div>
-        <div className="flex justify-end gap-8 px-4 sm:p-4">
+        <div className="flex justify-end gap-8">
           <Button
             variant="unstyledIcon"
             color="primary"
