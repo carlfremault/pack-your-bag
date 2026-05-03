@@ -1,2 +1,2 @@
 export { DataTable, type DataTableProps } from './DataTable';
-export { DataTableActions, type DataTableActionsProps } from './DataTableActions';
+export { EditDeleteActions, type EditDeleteActionsProps } from './EditDeleteActions';

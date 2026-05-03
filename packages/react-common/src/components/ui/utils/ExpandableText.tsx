@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 export interface ExpandableTextProps {
   text: string;
@@ -21,10 +21,10 @@ export function ExpandableText(props: ExpandableTextProps) {
   const [isClamped, setIsClamped] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
     if (el) setIsClamped(el.scrollHeight > el.clientHeight);
-  }, [text]);
+  }, [text, maxLines]);
 
   return (
     <div className="text-xs font-light">

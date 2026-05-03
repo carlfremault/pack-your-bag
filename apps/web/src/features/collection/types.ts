@@ -1,6 +1,8 @@
 import type { RequestBody, SuccessResponse } from '@repo/product-client';
 import type { ColorTheme } from '@repo/react-common/color-themes';
 
+import type { ItemForDisplay } from '@/features/item/types';
+
 export type ListSummary = SuccessResponse<'/list', 'get'>[number];
 export type PackSummary = SuccessResponse<'/pack', 'get'>[number];
 export type List = SuccessResponse<'/list/{id}', 'get'>;
@@ -27,3 +29,5 @@ export type CollectionForHeaderDisplay = CollectionForDisplay & {
 };
 
 export type CollectionType = Collection['type'];
+
+export type CollectionItemForDisplay = ItemForDisplay & { quantity: number };

@@ -26,6 +26,7 @@ export function toCollectionCardProps(
 
 export function toCollectionHeaderCardProps(
   collection: CollectionForHeaderDisplay,
+  isLoading: boolean,
   handlers: Pick<CollectionHeaderCardProps, 'onEditCollection' | 'onDeleteCollection'>,
 ): CollectionHeaderCardProps {
   return {
@@ -38,6 +39,7 @@ export function toCollectionHeaderCardProps(
     weightUnit: collection.displayUnit,
     itemCount: collection.itemCount,
     categoryWeights: collection.categoryWeights,
+    isLoading,
     ...handlers,
   };
 }

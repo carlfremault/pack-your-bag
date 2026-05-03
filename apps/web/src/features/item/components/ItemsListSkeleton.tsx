@@ -1,6 +1,12 @@
-export default function MobileItemsListSkeleton() {
+export default function ItemsListSkeleton() {
   return (
-    <div role="region" aria-busy="true" aria-label="Loading items list">
+    <div
+      role="region"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label="Loading items list"
+      className="flex flex-col gap-2"
+    >
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}

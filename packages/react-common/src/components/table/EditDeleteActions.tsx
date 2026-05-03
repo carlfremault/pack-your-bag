@@ -2,24 +2,24 @@ import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 
 import { Button } from '@repo/react-common/button';
 
-export interface DataTableActionsProps {
-  rowName: string;
-  rowId: string;
+export interface EditDeleteActionsProps {
+  name: string;
+  id: string;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export function DataTableActions(props: DataTableActionsProps) {
-  const { rowName, rowId, onEdit, onDelete } = props;
+export function EditDeleteActions(props: EditDeleteActionsProps) {
+  const { name, id, onEdit, onDelete } = props;
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <>
       <Button
         type="button"
         variant="unstyledIcon"
         color="primary"
-        aria-label={`Edit ${rowName}`}
-        onClick={() => onEdit(rowId)}
+        aria-label={`Edit ${name}`}
+        onClick={() => onEdit(id)}
       >
         <MdOutlineEdit className="h-5 w-5" aria-hidden="true" />
       </Button>
@@ -27,11 +27,11 @@ export function DataTableActions(props: DataTableActionsProps) {
         type="button"
         variant="unstyledIcon"
         color="danger"
-        aria-label={`Delete ${rowName}`}
-        onClick={() => onDelete(rowId)}
+        aria-label={`Delete ${name}`}
+        onClick={() => onDelete(id)}
       >
         <MdDeleteOutline className="h-5 w-5" aria-hidden="true" />
       </Button>
-    </div>
+    </>
   );
 }
