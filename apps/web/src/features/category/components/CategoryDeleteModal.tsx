@@ -25,7 +25,8 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
   const { data, isLoading, isError } = useCategoryDeleteImpact(categoryId);
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
-  const confirmDeleteCategory = () => {
+  const confirmDeleteCategory = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     deleteCategory(categoryId, {
       onSuccess: () => {
         onCategoryDeleted(categoryName);

@@ -9,6 +9,7 @@ type LinkButtonOwnProps<T extends React.ElementType = 'a'> = {
   variant?: ButtonVariant;
   fullWidth?: boolean;
   linkAs?: T;
+  ariaLabel?: string;
   className?: string;
 };
 
@@ -24,6 +25,7 @@ export function LinkButton<T extends React.ElementType = 'a'>(props: LinkButtonP
     variant = 'outline',
     fullWidth = false,
     linkAs: LinkComponent = 'a',
+    ariaLabel,
     className,
     ...rest
   } = props;
@@ -31,7 +33,7 @@ export function LinkButton<T extends React.ElementType = 'a'>(props: LinkButtonP
   const linkClassName = getButtonClassName({ variant, color, size, fullWidth, className });
 
   return (
-    <LinkComponent href={href} className={linkClassName} {...rest}>
+    <LinkComponent {...rest} href={href} className={linkClassName} aria-label={ariaLabel}>
       {children}
     </LinkComponent>
   );

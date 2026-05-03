@@ -5,12 +5,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
 import { CollectionHeaderCard } from '@repo/react-common/card';
+import { type ColorTheme } from '@repo/react-common/color-themes';
 import { useBreakpoint } from '@repo/react-common/hooks';
-import { QuantityStepper } from '@repo/react-common/input';
 import { PageNotReady } from '@repo/react-common/utils';
 
-import ItemsList from '@/features/item/components/ItemsList';
-import ItemsTable from '@/features/item/components/ItemsTable';
 import { usePreferences } from '@/features/settings/queries';
 import { toCollectionHeaderCardProps } from '@/lib/mappers/collection.mapper';
 import {
@@ -24,7 +22,9 @@ import {
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useCollection } from '../queries';
-import { CollectionForHeaderDisplay, CollectionItemForDisplay, CollectionType } from '../types';
+import { CollectionForHeaderDisplay, CollectionType } from '../types';
+
+import CollectionContent from './CollectionContent';
 
 export interface CollectionDetailsProps {
   type: CollectionType;
@@ -43,7 +43,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isCollectionLoading || isPreferencesLoading;
 
-  const collectionForDisplay: CollectionForHeaderDisplay | undefined = useMemo(() => {
+  const collectionForHeaderDisplay = useMemo((): CollectionForHeaderDisplay | undefined => {
     if (!collection) return undefined;
     const totalWeight =
       collection.type === 'list'
@@ -60,7 +60,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     const categoryWeights = categoryWeightsRaw.map((cw) => {
       const { value, unit } = formatWeightForDisplay(cw.weight, preferences?.units);
       return {
-        category: { name: cw.category.name, colorTheme: cw.category.colorTheme },
+        category: { name: cw.category.name, colorTheme: cw.category.colorTheme as ColorTheme },
         weight: unit ? `${value} ${unit}` : value,
       };
     });
@@ -68,21 +68,11 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     return {
       ...collection,
       itemCount,
+      totalWeight,
       displayWeight: value,
       displayUnit: unit,
       categoryWeights,
-    } as CollectionForHeaderDisplay;
-  }, [collection, preferences?.units]);
-
-  const collectionItemsForDisplay = useMemo((): CollectionItemForDisplay[] => {
-    if (!collection) return [];
-    return (collection.items ?? []).map(({ quantity, item }) => {
-      const { value, unit } =
-        item.weight != null
-          ? formatWeightForDisplay(Number(item.weight), preferences?.units)
-          : { value: null, unit: null };
-      return { ...item, quantity, displayWeight: value, displayUnit: unit };
-    });
+    };
   }, [collection, preferences?.units]);
 
   const handleEditCollection = useCallback(
@@ -99,14 +89,6 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   // TODO: Implement delete collection
   const handleDeleteCollection = () => {};
 
-  const ItemsActions = useCallback(
-    ({ quantity }: CollectionItemForDisplay) => (
-      // TODO: Implement quantity stepper onChange
-      <QuantityStepper quantity={quantity} onChange={() => {}} />
-    ),
-    [],
-  );
-
   if (!isReady) {
     return <PageNotReady />;
   }
@@ -119,36 +101,17 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     );
   }
 
-  const itemsView = isDesktop ? (
-    <ItemsTable
-      items={collectionItemsForDisplay}
-      isLoading={isLoading}
-      actionsTitle="Quantity"
-      actionSize={120}
-      itemsActions={ItemsActions}
-    />
-  ) : (
-    <ItemsList
-      items={collectionItemsForDisplay}
-      isLoading={isLoading}
-      itemsActions={ItemsActions}
-    />
-  );
-
   return (
     <div className="bg-surface border-primary-ring m-4 flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm">
-      {collectionForDisplay && (
+      {collectionForHeaderDisplay && (
         <CollectionHeaderCard
-          {...toCollectionHeaderCardProps(collectionForDisplay, isLoading, {
+          {...toCollectionHeaderCardProps(collectionForHeaderDisplay, isLoading, {
             onEditCollection: handleEditCollection,
             onDeleteCollection: handleDeleteCollection,
           })}
         />
       )}
-      <h2 className="text-primary text-xl">
-        {type === 'list' ? 'List content' : 'Pack content: items'}
-      </h2>
-      {itemsView}
+      {collection && <CollectionContent collection={collection} isDesktop={isDesktop} />}
     </div>
   );
 }
