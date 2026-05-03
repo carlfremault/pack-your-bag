@@ -1,6 +1,6 @@
 const SKELETON_ROW_COUNT = 6;
 
-export default function DesktopItemsTableSkeleton() {
+export default function ItemsTableSkeleton() {
   return (
     <div
       className="bg-surface border-primary-ring w-full overflow-hidden rounded-md border shadow-sm"

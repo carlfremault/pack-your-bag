@@ -9,6 +9,8 @@ import { Button } from '../button';
 import { CategoryPill, CategoryPillProps } from '../pill/CategoryPill';
 import { ExpandableText } from '../utils';
 
+import { CollectionHeaderCardSkeleton } from './CollectionHeaderCardSkeleton';
+
 export interface CollectionHeaderCardProps {
   id: string;
   name: string;
@@ -22,6 +24,7 @@ export interface CollectionHeaderCardProps {
     category: CategoryPillProps;
     weight: string;
   }[];
+  isLoading: boolean;
   onEditCollection: (id: string, type: 'list' | 'pack') => void;
   onDeleteCollection: (id: string, type: 'list' | 'pack') => void;
 }
@@ -37,6 +40,7 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
     totalWeight,
     weightUnit,
     categoryWeights,
+    isLoading,
     onEditCollection,
     onDeleteCollection,
   } = props;
@@ -48,6 +52,14 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
   );
 
   const Icon = type === 'list' ? MdOutlineFormatListBulleted : BsBackpack;
+
+  if (isLoading) {
+    return (
+      <div className={collectionHeaderCardClassName}>
+        <CollectionHeaderCardSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className={collectionHeaderCardClassName}>
@@ -70,10 +82,7 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
                 className="flex items-center justify-between gap-2"
               >
                 <CategoryPill {...category} />
-                <div className="text-xs">
-                  {weight}
-                  {weightUnit ? ` ${weightUnit}` : ''}
-                </div>
+                <div className="text-xs">{weight}</div>
               </div>
             ))}
           </div>

@@ -5,7 +5,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
-import { Spinner } from '@repo/react-common/spinner';
+import { EditDeleteActions } from '@repo/react-common/table';
+import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
 import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
@@ -13,11 +14,12 @@ import { useSearchDraft } from '@/hooks/useSearchDraft';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useAllItems } from '../queries';
+import { ItemForDisplay } from '../types';
 
-import DesktopItemsTable from './DesktopItemsTable';
 import ItemDeleteModal from './ItemDeleteModal';
 import { ItemFilter, ItemFilterState } from './ItemFilter';
-import MobileItemsList from './MobileItemsList';
+import ItemsList from './ItemsList';
+import ItemsTable from './ItemsTable';
 
 export default function ItemsView() {
   const { isReady, isDesktop } = useBreakpoint();
@@ -149,12 +151,22 @@ export default function ItemsView() {
     setDeleteItemId(null);
   }, []);
 
+  const ItemsActions = useCallback(
+    ({ id, name }: ItemForDisplay) => {
+      return (
+        <EditDeleteActions
+          name={name}
+          id={id}
+          onEdit={handleEditItem}
+          onDelete={handleDeleteItem}
+        />
+      );
+    },
+    [handleEditItem, handleDeleteItem],
+  );
+
   if (!isReady) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Spinner size="large" />
-      </div>
-    );
+    return <PageNotReady />;
   }
 
   if (isItemsError && !data.length) {
@@ -174,12 +186,7 @@ export default function ItemsView() {
       <>
         <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
           <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-          <MobileItemsList
-            items={filteredItems}
-            isLoading={isLoading}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-          />
+          <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={ItemsActions} />
         </div>
         {itemDeleteModal}
       </>
@@ -188,15 +195,10 @@ export default function ItemsView() {
 
   return (
     <>
-      <div className="flex h-full w-full flex-col gap-4 p-4">
+      <div className="flex w-full flex-col gap-4 p-4">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
-          <DesktopItemsTable
-            items={filteredItems}
-            isLoading={isLoading}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-          />
+          <ItemsTable items={filteredItems} isLoading={isLoading} itemsActions={ItemsActions} />
         </div>
       </div>
       {itemDeleteModal}

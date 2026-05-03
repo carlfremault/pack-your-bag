@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { CategoryPill } from '@repo/react-common/pill';
-import { DataTable, DataTableActions } from '@repo/react-common/table';
+import { DataTable, EditDeleteActions } from '@repo/react-common/table';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -39,12 +39,14 @@ export default function CategoryTable(props: CategoryTableProps) {
         maxSize: 80,
         cell: ({ row }) => {
           return (
-            <DataTableActions
-              rowName={row.original.name}
-              rowId={row.original.id}
-              onEdit={onEditCategory}
-              onDelete={onDeleteCategory}
-            />
+            <div className="flex items-center justify-center gap-4">
+              <EditDeleteActions
+                name={row.original.name}
+                id={row.original.id}
+                onEdit={onEditCategory}
+                onDelete={onDeleteCategory}
+              />
+            </div>
           );
         },
       }),
