@@ -1,4 +1,8 @@
-import type { CollectionCardProps, CollectionHeaderCardProps } from '@repo/react-common/card';
+import type {
+  CollectionCardProps,
+  CollectionHeaderCardProps,
+  CollectionListCardProps,
+} from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
 import { CollectionForDisplay, CollectionForHeaderDisplay } from '@/features/collection/types';
@@ -41,5 +45,26 @@ export function toCollectionHeaderCardProps(
     categoryWeights: collection.categoryWeights,
     isLoading,
     ...handlers,
+  };
+}
+
+export function toCollectionListCardProps(
+  collection: CollectionForDisplay,
+  actions: React.ReactNode,
+  linkAs?: React.ElementType,
+  actionQuery?: string,
+): CollectionListCardProps {
+  const basePath = `/${collection.type}/${collection.id}`;
+
+  return {
+    name: collection.name,
+    description: collection.description ?? undefined,
+    colorTheme: collection.colorTheme as ColorTheme,
+    itemCount: collection.itemCount,
+    totalWeight: collection.displayWeight,
+    weightUnit: collection.displayUnit,
+    href: actionQuery ? `${basePath}?${actionQuery}` : basePath,
+    linkAs,
+    actions,
   };
 }

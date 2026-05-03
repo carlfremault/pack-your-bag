@@ -1,10 +1,8 @@
-import { MdOutlineEdit } from 'react-icons/md';
-
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
 import { LONG_DESCRIPTION } from '../../../lib/constants';
-import { Button } from '../button/Button';
+import { EditDeleteActions } from '../../table';
 import { QuantityStepper } from '../input/QuantityStepper';
 
 import { ItemCard } from './ItemCard';
@@ -19,7 +17,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: 'Item 1 description',
     category: {
@@ -28,29 +25,28 @@ export const Default: Story = {
     },
     weight: '10',
     weightUnit: 'kg',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
+    actions: (
+      <div className="flex gap-8">
+        <EditDeleteActions name="Item 1" id="1" onEdit={fn()} onDelete={fn()} />
+      </div>
+    ),
   },
 };
 
 export const WithActions: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: 'Item 1 description',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
     actions: (
-      <Button variant="unstyledIcon" color="primary" aria-label="Edit Item 1" onClick={fn()}>
-        <MdOutlineEdit className="text-primary/80 hover:text-primary h-5 w-5 transition-colors" />
-      </Button>
+      <div className="flex gap-8">
+        <EditDeleteActions name="Item 1" id="1" onEdit={fn()} onDelete={fn()} />
+      </div>
     ),
   },
 };
 
 export const WithQuantityStepper: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     weight: '110',
     weightUnit: 'g',
@@ -59,90 +55,69 @@ export const WithQuantityStepper: Story = {
       name: 'Category 1',
       colorTheme: 'jungle',
     },
-    onEditItem: fn(),
-    onDeleteItem: fn(),
     actions: <QuantityStepper quantity={3} onChange={fn()} />,
   },
 };
 
 export const NoCategory: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: 'Item 1 description',
     weight: '10',
     weightUnit: 'kg',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
   },
 };
 
 export const NoWeight: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: 'Item 1 description',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
   },
 };
 
 export const WeightButNoWeightUnit: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: 'Item 1 description',
     weight: '10',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
   },
 };
 
 export const NoDescription: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
   },
 };
 
 export const DescriptionWith1000Characters: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: LONG_DESCRIPTION,
     weight: '10',
     weightUnit: 'kg',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
   },
 };
 
 export const DescriptionWith1000CharactersAndActions: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: LONG_DESCRIPTION,
     weight: '10',
     weightUnit: 'kg',
-    onEditItem: fn(),
-    onDeleteItem: fn(),
     category: {
       name: 'Category 1',
       colorTheme: 'sand',
     },
     actions: (
-      <Button variant="unstyledIcon" color="primary" aria-label="Edit Item 1" onClick={fn()}>
-        <MdOutlineEdit className="text-primary/80 hover:text-primary h-5 w-5 transition-colors" />
-      </Button>
+      <div className="flex gap-8">
+        <EditDeleteActions name="Item 1" id="1" onEdit={fn()} onDelete={fn()} />
+      </div>
     ),
   },
 };
 
 export const DescriptionWith1000CharactersAndQuantityStepper: Story = {
   args: {
-    id: '1',
     name: 'Item 1',
     description: LONG_DESCRIPTION,
     weight: '10',
@@ -151,8 +126,6 @@ export const DescriptionWith1000CharactersAndQuantityStepper: Story = {
       name: 'Category 1',
       colorTheme: 'lavender',
     },
-    onEditItem: fn(),
-    onDeleteItem: fn(),
     actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };

@@ -13,6 +13,7 @@ export type UpdateListBody = RequestBody<'/list/{id}', 'patch'>;
 export type UpdatePackBody = RequestBody<'/pack/{id}', 'patch'>;
 
 export type Collection = (ListSummary & { type: 'list' }) | (PackSummary & { type: 'pack' });
+export type CollectionType = Collection['type'];
 
 export type CollectionDetail = (List & { type: 'list' }) | (Pack & { type: 'pack' });
 
@@ -28,6 +29,5 @@ export type CollectionForHeaderDisplay = CollectionForDisplay & {
   }[];
 };
 
-export type CollectionType = Collection['type'];
-
 export type CollectionItemForDisplay = ItemForDisplay & { quantity: number };
+export type CollectionListForDisplay = CollectionForDisplay & { quantity: number };
