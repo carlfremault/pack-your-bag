@@ -11,6 +11,10 @@ import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
 import { toCollectionHeaderCardProps } from '@/lib/mappers/collection.mapper';
+import { formatWeightForDisplay } from '@/utils/weightUtils';
+
+import { useCollection } from '../queries';
+import { CollectionForHeaderDisplay, CollectionType } from '../types';
 import {
   getCategoryWeightsInList,
   getCategoryWeightsInPack,
@@ -18,13 +22,10 @@ import {
   getTotalItemQuantityInPack,
   getTotalWeightInList,
   getTotalWeightInPack,
-} from '@/utils/collectionsUtils';
-import { formatWeightForDisplay } from '@/utils/weightUtils';
+} from '../utils';
 
-import { useCollection } from '../queries';
-import { CollectionForHeaderDisplay, CollectionType } from '../types';
-
-import CollectionContent from './CollectionContent';
+import ListContent from './ListContent';
+import PackContent from './PackContent';
 
 export interface CollectionDetailsProps {
   type: CollectionType;
@@ -111,7 +112,8 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
           })}
         />
       )}
-      {collection && <CollectionContent collection={collection} isDesktop={isDesktop} />}
+      {collection?.type === 'list' && <ListContent collection={collection} isDesktop={isDesktop} />}
+      {collection?.type === 'pack' && <PackContent collection={collection} isDesktop={isDesktop} />}
     </div>
   );
 }

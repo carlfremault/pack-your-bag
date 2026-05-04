@@ -23,6 +23,7 @@ export const Default: Story = {
     itemCount: 10,
     totalWeight: '10',
     weightUnit: 'kg',
+    onViewDetails: fn(),
     actions: (
       <div className="flex gap-8">
         <EditDeleteActions name="Item 1" id="1" onEdit={fn()} onDelete={fn()} />
@@ -39,7 +40,28 @@ export const WithQuantityStepper: Story = {
     itemCount: 10,
     totalWeight: '10',
     weightUnit: 'kg',
+    onViewDetails: fn(),
     actions: <QuantityStepper quantity={3} onChange={fn()} />,
+  },
+};
+
+export const Expanded: Story = {
+  args: {
+    name: 'List 1',
+    description: 'List 1 description',
+    colorTheme: 'lavender',
+    itemCount: 2,
+    totalWeight: '5',
+    weightUnit: 'kg',
+    onViewDetails: fn(),
+    isExpanded: true,
+    expandedContent: (
+      <div className="flex flex-col gap-2 text-sm">
+        <div className="bg-surface rounded-md border p-2">Item A — 2 kg</div>
+        <div className="bg-surface rounded-md border p-2">Item B — 3 kg</div>
+      </div>
+    ),
+    actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };
 

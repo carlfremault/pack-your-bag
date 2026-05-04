@@ -31,3 +31,6 @@ export type CollectionForHeaderDisplay = CollectionForDisplay & {
 
 export type CollectionItemForDisplay = ItemForDisplay & { quantity: number };
 export type CollectionListForDisplay = CollectionForDisplay & { quantity: number };
+export type CollectionListForDisplayWithItems = CollectionListForDisplay & {
+  listItems: CollectionItemForDisplay[];
+};

@@ -51,11 +51,7 @@ export function toCollectionHeaderCardProps(
 export function toCollectionListCardProps(
   collection: CollectionForDisplay,
   actions: React.ReactNode,
-  linkAs?: React.ElementType,
-  actionQuery?: string,
 ): CollectionListCardProps {
-  const basePath = `/${collection.type}/${collection.id}`;
-
   return {
     name: collection.name,
     description: collection.description ?? undefined,
@@ -63,8 +59,6 @@ export function toCollectionListCardProps(
     itemCount: collection.itemCount,
     totalWeight: collection.displayWeight,
     weightUnit: collection.displayUnit,
-    href: actionQuery ? `${basePath}?${actionQuery}` : basePath,
-    linkAs,
     actions,
   };
 }

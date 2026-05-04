@@ -17,11 +17,13 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     const params = new URLSearchParams();
     const search = searchParams.get('search');
     const category = searchParams.get('category');
+    const type = searchParams.get('type');
     const sortField = searchParams.get('sort');
     const sortDir = searchParams.get('dir');
 
     if (search) params.set('search', search);
     if (category) params.set('category', category);
+    if (type) params.set('type', type);
     if (sortField) params.set('sort', sortField);
     if (sortDir) params.set('dir', sortDir);
 
