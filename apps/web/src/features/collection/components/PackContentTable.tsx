@@ -138,24 +138,20 @@ export default function PackContentTable(props: PackContentTableProps) {
     [],
   );
 
-  if (isLoading) {
-    return (
-      <div className="bg-background w-full">
-        <ItemsTableSkeleton />
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-background w-full">
-      <DataTable
-        data={entries}
-        columns={columns}
-        getSubRows={getSubRows}
-        getRowId={(row) => `${row.entryType}-${row.id}`}
-        emptyStateLabel="No content found"
-        scrollable
-      />
+    <div className="bg-background min-h-0 w-full flex-1">
+      {isLoading ? (
+        <ItemsTableSkeleton />
+      ) : (
+        <DataTable
+          data={entries}
+          columns={columns}
+          getSubRows={getSubRows}
+          getRowId={(row) => `${row.entryType}-${row.id}`}
+          emptyStateLabel="No content found"
+          scrollable
+        />
+      )}
     </div>
   );
 }

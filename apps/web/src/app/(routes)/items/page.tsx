@@ -18,7 +18,7 @@ export default async function Page() {
   });
 
   return (
-    <div className="mb-32 flex w-full justify-center">
+    <div className="flex w-full justify-center lg:min-h-0 lg:flex-1 lg:overflow-hidden">
       <h1 className="sr-only">Items</h1>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ItemsView />

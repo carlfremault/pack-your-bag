@@ -8,10 +8,12 @@ import { ItemFilter } from '@/features/item/components/ItemFilter';
 import ItemsList from '@/features/item/components/ItemsList';
 import ItemsTable from '@/features/item/components/ItemsTable';
 import { usePreferences } from '@/features/settings/queries';
-import { useFilterItems } from '@/hooks/useFilterItems';
+import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { CollectionDetail, CollectionItemForDisplay } from '../types';
+
+import AddItemsModal from './AddItemsModal';
 
 export interface ListContentProps {
   collection: CollectionDetail;
@@ -33,7 +35,7 @@ export default function ListContent(props: ListContentProps) {
     });
   }, [collection.items, preferences?.units]);
 
-  const { filteredItems, displayFilterState, handleFilterChange } = useFilterItems({
+  const { filteredItems, displayFilterState, handleFilterChange } = useUrlFilterItems({
     items: itemsForListDisplay,
     sortFieldKey: 'listItemSortField',
     sortDirKey: 'listItemSortDir',
@@ -48,20 +50,31 @@ export default function ListContent(props: ListContentProps) {
   );
 
   const listContent = isDesktop ? (
-    <ItemsTable
-      items={filteredItems}
-      isLoading={isPreferencesLoading}
-      actionsTitle="Quantity"
-      actionSize={120}
-      itemsActions={itemsActions}
-    />
+    <div className="min-h-0 flex-1">
+      <ItemsTable
+        items={filteredItems}
+        isLoading={isPreferencesLoading}
+        actionsTitle="Quantity"
+        actionSize={120}
+        itemsActions={itemsActions}
+      />
+    </div>
   ) : (
-    <ItemsList items={filteredItems} isLoading={isPreferencesLoading} itemsActions={itemsActions} />
+    <div className="mb-32">
+      <ItemsList
+        items={filteredItems}
+        isLoading={isPreferencesLoading}
+        itemsActions={itemsActions}
+      />
+    </div>
   );
 
   return (
     <>
-      <h2 className="text-primary text-xl">Content</h2>
+      <div className="flex w-full items-center justify-between">
+        <h2 className="text-primary text-xl">Content</h2>
+        <AddItemsModal />
+      </div>
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {listContent}
     </>

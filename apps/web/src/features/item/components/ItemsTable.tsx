@@ -82,7 +82,7 @@ export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTab
   }, [actionSize, actionsTitle, itemsActions]);
 
   return (
-    <div className="bg-background w-full">
+    <div className="bg-background h-full w-full">
       {isLoading ? (
         <ItemsTableSkeleton />
       ) : (
