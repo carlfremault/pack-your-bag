@@ -17,7 +17,6 @@ import { ToastNotifications } from '@/components/ToastNotifications';
 import { getPreferences } from '@/features/settings/api';
 import { PreferencesInitializer } from '@/features/settings/components/PreferencesInitializer';
 import { ThemeSynchronizer } from '@/features/settings/components/ThemeSynchronizer';
-import type { Preferences } from '@/features/settings/types';
 import { getSession } from '@/lib/session';
 
 import './globals.css';
@@ -40,23 +39,11 @@ export default async function RootLayout({
   const session = await getSession();
   const isLoggedIn = session.isLoggedIn ?? false;
 
-  // Distinguish a real fetch error (non-404) from a valid null (no preferences yet).
-  // Only dehydrate on success so HydrationBoundary can't overwrite a valid browser-cached
-  // theme with null when getPreferences throws transiently (e.g. during HMR rebuilds).
-  let preferences: Preferences | null = null;
-  let preferencesFetched = false;
-  if (isLoggedIn) {
-    try {
-      preferences = await getPreferences();
-      preferencesFetched = true;
-    } catch {
-      // non-404 error — skip dehydration, browser cache stays authoritative
-    }
-  }
+  const preferences = isLoggedIn ? await getPreferences().catch(() => null) : null;
   const theme = preferences?.theme;
 
   const queryClient = new QueryClient();
-  if (preferencesFetched) {
+  if (isLoggedIn) {
     queryClient.setQueryData(['preferences'], preferences);
   }
   const dehydratedState = dehydrate(queryClient);
