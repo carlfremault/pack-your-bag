@@ -42,11 +42,7 @@ export default function ItemsList<ListData extends ItemForDisplay>(
   return (
     <div className={containerClassName}>
       {items.map((item) => (
-        <ItemCard
-          key={item.id}
-          {...toItemCardProps(item, cardActions(item))}
-          className="last:mb-[25vh]"
-        />
+        <ItemCard key={item.id} {...toItemCardProps(item, cardActions(item))} />
       ))}
     </div>
   );

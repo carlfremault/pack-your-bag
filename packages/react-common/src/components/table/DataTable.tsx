@@ -1,10 +1,19 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  Row,
+  useReactTable,
+} from '@tanstack/react-table';
 import classNames from 'classnames';
 
 export type DataTableProps<T> = {
   data: Array<T>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns: ColumnDef<T, any>[];
+  getSubRows?: (originalRow: T, index: number) => T[] | undefined;
+  getRowId?: (originalRow: T, index: number, parent?: Row<T>) => string;
   emptyStateLabel?: string;
   scrollable?: boolean;
 };
@@ -14,13 +23,23 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // TODO: upgrade to TanStack Table v9 when it's released
   'use no memo';
 
-  const { data, columns, emptyStateLabel = 'No data', scrollable = false } = props;
+  const {
+    data,
+    columns,
+    getSubRows,
+    getRowId,
+    emptyStateLabel = 'No data',
+    scrollable = false,
+  } = props;
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows,
+    getRowId,
   });
 
   if (!data.length) {
@@ -67,10 +86,24 @@ export function DataTable<T>(props: DataTableProps<T>) {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={row.index % 2 === 0 ? 'bg-surface' : 'bg-surface-overlay/70'}
+                className={classNames(
+                  row.depth > 0 || row.getIsExpanded()
+                    ? 'bg-primary-ring/50'
+                    : row.index % 2 === 0
+                      ? 'bg-surface'
+                      : 'bg-surface-overlay/90',
+                )}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3 text-sm">
+                {row.getVisibleCells().map((cell, cellIndex) => (
+                  <td
+                    key={cell.id}
+                    className={classNames(
+                      'py-3 text-sm',
+                      row.depth > 0 && cellIndex === 0
+                        ? 'border-primary-ring border-l-4 pr-4 pl-8'
+                        : 'px-4',
+                    )}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

@@ -1,10 +1,9 @@
 import { HiOutlineScale } from 'react-icons/hi2';
-import { MdOutlineFormatListBulleted, MdOutlineRemoveRedEye } from 'react-icons/md';
+import { MdOutlineFormatListBulleted, MdOutlineRemoveRedEye, MdRemoveRedEye } from 'react-icons/md';
 
 import classNames from 'classnames';
 
 import { ColorTheme, colorThemes } from '../../../lib/colorThemes';
-import { LinkButton } from '../button';
 import { ExpandableText } from '../utils';
 
 export interface CollectionListCardProps {
@@ -14,8 +13,9 @@ export interface CollectionListCardProps {
   itemCount: number;
   totalWeight: string;
   weightUnit?: string;
-  href: string;
-  linkAs?: React.ElementType;
+  onViewDetails?: () => void;
+  isExpanded?: boolean;
+  expandedContent?: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
 }
@@ -28,8 +28,9 @@ export function CollectionListCard(props: CollectionListCardProps) {
     itemCount,
     totalWeight,
     weightUnit,
-    href,
-    linkAs: LinkComponent = 'a',
+    onViewDetails,
+    isExpanded = false,
+    expandedContent,
     actions,
     className,
   } = props;
@@ -49,17 +50,27 @@ export function CollectionListCard(props: CollectionListCardProps) {
           <MdOutlineFormatListBulleted className="h-5 w-5" aria-hidden="true" />
           <h3 className="text-sm font-bold wrap-anywhere">{name}</h3>
         </div>
-        <LinkButton
-          href={href}
-          linkAs={LinkComponent}
-          variant="unstyledIcon"
-          ariaLabel={`View ${name} details`}
-        >
-          <MdOutlineRemoveRedEye
-            className={classNames('h-5 w-5', colorThemeClassName)}
-            aria-hidden="true"
-          />
-        </LinkButton>
+        {onViewDetails && (
+          <button
+            type="button"
+            aria-label={`${isExpanded ? 'Hide' : 'View'} ${name} details`}
+            aria-expanded={isExpanded}
+            onClick={onViewDetails}
+            className="focus-visible:ring-primary-ring rounded-md focus-visible:ring-2 focus-visible:outline-none"
+          >
+            {isExpanded ? (
+              <MdRemoveRedEye
+                className={classNames('h-5 w-5', colorThemeClassName)}
+                aria-hidden="true"
+              />
+            ) : (
+              <MdOutlineRemoveRedEye
+                className={classNames('h-5 w-5', colorThemeClassName)}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+        )}
       </div>
       {description && <ExpandableText text={description} />}
       <div className="flex w-full items-center justify-between">
@@ -72,6 +83,7 @@ export function CollectionListCard(props: CollectionListCardProps) {
         </div>
         {actions}
       </div>
+      {isExpanded && expandedContent && <div>{expandedContent}</div>}
     </div>
   );
 }

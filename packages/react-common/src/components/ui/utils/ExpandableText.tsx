@@ -37,7 +37,7 @@ export function ExpandableText(props: ExpandableTextProps) {
       {isClamped && (
         <button
           type="button"
-          className="mt-0.5 cursor-pointer underline underline-offset-2 hover:opacity-70"
+          className="focus-visible:ring-primary-ring mt-0.5 cursor-pointer underline underline-offset-2 hover:opacity-70 focus-visible:ring-2 focus-visible:outline-none"
           onClick={() => setExpanded((prev) => !prev)}
           aria-expanded={expanded}
         >

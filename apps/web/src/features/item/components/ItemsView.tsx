@@ -9,15 +9,14 @@ import { EditDeleteActions } from '@repo/react-common/table';
 import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
-import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
-import { useSearchDraft } from '@/hooks/useSearchDraft';
+import { useFilterItems } from '@/hooks/useFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useAllItems } from '../queries';
 import { ItemForDisplay } from '../types';
 
 import ItemDeleteModal from './ItemDeleteModal';
-import { ItemFilter, ItemFilterState } from './ItemFilter';
+import { ItemFilter } from './ItemFilter';
 import ItemsList from './ItemsList';
 import ItemsTable from './ItemsTable';
 
@@ -26,13 +25,6 @@ export default function ItemsView() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const { searchDraft, handleSearchChange } = useSearchDraft();
-  useRestoreSortFromSession({
-    sortFieldKey: 'itemSortField',
-    sortDirKey: 'itemSortDir',
-    defaultSortField: 'name',
-  });
 
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { data = [], isLoading: isItemsLoading, isError: isItemsError } = useAllItems();
@@ -49,89 +41,11 @@ export default function ItemsView() {
     });
   }, [data, preferences?.units]);
 
-  const filterState: ItemFilterState = useMemo(() => {
-    const rawSort = searchParams.get('sort');
-    const rawDir = searchParams.get('dir');
-    return {
-      search: searchParams.get('search') ?? '',
-      category: searchParams.get('category') ?? '',
-      sortField: rawSort === 'weight' || rawSort === 'category' ? rawSort : 'name',
-      sortDirection: rawDir === 'desc' ? 'desc' : 'asc',
-    };
-  }, [searchParams]);
-
-  const displayFilterState: ItemFilterState = { ...filterState, search: searchDraft };
-
-  const filteredItems = useMemo(() => {
-    let result = [...itemsForDisplay];
-
-    if (searchDraft) {
-      const term = searchDraft.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.name.toLowerCase().includes(term) ||
-          (item.description?.toLowerCase().includes(term) ?? false),
-      );
-    }
-
-    if (filterState.category) {
-      result = result.filter((item) => item.category?.name === filterState.category);
-    }
-
-    result.sort((a, b) => {
-      let cmp: number;
-      if (filterState.sortField === 'weight') {
-        cmp = (a.weight != null ? Number(a.weight) : 0) - (b.weight != null ? Number(b.weight) : 0);
-      } else if (filterState.sortField === 'name') {
-        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      } else if (filterState.sortField === 'category') {
-        cmp = (a.category?.name ?? '')
-          .toLowerCase()
-          .localeCompare((b.category?.name ?? '').toLowerCase());
-      } else {
-        cmp = 0;
-      }
-      if (cmp === 0 && filterState.sortField !== 'name') {
-        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      }
-      return filterState.sortDirection === 'asc' ? cmp : -cmp;
-    });
-
-    return result;
-  }, [
-    itemsForDisplay,
-    searchDraft,
-    filterState.category,
-    filterState.sortField,
-    filterState.sortDirection,
-  ]);
-
-  const handleFilterChange = useCallback(
-    (updates: Partial<ItemFilterState>) => {
-      if (updates.search !== undefined) {
-        handleSearchChange(updates.search);
-        return;
-      }
-
-      const params = new URLSearchParams(searchParams.toString());
-      if (updates.category !== undefined) {
-        if (updates.category) params.set('category', updates.category);
-        else params.delete('category');
-      }
-      if (updates.sortField !== undefined) {
-        if (updates.sortField !== 'name') params.set('sort', updates.sortField);
-        else params.delete('sort');
-        sessionStorage.setItem('itemSortField', updates.sortField);
-      }
-      if (updates.sortDirection !== undefined) {
-        if (updates.sortDirection !== 'asc') params.set('dir', updates.sortDirection);
-        else params.delete('dir');
-        sessionStorage.setItem('itemSortDir', updates.sortDirection);
-      }
-      router.replace(`${pathname}?${params.toString()}`);
-    },
-    [handleSearchChange, pathname, router, searchParams],
-  );
+  const { filteredItems, displayFilterState, handleFilterChange } = useFilterItems({
+    items: itemsForDisplay,
+    sortFieldKey: 'itemSortField',
+    sortDirKey: 'itemSortDir',
+  });
 
   const handleEditItem = useCallback(
     (id: string) => {

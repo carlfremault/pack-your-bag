@@ -1,36 +1,26 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
-import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
-import { useSearchDraft } from '@/hooks/useSearchDraft';
+import { useActionQuery } from '@/hooks/useActionQuery';
+import { useFilterCollections } from '@/hooks/useFilterCollections';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useAllCollections } from '../queries';
 import { CollectionForDisplay } from '../types';
 
-import { CollectionFilter, CollectionFilterState } from './CollectionFilter';
+import { CollectionFilter } from './CollectionFilter';
 import CollectionsList from './CollectionsList';
 
 export default function CollectionsView() {
   const { isReady, isDesktop } = useBreakpoint();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const { searchDraft, handleSearchChange } = useSearchDraft();
-  useRestoreSortFromSession({
-    sortFieldKey: 'collectionSortField',
-    sortDirKey: 'collectionSortDir',
-    defaultSortField: 'name',
-  });
+  const actionQuery = useActionQuery();
 
   const {
     data: collections = [],
@@ -47,99 +37,9 @@ export default function CollectionsView() {
     });
   }, [collections, preferences?.units]);
 
-  const actionQuery = useMemo(() => {
-    const action = searchParams.get('action');
-    if (!action) return undefined;
-    const params = new URLSearchParams();
-    params.set('action', action);
-    const id = searchParams.get('id');
-    const editCollectionType = searchParams.get('edit-type');
-    if (id) params.set('id', id);
-    if (editCollectionType) params.set('edit-type', editCollectionType);
-    return params.toString();
-  }, [searchParams]);
-
-  const filterState: CollectionFilterState = useMemo(() => {
-    const rawSort = searchParams.get('sort');
-    const rawDir = searchParams.get('dir');
-    return {
-      search: searchParams.get('search') ?? '',
-      type: (searchParams.get('type') ?? 'all') as CollectionFilterState['type'],
-      sortField: rawSort === 'type' || rawSort === 'weight' ? rawSort : 'name',
-      sortDirection: rawDir === 'desc' ? 'desc' : 'asc',
-    };
-  }, [searchParams]);
-
-  const displayFilterState: CollectionFilterState = { ...filterState, search: searchDraft };
-
-  const filteredCollections = useMemo(() => {
-    let result = [...collectionsForDisplay];
-
-    if (searchDraft) {
-      const term = searchDraft.toLowerCase();
-      result = result.filter(
-        (collection) =>
-          collection.name.toLowerCase().includes(term) ||
-          (collection.description?.toLowerCase().includes(term) ?? false),
-      );
-    }
-
-    if (filterState.type && filterState.type !== 'all') {
-      result = result.filter((collection) => collection.type === filterState.type);
-    }
-
-    result.sort((a, b) => {
-      let cmp: number;
-      if (filterState.sortField === 'name') {
-        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      } else if (filterState.sortField === 'type') {
-        cmp = a.type.localeCompare(b.type);
-      } else if (filterState.sortField === 'weight') {
-        cmp = a.totalWeight - b.totalWeight;
-      } else {
-        cmp = 0;
-      }
-      if (cmp === 0 && filterState.sortField !== 'name') {
-        cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      }
-      return filterState.sortDirection === 'asc' ? cmp : -cmp;
-    });
-
-    return result;
-  }, [
-    collectionsForDisplay,
-    searchDraft,
-    filterState.type,
-    filterState.sortField,
-    filterState.sortDirection,
-  ]);
-
-  const handleFilterChange = useCallback(
-    (updates: Partial<CollectionFilterState>) => {
-      if (updates.search !== undefined) {
-        handleSearchChange(updates.search);
-        return;
-      }
-
-      const params = new URLSearchParams(searchParams.toString());
-      if (updates.type !== undefined) {
-        if (updates.type) params.set('type', updates.type);
-        else params.delete('type');
-      }
-      if (updates.sortField !== undefined) {
-        if (updates.sortField !== 'name') params.set('sort', updates.sortField);
-        else params.delete('sort');
-        sessionStorage.setItem('collectionSortField', updates.sortField);
-      }
-      if (updates.sortDirection !== undefined) {
-        if (updates.sortDirection !== 'asc') params.set('dir', updates.sortDirection);
-        else params.delete('dir');
-        sessionStorage.setItem('collectionSortDir', updates.sortDirection);
-      }
-      router.replace(`${pathname}?${params.toString()}`);
-    },
-    [handleSearchChange, pathname, router, searchParams],
-  );
+  const { filteredCollections, displayFilterState, handleFilterChange } = useFilterCollections({
+    collections: collectionsForDisplay,
+  });
 
   if (!isReady) {
     return <PageNotReady />;

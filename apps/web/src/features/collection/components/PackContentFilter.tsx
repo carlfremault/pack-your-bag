@@ -1,33 +1,40 @@
 'use client';
 
-import { BsBackpack } from 'react-icons/bs';
+import { IoShirtOutline } from 'react-icons/io5';
 import { MdOutlineFormatListBulleted, MdOutlineShoppingBag } from 'react-icons/md';
 
 import { InputSelect, InputSelectOption } from '@repo/react-common/input';
 
 import { FilterWrapper } from '@/components/FilterWrapper';
 
-import { CollectionType } from '../types';
-
-export interface CollectionFilterState {
+export interface PackContentFilterState {
   search: string;
-  type: CollectionType | 'all';
-  sortField: 'name' | 'type' | 'weight';
+  contentType: 'all' | 'item' | 'list';
+  sortField: 'name' | 'type' | 'weight' | 'category';
   sortDirection: 'asc' | 'desc';
 }
 
-interface CollectionFilterProps {
-  filterState: CollectionFilterState;
-  onChange: (updates: Partial<CollectionFilterState>) => void;
+interface PackContentFilterProps {
+  filterState: PackContentFilterState;
+  onChange: (updates: Partial<PackContentFilterState>) => void;
 }
 
-const TYPE_OPTIONS: InputSelectOption<CollectionType | 'all'>[] = [
+const CONTENT_TYPE_OPTIONS: InputSelectOption<'all' | 'item' | 'list'>[] = [
   {
     value: 'all',
     label: (
       <div className="flex items-center gap-1">
         <MdOutlineShoppingBag className="h-4 w-4" aria-hidden="true" />
-        <span>Lists & Packs</span>
+        <span>Items & Lists</span>
+      </div>
+    ),
+  },
+  {
+    value: 'item',
+    label: (
+      <div className="flex items-center gap-1">
+        <IoShirtOutline className="h-4 w-4" aria-hidden="true" />
+        <span>Items</span>
       </div>
     ),
   },
@@ -40,26 +47,18 @@ const TYPE_OPTIONS: InputSelectOption<CollectionType | 'all'>[] = [
       </div>
     ),
   },
-  {
-    value: 'pack',
-    label: (
-      <div className="flex items-center gap-1">
-        <BsBackpack className="h-4 w-4" aria-hidden="true" />
-        <span>Packs</span>
-      </div>
-    ),
-  },
 ];
 
 const SORT_FIELD_OPTIONS: InputSelectOption[] = [
   { value: 'name', label: 'Name' },
   { value: 'type', label: 'Type' },
   { value: 'weight', label: 'Weight' },
+  { value: 'category', label: 'Category' },
 ];
 
-export function CollectionFilter({ filterState, onChange }: CollectionFilterProps) {
+export function PackContentFilter({ filterState, onChange }: PackContentFilterProps) {
   const hasActiveFilters =
-    filterState.type !== 'all' ||
+    filterState.contentType !== 'all' ||
     filterState.sortField !== 'name' ||
     filterState.sortDirection !== 'asc';
 
@@ -70,7 +69,7 @@ export function CollectionFilter({ filterState, onChange }: CollectionFilterProp
       hasActiveFilters={hasActiveFilters}
       sortField={filterState.sortField}
       sortFieldOptions={SORT_FIELD_OPTIONS}
-      onSortFieldChange={(v) => onChange({ sortField: v as CollectionFilterState['sortField'] })}
+      onSortFieldChange={(v) => onChange({ sortField: v as PackContentFilterState['sortField'] })}
       sortDirection={filterState.sortDirection}
       onSortDirectionChange={(v) => onChange({ sortDirection: v })}
     >
@@ -79,9 +78,9 @@ export function CollectionFilter({ filterState, onChange }: CollectionFilterProp
           label="Type"
           isClearable
           clearValue="all"
-          options={TYPE_OPTIONS}
-          value={filterState.type}
-          onChange={(v) => onChange({ type: v as CollectionFilterState['type'] })}
+          options={CONTENT_TYPE_OPTIONS}
+          value={filterState.contentType}
+          onChange={(v) => onChange({ contentType: v as PackContentFilterState['contentType'] })}
         />
       </div>
     </FilterWrapper>
