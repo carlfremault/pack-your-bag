@@ -106,9 +106,14 @@ export default function AddItemsModal(props: AddItemsModalProps) {
 
   const itemsActions = useCallback(
     ({ id, quantity }: CollectionItemForDisplay) => (
-      <QuantityStepper id={id} quantity={quantities[id] ?? quantity} onChange={handleUpsertItem} />
+      <QuantityStepper
+        id={id}
+        quantity={quantities[id] ?? quantity}
+        onChange={handleUpsertItem}
+        disabled={isPending}
+      />
     ),
-    [handleUpsertItem, quantities],
+    [handleUpsertItem, quantities, isPending],
   );
 
   if (!isReady) return null;

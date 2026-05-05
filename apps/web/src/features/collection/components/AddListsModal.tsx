@@ -54,7 +54,7 @@ export default function AddListsModal(props: AddListsModalProps) {
   const isLoading = isListsLoading || isPreferencesLoading || isListDetailsLoading;
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const { mutate: upsertListInPack } = useUpsertListInPack();
+  const { mutate: upsertListInPack, isPending } = useUpsertListInPack();
 
   const pendingMutations = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   useEffect(() => {
@@ -122,9 +122,14 @@ export default function AddListsModal(props: AddListsModalProps) {
 
   const listsActions = useCallback(
     ({ id, quantity }: CollectionListForDisplayWithItems) => (
-      <QuantityStepper id={id} quantity={quantities[id] ?? quantity} onChange={handleUpsertList} />
+      <QuantityStepper
+        id={id}
+        quantity={quantities[id] ?? quantity}
+        onChange={handleUpsertList}
+        disabled={isPending}
+      />
     ),
-    [handleUpsertList, quantities],
+    [handleUpsertList, quantities, isPending],
   );
 
   if (!isReady) return null;

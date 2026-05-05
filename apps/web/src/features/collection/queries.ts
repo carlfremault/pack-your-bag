@@ -51,10 +51,7 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
 // Fetch collection (List or Pack)
 // -------------------------------
 
-export const fetchCollection = async (
-  id?: string,
-  type?: CollectionType,
-): Promise<CollectionDetail> => {
+const fetchCollection = async (id?: string, type?: CollectionType): Promise<CollectionDetail> => {
   const res = await fetch(`/api/${type}/${id}`);
 
   if (!res.ok) {
