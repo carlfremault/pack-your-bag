@@ -204,8 +204,14 @@ export const UpdateTripDto = z
 export const UpsertItemOnListDto = z
   .object({ itemId: z.string(), listId: z.string(), quantity: z.number() })
   .passthrough();
+export const ItemListResponseDto = z
+  .object({ id: z.string(), quantity: z.number(), itemId: z.string(), listId: z.string() })
+  .passthrough();
 export const UpsertItemInPackDto = z
   .object({ itemId: z.string(), packId: z.string(), quantity: z.number() })
+  .passthrough();
+export const ItemPackResponseDto = z
+  .object({ id: z.string(), quantity: z.number(), itemId: z.string(), packId: z.string() })
   .passthrough();
 export const UpsertListInPackDto = z
   .object({ listId: z.string(), packId: z.string(), quantity: z.number() })

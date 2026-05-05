@@ -965,6 +965,28 @@ export interface components {
        */
       quantity: number;
     };
+    ItemListResponseDto: {
+      /**
+       * @description ItemList uuid
+       * @example 019de406-4785-71b8-8b00-b1706a4c05f2
+       */
+      id: string;
+      /**
+       * @description Item quantity
+       * @example 1
+       */
+      quantity: number;
+      /**
+       * @description Item uuid
+       * @example 019de3fc-ce73-70cd-a76b-edb429342fb7
+       */
+      itemId: string;
+      /**
+       * @description List uuid
+       * @example 019de402-dcc9-758e-af7b-b2cf9339b175
+       */
+      listId: string;
+    };
     UpsertItemInPackDto: {
       /**
        * @description Item uuid
@@ -981,6 +1003,28 @@ export interface components {
        * @example 1
        */
       quantity: number;
+    };
+    ItemPackResponseDto: {
+      /**
+       * @description ItemPack uuid
+       * @example 019de406-4785-71b8-8b00-b1706a4c05f2
+       */
+      id: string;
+      /**
+       * @description Item quantity
+       * @example 1
+       */
+      quantity: number;
+      /**
+       * @description Item uuid
+       * @example 019de3fc-ce73-70cd-a76b-edb429342fb7
+       */
+      itemId: string;
+      /**
+       * @description Pack uuid
+       * @example 019de402-dcc9-758e-af7b-b2cf9339b175
+       */
+      packId: string;
     };
     UpsertListInPackDto: {
       /**
@@ -2381,7 +2425,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ItemListResponseDto'];
+        };
       };
       /** @description Validation failed (dto) */
       400: {
@@ -2419,7 +2465,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Item removed from list successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2466,7 +2512,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ItemPackResponseDto'];
+        };
       };
       /** @description Validation failed (dto) */
       400: {
@@ -2504,7 +2552,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Item removed from pack successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };

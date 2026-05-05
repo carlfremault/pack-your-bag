@@ -8,15 +8,20 @@ import {
   CollectionType,
   CreateListBody,
   CreatePackBody,
+  ItemList,
+  ItemPack,
   List,
   Pack,
   UpdateListBody,
   UpdatePackBody,
+  UpsertItemListBody,
+  UpsertItemPackBody,
 } from './types';
 
 // -------------------------------
 // Fetch all collections
 // -------------------------------
+
 const fetchAllCollections = async (): Promise<Collection[]> => {
   const res = await fetch('/api/collections');
 
@@ -35,8 +40,9 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
 };
 
 // -------------------------------
-// Fetch collection
+// Fetch collection (List or Pack)
 // -------------------------------
+
 const fetchCollection = async (id?: string, type?: CollectionType): Promise<CollectionDetail> => {
   const res = await fetch(`/api/${type}/${id}`);
 
@@ -55,9 +61,9 @@ const useCollection = (id?: string, type?: CollectionType): UseQueryResult<Colle
   });
 };
 
-// -------------------------------
+// --------------------------------
 // Create Collection (List or Pack)
-// -------------------------------
+// --------------------------------
 
 type CreateCollectionVariables =
   | { type: 'list'; body: CreateListBody }
@@ -125,9 +131,9 @@ const useCreateCollection = () => {
   });
 };
 
-// -------------------------------
-// Update Collection
-// -------------------------------
+// --------------------------------
+// Update Collection (List or Pack)
+// --------------------------------
 
 type UpdateCollectionVariables =
   | { id: string; type: 'list'; body: UpdateListBody }
@@ -184,4 +190,95 @@ const useUpdateCollection = () => {
   });
 };
 
-export { useAllCollections, useCollection, useCreateCollection, useUpdateCollection };
+// --------------------------------------------------
+// Upsert or remove Item in Collection (List or Pack)
+// --------------------------------------------------
+
+type UpsertItemCollectionVariables =
+  | { type: 'list'; body: UpsertItemListBody }
+  | { type: 'pack'; body: UpsertItemPackBody };
+
+const upsertItemInCollection = async ({
+  type,
+  body,
+}: UpsertItemCollectionVariables): Promise<ItemList | ItemPack | void> => {
+  const itemId = body.itemId;
+  const collectionId = type === 'list' ? body.listId : body.packId;
+
+  if (body.quantity === 0) {
+    const res = await fetch(`/api/item-${type}/${itemId}/${collectionId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      throw await toHttpError(res);
+    }
+    return;
+  }
+
+  const res = await fetch(`/api/item-${type}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useUpsertItemInCollection = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: upsertItemInCollection,
+    onMutate: async ({ type, body }) => {
+      const id = type === 'list' ? body.listId : body.packId;
+      await queryClient.cancelQueries({ queryKey: [type, id] });
+
+      const previousCollection = queryClient.getQueryData<CollectionDetail>([type, id]);
+
+      if (body.quantity === 0) {
+        queryClient.setQueryData([type, id], (old: CollectionDetail) => ({
+          ...old,
+          items: (old.items ?? []).filter(({ item }) => item.id !== body.itemId),
+        }));
+      } else {
+        queryClient.setQueryData([type, id], (old: CollectionDetail) => {
+          const existingItems = old.items ?? [];
+          const existingIndex = existingItems.findIndex(({ item }) => item.id === body.itemId);
+          const existing = existingItems[existingIndex];
+          if (existingIndex >= 0 && existing) {
+            const updated = [...existingItems];
+            updated[existingIndex] = { ...existing, quantity: body.quantity };
+            return { ...old, items: updated };
+          }
+          return { ...old, items: existingItems };
+        });
+      }
+
+      return { previousCollection, type, id };
+    },
+    onError: (_error, _body, context) => {
+      if (context?.previousCollection !== undefined) {
+        queryClient.setQueryData([context.type, context.id], context.previousCollection);
+      }
+    },
+    onSuccess: (_data, variables) => {
+      const id = variables.type === 'list' ? variables.body.listId : variables.body.packId;
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: [variables.type, id] });
+    },
+  });
+};
+
+export {
+  useAllCollections,
+  useCollection,
+  useCreateCollection,
+  useUpdateCollection,
+  useUpsertItemInCollection,
+};

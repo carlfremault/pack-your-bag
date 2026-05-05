@@ -1,12 +1,11 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IoShirtOutline } from 'react-icons/io5';
 
 import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
-import { PageNotReady } from '@repo/react-common/utils';
 
 import { Modal } from '@/components/Modal';
 import { ItemFilter } from '@/features/item/components/ItemFilter';
@@ -17,35 +16,77 @@ import { usePreferences } from '@/features/settings/queries';
 import { useStateFilterItems } from '@/hooks/useStateFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { CollectionItemForDisplay } from '../types';
+import { useUpsertItemInCollection } from '../queries';
+import { CollectionDetail, CollectionItemForDisplay } from '../types';
 
-export default function AddItemsModal() {
+export interface AddItemsModalProps {
+  collection: CollectionDetail;
+}
+
+export default function AddItemsModal(props: AddItemsModalProps) {
+  const { collection } = props;
+
   const { isReady, isDesktop } = useBreakpoint();
 
   const { data = [], isLoading: isItemsLoading, isError: isItemsError } = useAllItems();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isItemsLoading || isPreferencesLoading;
 
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const { mutate: upsertItemInCollection, isPending } = useUpsertItemInCollection();
+
+  const pendingMutations = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  useEffect(() => {
+    const pending = pendingMutations.current;
+    return () => {
+      Object.values(pending).forEach(clearTimeout);
+    };
+  }, []);
+
   const itemsForDisplay = useMemo(() => {
-    return data.map((item) => {
-      const hasWeight = item.weight != null;
+    return data.map((entry) => {
+      const itemQuantity =
+        collection.items?.find(({ item }) => item.id === entry.id)?.quantity ?? 0;
+      const hasWeight = entry.weight != null;
       const { value, unit } = hasWeight
-        ? formatWeightForDisplay(Number(item.weight), preferences?.units)
+        ? formatWeightForDisplay(Number(entry.weight), preferences?.units)
         : { value: null, unit: null };
-      return { ...item, quantity: 0, displayWeight: value, displayUnit: unit };
+      return { ...entry, quantity: itemQuantity, displayWeight: value, displayUnit: unit };
     });
-  }, [data, preferences?.units]);
+  }, [data, collection.items, preferences?.units]);
 
   const { filteredItems, displayFilterState, handleFilterChange } = useStateFilterItems({
     items: itemsForDisplay,
   });
 
+  const handleUpsertItem = useCallback(
+    (itemId: string, quantity: number) => {
+      setQuantities((prev) => ({ ...prev, [itemId]: quantity }));
+
+      clearTimeout(pendingMutations.current[itemId]);
+      pendingMutations.current[itemId] = setTimeout(() => {
+        delete pendingMutations.current[itemId];
+        if (collection.type === 'list') {
+          upsertItemInCollection({
+            type: 'list',
+            body: { itemId, listId: collection.id, quantity },
+          });
+        } else if (collection.type === 'pack') {
+          upsertItemInCollection({
+            type: 'pack',
+            body: { itemId, packId: collection.id, quantity },
+          });
+        }
+      }, 300);
+    },
+    [collection.id, collection.type, upsertItemInCollection],
+  );
+
   const itemsActions = useCallback(
-    ({ quantity }: CollectionItemForDisplay) => (
-      // TODO: Implement quantity stepper onChange
-      <QuantityStepper quantity={quantity} onChange={() => {}} />
+    ({ id, quantity }: CollectionItemForDisplay) => (
+      <QuantityStepper id={id} quantity={quantities[id] ?? quantity} onChange={handleUpsertItem} />
     ),
-    [],
+    [handleUpsertItem, quantities],
   );
 
   if (!isReady) return null;
@@ -72,7 +113,7 @@ export default function AddItemsModal() {
 
   return (
     <Modal.Root>
-      <Modal.Trigger>
+      <Modal.Trigger ariaLabel="Add items">
         <div className="flex items-center gap-2">
           <IoShirtOutline className="h-4 w-4" aria-hidden="true" />
           <span>Add items</span>

@@ -39,7 +39,7 @@ export class ItemPackHelpers {
   }): Promise<{
     body: ItemPack;
   }> {
-    const { itemId, packId, accessToken, expectedStatus = HttpStatus.OK } = options;
+    const { itemId, packId, accessToken, expectedStatus = HttpStatus.NO_CONTENT } = options;
 
     const req = request(this.app.getHttpServer())
       .delete(`/item-pack/${itemId}/${packId}`)

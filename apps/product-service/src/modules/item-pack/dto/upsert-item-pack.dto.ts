@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsUUID, Min } from 'class-validator';
 export class UpsertItemInPackDto {
   @IsUUID()
   @IsNotEmpty()
@@ -14,7 +14,9 @@ export class UpsertItemInPackDto {
 
   @IsNumber()
   @IsInt()
+  // @Min(0)
   @IsPositive()
   @ApiProperty({ description: 'Item quantity', example: 1 })
+  // @ApiProperty({ description: 'Item quantity', example: 1, minimum: 0 })
   quantity: number;
 }

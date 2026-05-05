@@ -42,9 +42,9 @@ export default function ListContent(props: ListContentProps) {
   });
 
   const itemsActions = useCallback(
-    ({ quantity }: CollectionItemForDisplay) => (
+    ({ id, quantity }: CollectionItemForDisplay) => (
       // TODO: Implement quantity stepper onChange
-      <QuantityStepper quantity={quantity} onChange={() => {}} />
+      <QuantityStepper id={id} quantity={quantity} onChange={() => {}} />
     ),
     [],
   );
@@ -73,7 +73,7 @@ export default function ListContent(props: ListContentProps) {
     <>
       <div className="flex w-full items-center justify-between">
         <h2 className="text-primary text-xl">Content</h2>
-        <AddItemsModal />
+        <AddItemsModal collection={collection} />
       </div>
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {listContent}

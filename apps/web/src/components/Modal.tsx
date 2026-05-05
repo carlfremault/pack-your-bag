@@ -103,17 +103,32 @@ type TriggerProps = {
   color?: ButtonColor;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  ariaLabel?: string;
   className?: string;
   children: React.ReactNode;
 };
 
 function ModalTrigger(props: TriggerProps) {
-  const { color = 'primary', variant = 'solid', size = 'medium', className, children } = props;
+  const {
+    color = 'primary',
+    variant = 'solid',
+    size = 'medium',
+    ariaLabel,
+    className,
+    children,
+  } = props;
 
   const { openModal } = useModal();
 
   return (
-    <Button className={className} onClick={openModal} color={color} variant={variant} size={size}>
+    <Button
+      className={className}
+      onClick={openModal}
+      color={color}
+      variant={variant}
+      size={size}
+      aria-label={ariaLabel}
+    >
       {children}
     </Button>
   );

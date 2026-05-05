@@ -35,8 +35,8 @@ export class ItemPackService {
     });
   }
 
-  async removeItemFromPack(itemId: string, packId: string, userId: string): Promise<ItemPack> {
-    return this.prisma.$transaction(async (tx) => {
+  async removeItemFromPack(itemId: string, packId: string, userId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
       const [item, pack] = await Promise.all([
         tx.item.findUnique({ where: { id: itemId, userId } }),
         tx.pack.findUnique({ where: { id: packId, userId } }),
@@ -45,7 +45,7 @@ export class ItemPackService {
       if (!item) throw new NotFoundException('Item not found');
       if (!pack) throw new NotFoundException('Pack not found');
 
-      return tx.itemPack.delete({ where: { itemId_packId: { itemId, packId } } });
+      await tx.itemPack.delete({ where: { itemId_packId: { itemId, packId } } });
     });
   }
 }

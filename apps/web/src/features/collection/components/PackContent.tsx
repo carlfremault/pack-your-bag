@@ -88,9 +88,9 @@ export default function PackContent(props: PackContentProps) {
   });
 
   const itemsActions = useCallback(
-    ({ quantity }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
+    ({ id, quantity }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
       // TODO: Implement quantity stepper onChange
-      <QuantityStepper quantity={quantity} onChange={() => {}} />
+      <QuantityStepper id={id} quantity={quantity} onChange={() => {}} />
     ),
     [],
   );
@@ -143,7 +143,7 @@ export default function PackContent(props: PackContentProps) {
     <>
       <div className="flex w-full items-center justify-between">
         <h2 className="text-primary text-xl">Content</h2>
-        <AddItemsModal />
+        <AddItemsModal collection={collection} />
       </div>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {packContent}

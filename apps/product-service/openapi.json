@@ -1353,7 +1353,14 @@
         },
         "responses": {
           "200": {
-            "description": "Item upserted to list successfully."
+            "description": "Item upserted to list successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemListResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed (dto)"
@@ -1399,7 +1406,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Item removed from list successfully."
           },
           "400": {
@@ -1440,7 +1447,14 @@
         },
         "responses": {
           "200": {
-            "description": "Item upserted to pack successfully."
+            "description": "Item upserted to pack successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemPackResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed (dto)"
@@ -1486,7 +1500,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Item removed from pack successfully."
           },
           "400": {
@@ -2711,6 +2725,37 @@
           "quantity"
         ]
       },
+      "ItemListResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ItemList uuid",
+            "example": "019de406-4785-71b8-8b00-b1706a4c05f2"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          },
+          "itemId": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "019de3fc-ce73-70cd-a76b-edb429342fb7"
+          },
+          "listId": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "019de402-dcc9-758e-af7b-b2cf9339b175"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "itemId",
+          "listId"
+        ]
+      },
       "UpsertItemInPackDto": {
         "type": "object",
         "properties": {
@@ -2734,6 +2779,37 @@
           "itemId",
           "packId",
           "quantity"
+        ]
+      },
+      "ItemPackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ItemPack uuid",
+            "example": "019de406-4785-71b8-8b00-b1706a4c05f2"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          },
+          "itemId": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "019de3fc-ce73-70cd-a76b-edb429342fb7"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "019de402-dcc9-758e-af7b-b2cf9339b175"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "itemId",
+          "packId"
         ]
       },
       "UpsertListInPackDto": {
