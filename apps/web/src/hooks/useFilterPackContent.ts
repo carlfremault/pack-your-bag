@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { PackContentFilterState } from '@/features/collection/components/PackContentFilter';
-import { PackContentEntry } from '@/features/collection/components/PackContentTable';
+import { PackContentRow } from '@/features/collection/components/PackContentTable';
 import {
   CollectionItemForDisplay,
   CollectionListForDisplayWithItems,
@@ -45,7 +45,7 @@ export function useFilterPackContent({
 
   const displayFilterState: PackContentFilterState = { ...filterState, search: searchDraft };
 
-  const filteredContent = useMemo((): PackContentEntry[] => {
+  const filteredContent = useMemo((): PackContentRow[] => {
     const { sortField, sortDirection, contentType } = filterState;
     const term = searchDraft.toLowerCase();
 
@@ -54,11 +54,11 @@ export function useFilterPackContent({
       entry.name.toLowerCase().includes(term) ||
       (entry.description?.toLowerCase().includes(term) ?? false);
 
-    const itemEntries: PackContentEntry[] = items
+    const itemEntries: PackContentRow[] = items
       .filter((item) => contentType !== 'list' && matchesSearch(item))
       .map((item) => ({ ...item, entryType: 'item' as const }));
 
-    const listEntries: PackContentEntry[] = lists
+    const listEntries: PackContentRow[] = lists
       .filter((list) => contentType !== 'item' && matchesSearch(list))
       .map((list) => ({ ...list, entryType: 'list' as const }));
 

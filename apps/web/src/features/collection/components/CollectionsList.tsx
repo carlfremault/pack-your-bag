@@ -19,11 +19,7 @@ export default function CollectionsList(props: CollectionsListProps) {
   const containerClassName = 'grid w-full gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4';
 
   if (isLoading) {
-    return (
-      <div className={containerClassName} aria-busy="true" aria-label="Loading collections">
-        <CollectionsListSkeleton />
-      </div>
-    );
+    return <CollectionsListSkeleton className={containerClassName} />;
   }
 
   if (!collections.length) {

@@ -1,6 +1,6 @@
-export default function CollectionsListSkeleton() {
+export default function CollectionsListSkeleton({ className }: { className?: string }) {
   return (
-    <>
+    <div className={className} role="status" aria-busy="true" aria-label="Loading collections">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
@@ -18,6 +18,6 @@ export default function CollectionsListSkeleton() {
           </div>
         </div>
       ))}
-    </>
+    </div>
   );
 }

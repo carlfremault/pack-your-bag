@@ -71,10 +71,7 @@ export default function ListContent(props: ListContentProps) {
 
   return (
     <>
-      <div className="flex w-full items-center justify-between">
-        <h2 className="text-primary text-xl">Content</h2>
-        <AddItemsModal collection={collection} />
-      </div>
+      <AddItemsModal collection={collection} />
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {listContent}
     </>

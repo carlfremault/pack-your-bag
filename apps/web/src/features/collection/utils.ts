@@ -1,4 +1,6 @@
-import { List, Pack } from '@/features/collection/types';
+import { CollectionItemForDisplay, List, Pack } from '@/features/collection/types';
+import { Item } from '@/features/item/types';
+import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 export type CategoryWeightEntry = {
   category: { id: string; name: string; colorTheme: string };
@@ -124,4 +126,19 @@ export const getTotalWeightInPack = (pack: Pack): number => {
     }, 0) ?? 0;
 
   return directItemsWeight + listItemsWeight;
+};
+
+/**
+ * Converts an item in a collection to a format
+ * that includes the display weight and unit.
+ */
+export const toCollectionItemForDisplay = (
+  { quantity, item }: { quantity: number; item: Item },
+  units?: string,
+): CollectionItemForDisplay => {
+  const { value, unit } =
+    item.weight != null
+      ? formatWeightForDisplay(Number(item.weight), units)
+      : { value: null, unit: null };
+  return { ...item, quantity, displayWeight: value, displayUnit: unit };
 };

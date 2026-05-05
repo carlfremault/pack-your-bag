@@ -54,11 +54,7 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
   const Icon = type === 'list' ? MdOutlineFormatListBulleted : BsBackpack;
 
   if (isLoading) {
-    return (
-      <div className={collectionHeaderCardClassName}>
-        <CollectionHeaderCardSkeleton />
-      </div>
-    );
+    return <CollectionHeaderCardSkeleton className={collectionHeaderCardClassName} />;
   }
 
   return (

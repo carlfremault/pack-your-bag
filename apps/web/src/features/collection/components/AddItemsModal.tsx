@@ -67,15 +67,37 @@ export default function AddItemsModal(props: AddItemsModalProps) {
       pendingMutations.current[itemId] = setTimeout(() => {
         delete pendingMutations.current[itemId];
         if (collection.type === 'list') {
-          upsertItemInCollection({
-            type: 'list',
-            body: { itemId, listId: collection.id, quantity },
-          });
+          upsertItemInCollection(
+            {
+              type: 'list',
+              body: { itemId, listId: collection.id, quantity },
+            },
+            {
+              onError: () => {
+                setQuantities((prev) => {
+                  const next = { ...prev };
+                  delete next[itemId];
+                  return next;
+                });
+              },
+            },
+          );
         } else if (collection.type === 'pack') {
-          upsertItemInCollection({
-            type: 'pack',
-            body: { itemId, packId: collection.id, quantity },
-          });
+          upsertItemInCollection(
+            {
+              type: 'pack',
+              body: { itemId, packId: collection.id, quantity },
+            },
+            {
+              onError: () => {
+                setQuantities((prev) => {
+                  const next = { ...prev };
+                  delete next[itemId];
+                  return next;
+                });
+              },
+            },
+          );
         }
       }, 300);
     },
@@ -113,7 +135,7 @@ export default function AddItemsModal(props: AddItemsModalProps) {
 
   return (
     <Modal.Root>
-      <Modal.Trigger ariaLabel="Add items">
+      <Modal.Trigger ariaLabel="Add items" className="w-full">
         <div className="flex items-center gap-2">
           <IoShirtOutline className="h-4 w-4" aria-hidden="true" />
           <span>Add items</span>

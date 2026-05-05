@@ -1,6 +1,6 @@
-export default function ItemsListSkeleton({ className }: { className?: string }) {
+export default function ListsListSkeleton({ className }: { className?: string }) {
   return (
-    <div role="status" aria-busy="true" aria-label="Loading items list" className={className}>
+    <div role="status" aria-busy="true" aria-label="Loading lists" className={className}>
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}

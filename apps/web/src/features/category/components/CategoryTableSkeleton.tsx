@@ -4,7 +4,7 @@ export function CategoryTableSkeleton() {
   return (
     <div
       className="bg-surface border-primary-ring w-full overflow-hidden rounded-md border shadow-sm"
-      role="region"
+      role="status"
       aria-busy="true"
       aria-label="Loading categories table"
     >
