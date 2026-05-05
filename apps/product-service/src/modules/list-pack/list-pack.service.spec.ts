@@ -147,12 +147,7 @@ describe('ListPackService', () => {
       expect(mockPrismaService.listPack.delete).toHaveBeenCalledWith({
         where: { listId_packId: { listId, packId } },
       });
-      expect(result).toEqual({
-        id: 'mocked-uuid',
-        listId,
-        packId,
-        quantity: 1,
-      });
+      expect(result).toBeUndefined();
     });
 
     it('should throw an error if the list is not found', async () => {

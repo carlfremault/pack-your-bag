@@ -216,3 +216,6 @@ export const ItemPackResponseDto = z
 export const UpsertListInPackDto = z
   .object({ listId: z.string(), packId: z.string(), quantity: z.number() })
   .passthrough();
+export const ListPackResponseDto = z
+  .object({ id: z.string(), quantity: z.number(), listId: z.string(), packId: z.string() })
+  .passthrough();

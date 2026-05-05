@@ -22,6 +22,7 @@ import {
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
+import { ListPackResponseDto } from './dto/list-pack-response.dto';
 import { UpsertListInPackDto } from './dto/upsert-list-pack.dto';
 import { ListPackService } from './list-pack.service';
 
@@ -39,7 +40,11 @@ export class ListPackController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Upsert a list to a pack' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'List upserted to pack successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List upserted to pack successfully.',
+    type: ListPackResponseDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (dto)',
@@ -57,18 +62,22 @@ export class ListPackController {
   @Delete(':listId/:packId')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Remove a list from a pack' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'List removed from pack successfully.' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'List removed from pack successfully.',
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format).',
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LIST_PACK.REMOVE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async removeListFromPack(
     @Param('listId', new ParseUUIDPipe({ version: '7' })) listId: string,
     @Param('packId', new ParseUUIDPipe({ version: '7' })) packId: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.listPackService.removeListFromPack(listId, packId, userId);
+    await this.listPackService.removeListFromPack(listId, packId, userId);
   }
 }
