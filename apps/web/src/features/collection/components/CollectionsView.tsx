@@ -55,7 +55,7 @@ export default function CollectionsView() {
 
   if (!isDesktop) {
     return (
-      <div className="flex w-full max-w-3xl flex-col gap-4 p-4 lg:p-8">
+      <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4 lg:p-8">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <CollectionsList
           collections={filteredCollections}
@@ -70,7 +70,7 @@ export default function CollectionsView() {
   return (
     <div className="flex h-full w-full flex-col gap-4 p-4">
       <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <CollectionsList
           collections={filteredCollections}
           isLoading={isLoading}

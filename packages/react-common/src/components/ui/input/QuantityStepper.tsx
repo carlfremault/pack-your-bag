@@ -1,20 +1,30 @@
 import classNames from 'classnames';
 
 export interface QuantityStepperProps {
+  id: string;
   quantity: number;
-  onChange: (quantity: number) => void;
+  onChange: (id: string, quantity: number) => void;
   min?: number;
   max?: number;
   groupAriaLabel?: string;
+  disabled?: boolean;
 }
 
 export function QuantityStepper(props: QuantityStepperProps) {
-  const { quantity, onChange, min = 0, max = Infinity, groupAriaLabel = 'Quantity' } = props;
+  const {
+    id,
+    quantity,
+    onChange,
+    min = 0,
+    max = Infinity,
+    groupAriaLabel = 'Quantity',
+    disabled,
+  } = props;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     if (value >= min && value <= max && !isNaN(value)) {
-      onChange(Number(value));
+      onChange(id, value);
     }
   };
 
@@ -32,8 +42,8 @@ export function QuantityStepper(props: QuantityStepperProps) {
       <button
         type="button"
         aria-label="Decrease quantity"
-        onClick={() => onChange(Math.max(min, quantity - 1))}
-        disabled={quantity <= min}
+        onClick={() => onChange(id, Math.max(min, quantity - 1))}
+        disabled={quantity <= min || disabled}
         className={classNames(
           stepperButtonClassName,
           quantity <= min ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
@@ -47,12 +57,13 @@ export function QuantityStepper(props: QuantityStepperProps) {
         value={quantity}
         onChange={handleChange}
         className={inputClassName}
+        disabled={disabled}
       />
       <button
         type="button"
         aria-label="Increase quantity"
-        onClick={() => onChange(Math.min(max, quantity + 1))}
-        disabled={quantity >= max}
+        onClick={() => onChange(id, Math.min(max, quantity + 1))}
+        disabled={quantity >= max || disabled}
         className={classNames(
           stepperButtonClassName,
           quantity >= max ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',

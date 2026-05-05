@@ -19,6 +19,7 @@ import {
   CollectionListForDisplayWithItems,
 } from '../types';
 
+import AddItemsModal from './AddItemsModal';
 import { PackContentFilter } from './PackContentFilter';
 import PackContentTable from './PackContentTable';
 
@@ -87,9 +88,9 @@ export default function PackContent(props: PackContentProps) {
   });
 
   const itemsActions = useCallback(
-    ({ quantity }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
+    ({ id, quantity }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
       // TODO: Implement quantity stepper onChange
-      <QuantityStepper quantity={quantity} onChange={() => {}} />
+      <QuantityStepper id={id} quantity={quantity} onChange={() => {}} />
     ),
     [],
   );
@@ -105,7 +106,7 @@ export default function PackContent(props: PackContentProps) {
     );
   } else {
     packContent = (
-      <div className="flex w-full flex-col gap-2">
+      <div className="mb-32 flex w-full flex-col gap-2">
         {filteredContent.map((entry) =>
           entry.entryType === 'item' ? (
             <ItemCard
@@ -140,7 +141,10 @@ export default function PackContent(props: PackContentProps) {
 
   return (
     <>
-      <h2 className="text-primary text-xl">Content</h2>
+      <div className="flex w-full items-center justify-between">
+        <h2 className="text-primary text-xl">Content</h2>
+        <AddItemsModal collection={collection} />
+      </div>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {packContent}
     </>

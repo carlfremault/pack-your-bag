@@ -9,7 +9,7 @@ import { EditDeleteActions } from '@repo/react-common/table';
 import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
-import { useFilterItems } from '@/hooks/useFilterItems';
+import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useAllItems } from '../queries';
@@ -41,7 +41,7 @@ export default function ItemsView() {
     });
   }, [data, preferences?.units]);
 
-  const { filteredItems, displayFilterState, handleFilterChange } = useFilterItems({
+  const { filteredItems, displayFilterState, handleFilterChange } = useUrlFilterItems({
     items: itemsForDisplay,
     sortFieldKey: 'itemSortField',
     sortDirKey: 'itemSortDir',
@@ -98,7 +98,7 @@ export default function ItemsView() {
   if (!isDesktop) {
     return (
       <>
-        <div className="flex w-full max-w-3xl flex-col gap-4 p-4">
+        <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4">
           <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
           <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={ItemsActions} />
         </div>
@@ -109,7 +109,7 @@ export default function ItemsView() {
 
   return (
     <>
-      <div className="flex w-full flex-col gap-4 p-4">
+      <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
           <ItemsTable items={filteredItems} isLoading={isLoading} itemsActions={ItemsActions} />

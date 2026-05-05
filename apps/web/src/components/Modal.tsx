@@ -103,17 +103,32 @@ type TriggerProps = {
   color?: ButtonColor;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  ariaLabel?: string;
   className?: string;
   children: React.ReactNode;
 };
 
 function ModalTrigger(props: TriggerProps) {
-  const { color = 'primary', variant = 'solid', size = 'medium', className, children } = props;
+  const {
+    color = 'primary',
+    variant = 'solid',
+    size = 'medium',
+    ariaLabel,
+    className,
+    children,
+  } = props;
 
   const { openModal } = useModal();
 
   return (
-    <Button className={className} onClick={openModal} color={color} variant={variant} size={size}>
+    <Button
+      className={className}
+      onClick={openModal}
+      color={color}
+      variant={variant}
+      size={size}
+      aria-label={ariaLabel}
+    >
       {children}
     </Button>
   );
@@ -123,14 +138,21 @@ function ModalTrigger(props: TriggerProps) {
 // Modal Content
 // ------------------------------------------------------------
 
+type ModalWidth = 'lg' | '3xl';
 type ContentProps = {
   title?: string;
   titleColor?: 'primary' | 'danger';
+  modalWidth?: ModalWidth;
   className?: string;
   ariaLabel?: string;
   role?: 'dialog' | 'alertdialog';
   ariaDescribedBy?: string;
   children: React.ReactNode | ((close: () => void) => React.ReactNode);
+};
+
+const MODAL_WIDTH_CLASS: Record<ModalWidth, string> = {
+  lg: 'max-w-lg',
+  '3xl': 'max-w-lg lg:max-w-3xl',
 };
 
 const FOCUSABLE =
@@ -140,6 +162,7 @@ function ModalContent(props: ContentProps) {
   const {
     title,
     titleColor = 'primary',
+    modalWidth = 'lg',
     className,
     ariaLabel = 'Modal dialog',
     role = 'dialog',
@@ -187,7 +210,8 @@ function ModalContent(props: ContentProps) {
   if (!isOpen || typeof document === 'undefined') return null;
 
   const modalContentClassName = classNames(
-    'bg-surface border-primary-ring flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-md border p-4 shadow-lg',
+    'bg-surface border-primary-ring flex max-h-full w-full flex-col overflow-hidden rounded-md border p-4 shadow-lg',
+    MODAL_WIDTH_CLASS[modalWidth],
     className,
   );
   const titleClassName = classNames(

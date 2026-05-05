@@ -16,8 +16,8 @@ const DEFAULT_RESOURCE_THROTTLE = {
 } as const;
 
 const DEFAULT_JOIN_TABLE_THROTTLE = {
-  UPSERT: 10,
-  REMOVE: 10,
+  UPSERT: 60,
+  REMOVE: 60,
 } as const;
 
 export const THROTTLE_TTL_MS = 60000;

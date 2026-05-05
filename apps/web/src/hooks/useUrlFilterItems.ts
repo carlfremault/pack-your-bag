@@ -12,7 +12,7 @@ type FilterableItem = {
   category?: { name: string } | null;
 };
 
-export function useFilterItems<T extends FilterableItem>({
+export function useUrlFilterItems<T extends FilterableItem>({
   items,
   sortFieldKey,
   sortDirKey,

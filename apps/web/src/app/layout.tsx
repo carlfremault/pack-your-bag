@@ -67,7 +67,9 @@ export default async function RootLayout({
                 <MobileHeader />
               </div>
 
-              <main className="mb-16 flex-1 overflow-y-auto lg:mb-0">{children}</main>
+              <main className="mb-16 flex-1 overflow-y-auto lg:mb-0 lg:flex lg:flex-col">
+                {children}
+              </main>
 
               <div className="lg:hidden">
                 <MobileNavDrawer />

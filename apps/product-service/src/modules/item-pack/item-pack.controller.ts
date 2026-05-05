@@ -22,6 +22,7 @@ import {
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
+import { ItemPackResponseDto } from './dto/item-pack-response.dto';
 import { UpsertItemInPackDto } from './dto/upsert-item-pack.dto';
 import { ItemPackService } from './item-pack.service';
 
@@ -39,7 +40,11 @@ export class ItemPackController {
   @Post()
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Upsert an item to a pack' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item upserted to pack successfully.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Item upserted to pack successfully.',
+    type: ItemPackResponseDto,
+  })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed (dto)' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_PACK.UPSERT, ttl: THROTTLE_TTL_MS } })
@@ -54,18 +59,22 @@ export class ItemPackController {
   @Delete(':itemId/:packId')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Remove an item from a pack' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item removed from pack successfully.' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Item removed from pack successfully.',
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (invalid UUID v7 format).',
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEM_PACK.REMOVE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async removeItemFromPack(
     @Param('itemId', new ParseUUIDPipe({ version: '7' })) itemId: string,
     @Param('packId', new ParseUUIDPipe({ version: '7' })) packId: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.itemPackService.removeItemFromPack(itemId, packId, userId);
+    await this.itemPackService.removeItemFromPack(itemId, packId, userId);
   }
 }

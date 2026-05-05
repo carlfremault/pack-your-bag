@@ -1,16 +1,20 @@
-import { handleApiResponse } from '@/lib/api-handlers';
+import { handleApiResponse, handleApiVoidResponse } from '@/lib/api-handlers';
 import { getProductClient } from '@/lib/clients/product-client';
 
 import {
   Collection,
   CreateListBody,
   CreatePackBody,
+  ItemList,
+  ItemPack,
   List,
   ListSummary,
   Pack,
   PackSummary,
   UpdateListBody,
   UpdatePackBody,
+  UpsertItemListBody,
+  UpsertItemPackBody,
 } from './types';
 
 export async function getList(id: string): Promise<List> {
@@ -85,4 +89,32 @@ export async function updatePack(id: string, body: UpdatePackBody): Promise<Pack
     body,
   });
   return handleApiResponse(data, error, response);
+}
+
+export async function upsertItemOnList(body: UpsertItemListBody): Promise<ItemList> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/item-list', { body });
+  return handleApiResponse(data, error, response);
+}
+
+export async function removeItemFromList(itemId: string, listId: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/item-list/{itemId}/{listId}', {
+    params: { path: { itemId, listId } },
+  });
+  handleApiVoidResponse(error, response);
+}
+
+export async function upsertItemInPack(body: UpsertItemPackBody): Promise<ItemPack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/item-pack', { body });
+  return handleApiResponse(data, error, response);
+}
+
+export async function removeItemFromPack(itemId: string, packId: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/item-pack/{itemId}/{packId}', {
+    params: { path: { itemId, packId } },
+  });
+  handleApiVoidResponse(error, response);
 }
