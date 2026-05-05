@@ -14,12 +14,12 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import { CollectionItemForDisplay, CollectionListForDisplayWithItems } from '../types';
 
-export type PackContentEntry =
+export type PackContentRow =
   | (CollectionItemForDisplay & { entryType: 'item' })
   | (CollectionListForDisplayWithItems & { entryType: 'list' });
 
 export interface PackContentTableProps {
-  entries: PackContentEntry[];
+  entries: PackContentRow[];
   isLoading: boolean;
   itemsActions: (
     row: CollectionItemForDisplay | CollectionListForDisplayWithItems,
@@ -30,7 +30,7 @@ export default function PackContentTable(props: PackContentTableProps) {
   const { entries, isLoading, itemsActions } = props;
 
   const columns = useMemo(() => {
-    const columnHelper = createColumnHelper<PackContentEntry>();
+    const columnHelper = createColumnHelper<PackContentRow>();
 
     return [
       columnHelper.display({
@@ -131,9 +131,9 @@ export default function PackContentTable(props: PackContentTableProps) {
 
   const getSubRows = useMemo(
     () =>
-      (row: PackContentEntry): PackContentEntry[] | undefined => {
+      (row: PackContentRow): PackContentRow[] | undefined => {
         if (row.entryType !== 'list') return undefined;
-        return row.listItems.map((item): PackContentEntry => ({ ...item, entryType: 'item' }));
+        return row.listItems.map((item): PackContentRow => ({ ...item, entryType: 'item' }));
       },
     [],
   );

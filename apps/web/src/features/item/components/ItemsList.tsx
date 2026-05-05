@@ -22,11 +22,7 @@ export default function ItemsList<ListData extends ItemForDisplay>(
   const cardActions = (item: ListData) => <div className="flex gap-8">{itemsActions(item)}</div>;
 
   if (isLoading) {
-    return (
-      <div className={containerClassName}>
-        <ItemsListSkeleton />
-      </div>
-    );
+    return <ItemsListSkeleton className={containerClassName} />;
   }
 
   if (!items.length) {

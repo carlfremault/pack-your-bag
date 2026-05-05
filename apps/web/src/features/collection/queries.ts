@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
 
@@ -11,11 +17,13 @@ import {
   ItemList,
   ItemPack,
   List,
+  ListPack,
   Pack,
   UpdateListBody,
   UpdatePackBody,
   UpsertItemListBody,
   UpsertItemPackBody,
+  UpsertListInPackBody,
 } from './types';
 
 // -------------------------------
@@ -58,6 +66,20 @@ const useCollection = (id?: string, type?: CollectionType): UseQueryResult<Colle
     queryKey: [type, id],
     queryFn: () => fetchCollection(id, type),
     enabled: !!id && !!type,
+  });
+};
+
+// -------------------------------
+// Fetch all lists
+// -------------------------------
+
+const useAllLists = (listIds: string[]): UseQueryResult<CollectionDetail>[] => {
+  return useQueries({
+    queries: listIds.map((id) => ({
+      queryKey: ['list', id],
+      queryFn: () => fetchCollection(id, 'list'),
+      enabled: !!id,
+    })),
   });
 };
 
@@ -275,10 +297,91 @@ const useUpsertItemInCollection = () => {
   });
 };
 
+// ----------------------------------
+// Upsert or remove List in Pack
+// ----------------------------------
+
+const upsertListInPack = async (body: UpsertListInPackBody): Promise<ListPack | void> => {
+  if (body.quantity === 0) {
+    const res = await fetch(`/api/list-pack/${body.listId}/${body.packId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      throw await toHttpError(res);
+    }
+    return;
+  }
+
+  const res = await fetch('/api/list-pack', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useUpsertListInPack = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: upsertListInPack,
+    onMutate: async (body) => {
+      await queryClient.cancelQueries({ queryKey: ['pack', body.packId] });
+
+      const previousPack = queryClient.getQueryData<CollectionDetail>(['pack', body.packId]);
+
+      if (body.quantity === 0) {
+        queryClient.setQueryData(
+          ['pack', body.packId],
+          (old: CollectionDetail & { type: 'pack' }) => ({
+            ...old,
+            lists: (old.lists ?? []).filter(({ list }) => list.id !== body.listId),
+          }),
+        );
+      } else {
+        queryClient.setQueryData(
+          ['pack', body.packId],
+          (old: CollectionDetail & { type: 'pack' }) => {
+            const existingLists = old.lists ?? [];
+            const existingIndex = existingLists.findIndex(({ list }) => list.id === body.listId);
+            const existing = existingLists[existingIndex];
+            if (existingIndex >= 0 && existing) {
+              const updated = [...existingLists];
+              updated[existingIndex] = { ...existing, quantity: body.quantity };
+              return { ...old, lists: updated };
+            }
+            return { ...old, lists: existingLists };
+          },
+        );
+      }
+
+      return { previousPack, id: body.packId };
+    },
+    onError: (_error, _body, context) => {
+      if (context?.previousPack !== undefined) {
+        queryClient.setQueryData(['pack', context.id], context.previousPack);
+      }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['pack', variables.packId] });
+    },
+  });
+};
+
 export {
   useAllCollections,
+  useAllLists,
   useCollection,
   useCreateCollection,
   useUpdateCollection,
   useUpsertItemInCollection,
+  useUpsertListInPack,
 };

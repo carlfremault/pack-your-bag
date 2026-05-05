@@ -5,8 +5,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { CollectionListCard, ItemCard } from '@repo/react-common/card';
 import { QuantityStepper } from '@repo/react-common/input';
 
-import { getTotalItemQuantityInList, getTotalWeightInList } from '@/features/collection/utils';
-import { Item } from '@/features/item/types';
+import {
+  getTotalItemQuantityInList,
+  getTotalWeightInList,
+  toCollectionItemForDisplay,
+} from '@/features/collection/utils';
 import { usePreferences } from '@/features/settings/queries';
 import { useFilterPackContent } from '@/hooks/useFilterPackContent';
 import { toCollectionListCardProps } from '@/lib/mappers/collection.mapper';
@@ -20,22 +23,12 @@ import {
 } from '../types';
 
 import AddItemsModal from './AddItemsModal';
+import AddListsModal from './AddListsModal';
 import { PackContentFilter } from './PackContentFilter';
 import PackContentTable from './PackContentTable';
 
-function toCollectionItemForDisplay(
-  { quantity, item }: { quantity: number; item: Item },
-  units?: string,
-): CollectionItemForDisplay {
-  const { value, unit } =
-    item.weight != null
-      ? formatWeightForDisplay(Number(item.weight), units)
-      : { value: null, unit: null };
-  return { ...item, quantity, displayWeight: value, displayUnit: unit };
-}
-
 export interface PackContentProps {
-  collection: CollectionDetail;
+  collection: CollectionDetail & { type: 'pack' };
   isDesktop: boolean;
 }
 
@@ -61,7 +54,6 @@ export default function PackContent(props: PackContentProps) {
   }, [collection.items, preferences?.units]);
 
   const collectionListsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
-    if (collection.type !== 'pack') return [];
     return (collection.lists ?? []).map(({ quantity, list }) => {
       const totalWeight = getTotalWeightInList(list);
       const itemCount = getTotalItemQuantityInList(list);
@@ -120,17 +112,21 @@ export default function PackContent(props: PackContentProps) {
               onViewDetails={() => toggleExpandedList(entry.id)}
               isExpanded={expandedLists.has(entry.id)}
               expandedContent={
-                <div className="flex flex-col gap-2">
-                  {entry.listItems.map((item) => (
-                    <ItemCard
-                      key={item.id}
-                      {...toItemCardProps(
-                        item,
-                        <div className="flex gap-8">{itemsActions(item)}</div>,
-                      )}
-                    />
-                  ))}
-                </div>
+                entry.listItems.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {entry.listItems.map((item) => (
+                      <ItemCard
+                        key={item.id}
+                        {...toItemCardProps(
+                          item,
+                          <div className="flex gap-8">{itemsActions(item)}</div>,
+                        )}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-primary text-sm">No items in this list</div>
+                )
               }
             />
           ),
@@ -141,8 +137,8 @@ export default function PackContent(props: PackContentProps) {
 
   return (
     <>
-      <div className="flex w-full items-center justify-between">
-        <h2 className="text-primary text-xl">Content</h2>
+      <div className="flex w-full items-center justify-between gap-4">
+        <AddListsModal pack={collection} />
         <AddItemsModal collection={collection} />
       </div>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />

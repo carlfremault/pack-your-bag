@@ -1541,7 +1541,14 @@
         },
         "responses": {
           "200": {
-            "description": "List upserted to pack successfully."
+            "description": "List upserted to pack successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPackResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed (dto)"
@@ -1587,7 +1594,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "List removed from pack successfully."
           },
           "400": {
@@ -2835,6 +2842,37 @@
           "listId",
           "packId",
           "quantity"
+        ]
+      },
+      "ListPackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ListPack uuid",
+            "example": "019de406-4785-71b8-8b00-b1706a4c05f2"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "List quantity",
+            "example": 1
+          },
+          "listId": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "019de3fc-ce73-70cd-a76b-edb429342fb7"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "019de402-dcc9-758e-af7b-b2cf9339b175"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "listId",
+          "packId"
         ]
       }
     }

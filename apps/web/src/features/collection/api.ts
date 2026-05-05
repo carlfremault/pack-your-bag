@@ -8,6 +8,7 @@ import {
   ItemList,
   ItemPack,
   List,
+  ListPack,
   ListSummary,
   Pack,
   PackSummary,
@@ -15,6 +16,7 @@ import {
   UpdatePackBody,
   UpsertItemListBody,
   UpsertItemPackBody,
+  UpsertListInPackBody,
 } from './types';
 
 export async function getList(id: string): Promise<List> {
@@ -115,6 +117,20 @@ export async function removeItemFromPack(itemId: string, packId: string): Promis
   const productClient = await getProductClient();
   const { error, response } = await productClient.DELETE('/item-pack/{itemId}/{packId}', {
     params: { path: { itemId, packId } },
+  });
+  handleApiVoidResponse(error, response);
+}
+
+export async function upsertListInPack(body: UpsertListInPackBody): Promise<ListPack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/list-pack', { body });
+  return handleApiResponse(data, error, response);
+}
+
+export async function removeListFromPack(listId: string, packId: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/list-pack/{listId}/{packId}', {
+    params: { path: { listId, packId } },
   });
   handleApiVoidResponse(error, response);
 }

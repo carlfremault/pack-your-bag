@@ -4,7 +4,7 @@ export default function ItemsTableSkeleton() {
   return (
     <div
       className="bg-surface border-primary-ring flex h-full w-full overflow-hidden rounded-md border shadow-sm"
-      role="region"
+      role="status"
       aria-busy="true"
       aria-label="Loading items table"
     >

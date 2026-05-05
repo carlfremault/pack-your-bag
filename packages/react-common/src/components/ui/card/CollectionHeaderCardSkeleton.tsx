@@ -1,12 +1,12 @@
 const SKELETON_CATEGORY_COUNT = 3;
 
-export function CollectionHeaderCardSkeleton() {
+export function CollectionHeaderCardSkeleton({ className }: { className?: string }) {
   return (
     <div
-      className="flex w-full flex-col gap-6 sm:flex-row sm:gap-8"
       role="status"
       aria-busy="true"
       aria-label="Loading collection details"
+      className={className}
     >
       <div className="flex flex-none flex-row justify-between gap-4 sm:flex-col">
         <div className="self-center p-4">
