@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useUpsertItemInCollection, useUpsertListInPack } from '@/features/collection/queries';
-import { CollectionDetail, UpsertType } from '@/features/collection/types';
+import { CollectionDetail } from '@/features/collection/types';
 
 export function useUpsert(collection: CollectionDetail) {
   const queryClient = useQueryClient();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
   const { mutate: upsertItemInCollection, isPending: isPendingItem } = useUpsertItemInCollection();
   const { mutate: upsertListInPack, isPending: isPendingList } = useUpsertListInPack();
   const isPending = isPendingItem || isPendingList;
@@ -20,78 +20,54 @@ export function useUpsert(collection: CollectionDetail) {
     };
   }, []);
 
-  const handleUpsert = useCallback(
-    (upsertId: string, quantity: number, type: UpsertType) => {
-      setQuantities((prev) => ({ ...prev, [upsertId]: quantity }));
-
-      clearTimeout(pendingMutations.current[upsertId]);
-      pendingMutations.current[upsertId] = setTimeout(() => {
-        delete pendingMutations.current[upsertId];
-
-        const clearEntry = () => {
-          setQuantities((prev) => {
-            const next = { ...prev };
-            delete next[upsertId];
-            return next;
-          });
-        };
-
-        if (collection.type === 'list') {
-          upsertItemInCollection(
-            { type: 'list', body: { itemId: upsertId, listId: collection.id, quantity } },
-            { onSuccess: clearEntry, onError: clearEntry },
-          );
-        } else if (collection.type === 'pack') {
-          if (type === 'item') {
-            upsertItemInCollection(
-              { type: 'pack', body: { itemId: upsertId, packId: collection.id, quantity } },
-              { onSuccess: clearEntry, onError: clearEntry },
-            );
-          } else if (type === 'list') {
-            upsertListInPack(
-              { listId: upsertId, packId: collection.id, quantity },
-              { onSuccess: clearEntry, onError: clearEntry },
-            );
-          }
-        }
-      }, 300);
+  const handleUpsertItemInPack = useCallback(
+    (itemId: string, quantity: number, packId: string) => {
+      const key = `pack-item-${itemId}`;
+      clearTimeout(pendingMutations.current[key]);
+      pendingMutations.current[key] = setTimeout(() => {
+        delete pendingMutations.current[key];
+        upsertItemInCollection({ type: 'pack', body: { itemId, packId, quantity } });
+      }, 600);
     },
-    [collection.id, collection.type, upsertItemInCollection, upsertListInPack],
+    [upsertItemInCollection],
+  );
+
+  const handleUpsertListInPack = useCallback(
+    (listId: string, quantity: number, packId: string) => {
+      clearTimeout(pendingMutations.current[listId]);
+      pendingMutations.current[listId] = setTimeout(() => {
+        delete pendingMutations.current[listId];
+        upsertListInPack({ listId, packId, quantity });
+      }, 600);
+    },
+    [upsertListInPack],
   );
 
   const handleUpsertItemInList = useCallback(
     (itemId: string, quantity: number, listId: string) => {
-      setQuantities((prev) => ({ ...prev, [itemId]: quantity }));
-
-      clearTimeout(pendingMutations.current[itemId]);
-      pendingMutations.current[itemId] = setTimeout(() => {
-        delete pendingMutations.current[itemId];
-
-        const clearEntry = () => {
-          setQuantities((prev) => {
-            const next = { ...prev };
-            delete next[itemId];
-            return next;
-          });
-        };
-
+      const key = `list-item-${itemId}`;
+      clearTimeout(pendingMutations.current[key]);
+      pendingMutations.current[key] = setTimeout(() => {
+        delete pendingMutations.current[key];
         upsertItemInCollection(
           { type: 'list', body: { itemId, listId, quantity } },
           {
             onSuccess: async () => {
               if (collection.type === 'pack') {
-                // Needs to be invalidated here as the hook has no knowledge of the pack id
                 await queryClient.invalidateQueries({ queryKey: ['pack', collection.id] });
               }
-              clearEntry();
             },
-            onError: clearEntry,
           },
         );
-      }, 300);
+      }, 600);
     },
     [collection.id, collection.type, queryClient, upsertItemInCollection],
   );
 
-  return { quantities, handleUpsert, handleUpsertItemInList, isPending };
+  return {
+    handleUpsertItemInList,
+    handleUpsertItemInPack,
+    handleUpsertListInPack,
+    isPending,
+  };
 }

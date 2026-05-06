@@ -36,8 +36,9 @@ export interface PackContentProps {
 export default function PackContent(props: PackContentProps) {
   const { collection, isDesktop } = props;
 
-  const { quantities, handleUpsert, handleUpsertItemInList } = useUpsert(collection);
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { handleUpsertItemInList, handleUpsertItemInPack, handleUpsertListInPack } =
+    useUpsert(collection);
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const toggleExpandedList = useCallback((id: string) => {
@@ -60,9 +61,9 @@ export default function PackContent(props: PackContentProps) {
       const totalWeight = getTotalWeightInList(list);
       const itemCount = getTotalItemQuantityInList(list);
       const { value, unit } = formatWeightForDisplay(totalWeight, preferences?.units);
-      const listItems: CollectionItemForDisplay[] = (list.items ?? []).map((entry) =>
-        toCollectionItemForDisplay(entry, preferences?.units),
-      );
+      const listItems: CollectionItemForDisplay[] = (list.items ?? [])
+        .map((entry) => toCollectionItemForDisplay(entry, preferences?.units))
+        .sort((a, b) => a.name.localeCompare(b.name));
       return {
         ...list,
         type: 'list' as const,
@@ -74,35 +75,34 @@ export default function PackContent(props: PackContentProps) {
         listItems,
       };
     });
-  }, [collection, preferences?.units]);
+  }, [collection.lists, preferences?.units]);
 
   const { filteredContent, displayFilterState, handleFilterChange } = useFilterPackContent({
     items: collectionItemsForDisplay,
     lists: collectionListsForDisplay,
   });
 
-  const upsertActions = useCallback(
-    ({ id, quantity, type }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
-      <QuantityStepper
-        id={id}
-        type={type}
-        quantity={quantities[id] ?? quantity}
-        onChange={handleUpsert}
-      />
-    ),
-    [handleUpsert, quantities],
+  const renderUpsertActions = useCallback(
+    (entry: CollectionItemForDisplay | CollectionListForDisplayWithItems) => {
+      const handleChange = entry.type === 'item' ? handleUpsertItemInPack : handleUpsertListInPack;
+      return (
+        <QuantityStepper
+          quantity={entry.quantity}
+          onChange={(qty) => handleChange(entry.id, qty, collection.id)}
+        />
+      );
+    },
+    [handleUpsertItemInPack, handleUpsertListInPack, collection.id],
   );
 
-  const listItemUpsertActions = useCallback(
-    (listId: string, item: CollectionItemForDisplay) => (
+  const renderListItemUpsertActions = useCallback(
+    (item: CollectionItemForDisplay, listId: string) => (
       <QuantityStepper
-        id={item.id}
-        type={item.type}
-        quantity={quantities[item.id] ?? item.quantity}
-        onChange={(id, qty, _type) => handleUpsertItemInList(id, qty, listId)}
+        quantity={item.quantity}
+        onChange={(qty) => handleUpsertItemInList(item.id, qty, listId)}
       />
     ),
-    [handleUpsertItemInList, quantities],
+    [handleUpsertItemInList],
   );
 
   let packContent: React.ReactNode;
@@ -111,8 +111,8 @@ export default function PackContent(props: PackContentProps) {
       <PackContentTable
         entries={filteredContent}
         isLoading={isPreferencesLoading}
-        upsertActions={upsertActions}
-        listItemUpsertActions={listItemUpsertActions}
+        upsertActions={renderUpsertActions}
+        listItemUpsertActions={renderListItemUpsertActions}
       />
     );
   } else {
@@ -120,24 +120,22 @@ export default function PackContent(props: PackContentProps) {
       <div className="mb-32 flex w-full flex-col gap-2">
         {filteredContent.map((entry) =>
           entry.entryType === 'item' ? (
-            <ItemCard key={entry.id} {...toItemCardProps(entry, upsertActions(entry))} />
+            <ItemCard key={entry.id} {...toItemCardProps(entry, renderUpsertActions(entry))} />
           ) : (
             <CollectionListCard
               key={entry.id}
-              {...toCollectionListCardProps(entry, upsertActions(entry))}
+              {...toCollectionListCardProps(entry, renderUpsertActions(entry))}
               onViewDetails={() => toggleExpandedList(entry.id)}
               isExpanded={expandedLists.has(entry.id)}
               expandedContent={
                 entry.listItems.length > 0 ? (
                   <div className="flex flex-col gap-2">
-                    {entry.listItems
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((item) => (
-                        <ItemCard
-                          key={item.id}
-                          {...toItemCardProps(item, listItemUpsertActions(entry.id, item))}
-                        />
-                      ))}
+                    {entry.listItems.map((item) => (
+                      <ItemCard
+                        key={item.id}
+                        {...toItemCardProps(item, renderListItemUpsertActions(item, entry.id))}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <div className="text-primary text-sm">No items in this list</div>
@@ -153,8 +151,8 @@ export default function PackContent(props: PackContentProps) {
   return (
     <>
       <div className="flex w-full items-center justify-between gap-4">
-        <AddListsModal pack={collection} />
         <AddItemsModal collection={collection} />
+        <AddListsModal pack={collection} />
       </div>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {packContent}

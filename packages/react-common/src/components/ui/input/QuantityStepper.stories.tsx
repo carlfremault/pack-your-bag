@@ -13,7 +13,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    id: 'test',
     quantity: 1,
     onChange: fn(),
   },
@@ -21,7 +20,6 @@ export const Default: Story = {
 
 export const WithMinAndMax: Story = {
   args: {
-    id: 'test',
     quantity: 1,
     onChange: fn(),
     min: 0,
@@ -31,7 +29,6 @@ export const WithMinAndMax: Story = {
 
 export const AtMin: Story = {
   args: {
-    id: 'test',
     quantity: 0,
     onChange: fn(),
     min: 0,
@@ -41,7 +38,6 @@ export const AtMin: Story = {
 
 export const AtMax: Story = {
   args: {
-    id: 'test',
     quantity: 100,
     onChange: fn(),
     min: 0,

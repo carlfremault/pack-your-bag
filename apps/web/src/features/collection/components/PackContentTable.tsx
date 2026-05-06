@@ -24,7 +24,7 @@ export interface PackContentTableProps {
   upsertActions: (
     row: CollectionItemForDisplay | CollectionListForDisplayWithItems,
   ) => React.ReactNode;
-  listItemUpsertActions: (listId: string, item: CollectionItemForDisplay) => React.ReactNode;
+  listItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
 }
 
 export default function PackContentTable(props: PackContentTableProps) {
@@ -125,8 +125,8 @@ export default function PackContentTable(props: PackContentTableProps) {
           const content =
             row.depth > 0
               ? listItemUpsertActions(
-                  row.getParentRow()!.original.id,
                   row.original as CollectionItemForDisplay,
+                  row.getParentRow()!.original.id,
                 )
               : upsertActions(row.original);
           return <div className="flex w-full items-center justify-center">{content}</div>;
@@ -139,7 +139,7 @@ export default function PackContentTable(props: PackContentTableProps) {
     () =>
       (row: PackContentRow): PackContentRow[] | undefined => {
         if (row.entryType !== 'list') return undefined;
-        return row.listItems
+        return [...row.listItems]
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((item): PackContentRow => ({ ...item, entryType: 'item' }));
       },

@@ -8,7 +8,7 @@ export {
 
 const DEFAULT_RESOURCE_THROTTLE = {
   GET_ALL: 60,
-  GET: 20,
+  GET: 60,
   POST: 10,
   PATCH: 20,
   DELETE: 20,

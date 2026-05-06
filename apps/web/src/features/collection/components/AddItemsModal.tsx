@@ -17,7 +17,7 @@ import { usePreferences } from '@/features/settings/queries';
 import { useStateFilterItems } from '@/hooks/useStateFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { CollectionDetail, CollectionItemForDisplay } from '../types';
+import { CollectionDetail } from '../types';
 
 export interface AddItemsModalProps {
   collection: CollectionDetail;
@@ -26,17 +26,20 @@ export interface AddItemsModalProps {
 export default function AddItemsModal(props: AddItemsModalProps) {
   const { collection } = props;
 
-  const { quantities, handleUpsert } = useUpsert(collection);
   const { isReady, isDesktop } = useBreakpoint();
 
   const { data = [], isLoading: isItemsLoading, isError: isItemsError } = useAllItems();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isItemsLoading || isPreferencesLoading;
 
+  const { handleUpsertItemInList, handleUpsertItemInPack } = useUpsert(collection);
+
   const itemsForDisplay = useMemo(() => {
+    const collectionItemMap = new Map(
+      collection.items?.map(({ item, quantity }) => [item.id, quantity]) ?? [],
+    );
     return data.map((entry) => {
-      const itemQuantity =
-        collection.items?.find(({ item }) => item.id === entry.id)?.quantity ?? 0;
+      const itemQuantity = collectionItemMap.get(entry.id) ?? 0;
       const hasWeight = entry.weight != null;
       const { value, unit } = hasWeight
         ? formatWeightForDisplay(Number(entry.weight), preferences?.units)
@@ -55,16 +58,16 @@ export default function AddItemsModal(props: AddItemsModalProps) {
     items: itemsForDisplay,
   });
 
-  const upsertActions = useCallback(
-    ({ id, quantity, type }: CollectionItemForDisplay) => (
-      <QuantityStepper
-        id={id}
-        type={type}
-        quantity={quantities[id] ?? quantity}
-        onChange={handleUpsert}
-      />
-    ),
-    [handleUpsert, quantities],
+  const renderItemsUpsertActions = useCallback(
+    (item: (typeof filteredItems)[number]) => {
+      const handleChange =
+        collection.type === 'list'
+          ? (qty: number) => handleUpsertItemInList(item.id, qty, collection.id)
+          : (qty: number) => handleUpsertItemInPack(item.id, qty, collection.id);
+
+      return <QuantityStepper quantity={item.quantity} onChange={handleChange} />;
+    },
+    [handleUpsertItemInList, handleUpsertItemInPack, collection.id, collection.type],
   );
 
   if (!isReady) return null;
@@ -82,11 +85,15 @@ export default function AddItemsModal(props: AddItemsModalProps) {
         isLoading={isLoading}
         actionsTitle="Quantity"
         actionSize={120}
-        itemsActions={upsertActions}
+        itemsActions={renderItemsUpsertActions}
       />
     </div>
   ) : (
-    <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={upsertActions} />
+    <ItemsList
+      items={filteredItems}
+      isLoading={isLoading}
+      itemsActions={renderItemsUpsertActions}
+    />
   );
 
   return (

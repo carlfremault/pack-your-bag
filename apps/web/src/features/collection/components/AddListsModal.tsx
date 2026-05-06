@@ -43,6 +43,7 @@ export default function AddListsModal(props: AddListsModalProps) {
     isError: isListsError,
   } = useAllCollections();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { handleUpsertListInPack, handleUpsertItemInList } = useUpsert(pack);
 
   const lists = useMemo(
     () => collections.filter((collection) => collection.type === 'list'),
@@ -53,8 +54,6 @@ export default function AddListsModal(props: AddListsModalProps) {
   const isListDetailsLoading = listDetails.some((query) => query.isPending);
 
   const isLoading = isListsLoading || isPreferencesLoading || isListDetailsLoading;
-
-  const { quantities, handleUpsert, handleUpsertItemInList } = useUpsert(pack);
 
   const listsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
     const detailsById: Record<string, CollectionDetail> = {};
@@ -67,9 +66,9 @@ export default function AddListsModal(props: AddListsModalProps) {
       const totalWeight = list ? getTotalWeightInList(list) : 0;
       const itemCount = list ? getTotalItemQuantityInList(list) : 0;
       const { value, unit } = formatWeightForDisplay(totalWeight, preferences?.units);
-      const listItems: CollectionItemForDisplay[] = (list?.items ?? []).map((item) =>
-        toCollectionItemForDisplay(item, preferences?.units),
-      );
+      const listItems: CollectionItemForDisplay[] = (list?.items ?? [])
+        .map((item) => toCollectionItemForDisplay(item, preferences?.units))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
       return {
         ...entry,
@@ -88,28 +87,24 @@ export default function AddListsModal(props: AddListsModalProps) {
     lists: listsForDisplay,
   });
 
-  const upsertActions = useCallback(
-    ({ id, quantity, type }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
+  const renderListUpsertActions = useCallback(
+    (list: CollectionListForDisplayWithItems) => (
       <QuantityStepper
-        id={id}
-        type={type}
-        quantity={quantities[id] ?? quantity}
-        onChange={handleUpsert}
+        quantity={list.quantity}
+        onChange={(qty) => handleUpsertListInPack(list.id, qty, pack.id)}
       />
     ),
-    [handleUpsert, quantities],
+    [handleUpsertListInPack, pack.id],
   );
 
-  const listItemUpsertActions = useCallback(
-    (listId: string, item: CollectionItemForDisplay) => (
+  const renderListItemUpsertActions = useCallback(
+    (item: CollectionItemForDisplay, listId: string) => (
       <QuantityStepper
-        id={item.id}
-        type={item.type}
-        quantity={quantities[item.id] ?? item.quantity}
-        onChange={(id, qty, _type) => handleUpsertItemInList(id, qty, listId)}
+        quantity={item.quantity}
+        onChange={(qty) => handleUpsertItemInList(item.id, qty, listId)}
       />
     ),
-    [handleUpsertItemInList, quantities],
+    [handleUpsertItemInList],
   );
 
   if (!isReady) return null;
@@ -137,8 +132,8 @@ export default function AddListsModal(props: AddListsModalProps) {
                 <ListsList
                   lists={filteredLists}
                   isLoading={isLoading}
-                  upsertActions={upsertActions}
-                  listItemUpsertActions={listItemUpsertActions}
+                  upsertActions={renderListUpsertActions}
+                  listItemUpsertActions={renderListItemUpsertActions}
                 />
               </div>
             </>

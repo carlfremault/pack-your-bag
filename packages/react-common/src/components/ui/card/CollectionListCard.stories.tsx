@@ -41,7 +41,7 @@ export const WithQuantityStepper: Story = {
     totalWeight: '10',
     weightUnit: 'kg',
     onViewDetails: fn(),
-    actions: <QuantityStepper id="id-1" type="list" quantity={3} onChange={fn()} />,
+    actions: <QuantityStepper quantity={3} onChange={fn()} />,
   },
 };
 
@@ -61,7 +61,7 @@ export const Expanded: Story = {
         <div className="bg-surface rounded-md border p-2">Item B — 3 kg</div>
       </div>
     ),
-    actions: <QuantityStepper id="id-1" type="list" quantity={1} onChange={fn()} />,
+    actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };
 

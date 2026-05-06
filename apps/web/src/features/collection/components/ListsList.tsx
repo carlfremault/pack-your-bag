@@ -13,7 +13,7 @@ interface ListsListProps {
   lists: CollectionListForDisplayWithItems[];
   isLoading: boolean;
   upsertActions: (upsertItem: CollectionListForDisplayWithItems) => React.ReactNode;
-  listItemUpsertActions: (listId: string, item: CollectionItemForDisplay) => React.ReactNode;
+  listItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
 }
 
 export default function ListsList(props: ListsListProps) {
@@ -56,14 +56,12 @@ export default function ListsList(props: ListsListProps) {
           expandedContent={
             list.listItems.length > 0 ? (
               <div className="flex flex-col gap-2">
-                {list.listItems
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((item) => (
-                    <ItemCard
-                      key={item.id}
-                      {...toItemCardProps(item, listItemUpsertActions(list.id, item))}
-                    />
-                  ))}
+                {[...list.listItems].map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    {...toItemCardProps(item, listItemUpsertActions(item, list.id))}
+                  />
+                ))}
               </div>
             ) : (
               <div className="text-primary text-sm">No items in this list</div>

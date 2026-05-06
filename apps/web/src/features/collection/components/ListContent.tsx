@@ -12,7 +12,7 @@ import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useUpsert } from '../hooks/useUpsert';
-import { CollectionDetail, CollectionItemForDisplay } from '../types';
+import { CollectionDetail } from '../types';
 
 import AddItemsModal from './AddItemsModal';
 
@@ -24,8 +24,8 @@ export interface ListContentProps {
 export default function ListContent(props: ListContentProps) {
   const { collection, isDesktop } = props;
 
-  const { quantities, handleUpsert } = useUpsert(collection);
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { handleUpsertItemInList } = useUpsert(collection);
 
   const itemsForListDisplay = useMemo(() => {
     return (collection.items ?? []).map(({ quantity, item }) => {
@@ -43,16 +43,14 @@ export default function ListContent(props: ListContentProps) {
     sortDirKey: 'listItemSortDir',
   });
 
-  const upsertActions = useCallback(
-    ({ id, quantity, type }: CollectionItemForDisplay) => (
+  const renderItemsUpsertActions = useCallback(
+    (item: (typeof filteredItems)[number]) => (
       <QuantityStepper
-        id={id}
-        type={type}
-        quantity={quantities[id] ?? quantity}
-        onChange={handleUpsert}
+        quantity={item.quantity}
+        onChange={(qty) => handleUpsertItemInList(item.id, qty, collection.id)}
       />
     ),
-    [handleUpsert, quantities],
+    [handleUpsertItemInList, collection.id],
   );
 
   const listContent = isDesktop ? (
@@ -62,7 +60,7 @@ export default function ListContent(props: ListContentProps) {
         isLoading={isPreferencesLoading}
         actionsTitle="Quantity"
         actionSize={120}
-        itemsActions={upsertActions}
+        itemsActions={renderItemsUpsertActions}
       />
     </div>
   ) : (
@@ -70,7 +68,7 @@ export default function ListContent(props: ListContentProps) {
       <ItemsList
         items={filteredItems}
         isLoading={isPreferencesLoading}
-        itemsActions={upsertActions}
+        itemsActions={renderItemsUpsertActions}
       />
     </div>
   );

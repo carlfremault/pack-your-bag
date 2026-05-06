@@ -130,6 +130,9 @@ const useUpdateCategory = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['list'] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
     },
   });
 };
@@ -192,6 +195,9 @@ const useDeleteCategory = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['list'] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
     },
   });
 };
