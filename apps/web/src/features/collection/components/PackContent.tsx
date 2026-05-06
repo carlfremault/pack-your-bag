@@ -130,12 +130,14 @@ export default function PackContent(props: PackContentProps) {
               expandedContent={
                 entry.listItems.length > 0 ? (
                   <div className="flex flex-col gap-2">
-                    {entry.listItems.map((item) => (
-                      <ItemCard
-                        key={item.id}
-                        {...toItemCardProps(item, listItemUpsertActions(entry.id, item))}
-                      />
-                    ))}
+                    {entry.listItems
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((item) => (
+                        <ItemCard
+                          key={item.id}
+                          {...toItemCardProps(item, listItemUpsertActions(entry.id, item))}
+                        />
+                      ))}
                   </div>
                 ) : (
                   <div className="text-primary text-sm">No items in this list</div>

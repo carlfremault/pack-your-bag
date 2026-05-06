@@ -139,7 +139,9 @@ export default function PackContentTable(props: PackContentTableProps) {
     () =>
       (row: PackContentRow): PackContentRow[] | undefined => {
         if (row.entryType !== 'list') return undefined;
-        return row.listItems.map((item): PackContentRow => ({ ...item, entryType: 'item' }));
+        return row.listItems
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((item): PackContentRow => ({ ...item, entryType: 'item' }));
       },
     [],
   );

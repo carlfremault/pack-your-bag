@@ -56,12 +56,14 @@ export default function ListsList(props: ListsListProps) {
           expandedContent={
             list.listItems.length > 0 ? (
               <div className="flex flex-col gap-2">
-                {list.listItems.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    {...toItemCardProps(item, listItemUpsertActions(list.id, item))}
-                  />
-                ))}
+                {list.listItems
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((item) => (
+                    <ItemCard
+                      key={item.id}
+                      {...toItemCardProps(item, listItemUpsertActions(list.id, item))}
+                    />
+                  ))}
               </div>
             ) : (
               <div className="text-primary text-sm">No items in this list</div>
