@@ -9,9 +9,9 @@ import { QuantityStepper } from '@repo/react-common/input';
 
 import { Modal } from '@/components/Modal';
 import { usePreferences } from '@/features/settings/queries';
-import { useStateFilterLists } from '@/hooks/useStateFilterLists';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
+import { useStateFilterLists } from '../hooks/useStateFilterLists';
 import { useUpsert } from '../hooks/useUpsert';
 import { useAllCollections, useAllLists } from '../queries';
 import {
