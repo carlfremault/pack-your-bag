@@ -35,34 +35,57 @@ export interface AddListsModalProps {
 export default function AddListsModal(props: AddListsModalProps) {
   const { pack } = props;
 
+  const { handleUpsertListInPack, handleUpsertItemInList } = useUpsert(pack);
   const { isReady } = useBreakpoint();
 
+  if (!isReady) return null;
+
+  return (
+    <Modal.Root>
+      <Modal.Trigger ariaLabel="Add lists" className="w-full">
+        <div className="flex items-center gap-2">
+          <MdOutlineFormatListBulleted className="h-4 w-4" aria-hidden="true" />
+          <span>Add lists</span>
+        </div>
+      </Modal.Trigger>
+      <Modal.Content title="Add lists" modalWidth="3xl" className="h-full">
+        <AddListsModalContent
+          pack={pack}
+          handleUpsertItemInList={handleUpsertItemInList}
+          handleUpsertListInPack={handleUpsertListInPack}
+        />
+      </Modal.Content>
+    </Modal.Root>
+  );
+}
+
+interface AddListsModalContentProps {
+  pack: CollectionDetail & { type: 'pack' };
+  handleUpsertItemInList: (itemId: string, quantity: number, listId: string) => void;
+  handleUpsertListInPack: (listId: string, quantity: number, packId: string) => void;
+}
+
+function AddListsModalContent(props: AddListsModalContentProps) {
+  const { pack, handleUpsertItemInList, handleUpsertListInPack } = props;
   const {
     data: collections = [],
     isLoading: isListsLoading,
     isError: isListsError,
   } = useAllCollections();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
-  const { handleUpsertListInPack, handleUpsertItemInList } = useUpsert(pack);
 
   const lists = useMemo(
     () => collections.filter((collection) => collection.type === 'list'),
     [collections],
   );
   const listIds = useMemo(() => lists.map((collection) => collection.id), [lists]);
-  const listDetails = useAllLists(listIds);
-  const isListDetailsLoading = listDetails.some((query) => query.isPending);
-
+  const { detailsById: listDetailsById, isLoading: isListDetailsLoading } = useAllLists(listIds);
   const isLoading = isListsLoading || isPreferencesLoading || isListDetailsLoading;
 
   const listsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
-    const detailsById: Record<string, CollectionDetail> = {};
-    listDetails.forEach((q) => {
-      if (q.data) detailsById[q.data.id] = q.data;
-    });
     return lists.map((entry) => {
       const listQuantity = pack.lists?.find(({ list }) => list.id === entry.id)?.quantity ?? 0;
-      const list = detailsById[entry.id];
+      const list = listDetailsById[entry.id];
       const totalWeight = list ? getTotalWeightInList(list) : 0;
       const itemCount = list ? getTotalItemQuantityInList(list) : 0;
       const { value, unit } = formatWeightForDisplay(totalWeight, preferences?.units);
@@ -81,7 +104,7 @@ export default function AddListsModal(props: AddListsModalProps) {
         listItems,
       };
     });
-  }, [lists, pack.lists, preferences?.units, listDetails]);
+  }, [lists, pack.lists, preferences?.units, listDetailsById]);
 
   const { filteredLists, displayFilterState, handleFilterChange } = useStateFilterLists({
     lists: listsForDisplay,
@@ -107,39 +130,24 @@ export default function AddListsModal(props: AddListsModalProps) {
     [handleUpsertItemInList],
   );
 
-  if (!isReady) return null;
-
-  const errorContent = isListsError && !collections.length && (
-    <div className="flex h-full w-full items-center justify-center p-8">
-      <Alert type="error" message="Failed to load lists. Please try again later." />
-    </div>
-  );
+  if (isListsError && !collections.length)
+    return (
+      <div className="flex h-full w-full items-center justify-center p-8">
+        <Alert type="error" message="Failed to load lists. Please try again later." />
+      </div>
+    );
 
   return (
-    <Modal.Root>
-      <Modal.Trigger ariaLabel="Add lists" className="w-full">
-        <div className="flex items-center gap-2">
-          <MdOutlineFormatListBulleted className="h-4 w-4" aria-hidden="true" />
-          <span>Add lists</span>
-        </div>
-      </Modal.Trigger>
-      <Modal.Content title="Add lists" modalWidth="3xl" className="h-full">
-        <div className="flex h-full flex-col gap-4">
-          {errorContent || (
-            <>
-              <ListFilter filterState={displayFilterState} onChange={handleFilterChange} />
-              <div className="min-h-0 flex-1 md:overflow-y-auto">
-                <ListsList
-                  lists={filteredLists}
-                  isLoading={isLoading}
-                  upsertActions={renderListUpsertActions}
-                  listItemUpsertActions={renderListItemUpsertActions}
-                />
-              </div>
-            </>
-          )}
-        </div>
-      </Modal.Content>
-    </Modal.Root>
+    <div className="flex h-full flex-col gap-4">
+      <ListFilter filterState={displayFilterState} onChange={handleFilterChange} />
+      <div className="min-h-0 flex-1 md:overflow-y-auto">
+        <ListsList
+          lists={filteredLists}
+          isLoading={isLoading}
+          upsertActions={renderListUpsertActions}
+          listItemUpsertActions={renderListItemUpsertActions}
+        />
+      </div>
+    </div>
   );
 }

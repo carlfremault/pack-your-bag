@@ -20,6 +20,27 @@ export function useUpsert(collection: CollectionDetail) {
     };
   }, []);
 
+  const handleUpsertItemInList = useCallback(
+    (itemId: string, quantity: number, listId: string) => {
+      const key = `list-item-${itemId}`;
+      clearTimeout(pendingMutations.current[key]);
+      pendingMutations.current[key] = setTimeout(() => {
+        delete pendingMutations.current[key];
+        upsertItemInCollection(
+          { type: 'list', body: { itemId, listId, quantity } },
+          {
+            onSuccess: async () => {
+              if (collection.type === 'pack') {
+                await queryClient.invalidateQueries({ queryKey: ['pack', collection.id] });
+              }
+            },
+          },
+        );
+      }, 600);
+    },
+    [collection.id, collection.type, queryClient, upsertItemInCollection],
+  );
+
   const handleUpsertItemInPack = useCallback(
     (itemId: string, quantity: number, packId: string) => {
       const key = `pack-item-${itemId}`;
@@ -41,27 +62,6 @@ export function useUpsert(collection: CollectionDetail) {
       }, 600);
     },
     [upsertListInPack],
-  );
-
-  const handleUpsertItemInList = useCallback(
-    (itemId: string, quantity: number, listId: string) => {
-      const key = `list-item-${itemId}`;
-      clearTimeout(pendingMutations.current[key]);
-      pendingMutations.current[key] = setTimeout(() => {
-        delete pendingMutations.current[key];
-        upsertItemInCollection(
-          { type: 'list', body: { itemId, listId, quantity } },
-          {
-            onSuccess: async () => {
-              if (collection.type === 'pack') {
-                await queryClient.invalidateQueries({ queryKey: ['pack', collection.id] });
-              }
-            },
-          },
-        );
-      }, 600);
-    },
-    [collection.id, collection.type, queryClient, upsertItemInCollection],
   );
 
   return {
