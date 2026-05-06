@@ -11,11 +11,11 @@ import {
   toCollectionItemForDisplay,
 } from '@/features/collection/utils';
 import { usePreferences } from '@/features/settings/queries';
-import { useFilterPackContent } from '@/hooks/useFilterPackContent';
 import { toCollectionListCardProps } from '@/lib/mappers/collection.mapper';
 import { toItemCardProps } from '@/lib/mappers/item.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
+import { useFilterPackContent } from '../hooks/useFilterPackContent';
 import { useUpsert } from '../hooks/useUpsert';
 import {
   CollectionDetail,

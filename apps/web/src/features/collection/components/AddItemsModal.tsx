@@ -14,9 +14,9 @@ import ItemsList from '@/features/item/components/ItemsList';
 import ItemsTable from '@/features/item/components/ItemsTable';
 import { useAllItems } from '@/features/item/queries';
 import { usePreferences } from '@/features/settings/queries';
-import { useStateFilterItems } from '@/hooks/useStateFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
+import { useStateFilterItems } from '../hooks/useStateFilterItems';
 import { CollectionDetail } from '../types';
 
 export interface AddItemsModalProps {

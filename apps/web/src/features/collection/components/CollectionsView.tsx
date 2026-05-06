@@ -9,9 +9,9 @@ import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
 import { useActionQuery } from '@/hooks/useActionQuery';
-import { useFilterCollections } from '@/hooks/useFilterCollections';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
+import { useFilterCollections } from '../hooks/useFilterCollections';
 import { useAllCollections } from '../queries';
 import { CollectionForDisplay } from '../types';
 
