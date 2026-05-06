@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { IoShirtOutline } from 'react-icons/io5';
 
 import { Alert } from '@repo/react-common/alert';
@@ -8,6 +8,7 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
 import { Modal } from '@/components/Modal';
+import { useUpsert } from '@/features/collection/hooks/useUpsert';
 import { ItemFilter } from '@/features/item/components/ItemFilter';
 import ItemsList from '@/features/item/components/ItemsList';
 import ItemsTable from '@/features/item/components/ItemsTable';
@@ -16,8 +17,7 @@ import { usePreferences } from '@/features/settings/queries';
 import { useStateFilterItems } from '@/hooks/useStateFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { useUpsertItemInCollection } from '../queries';
-import { CollectionDetail, CollectionItemForDisplay } from '../types';
+import { CollectionDetail } from '../types';
 
 export interface AddItemsModalProps {
   collection: CollectionDetail;
@@ -32,26 +32,25 @@ export default function AddItemsModal(props: AddItemsModalProps) {
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isItemsLoading || isPreferencesLoading;
 
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const { mutate: upsertItemInCollection, isPending } = useUpsertItemInCollection();
-
-  const pendingMutations = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  useEffect(() => {
-    const pending = pendingMutations.current;
-    return () => {
-      Object.values(pending).forEach(clearTimeout);
-    };
-  }, []);
+  const { handleUpsertItemInList, handleUpsertItemInPack } = useUpsert(collection);
 
   const itemsForDisplay = useMemo(() => {
+    const collectionItemMap = new Map(
+      collection.items?.map(({ item, quantity }) => [item.id, quantity]) ?? [],
+    );
     return data.map((entry) => {
-      const itemQuantity =
-        collection.items?.find(({ item }) => item.id === entry.id)?.quantity ?? 0;
+      const itemQuantity = collectionItemMap.get(entry.id) ?? 0;
       const hasWeight = entry.weight != null;
       const { value, unit } = hasWeight
         ? formatWeightForDisplay(Number(entry.weight), preferences?.units)
         : { value: null, unit: null };
-      return { ...entry, quantity: itemQuantity, displayWeight: value, displayUnit: unit };
+      return {
+        ...entry,
+        quantity: itemQuantity,
+        displayWeight: value,
+        displayUnit: unit,
+        type: 'item' as const,
+      };
     });
   }, [data, collection.items, preferences?.units]);
 
@@ -59,61 +58,16 @@ export default function AddItemsModal(props: AddItemsModalProps) {
     items: itemsForDisplay,
   });
 
-  const handleUpsertItem = useCallback(
-    (itemId: string, quantity: number) => {
-      setQuantities((prev) => ({ ...prev, [itemId]: quantity }));
+  const renderItemsUpsertActions = useCallback(
+    (item: (typeof filteredItems)[number]) => {
+      const handleChange =
+        collection.type === 'list'
+          ? (qty: number) => handleUpsertItemInList(item.id, qty, collection.id)
+          : (qty: number) => handleUpsertItemInPack(item.id, qty, collection.id);
 
-      clearTimeout(pendingMutations.current[itemId]);
-      pendingMutations.current[itemId] = setTimeout(() => {
-        delete pendingMutations.current[itemId];
-        if (collection.type === 'list') {
-          upsertItemInCollection(
-            {
-              type: 'list',
-              body: { itemId, listId: collection.id, quantity },
-            },
-            {
-              onError: () => {
-                setQuantities((prev) => {
-                  const next = { ...prev };
-                  delete next[itemId];
-                  return next;
-                });
-              },
-            },
-          );
-        } else if (collection.type === 'pack') {
-          upsertItemInCollection(
-            {
-              type: 'pack',
-              body: { itemId, packId: collection.id, quantity },
-            },
-            {
-              onError: () => {
-                setQuantities((prev) => {
-                  const next = { ...prev };
-                  delete next[itemId];
-                  return next;
-                });
-              },
-            },
-          );
-        }
-      }, 300);
+      return <QuantityStepper quantity={item.quantity} onChange={handleChange} />;
     },
-    [collection.id, collection.type, upsertItemInCollection],
-  );
-
-  const itemsActions = useCallback(
-    ({ id, quantity }: CollectionItemForDisplay) => (
-      <QuantityStepper
-        id={id}
-        quantity={quantities[id] ?? quantity}
-        onChange={handleUpsertItem}
-        disabled={isPending}
-      />
-    ),
-    [handleUpsertItem, quantities, isPending],
+    [handleUpsertItemInList, handleUpsertItemInPack, collection.id, collection.type],
   );
 
   if (!isReady) return null;
@@ -131,11 +85,15 @@ export default function AddItemsModal(props: AddItemsModalProps) {
         isLoading={isLoading}
         actionsTitle="Quantity"
         actionSize={120}
-        itemsActions={itemsActions}
+        itemsActions={renderItemsUpsertActions}
       />
     </div>
   ) : (
-    <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={itemsActions} />
+    <ItemsList
+      items={filteredItems}
+      isLoading={isLoading}
+      itemsActions={renderItemsUpsertActions}
+    />
   );
 
   return (

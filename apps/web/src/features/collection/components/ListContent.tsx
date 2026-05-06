@@ -11,7 +11,8 @@ import { usePreferences } from '@/features/settings/queries';
 import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { CollectionDetail, CollectionItemForDisplay } from '../types';
+import { useUpsert } from '../hooks/useUpsert';
+import { CollectionDetail } from '../types';
 
 import AddItemsModal from './AddItemsModal';
 
@@ -24,6 +25,7 @@ export default function ListContent(props: ListContentProps) {
   const { collection, isDesktop } = props;
 
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { handleUpsertItemInList } = useUpsert(collection);
 
   const itemsForListDisplay = useMemo(() => {
     return (collection.items ?? []).map(({ quantity, item }) => {
@@ -31,7 +33,7 @@ export default function ListContent(props: ListContentProps) {
       const { value, unit } = hasWeight
         ? formatWeightForDisplay(Number(item.weight), preferences?.units)
         : { value: null, unit: null };
-      return { ...item, quantity, displayWeight: value, displayUnit: unit };
+      return { ...item, quantity, displayWeight: value, displayUnit: unit, type: 'item' as const };
     });
   }, [collection.items, preferences?.units]);
 
@@ -41,12 +43,14 @@ export default function ListContent(props: ListContentProps) {
     sortDirKey: 'listItemSortDir',
   });
 
-  const itemsActions = useCallback(
-    ({ id, quantity }: CollectionItemForDisplay) => (
-      // TODO: Implement quantity stepper onChange
-      <QuantityStepper id={id} quantity={quantity} onChange={() => {}} />
+  const renderItemsUpsertActions = useCallback(
+    (item: (typeof filteredItems)[number]) => (
+      <QuantityStepper
+        quantity={item.quantity}
+        onChange={(qty) => handleUpsertItemInList(item.id, qty, collection.id)}
+      />
     ),
-    [],
+    [handleUpsertItemInList, collection.id],
   );
 
   const listContent = isDesktop ? (
@@ -56,7 +60,7 @@ export default function ListContent(props: ListContentProps) {
         isLoading={isPreferencesLoading}
         actionsTitle="Quantity"
         actionSize={120}
-        itemsActions={itemsActions}
+        itemsActions={renderItemsUpsertActions}
       />
     </div>
   ) : (
@@ -64,7 +68,7 @@ export default function ListContent(props: ListContentProps) {
       <ItemsList
         items={filteredItems}
         isLoading={isPreferencesLoading}
-        itemsActions={itemsActions}
+        itemsActions={renderItemsUpsertActions}
       />
     </div>
   );

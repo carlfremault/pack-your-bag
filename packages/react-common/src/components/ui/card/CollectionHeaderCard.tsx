@@ -59,7 +59,7 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
 
   return (
     <div className={collectionHeaderCardClassName}>
-      <div className="flex flex-none flex-row justify-between gap-4 sm:flex-col">
+      <div className="flex min-w-1/5 flex-none flex-row justify-between gap-4 sm:flex-col">
         <div className="self-center p-4">
           <Icon size={36} className="text-primary" aria-hidden="true" />
         </div>

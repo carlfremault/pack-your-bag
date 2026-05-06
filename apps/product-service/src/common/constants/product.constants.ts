@@ -8,7 +8,7 @@ export {
 
 const DEFAULT_RESOURCE_THROTTLE = {
   GET_ALL: 60,
-  GET: 20,
+  GET: 60,
   POST: 10,
   PATCH: 20,
   DELETE: 20,
@@ -16,8 +16,8 @@ const DEFAULT_RESOURCE_THROTTLE = {
 } as const;
 
 const DEFAULT_JOIN_TABLE_THROTTLE = {
-  UPSERT: 60,
-  REMOVE: 60,
+  UPSERT: 120,
+  REMOVE: 120,
 } as const;
 
 export const THROTTLE_TTL_MS = 60000;
