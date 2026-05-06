@@ -41,5 +41,3 @@ export type CollectionListForDisplay = CollectionForDisplay & { quantity: number
 export type CollectionListForDisplayWithItems = CollectionListForDisplay & {
   listItems: CollectionItemForDisplay[];
 };
-
-export type UpsertType = 'item' | 'list';
