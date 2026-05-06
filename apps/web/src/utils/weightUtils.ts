@@ -24,7 +24,7 @@ export function formatWeightForDisplay(
 
   if (units === Units.METRIC) {
     return grams >= LARGE_UNIT_THRESHOLD
-      ? { value: (grams / 1000).toFixed(2), unit: 'kg' }
+      ? { value: (grams / 1000).toFixed(3), unit: 'kg' }
       : { value: String(grams), unit: 'g' };
   }
 

@@ -1,9 +1,12 @@
 import classNames from 'classnames';
 
+export type QuantityType = 'item' | 'list';
+
 export interface QuantityStepperProps {
   id: string;
+  type: QuantityType;
   quantity: number;
-  onChange: (id: string, quantity: number) => void;
+  onChange: (id: string, quantity: number, type: QuantityType) => void;
   min?: number;
   max?: number;
   groupAriaLabel?: string;
@@ -13,6 +16,7 @@ export interface QuantityStepperProps {
 export function QuantityStepper(props: QuantityStepperProps) {
   const {
     id,
+    type,
     quantity,
     onChange,
     min = 0,
@@ -24,7 +28,7 @@ export function QuantityStepper(props: QuantityStepperProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     if (value >= min && value <= max && !isNaN(value)) {
-      onChange(id, value);
+      onChange(id, value, type);
     }
   };
 
@@ -42,7 +46,7 @@ export function QuantityStepper(props: QuantityStepperProps) {
       <button
         type="button"
         aria-label="Decrease quantity"
-        onClick={() => onChange(id, Math.max(min, quantity - 1))}
+        onClick={() => onChange(id, Math.max(min, quantity - 1), type)}
         disabled={quantity <= min || disabled}
         className={classNames(
           stepperButtonClassName,
@@ -62,7 +66,7 @@ export function QuantityStepper(props: QuantityStepperProps) {
       <button
         type="button"
         aria-label="Increase quantity"
-        onClick={() => onChange(id, Math.min(max, quantity + 1))}
+        onClick={() => onChange(id, Math.min(max, quantity + 1), type)}
         disabled={quantity >= max || disabled}
         className={classNames(
           stepperButtonClassName,

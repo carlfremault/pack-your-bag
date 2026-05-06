@@ -140,5 +140,5 @@ export const toCollectionItemForDisplay = (
     item.weight != null
       ? formatWeightForDisplay(Number(item.weight), units)
       : { value: null, unit: null };
-  return { ...item, quantity, displayWeight: value, displayUnit: unit };
+  return { ...item, quantity, displayWeight: value, displayUnit: unit, type: 'item' as const };
 };

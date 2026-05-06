@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { MdOutlineFormatListBulleted } from 'react-icons/md';
 
 import { Alert } from '@repo/react-common/alert';
@@ -12,7 +12,8 @@ import { usePreferences } from '@/features/settings/queries';
 import { useStateFilterLists } from '@/hooks/useStateFilterLists';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { useAllCollections, useAllLists, useUpsertListInPack } from '../queries';
+import { useUpsert } from '../hooks/useUpsert';
+import { useAllCollections, useAllLists } from '../queries';
 import {
   CollectionDetail,
   CollectionItemForDisplay,
@@ -53,16 +54,7 @@ export default function AddListsModal(props: AddListsModalProps) {
 
   const isLoading = isListsLoading || isPreferencesLoading || isListDetailsLoading;
 
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const { mutate: upsertListInPack, isPending } = useUpsertListInPack();
-
-  const pendingMutations = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  useEffect(() => {
-    const pending = pendingMutations.current;
-    return () => {
-      Object.values(pending).forEach(clearTimeout);
-    };
-  }, []);
+  const { quantities, handleUpsert, handleUpsertItemInList } = useUpsert(pack);
 
   const listsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
     const detailsById: Record<string, CollectionDetail> = {};
@@ -96,40 +88,28 @@ export default function AddListsModal(props: AddListsModalProps) {
     lists: listsForDisplay,
   });
 
-  const handleUpsertList = useCallback(
-    (listId: string, quantity: number) => {
-      setQuantities((prev) => ({ ...prev, [listId]: quantity }));
-
-      clearTimeout(pendingMutations.current[listId]);
-      pendingMutations.current[listId] = setTimeout(() => {
-        delete pendingMutations.current[listId];
-        upsertListInPack(
-          { listId, packId: pack.id, quantity },
-          {
-            onError: () => {
-              setQuantities((prev) => {
-                const next = { ...prev };
-                delete next[listId];
-                return next;
-              });
-            },
-          },
-        );
-      }, 300);
-    },
-    [pack.id, upsertListInPack],
-  );
-
-  const listsActions = useCallback(
-    ({ id, quantity }: CollectionListForDisplayWithItems) => (
+  const upsertActions = useCallback(
+    ({ id, quantity, type }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
       <QuantityStepper
         id={id}
+        type={type}
         quantity={quantities[id] ?? quantity}
-        onChange={handleUpsertList}
-        disabled={isPending}
+        onChange={handleUpsert}
       />
     ),
-    [handleUpsertList, quantities, isPending],
+    [handleUpsert, quantities],
+  );
+
+  const listItemUpsertActions = useCallback(
+    (listId: string, item: CollectionItemForDisplay) => (
+      <QuantityStepper
+        id={item.id}
+        type={item.type}
+        quantity={quantities[item.id] ?? item.quantity}
+        onChange={(id, qty, _type) => handleUpsertItemInList(id, qty, listId)}
+      />
+    ),
+    [handleUpsertItemInList, quantities],
   );
 
   if (!isReady) return null;
@@ -157,7 +137,8 @@ export default function AddListsModal(props: AddListsModalProps) {
                 <ListsList
                   lists={filteredLists}
                   isLoading={isLoading}
-                  listsActions={listsActions}
+                  upsertActions={upsertActions}
+                  listItemUpsertActions={listItemUpsertActions}
                 />
               </div>
             </>

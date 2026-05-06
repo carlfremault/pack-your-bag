@@ -16,6 +16,7 @@ import { toCollectionListCardProps } from '@/lib/mappers/collection.mapper';
 import { toItemCardProps } from '@/lib/mappers/item.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
+import { useUpsert } from '../hooks/useUpsert';
 import {
   CollectionDetail,
   CollectionItemForDisplay,
@@ -35,6 +36,7 @@ export interface PackContentProps {
 export default function PackContent(props: PackContentProps) {
   const { collection, isDesktop } = props;
 
+  const { quantities, handleUpsert, handleUpsertItemInList } = useUpsert(collection);
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
@@ -79,12 +81,28 @@ export default function PackContent(props: PackContentProps) {
     lists: collectionListsForDisplay,
   });
 
-  const itemsActions = useCallback(
-    ({ id, quantity }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
-      // TODO: Implement quantity stepper onChange
-      <QuantityStepper id={id} quantity={quantity} onChange={() => {}} />
+  const upsertActions = useCallback(
+    ({ id, quantity, type }: CollectionItemForDisplay | CollectionListForDisplayWithItems) => (
+      <QuantityStepper
+        id={id}
+        type={type}
+        quantity={quantities[id] ?? quantity}
+        onChange={handleUpsert}
+      />
     ),
-    [],
+    [handleUpsert, quantities],
+  );
+
+  const listItemUpsertActions = useCallback(
+    (listId: string, item: CollectionItemForDisplay) => (
+      <QuantityStepper
+        id={item.id}
+        type={item.type}
+        quantity={quantities[item.id] ?? item.quantity}
+        onChange={(id, qty, _type) => handleUpsertItemInList(id, qty, listId)}
+      />
+    ),
+    [handleUpsertItemInList, quantities],
   );
 
   let packContent: React.ReactNode;
@@ -93,7 +111,8 @@ export default function PackContent(props: PackContentProps) {
       <PackContentTable
         entries={filteredContent}
         isLoading={isPreferencesLoading}
-        itemsActions={itemsActions}
+        upsertActions={upsertActions}
+        listItemUpsertActions={listItemUpsertActions}
       />
     );
   } else {
@@ -101,14 +120,11 @@ export default function PackContent(props: PackContentProps) {
       <div className="mb-32 flex w-full flex-col gap-2">
         {filteredContent.map((entry) =>
           entry.entryType === 'item' ? (
-            <ItemCard
-              key={entry.id}
-              {...toItemCardProps(entry, <div className="flex gap-8">{itemsActions(entry)}</div>)}
-            />
+            <ItemCard key={entry.id} {...toItemCardProps(entry, upsertActions(entry))} />
           ) : (
             <CollectionListCard
               key={entry.id}
-              {...toCollectionListCardProps(entry, itemsActions(entry))}
+              {...toCollectionListCardProps(entry, upsertActions(entry))}
               onViewDetails={() => toggleExpandedList(entry.id)}
               isExpanded={expandedLists.has(entry.id)}
               expandedContent={
@@ -117,10 +133,7 @@ export default function PackContent(props: PackContentProps) {
                     {entry.listItems.map((item) => (
                       <ItemCard
                         key={item.id}
-                        {...toItemCardProps(
-                          item,
-                          <div className="flex gap-8">{itemsActions(item)}</div>,
-                        )}
+                        {...toItemCardProps(item, listItemUpsertActions(entry.id, item))}
                       />
                     ))}
                   </div>

@@ -278,7 +278,19 @@ const useUpsertItemInCollection = () => {
             updated[existingIndex] = { ...existing, quantity: body.quantity };
             return { ...old, items: updated };
           }
-          return { ...old, items: existingItems };
+          return {
+            ...old,
+            items: [
+              ...existingItems,
+              {
+                item: {
+                  id: body.itemId,
+                  name: '',
+                },
+                quantity: body.quantity,
+              },
+            ],
+          };
         });
       }
 
@@ -357,7 +369,19 @@ const useUpsertListInPack = () => {
               updated[existingIndex] = { ...existing, quantity: body.quantity };
               return { ...old, lists: updated };
             }
-            return { ...old, lists: existingLists };
+            return {
+              ...old,
+              lists: [
+                ...existingLists,
+                {
+                  list: {
+                    id: body.listId,
+                    name: '',
+                  },
+                  quantity: body.quantity,
+                },
+              ],
+            };
           },
         );
       }

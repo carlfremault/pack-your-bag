@@ -21,13 +21,14 @@ export type PackContentRow =
 export interface PackContentTableProps {
   entries: PackContentRow[];
   isLoading: boolean;
-  itemsActions: (
+  upsertActions: (
     row: CollectionItemForDisplay | CollectionListForDisplayWithItems,
   ) => React.ReactNode;
+  listItemUpsertActions: (listId: string, item: CollectionItemForDisplay) => React.ReactNode;
 }
 
 export default function PackContentTable(props: PackContentTableProps) {
-  const { entries, isLoading, itemsActions } = props;
+  const { entries, isLoading, upsertActions, listItemUpsertActions } = props;
 
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<PackContentRow>();
@@ -120,14 +121,19 @@ export default function PackContentTable(props: PackContentTableProps) {
         id: 'quantity',
         header: () => <div className="text-center">Quantity</div>,
         size: 120,
-        cell: ({ row }) => (
-          <div className="flex w-full items-center justify-center">
-            {itemsActions(row.original)}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const content =
+            row.depth > 0
+              ? listItemUpsertActions(
+                  row.getParentRow()!.original.id,
+                  row.original as CollectionItemForDisplay,
+                )
+              : upsertActions(row.original);
+          return <div className="flex w-full items-center justify-center">{content}</div>;
+        },
       }),
     ];
-  }, [itemsActions]);
+  }, [upsertActions, listItemUpsertActions]);
 
   const getSubRows = useMemo(
     () =>
@@ -147,7 +153,9 @@ export default function PackContentTable(props: PackContentTableProps) {
           data={entries}
           columns={columns}
           getSubRows={getSubRows}
-          getRowId={(row) => `${row.entryType}-${row.id}`}
+          getRowId={(row, _index, parent) =>
+            parent ? `${parent.id}_${row.entryType}-${row.id}` : `${row.entryType}-${row.id}`
+          }
           emptyStateLabel="No content found"
           scrollable
         />

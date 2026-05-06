@@ -36,8 +36,10 @@ export type CollectionForHeaderDisplay = CollectionForDisplay & {
   }[];
 };
 
-export type CollectionItemForDisplay = ItemForDisplay & { quantity: number };
-export type CollectionListForDisplay = CollectionForDisplay & { quantity: number };
+export type CollectionItemForDisplay = ItemForDisplay & { quantity: number; type: 'item' };
+export type CollectionListForDisplay = CollectionForDisplay & { quantity: number; type: 'list' };
 export type CollectionListForDisplayWithItems = CollectionListForDisplay & {
   listItems: CollectionItemForDisplay[];
 };
+
+export type UpsertType = 'item' | 'list';

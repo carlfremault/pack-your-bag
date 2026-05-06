@@ -55,7 +55,7 @@ export const WithQuantityStepper: Story = {
       name: 'Category 1',
       colorTheme: 'jungle',
     },
-    actions: <QuantityStepper quantity={3} onChange={fn()} />,
+    actions: <QuantityStepper id="id-1" type="item" quantity={3} onChange={fn()} />,
   },
 };
 
@@ -126,6 +126,6 @@ export const DescriptionWith1000CharactersAndQuantityStepper: Story = {
       name: 'Category 1',
       colorTheme: 'lavender',
     },
-    actions: <QuantityStepper quantity={1} onChange={fn()} />,
+    actions: <QuantityStepper id="id-1" type="item" quantity={1} onChange={fn()} />,
   },
 };

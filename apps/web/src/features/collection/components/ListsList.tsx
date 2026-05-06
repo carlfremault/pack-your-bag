@@ -5,18 +5,19 @@ import { CollectionListCard, ItemCard } from '@repo/react-common/card';
 import { toCollectionListCardProps } from '@/lib/mappers/collection.mapper';
 import { toItemCardProps } from '@/lib/mappers/item.mapper';
 
-import { CollectionListForDisplayWithItems } from '../types';
+import { CollectionItemForDisplay, CollectionListForDisplayWithItems } from '../types';
 
 import ListsListSkeleton from './ListsListSkeleton';
 
 interface ListsListProps {
   lists: CollectionListForDisplayWithItems[];
   isLoading: boolean;
-  listsActions: (list: CollectionListForDisplayWithItems) => React.ReactNode;
+  upsertActions: (upsertItem: CollectionListForDisplayWithItems) => React.ReactNode;
+  listItemUpsertActions: (listId: string, item: CollectionItemForDisplay) => React.ReactNode;
 }
 
 export default function ListsList(props: ListsListProps) {
-  const { lists, isLoading, listsActions } = props;
+  const { lists, isLoading, upsertActions, listItemUpsertActions } = props;
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const toggleExpandedList = useCallback((id: string) => {
@@ -49,14 +50,17 @@ export default function ListsList(props: ListsListProps) {
       {lists.map((list) => (
         <CollectionListCard
           key={list.id}
-          {...toCollectionListCardProps(list, listsActions(list))}
+          {...toCollectionListCardProps(list, upsertActions(list))}
           onViewDetails={() => toggleExpandedList(list.id)}
           isExpanded={expandedLists.has(list.id)}
           expandedContent={
             list.listItems.length > 0 ? (
               <div className="flex flex-col gap-2">
                 {list.listItems.map((item) => (
-                  <ItemCard key={item.id} {...toItemCardProps(item, null)} />
+                  <ItemCard
+                    key={item.id}
+                    {...toItemCardProps(item, listItemUpsertActions(list.id, item))}
+                  />
                 ))}
               </div>
             ) : (
