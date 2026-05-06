@@ -73,13 +73,20 @@ const useCollection = (id?: string, type?: CollectionType): UseQueryResult<Colle
 // Fetch all lists
 // -------------------------------
 
-const useAllLists = (listIds: string[]): UseQueryResult<CollectionDetail>[] => {
+const useAllLists = (listIds: string[]) => {
   return useQueries({
     queries: listIds.map((id) => ({
       queryKey: ['list', id],
       queryFn: () => fetchCollection(id, 'list'),
       enabled: !!id,
     })),
+    combine: (results) => ({
+      detailsById: results.reduce<Record<string, CollectionDetail>>((acc, q) => {
+        if (q.data) acc[q.data.id] = q.data;
+        return acc;
+      }, {}),
+      isLoading: results.some((q) => q.isPending),
+    }),
   });
 };
 

@@ -27,12 +27,43 @@ export default function AddItemsModal(props: AddItemsModalProps) {
   const { collection } = props;
 
   const { isReady, isDesktop } = useBreakpoint();
+  const { handleUpsertItemInList, handleUpsertItemInPack } = useUpsert(collection);
 
-  const { data = [], isLoading: isItemsLoading, isError: isItemsError } = useAllItems();
+  if (!isReady) return null;
+
+  return (
+    <Modal.Root>
+      <Modal.Trigger ariaLabel="Add items" className="w-full">
+        <div className="flex items-center gap-2">
+          <IoShirtOutline className="h-4 w-4" aria-hidden="true" />
+          <span>Add items</span>
+        </div>
+      </Modal.Trigger>
+      <Modal.Content title="Add items" modalWidth="3xl" className="h-full">
+        <AddItemsModalContent
+          collection={collection}
+          handleUpsertItemInList={handleUpsertItemInList}
+          handleUpsertItemInPack={handleUpsertItemInPack}
+          isDesktop={isDesktop}
+        />
+      </Modal.Content>
+    </Modal.Root>
+  );
+}
+
+interface AddItemsModalContentProps {
+  collection: CollectionDetail;
+  handleUpsertItemInList: (itemId: string, quantity: number, listId: string) => void;
+  handleUpsertItemInPack: (itemId: string, quantity: number, packId: string) => void;
+  isDesktop: boolean;
+}
+
+function AddItemsModalContent(props: AddItemsModalContentProps) {
+  const { collection, handleUpsertItemInList, handleUpsertItemInPack, isDesktop } = props;
+
+  const { data = [], isLoading: isItemsLoading, isError } = useAllItems();
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isItemsLoading || isPreferencesLoading;
-
-  const { handleUpsertItemInList, handleUpsertItemInPack } = useUpsert(collection);
 
   const itemsForDisplay = useMemo(() => {
     const collectionItemMap = new Map(
@@ -70,50 +101,33 @@ export default function AddItemsModal(props: AddItemsModalProps) {
     [handleUpsertItemInList, handleUpsertItemInPack, collection.id, collection.type],
   );
 
-  if (!isReady) return null;
-
-  const errorContent = isItemsError && !data.length && (
-    <div className="flex h-full w-full items-center justify-center p-8">
-      <Alert type="error" message="Failed to load items. Please try again later." />
-    </div>
-  );
-
-  const listContent = isDesktop ? (
-    <div className="min-h-0 flex-1">
-      <ItemsTable
-        items={filteredItems}
-        isLoading={isLoading}
-        actionsTitle="Quantity"
-        actionSize={120}
-        itemsActions={renderItemsUpsertActions}
-      />
-    </div>
-  ) : (
-    <ItemsList
-      items={filteredItems}
-      isLoading={isLoading}
-      itemsActions={renderItemsUpsertActions}
-    />
-  );
+  if (isError && !data.length)
+    return (
+      <div className="flex h-full w-full items-center justify-center p-8">
+        <Alert type="error" message="Failed to load items. Please try again later." />
+      </div>
+    );
 
   return (
-    <Modal.Root>
-      <Modal.Trigger ariaLabel="Add items" className="w-full">
-        <div className="flex items-center gap-2">
-          <IoShirtOutline className="h-4 w-4" aria-hidden="true" />
-          <span>Add items</span>
+    <div className="flex h-full flex-col gap-4">
+      <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
+      {isDesktop ? (
+        <div className="min-h-0 flex-1">
+          <ItemsTable
+            items={filteredItems}
+            isLoading={isLoading}
+            actionsTitle="Quantity"
+            actionSize={120}
+            itemsActions={renderItemsUpsertActions}
+          />
         </div>
-      </Modal.Trigger>
-      <Modal.Content title="Add items" modalWidth="3xl" className="h-full">
-        <div className="flex h-full flex-col gap-4">
-          {errorContent || (
-            <>
-              <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-              {listContent}
-            </>
-          )}
-        </div>
-      </Modal.Content>
-    </Modal.Root>
+      ) : (
+        <ItemsList
+          items={filteredItems}
+          isLoading={isLoading}
+          itemsActions={renderItemsUpsertActions}
+        />
+      )}
+    </div>
   );
 }
