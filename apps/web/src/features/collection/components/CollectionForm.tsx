@@ -86,7 +86,11 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
 
   const handleSuccess = () => {
     setFieldErrors({});
-    onClose();
+    if (editMode) {
+      onClose();
+    } else {
+      handleReset();
+    }
     toast.success(editMode ? 'Collection updated successfully' : 'Collection created successfully');
   };
 
@@ -126,6 +130,7 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
       onReset={handleReset}
       onClose={onClose}
       isPending={isCreating || isUpdating}
+      editMode={editMode}
     >
       {!editMode && (
         <InputSelect
