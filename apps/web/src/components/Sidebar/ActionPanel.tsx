@@ -132,11 +132,9 @@ function ActionPanelInner() {
     return (
       <SidebarPortal>
         {panelContent ? (
-          <div className="flex h-full">
-            <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
-              {desktopTitle && <h2 className="text-primary text-xl">{desktopTitle}</h2>}
-              {panelContent}
-            </div>
+          <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
+            {desktopTitle && <h2 className="text-primary text-xl">{desktopTitle}</h2>}
+            {panelContent}
           </div>
         ) : (
           <SidebarNav pathname={pathname} />
