@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -119,7 +120,7 @@ export class TripController {
   @Delete(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Delete a trip by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Trip deleted successfully.' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Trip deleted successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -127,10 +128,11 @@ export class TripController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Trip not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.TRIPS.DELETE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTrip(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.tripService.deleteTrip(id, userId);
+    await this.tripService.deleteTrip(id, userId);
   }
 }
