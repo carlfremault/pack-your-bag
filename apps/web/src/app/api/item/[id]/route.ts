@@ -37,6 +37,6 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
     await deleteItem(id);
 
-    return NextResponse.json({ message: 'Item deleted successfully' }, { status: 200 });
+    return new NextResponse(null, { status: 204 });
   });
 }

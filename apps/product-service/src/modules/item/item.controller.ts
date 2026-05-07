@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -145,7 +146,7 @@ export class ItemController {
   @Delete(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Delete an item by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Item deleted successfully.' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Item deleted successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -153,10 +154,11 @@ export class ItemController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Item not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.ITEMS.DELETE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteItem(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.itemService.handleItemDeletion(id, userId);
+    await this.itemService.handleItemDeletion(id, userId);
   }
 }

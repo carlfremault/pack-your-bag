@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -147,7 +148,7 @@ export class CategoryController {
   @Delete(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Delete a category by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Category deleted successfully.' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Category deleted successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -155,10 +156,11 @@ export class CategoryController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Category not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.CATEGORIES.DELETE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategory(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.categoryService.deleteCategory(id, userId);
+    await this.categoryService.deleteCategory(id, userId);
   }
 }
