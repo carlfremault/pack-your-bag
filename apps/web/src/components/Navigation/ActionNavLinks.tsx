@@ -47,7 +47,7 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
         linkAs={Link}
         onClick={onNavigate}
       >
-        Add new item
+        Add new items
       </LinkButton>
       <LinkButton
         href={`?action=add-collection${query ? `&${query}` : ''}`}
@@ -58,7 +58,7 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
         linkAs={Link}
         onClick={onNavigate}
       >
-        Add new collection
+        Add new collections
       </LinkButton>
       <LinkButton
         href={`?action=manage-categories${query ? `&${query}` : ''}`}
