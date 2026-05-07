@@ -7,7 +7,6 @@ import classNames from 'classnames';
 export interface QuantityStepperProps {
   quantity: number;
   onChange: (quantity: number) => void;
-
   min?: number;
   max?: number;
   groupAriaLabel?: string;

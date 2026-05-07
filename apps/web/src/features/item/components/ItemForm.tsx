@@ -69,7 +69,11 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
 
   const handleSuccess = () => {
     setFieldErrors({});
-    onClose();
+    if (editMode) {
+      onClose();
+    } else {
+      handleReset();
+    }
     toast.success(editMode ? 'Item updated successfully' : 'Item created successfully');
   };
 
@@ -110,6 +114,7 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
       onReset={handleReset}
       onClose={onClose}
       isPending={isCreating || isUpdating}
+      editMode={editMode}
     >
       <Input
         label="Name"

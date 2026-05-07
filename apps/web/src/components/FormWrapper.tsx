@@ -7,10 +7,18 @@ interface FormWrapperProps {
   onReset: () => void;
   onClose: () => void;
   isPending: boolean;
+  editMode?: boolean;
   children: React.ReactNode;
 }
 
-export function FormWrapper({ onSubmit, onReset, onClose, isPending, children }: FormWrapperProps) {
+export function FormWrapper({
+  onSubmit,
+  onReset,
+  onClose,
+  isPending,
+  editMode = false,
+  children,
+}: FormWrapperProps) {
   return (
     <form onSubmit={onSubmit}>
       <fieldset
@@ -23,11 +31,13 @@ export function FormWrapper({ onSubmit, onReset, onClose, isPending, children }:
             Save
           </SubmitButton>
           <div className="flex w-full items-center justify-between gap-2">
-            <Button type="button" onClick={onReset} variant="outline" className="w-full">
-              Reset
-            </Button>
+            {editMode && (
+              <Button type="button" onClick={onReset} variant="outline" className="w-full">
+                Reset
+              </Button>
+            )}
             <Button type="button" onClick={onClose} variant="outline" className="w-full">
-              Cancel
+              {editMode ? 'Cancel' : 'Back'}
             </Button>
           </div>
         </div>

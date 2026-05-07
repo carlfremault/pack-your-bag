@@ -52,7 +52,11 @@ export function CategoryForm(props: CategoryFormProps) {
     if (editMode && category && formValues.name !== category.name) {
       onCategoryRenamed(category.name, formValues.name);
     }
-    onClose();
+    if (editMode) {
+      onClose();
+    } else {
+      handleReset();
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,6 +94,7 @@ export function CategoryForm(props: CategoryFormProps) {
       onReset={handleReset}
       onClose={onClose}
       isPending={isCreating || isUpdating}
+      editMode={editMode}
     >
       <Input
         label="Name"

@@ -84,7 +84,7 @@ export function CategoryView({
           />
         </div>
         <Button className="w-full shrink-0" onClick={handleAddCategory}>
-          Add Category
+          Add Categories
         </Button>
         <div className="hidden shrink-0 lg:block">
           <Button variant="outline" onClick={onClose} className="w-full">
@@ -111,5 +111,5 @@ export function CategoryView({
     );
   }
 
-  return <div className="flex min-h-0 flex-1 flex-col gap-4">{content}</div>;
+  return <div className="flex max-h-full min-h-0 flex-col gap-4">{content}</div>;
 }
