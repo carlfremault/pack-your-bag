@@ -1,13 +1,12 @@
 'use client';
 
 import toast from 'react-hot-toast';
-import { MdOutlineCheckCircle } from 'react-icons/md';
 import { TbExternalLink, TbTrash } from 'react-icons/tb';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { Button, SubmitButton } from '@repo/react-common/button';
-import { FormNotReady } from '@repo/react-common/utils';
+import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
+import { CheckedWrapper, DangerWrapper, FormNotReady } from '@repo/react-common/utils';
 
 import { Modal } from '@/components/Modal';
 import { capitalizeFirstLetter } from '@/utils/capitalizeFirstLetter';
@@ -47,8 +46,7 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
   });
   const { mutate: deleteCollection, isPending: isDeleting } = useDeleteCollection();
 
-  const confirmDeleteCollection = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const confirmDeleteCollection = () => {
     deleteCollection(
       { type: collectionType, id: collectionId },
       {
@@ -79,29 +77,14 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
             isLoading={isLoading}
             isError={isError}
           />
-          <form
-            onSubmit={confirmDeleteCollection}
-            className="flex items-center gap-2 lg:justify-end"
-          >
-            <Button
-              variant="outline"
-              color="primary"
-              type="button"
-              onClick={onClose}
-              disabled={isDeleting}
-              className="w-full lg:w-auto"
-            >
-              Cancel
-            </Button>
-            <SubmitButton
-              color="danger"
-              pending={isDeleting}
-              disabled={isLoading}
-              className="w-full lg:w-auto"
-            >
-              Delete
-            </SubmitButton>
-          </form>
+          <ConfirmationDialog
+            isPending={isDeleting}
+            isLoading={isLoading}
+            onConfirm={confirmDeleteCollection}
+            closeForm={onClose}
+            submitButtonColor="danger"
+            submitButtonText="Delete"
+          />
         </>
       </Modal.Content>
     </Modal.Root>
@@ -132,10 +115,10 @@ function ImpactContent(props: ImpactContentProps) {
 
   if (isLoading) {
     dialogContent = <FormNotReady />;
-  } else if (isError) {
-    dialogContent = <p>{ERROR_LOADING_IMPACT[collectionType]}</p>;
+  } else if (true) {
+    dialogContent = <DangerWrapper>{ERROR_LOADING_IMPACT[collectionType]}</DangerWrapper>;
   } else if (impactedPacks.length === 0) {
-    dialogContent = <Reassurance>{NO_IMPACT[collectionType]}</Reassurance>;
+    dialogContent = <CheckedWrapper>{NO_IMPACT[collectionType]}</CheckedWrapper>;
   } else if (collectionType === 'list') {
     dialogContent = <ListImpact packs={impactedPacks} />;
   } else {
@@ -148,7 +131,7 @@ function ImpactContent(props: ImpactContentProps) {
       className="text-primary mb-6 flex min-h-0 flex-1 flex-col gap-4 py-4 text-sm"
     >
       {dialogContent}
-      {!isLoading && <Reassurance>{IMPACT_REASSURANCE[collectionType]}</Reassurance>}
+      {!isLoading && <CheckedWrapper>{IMPACT_REASSURANCE[collectionType]}</CheckedWrapper>}
     </div>
   );
 }
@@ -158,7 +141,7 @@ function ListImpact({ packs }: { packs: { id: string; name: string }[] }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <p className="mb-2">
+      <p className="mb-4">
         This list is used in{' '}
         <strong className="font-medium">
           {packsCount} pack{packsCount === 1 ? '' : 's'}
@@ -192,15 +175,6 @@ function AffectedPacksList({ packs }: { packs: { id: string; name: string }[] })
           </Link>
         </div>
       ))}
-    </div>
-  );
-}
-
-function Reassurance({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-2">
-      <MdOutlineCheckCircle size={15} className="text-success mt-0.5 shrink-0" />
-      <p>{children}</p>
     </div>
   );
 }
