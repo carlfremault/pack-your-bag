@@ -68,7 +68,7 @@ export function CollectionCard(props: CollectionCardProps) {
           {name}
         </span>
         {description && (
-          <div id={descriptionId} className="line-clamp-3 text-xs font-light">
+          <div id={descriptionId} className="line-clamp-3 text-xs font-light break-all">
             {description}
           </div>
         )}

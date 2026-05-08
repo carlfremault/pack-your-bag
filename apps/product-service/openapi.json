@@ -250,7 +250,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Item deleted successfully."
           },
           "400": {
@@ -527,7 +527,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Category deleted successfully."
           },
           "400": {
@@ -804,7 +804,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "List deleted successfully."
           },
           "400": {
@@ -1081,7 +1081,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Pack deleted successfully."
           },
           "400": {
@@ -1309,7 +1309,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Trip deleted successfully."
           },
           "400": {

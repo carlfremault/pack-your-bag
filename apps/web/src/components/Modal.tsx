@@ -140,7 +140,7 @@ function ModalTrigger(props: TriggerProps) {
 
 type ModalWidth = 'lg' | '3xl';
 type ContentProps = {
-  title?: string;
+  title?: React.ReactNode;
   titleColor?: 'primary' | 'danger';
   modalWidth?: ModalWidth;
   className?: string;

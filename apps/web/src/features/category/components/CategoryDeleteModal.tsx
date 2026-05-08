@@ -1,7 +1,7 @@
 'use client';
 
 import toast from 'react-hot-toast';
-import { HiOutlineArrowUpRight } from 'react-icons/hi2';
+import { FiExternalLink } from 'react-icons/fi';
 import { MdArrowRight } from 'react-icons/md';
 import Link from 'next/link';
 
@@ -53,9 +53,11 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
         <Link
           href={`/items?category=${encodeURIComponent(categoryName)}`}
           className="text-primary flex items-center gap-2 underline"
+          target="_blank"
+          rel="noopener"
         >
           View all affected items
-          <HiOutlineArrowUpRight />
+          <FiExternalLink />
         </Link>
         <p className="text-danger">If you are sure you may still proceed with deletion.</p>
       </div>
@@ -73,7 +75,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
           <p>Deleting it will leave them uncategorized:</p>
         </div>
 
-        <div className="bg-primary-ring/50 border-info rounded-md border p-1">
+        <div className="bg-primary-ring/50 border-info rounded-md border p-2">
           {firstThreeImpactedItems.map((item) => (
             <div key={item.id} className="flex items-center">
               <MdArrowRight className="h-4 w-4" />
@@ -86,9 +88,11 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
           <Link
             href={`/items?category=${encodeURIComponent(categoryName)}`}
             className="text-primary flex items-center gap-2 underline"
+            target="_blank"
+            rel="noopener"
           >
             View all affected items
-            <HiOutlineArrowUpRight />
+            <FiExternalLink />
           </Link>
         )}
       </>

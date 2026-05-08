@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
@@ -24,6 +24,7 @@ import {
   getTotalWeightInPack,
 } from '../utils';
 
+import CollectionDeleteModal from './CollectionDeleteModal';
 import ListContent from './ListContent';
 import PackContent from './PackContent';
 
@@ -40,6 +41,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
   const { data: collection, isLoading: isCollectionLoading, isError } = useCollection(id, type);
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const isLoading = isCollectionLoading || isPreferencesLoading;
@@ -87,8 +89,13 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     [pathname, router, searchParams],
   );
 
-  // TODO: Implement delete collection
-  const handleDeleteCollection = () => {};
+  const handleDeleteCollection = (id: string) => {
+    setDeleteCollectionId(id);
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteCollectionId(null);
+  };
 
   if (!isReady) {
     return <PageNotReady />;
@@ -102,6 +109,14 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     );
   }
 
+  const collectionDeleteModal = deleteCollectionId && (
+    <CollectionDeleteModal
+      collectionId={deleteCollectionId}
+      collectionType={type}
+      onClose={closeDeleteModal}
+    />
+  );
+
   return (
     <div className="bg-surface border-primary-ring m-4 flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm">
       {collectionForHeaderDisplay && (
@@ -114,6 +129,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
       )}
       {collection?.type === 'list' && <ListContent collection={collection} isDesktop={isDesktop} />}
       {collection?.type === 'pack' && <PackContent collection={collection} isDesktop={isDesktop} />}
+      {collectionDeleteModal}
     </div>
   );
 }
