@@ -2,21 +2,21 @@ import { Button, ButtonColor, SubmitButton } from '@repo/react-common/button';
 
 export interface ConfirmationDialogProps {
   isPending: boolean;
-  disabled?: boolean;
+  isLoading?: boolean;
   onConfirm: () => void;
   closeForm: () => void;
-  children: React.ReactNode;
   submitButtonColor?: ButtonColor;
+  submitButtonText?: string;
 }
 
 export function ConfirmationDialog(props: ConfirmationDialogProps) {
   const {
     isPending,
-    disabled = false,
+    isLoading = false,
     onConfirm,
     closeForm,
-    children,
     submitButtonColor = 'danger',
+    submitButtonText = 'Submit',
   } = props;
 
   const handleConfirm = (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,22 +25,25 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {children}
-      <form onSubmit={handleConfirm} className="flex items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          color="primary"
-          type="button"
-          onClick={closeForm}
-          disabled={isPending}
-        >
-          Cancel
-        </Button>
-        <SubmitButton color={submitButtonColor} pending={isPending} disabled={disabled}>
-          Confirm
-        </SubmitButton>
-      </form>
-    </div>
+    <form onSubmit={handleConfirm} className="flex items-center gap-2 lg:justify-end">
+      <Button
+        variant="outline"
+        color="primary"
+        type="button"
+        onClick={closeForm}
+        disabled={isPending}
+        className="w-full lg:w-auto"
+      >
+        Cancel
+      </Button>
+      <SubmitButton
+        color={submitButtonColor}
+        pending={isPending}
+        disabled={isLoading}
+        className="w-full lg:w-auto"
+      >
+        {submitButtonText}
+      </SubmitButton>
+    </form>
   );
 }

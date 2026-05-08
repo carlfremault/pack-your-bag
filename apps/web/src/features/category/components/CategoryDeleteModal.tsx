@@ -2,15 +2,19 @@
 
 import toast from 'react-hot-toast';
 import { FiExternalLink } from 'react-icons/fi';
-import { MdArrowRight } from 'react-icons/md';
+import { TbTrash } from 'react-icons/tb';
 import Link from 'next/link';
 
-import { Button, SubmitButton } from '@repo/react-common/button';
-import { FormNotReady } from '@repo/react-common/utils';
+import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
+import { CheckedWrapper, DangerWrapper, FormNotReady } from '@repo/react-common/utils';
 
 import { Modal } from '@/components/Modal';
 
 import { useCategoryDeleteImpact, useDeleteCategory } from '../queries';
+
+const ERROR_LOADING_IMPACT =
+  'There was an error loading impact data. You may proceed but note that any item which has this category assigned will be uncategorized.';
+const NO_IMPACT = 'This category is not assigned to any item.';
 
 interface CategoryDeleteModalProps {
   categoryId: string;
@@ -25,8 +29,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
   const { data, isLoading, isError } = useCategoryDeleteImpact(categoryId);
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
-  const confirmDeleteCategory = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const confirmDeleteCategory = () => {
     deleteCategory(categoryId, {
       onSuccess: () => {
         onCategoryDeleted(categoryName);
@@ -37,102 +40,135 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
   };
 
   const impactedItems = data?.items ?? [];
-  const impactedItemsCount = impactedItems.length;
-  const firstThreeImpactedItems = impactedItems.slice(0, 3);
-
-  let dialogContent: React.ReactNode;
-  if (isLoading) {
-    dialogContent = <FormNotReady />;
-  } else if (isError) {
-    dialogContent = (
-      <div className="bg-danger/10 border-danger flex flex-col gap-2 rounded-md border p-4">
-        <p className="text-danger">
-          Could not load impact data. Any item which has this category assigned will be
-          uncategorized. You can check manually on the items page or try again later.
-        </p>
-        <Link
-          href={`/items?category=${encodeURIComponent(categoryName)}`}
-          className="text-primary flex items-center gap-2 underline"
-          target="_blank"
-          rel="noopener"
-        >
-          View all affected items
-          <FiExternalLink />
-        </Link>
-        <p className="text-danger">If you are sure you may still proceed with deletion.</p>
-      </div>
-    );
-  } else if (impactedItemsCount === 0) {
-    dialogContent = <p>This category is not assigned to any item.</p>;
-  } else {
-    dialogContent = (
-      <>
-        <div>
-          <p>
-            This category is assigned to{' '}
-            <strong>{`${impactedItemsCount} item${impactedItemsCount === 1 ? '' : 's'}`}</strong>.
-          </p>
-          <p>Deleting it will leave them uncategorized:</p>
-        </div>
-
-        <div className="bg-primary-ring/50 border-info rounded-md border p-2">
-          {firstThreeImpactedItems.map((item) => (
-            <div key={item.id} className="flex items-center">
-              <MdArrowRight className="h-4 w-4" />
-              {item.name}
-            </div>
-          ))}
-          {impactedItemsCount > 3 && <div className="">... and {impactedItemsCount - 3} more.</div>}
-        </div>
-        {impactedItemsCount > 3 && (
-          <Link
-            href={`/items?category=${encodeURIComponent(categoryName)}`}
-            className="text-primary flex items-center gap-2 underline"
-            target="_blank"
-            rel="noopener"
-          >
-            View all affected items
-            <FiExternalLink />
-          </Link>
-        )}
-      </>
-    );
-  }
 
   return (
     <Modal.Root open onOpenChange={onClose}>
       <Modal.Content
-        title="Delete Category"
+        title={<ModalTitle />}
         role="alertdialog"
         ariaDescribedBy="confirmation-dialog-desc"
         className="max-w-md"
       >
         <>
-          <div id="confirmation-dialog-desc" className="text-primary mb-6 flex flex-col gap-4 py-4">
-            {dialogContent}
-          </div>
-          <form onSubmit={confirmDeleteCategory} className="flex items-center gap-2 lg:justify-end">
-            <Button
-              variant="outline"
-              color="primary"
-              type="button"
-              onClick={onClose}
-              disabled={isDeleting}
-              className="w-full lg:w-auto"
-            >
-              Cancel
-            </Button>
-            <SubmitButton
-              color="danger"
-              pending={isDeleting}
-              disabled={isLoading}
-              className="w-full lg:w-auto"
-            >
-              Delete
-            </SubmitButton>
-          </form>
+          <ImpactContent
+            impactedItems={impactedItems}
+            categoryName={categoryName}
+            isLoading={isLoading}
+            isError={isError}
+          />
+          <ConfirmationDialog
+            isPending={isDeleting}
+            isLoading={isLoading}
+            onConfirm={confirmDeleteCategory}
+            closeForm={onClose}
+            submitButtonColor="danger"
+            submitButtonText="Delete"
+          />
         </>
       </Modal.Content>
     </Modal.Root>
+  );
+}
+
+function ModalTitle() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="bg-danger/10 flex h-8 w-8 items-center justify-center rounded-md">
+        <TbTrash size={16} className="text-danger" />
+      </div>
+      <span>Delete Category</span>
+    </div>
+  );
+}
+
+interface ImpactContentProps {
+  impactedItems: { id: string; name: string }[];
+  categoryName: string;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+function ImpactContent(props: ImpactContentProps) {
+  const { impactedItems, categoryName, isLoading, isError } = props;
+
+  let dialogContent: React.ReactNode;
+
+  if (isLoading) {
+    dialogContent = <FormNotReady />;
+  } else if (isError) {
+    dialogContent = (
+      <>
+        <DangerWrapper>{ERROR_LOADING_IMPACT}</DangerWrapper>
+        <ViewAllImpactedItems categoryName={categoryName} />
+      </>
+    );
+  } else if (impactedItems.length === 0) {
+    dialogContent = <CheckedWrapper>{NO_IMPACT}</CheckedWrapper>;
+  } else {
+    dialogContent = (
+      <>
+        <CategoryImpact items={impactedItems} />
+        {impactedItems.length > 3 && <ViewAllImpactedItems categoryName={categoryName} />}
+      </>
+    );
+  }
+
+  return (
+    <div
+      id="confirmation-dialog-desc"
+      className="text-primary mb-6 flex flex-col gap-4 py-4 text-sm"
+    >
+      {dialogContent}
+    </div>
+  );
+}
+
+function CategoryImpact({ items }: { items: { id: string; name: string }[] }) {
+  const itemsCount = items.length;
+
+  return (
+    <div className="flex flex-col">
+      <p className="mb-4">
+        This category is assigned to{' '}
+        <strong className="font-medium">{`${itemsCount} item${itemsCount === 1 ? '' : 's'}`}</strong>
+        . Deleting it will leave them uncategorized:
+      </p>
+      <p className="mb-2 text-xs font-medium tracking-wider uppercase">Affected items</p>
+      <AffectedItemsList items={items} />
+    </div>
+  );
+}
+
+function AffectedItemsList({ items }: { items: { id: string; name: string }[] }) {
+  return (
+    <div className="border-primary-ring min-h-0 flex-1 overflow-y-auto rounded-md border">
+      {items.slice(0, 3).map((item, index) => (
+        <div
+          key={item.id}
+          className={`px-3 py-2 ${index > 0 ? 'border-primary-ring border-t' : ''}`}
+        >
+          <span>{item.name}</span>
+        </div>
+      ))}
+      {items.length > 3 && (
+        <div className="border-primary-ring border-t px-3 py-2">
+          ... and {items.length - 3} more.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ViewAllImpactedItems({ categoryName }: { categoryName: string }) {
+  return (
+    <Link
+      href={`/items?category=${encodeURIComponent(categoryName)}`}
+      className="text-primary flex items-center gap-2 underline"
+      target="_blank"
+      rel="noopener"
+    >
+      View all items with this category
+      <FiExternalLink />
+    </Link>
   );
 }
