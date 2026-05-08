@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import z from 'zod';
 
-import { getList, updateList } from '@/features/collection/api';
+import { deleteList, getList, updateList } from '@/features/collection/api';
 import { updateListSchema } from '@/features/collection/schema';
 import { withErrorHandling } from '@/lib/api-handlers';
 
@@ -38,5 +38,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const data = await updateList(id, parsedBody.data);
 
     return NextResponse.json({ data }, { status: 200 });
+  });
+}
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  return withErrorHandling(async () => {
+    const { id } = await params;
+
+    await deleteList(id);
+
+    return new NextResponse(null, { status: 204 });
   });
 }

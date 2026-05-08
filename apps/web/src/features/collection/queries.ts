@@ -17,8 +17,10 @@ import {
   ItemList,
   ItemPack,
   List,
+  ListDeleteImpact,
   ListPack,
   Pack,
+  PackDeleteImpact,
   UpdateListBody,
   UpdatePackBody,
   UpsertItemListBody,
@@ -65,7 +67,7 @@ const useCollection = (id?: string, type?: CollectionType): UseQueryResult<Colle
   return useQuery({
     queryKey: [type, id],
     queryFn: () => fetchCollection(id, type),
-    enabled: !!id && !!type,
+    enabled: !!id,
   });
 };
 
@@ -215,6 +217,78 @@ const useUpdateCollection = () => {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: [variables.type, variables.id] });
+    },
+  });
+};
+
+// -------------------------------------------
+// Get collection delete impact (List or Pack)
+// -------------------------------------------
+
+type CollectionDeleteVariables = { type: 'list'; id: string } | { type: 'pack'; id: string };
+
+const fetchCollectionDeleteImpact = async ({
+  type,
+  id,
+}: CollectionDeleteVariables): Promise<ListDeleteImpact | PackDeleteImpact> => {
+  const res = await fetch(`/api/${type}/${id}/delete-impact`);
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useCollectionDeleteImpact = ({
+  type,
+  id,
+}: CollectionDeleteVariables): UseQueryResult<ListDeleteImpact | PackDeleteImpact> => {
+  return useQuery({
+    queryKey: ['deleteImpact', type, id],
+    queryFn: () => fetchCollectionDeleteImpact({ type, id }),
+    enabled: !!id,
+  });
+};
+
+// ----------------------------------
+// Delete collection (List or Pack)
+// ----------------------------------
+
+const deleteCollection = async ({ type, id }: CollectionDeleteVariables): Promise<void> => {
+  const res = await fetch(`/api/${type}/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+};
+
+const useDeleteCollection = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteCollection,
+    onMutate: async ({ type, id }) => {
+      await queryClient.cancelQueries({ queryKey: ['collections'] });
+      await queryClient.cancelQueries({ queryKey: [type, id] });
+
+      const previousCollections = queryClient.getQueryData<Collection[]>(['collections']) ?? [];
+
+      queryClient.setQueryData(['collections'], (old: Collection[] = []) =>
+        old.filter((collection) => collection.id !== id),
+      );
+
+      return { previousCollections };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousCollections !== undefined) {
+        queryClient.setQueryData(['collections'], context.previousCollections);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
     },
   });
 };
@@ -413,6 +487,8 @@ export {
   useCollection,
   useCreateCollection,
   useUpdateCollection,
+  useCollectionDeleteImpact,
+  useDeleteCollection,
   useUpsertItemInCollection,
   useUpsertListInPack,
 };

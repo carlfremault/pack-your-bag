@@ -11,6 +11,8 @@ export type CreateListBody = RequestBody<'/list', 'post'>;
 export type CreatePackBody = RequestBody<'/pack', 'post'>;
 export type UpdateListBody = RequestBody<'/list/{id}', 'patch'>;
 export type UpdatePackBody = RequestBody<'/pack/{id}', 'patch'>;
+export type ListDeleteImpact = SuccessResponse<'/list/{id}/delete-impact', 'get'>;
+export type PackDeleteImpact = SuccessResponse<'/pack/{id}/delete-impact', 'get'>;
 
 export type ItemList = SuccessResponse<'/item-list', 'post'>;
 export type ItemPack = SuccessResponse<'/item-pack', 'post'>;

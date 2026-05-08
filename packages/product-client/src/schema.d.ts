@@ -1265,7 +1265,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Item deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1546,7 +1546,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Category deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1827,7 +1827,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description List deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2108,7 +2108,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Pack deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2339,7 +2339,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Trip deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };

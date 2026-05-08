@@ -8,9 +8,11 @@ import {
   ItemList,
   ItemPack,
   List,
+  ListDeleteImpact,
   ListPack,
   ListSummary,
   Pack,
+  PackDeleteImpact,
   PackSummary,
   UpdateListBody,
   UpdatePackBody,
@@ -18,6 +20,10 @@ import {
   UpsertItemPackBody,
   UpsertListInPackBody,
 } from './types';
+
+// -------------------------------
+// Get functions
+// -------------------------------
 
 export async function getList(id: string): Promise<List> {
   const productClient = await getProductClient();
@@ -63,6 +69,10 @@ export async function getAllCollections(): Promise<Collection[]> {
   return [...mappedLists, ...mappedPacks];
 }
 
+// -------------------------------
+// Create functions
+// -------------------------------
+
 export async function createList(body: CreateListBody): Promise<List> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.POST('/list', { body });
@@ -74,6 +84,10 @@ export async function createPack(body: CreatePackBody): Promise<Pack> {
   const { data, error, response } = await productClient.POST('/pack', { body });
   return handleApiResponse(data, error, response);
 }
+
+// -------------------------------
+// Update functions
+// -------------------------------
 
 export async function updateList(id: string, body: UpdateListBody): Promise<List> {
   const productClient = await getProductClient();
@@ -92,6 +106,46 @@ export async function updatePack(id: string, body: UpdatePackBody): Promise<Pack
   });
   return handleApiResponse(data, error, response);
 }
+
+// -------------------------------
+// Delete functions
+// -------------------------------
+
+export async function getListDeleteImpact(id: string): Promise<ListDeleteImpact> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.GET('/list/{id}/delete-impact', {
+    params: { path: { id } },
+  });
+  return handleApiResponse(data, error, response);
+}
+
+export async function getPackDeleteImpact(id: string): Promise<PackDeleteImpact> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.GET('/pack/{id}/delete-impact', {
+    params: { path: { id } },
+  });
+  return handleApiResponse(data, error, response);
+}
+
+export async function deleteList(id: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/list/{id}', {
+    params: { path: { id } },
+  });
+  handleApiVoidResponse(error, response);
+}
+
+export async function deletePack(id: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/pack/{id}', {
+    params: { path: { id } },
+  });
+  handleApiVoidResponse(error, response);
+}
+
+// -------------------------------
+// Upserting functions
+// -------------------------------
 
 export async function upsertItemOnList(body: UpsertItemListBody): Promise<ItemList> {
   const productClient = await getProductClient();
