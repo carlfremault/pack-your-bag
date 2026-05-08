@@ -4,7 +4,7 @@ export interface ConfirmationDialogProps {
   isPending: boolean;
   isLoading?: boolean;
   onConfirm: () => void;
-  closeForm: () => void;
+  onClose: () => void;
   submitButtonColor?: ButtonColor;
   submitButtonText?: string;
 }
@@ -14,7 +14,7 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
     isPending,
     isLoading = false,
     onConfirm,
-    closeForm,
+    onClose,
     submitButtonColor = 'danger',
     submitButtonText = 'Submit',
   } = props;
@@ -30,7 +30,7 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
         variant="outline"
         color="primary"
         type="button"
-        onClick={closeForm}
+        onClick={onClose}
         disabled={isPending}
         className="w-full lg:w-auto"
       >

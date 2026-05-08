@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { MdOutlineFormatListBulleted } from 'react-icons/md';
 
 import { Alert } from '@repo/react-common/alert';
@@ -110,24 +110,18 @@ function AddListsModalContent(props: AddListsModalContentProps) {
     lists: listsForDisplay,
   });
 
-  const renderListUpsertActions = useCallback(
-    (list: CollectionListForDisplayWithItems) => (
-      <QuantityStepper
-        quantity={list.quantity}
-        onChange={(qty) => handleUpsertListInPack(list.id, qty, pack.id)}
-      />
-    ),
-    [handleUpsertListInPack, pack.id],
+  const renderListUpsertActions = (list: CollectionListForDisplayWithItems) => (
+    <QuantityStepper
+      quantity={list.quantity}
+      onChange={(qty) => handleUpsertListInPack(list.id, qty, pack.id)}
+    />
   );
 
-  const renderListItemUpsertActions = useCallback(
-    (item: CollectionItemForDisplay, listId: string) => (
-      <QuantityStepper
-        quantity={item.quantity}
-        onChange={(qty) => handleUpsertItemInList(item.id, qty, listId)}
-      />
-    ),
-    [handleUpsertItemInList],
+  const renderListItemUpsertActions = (item: CollectionItemForDisplay, listId: string) => (
+    <QuantityStepper
+      quantity={item.quantity}
+      onChange={(qty) => handleUpsertItemInList(item.id, qty, listId)}
+    />
   );
 
   if (isListsError && !collections.length)

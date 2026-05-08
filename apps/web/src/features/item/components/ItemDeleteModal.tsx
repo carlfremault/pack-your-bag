@@ -40,7 +40,7 @@ export default function ItemDeleteModal(props: ItemDeleteModalProps) {
         <ConfirmationDialog
           isPending={isDeleting}
           onConfirm={confirmDeleteItem}
-          closeForm={onClose}
+          onClose={onClose}
           submitButtonColor="danger"
           submitButtonText="Delete"
         />

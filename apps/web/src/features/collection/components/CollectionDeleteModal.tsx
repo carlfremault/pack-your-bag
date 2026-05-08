@@ -81,7 +81,7 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
             isPending={isDeleting}
             isLoading={isLoading}
             onConfirm={confirmDeleteCollection}
-            closeForm={onClose}
+            onClose={onClose}
             submitButtonColor="danger"
             submitButtonText="Delete"
           />

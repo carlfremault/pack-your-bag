@@ -41,14 +41,14 @@ export default function PackContent(props: PackContentProps) {
     useUpsert(collection);
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
-  const toggleExpandedList = useCallback((id: string) => {
+  const toggleExpandedList = (id: string) => {
     setExpandedLists((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  }, []);
+  };
 
   const collectionItemsForDisplay = useMemo((): CollectionItemForDisplay[] => {
     return (collection.items ?? []).map((entry) =>

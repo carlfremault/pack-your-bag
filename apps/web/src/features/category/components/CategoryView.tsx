@@ -30,11 +30,11 @@ export function CategoryView({
   const { data = [], isLoading, isError } = useAllCategories();
   const editCategory = data.find((category) => category.id === editCategoryId);
 
-  const closeForm = useCallback(() => {
+  const closeForm = () => {
     setEditCategoryId(null);
     setMode('table');
     onTitleChange('Categories');
-  }, [onTitleChange]);
+  };
 
   const handleAddCategory = () => {
     setEditCategoryId(null);
@@ -59,9 +59,9 @@ export function CategoryView({
     [data],
   );
 
-  const closeDeleteModal = useCallback(() => {
+  const handleCloseDeleteModal = () => {
     setDeleteCategory(null);
-  }, []);
+  };
 
   if (isError && !data.length) {
     return (
@@ -95,7 +95,7 @@ export function CategoryView({
           <CategoryDeleteModal
             categoryId={deleteCategory.id}
             categoryName={deleteCategory.name}
-            onClose={closeDeleteModal}
+            onClose={handleCloseDeleteModal}
             onCategoryDeleted={onCategoryDeleted}
           />
         )}

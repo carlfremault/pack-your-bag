@@ -60,7 +60,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
             isPending={isDeleting}
             isLoading={isLoading}
             onConfirm={confirmDeleteCategory}
-            closeForm={onClose}
+            onClose={onClose}
             submitButtonColor="danger"
             submitButtonText="Delete"
           />
