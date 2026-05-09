@@ -8,7 +8,6 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from '@/components/Modal';
-import { CategoryErrorFallback } from '@/features/category/components/CategoryErrorFallback';
 import { CategoryTableSkeleton } from '@/features/category/components/CategoryTableSkeleton';
 import { CategoryView, type CategoryViewMode } from '@/features/category/components/CategoryView';
 import CollectionForm from '@/features/collection/components/CollectionForm';
@@ -16,6 +15,7 @@ import { CollectionType } from '@/features/collection/types';
 import ItemForm from '@/features/item/components/ItemForm';
 import { usePreferences } from '@/features/settings/queries';
 
+import ErrorFallback from '../ErrorFallback';
 import { AddModalTitle, EditModalTitle } from '../Modal/ModalTitle';
 import { SidebarNav } from '../Navigation/SidebarNav';
 
@@ -123,7 +123,9 @@ function ActionPanelInner() {
     desktopTitle = 'Edit collection';
   } else if (action === 'manage-categories') {
     panelContent = (
-      <ErrorBoundary fallback={<CategoryErrorFallback />}>
+      <ErrorBoundary
+        fallback={<ErrorFallback message="Failed to load categories. Please try again later." />}
+      >
         <Suspense fallback={<CategoryTableSkeleton />}>
           <CategoryView
             onClose={closeAction}

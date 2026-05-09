@@ -3,9 +3,9 @@ import { Suspense } from 'react';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ErrorFallback from '@/components/ErrorFallback';
 import { getPack } from '@/features/collection/api';
 import CollectionDetails from '@/features/collection/components/CollectionDetails';
-import CollectionDetailsErrorFallback from '@/features/collection/components/CollectionDetailsErrorFallback';
 import CollectionDetailsSkeleton from '@/features/collection/components/CollectionDetailsSkeleton';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +21,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     <div className="flex w-full justify-center lg:min-h-0 lg:flex-1 lg:overflow-hidden">
       <h1 className="sr-only">Pack details</h1>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <ErrorBoundary fallback={<CollectionDetailsErrorFallback />}>
+        <ErrorBoundary
+          fallback={<ErrorFallback message="Failed to load pack. Please try again later." />}
+        >
           <Suspense fallback={<CollectionDetailsSkeleton />}>
             <CollectionDetails type="pack" id={id} />
           </Suspense>
