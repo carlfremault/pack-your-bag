@@ -85,7 +85,13 @@ const useCreateCategory = () => {
 // -------------------------------
 // Update category
 // -------------------------------
-const updateCategory = async (id: string, body: UpdateCategoryBody): Promise<Category> => {
+const updateCategory = async ({
+  id,
+  body,
+}: {
+  id: string;
+  body: UpdateCategoryBody;
+}): Promise<Category> => {
   const res = await fetch(`/api/category/${id}`, {
     method: 'PATCH',
     headers: {
@@ -105,8 +111,7 @@ const useUpdateCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: UpdateCategoryBody }) =>
-      updateCategory(id, body),
+    mutationFn: updateCategory,
     onMutate: async ({ id, body }) => {
       await queryClient.cancelQueries({ queryKey: ['categories'] });
 

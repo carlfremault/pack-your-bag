@@ -84,7 +84,7 @@ const useCreateItem = () => {
 // -------------------------------
 // Update item
 // -------------------------------
-const updateItem = async (id: string, body: UpdateItemBody): Promise<Item> => {
+const updateItem = async ({ id, body }: { id: string; body: UpdateItemBody }): Promise<Item> => {
   const res = await fetch(`/api/item/${id}`, {
     method: 'PATCH',
     headers: {
@@ -104,7 +104,7 @@ const useUpdateItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: UpdateItemBody }) => updateItem(id, body),
+    mutationFn: updateItem,
     onMutate: async ({ id, body }) => {
       await queryClient.cancelQueries({ queryKey: ['items'] });
 
