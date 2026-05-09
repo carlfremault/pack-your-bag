@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { MdCheckCircleOutline, MdOutlineCircle } from 'react-icons/md';
 
 import { QuantityStepper } from '../input/QuantityStepper';
@@ -14,10 +13,7 @@ export interface TripItemCardProps {
 export function TripItemCard(props: TripItemCardProps) {
   const { itemId, itemName, quantityNeeded, quantityPacked, onQuantityPackedChange } = props;
 
-  const handleQuantityChange = useCallback(
-    (quantity: number) => onQuantityPackedChange(itemId, quantity),
-    [itemId, onQuantityPackedChange],
-  );
+  const handleQuantityChange = (quantity: number) => onQuantityPackedChange(itemId, quantity);
 
   const fullyPacked = quantityPacked === quantityNeeded;
 

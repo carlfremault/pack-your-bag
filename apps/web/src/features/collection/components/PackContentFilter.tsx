@@ -14,11 +14,6 @@ export interface PackContentFilterState {
   sortDirection: 'asc' | 'desc';
 }
 
-interface PackContentFilterProps {
-  filterState: PackContentFilterState;
-  onChange: (updates: Partial<PackContentFilterState>) => void;
-}
-
 const CONTENT_TYPE_OPTIONS: InputSelectOption<'all' | 'item' | 'list'>[] = [
   {
     value: 'all',
@@ -55,6 +50,11 @@ const SORT_FIELD_OPTIONS: InputSelectOption[] = [
   { value: 'weight', label: 'Weight' },
   { value: 'category', label: 'Category' },
 ];
+
+export interface PackContentFilterProps {
+  filterState: PackContentFilterState;
+  onChange: (updates: Partial<PackContentFilterState>) => void;
+}
 
 export function PackContentFilter({ filterState, onChange }: PackContentFilterProps) {
   const hasActiveFilters =

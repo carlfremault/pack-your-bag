@@ -14,6 +14,14 @@ import {
 } from '@/components/Navigation/navigation';
 import { logoutAction } from '@/features/auth/actions';
 
+export function DesktopNav() {
+  return (
+    <Suspense fallback={null}>
+      <DesktopNavInner />
+    </Suspense>
+  );
+}
+
 function DesktopNavInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,13 +36,5 @@ function DesktopNavInner() {
       linkAs={Link}
       logOut={logoutAction}
     />
-  );
-}
-
-export function DesktopNav() {
-  return (
-    <Suspense fallback={null}>
-      <DesktopNavInner />
-    </Suspense>
   );
 }

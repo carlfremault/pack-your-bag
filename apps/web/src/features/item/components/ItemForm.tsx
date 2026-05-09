@@ -16,18 +16,6 @@ import { convertGramsToOunces, convertOuncesToGrams } from '@/utils/weightUtils'
 import { useAllItems, useCreateItem, useUpdateItem } from '../queries';
 import { Item } from '../types';
 
-export interface ItemFormProps {
-  itemId?: string;
-  units: Units;
-  onClose: () => void;
-}
-
-interface ItemFormInnerProps {
-  item?: Item;
-  units: Units;
-  onClose: () => void;
-}
-
 type ItemFieldErrors = {
   name?: string;
   description?: string;
@@ -35,21 +23,30 @@ type ItemFieldErrors = {
   categoryId?: string;
 };
 
-const getInitialFormValues = (item?: Item, units?: Units) => {
-  const convertedWeight =
-    units === Units.IMPERIAL && item?.weight
-      ? convertGramsToOunces(Number(item?.weight))
-      : item?.weight;
-
-  return {
-    name: item?.name ?? '',
-    description: item?.description ?? '',
-    weight: convertedWeight?.toString() ?? '',
-    categoryId: item?.category?.id ?? '',
-  };
-};
-
 const ITEM_FORM_FIELDS: (keyof ItemFieldErrors)[] = ['name', 'description', 'weight', 'categoryId'];
+
+export interface ItemFormProps {
+  itemId?: string;
+  units: Units;
+  onClose: () => void;
+}
+
+export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
+  const { data: items = [], isLoading } = useAllItems();
+  const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
+
+  if (itemId && isLoading && !itemToEdit) {
+    return <FormNotReady />;
+  }
+
+  return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;
+}
+
+interface ItemFormInnerProps {
+  item?: Item;
+  units: Units;
+  onClose: () => void;
+}
 
 function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   const editMode = item !== undefined;
@@ -154,13 +151,16 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   );
 }
 
-export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
-  const { data: items = [], isLoading } = useAllItems();
-  const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
+const getInitialFormValues = (item?: Item, units?: Units) => {
+  const convertedWeight =
+    units === Units.IMPERIAL && item?.weight
+      ? convertGramsToOunces(Number(item?.weight))
+      : item?.weight;
 
-  if (itemId && isLoading && !itemToEdit) {
-    return <FormNotReady />;
-  }
-
-  return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;
-}
+  return {
+    name: item?.name ?? '',
+    description: item?.description ?? '',
+    weight: convertedWeight?.toString() ?? '',
+    categoryId: item?.category?.id ?? '',
+  };
+};

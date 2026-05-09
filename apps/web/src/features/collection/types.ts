@@ -43,3 +43,7 @@ export type CollectionListForDisplay = CollectionForDisplay & { quantity: number
 export type CollectionListForDisplayWithItems = CollectionListForDisplay & {
   listItems: CollectionItemForDisplay[];
 };
+
+export type PackContentRow =
+  | (CollectionItemForDisplay & { entryType: 'item' })
+  | (CollectionListForDisplayWithItems & { entryType: 'list' });

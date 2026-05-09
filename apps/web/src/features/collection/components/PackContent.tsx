@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { CollectionListCard, ItemCard } from '@repo/react-common/card';
 import { QuantityStepper } from '@repo/react-common/input';
 
 import {
@@ -11,8 +10,6 @@ import {
   toCollectionItemForDisplay,
 } from '@/features/collection/utils';
 import { usePreferences } from '@/features/settings/queries';
-import { toCollectionListCardProps } from '@/lib/mappers/collection.mapper';
-import { toItemCardProps } from '@/lib/mappers/item.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useFilterPackContent } from '../hooks/useFilterPackContent';
@@ -25,6 +22,7 @@ import {
 
 import AddItemsModal from './AddItemsModal';
 import AddListsModal from './AddListsModal';
+import PackContentCards from './PackContentCards';
 import { PackContentFilter } from './PackContentFilter';
 import PackContentTable from './PackContentTable';
 
@@ -39,16 +37,6 @@ export default function PackContent(props: PackContentProps) {
   const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
   const { handleUpsertItemInList, handleUpsertItemInPack, handleUpsertListInPack } =
     useUpsert(collection);
-
-  const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
-  const toggleExpandedList = useCallback((id: string) => {
-    setExpandedLists((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
 
   const collectionItemsForDisplay = useMemo((): CollectionItemForDisplay[] => {
     return (collection.items ?? []).map((entry) =>
@@ -105,48 +93,20 @@ export default function PackContent(props: PackContentProps) {
     [handleUpsertItemInList],
   );
 
-  let packContent: React.ReactNode;
-  if (isDesktop) {
-    packContent = (
-      <PackContentTable
-        entries={filteredContent}
-        isLoading={isPreferencesLoading}
-        upsertActions={renderUpsertActions}
-        listItemUpsertActions={renderListItemUpsertActions}
-      />
-    );
-  } else {
-    packContent = (
-      <div className="mb-32 flex w-full flex-col gap-2">
-        {filteredContent.map((entry) =>
-          entry.entryType === 'item' ? (
-            <ItemCard key={entry.id} {...toItemCardProps(entry, renderUpsertActions(entry))} />
-          ) : (
-            <CollectionListCard
-              key={entry.id}
-              {...toCollectionListCardProps(entry, renderUpsertActions(entry))}
-              onViewDetails={() => toggleExpandedList(entry.id)}
-              isExpanded={expandedLists.has(entry.id)}
-              expandedContent={
-                entry.listItems.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    {entry.listItems.map((item) => (
-                      <ItemCard
-                        key={item.id}
-                        {...toItemCardProps(item, renderListItemUpsertActions(item, entry.id))}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-primary text-sm">No items in this list</div>
-                )
-              }
-            />
-          ),
-        )}
-      </div>
-    );
-  }
+  const packContent = isDesktop ? (
+    <PackContentTable
+      entries={filteredContent}
+      isLoading={isPreferencesLoading}
+      upsertActions={renderUpsertActions}
+      listItemUpsertActions={renderListItemUpsertActions}
+    />
+  ) : (
+    <PackContentCards
+      entries={filteredContent}
+      renderUpsertActions={renderUpsertActions}
+      renderListItemUpsertActions={renderListItemUpsertActions}
+    />
+  );
 
   return (
     <>

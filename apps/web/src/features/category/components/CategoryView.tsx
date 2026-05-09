@@ -10,16 +10,18 @@ import CategoryDeleteModal from './CategoryDeleteModal';
 import { CategoryForm } from './CategoryForm';
 import CategoryTable from './CategoryTable';
 
+export type CategoryViewMode = 'table' | 'add' | 'edit';
+
 interface CategoryViewProps {
   onClose: () => void;
-  onTitleChange: (title: string) => void;
+  onModeChange: (mode: CategoryViewMode) => void;
   onCategoryRenamed: (oldName: string, newName: string) => void;
   onCategoryDeleted: (name: string) => void;
 }
 
 export function CategoryView({
   onClose,
-  onTitleChange,
+  onModeChange,
   onCategoryRenamed,
   onCategoryDeleted,
 }: CategoryViewProps) {
@@ -30,25 +32,25 @@ export function CategoryView({
   const { data = [], isLoading, isError } = useAllCategories();
   const editCategory = data.find((category) => category.id === editCategoryId);
 
-  const closeForm = useCallback(() => {
+  const closeForm = () => {
     setEditCategoryId(null);
     setMode('table');
-    onTitleChange('Categories');
-  }, [onTitleChange]);
+    onModeChange('table');
+  };
 
   const handleAddCategory = () => {
     setEditCategoryId(null);
     setMode('form');
-    onTitleChange('Add category');
+    onModeChange('add');
   };
 
   const handleEditCategory = useCallback(
     (id: string) => {
       setEditCategoryId(id);
       setMode('form');
-      onTitleChange('Edit category');
+      onModeChange('edit');
     },
-    [onTitleChange],
+    [onModeChange],
   );
 
   const handleDeleteCategory = useCallback(
@@ -59,9 +61,9 @@ export function CategoryView({
     [data],
   );
 
-  const closeDeleteModal = useCallback(() => {
+  const handleCloseDeleteModal = () => {
     setDeleteCategory(null);
-  }, []);
+  };
 
   if (isError && !data.length) {
     return (
@@ -95,7 +97,7 @@ export function CategoryView({
           <CategoryDeleteModal
             categoryId={deleteCategory.id}
             categoryName={deleteCategory.name}
-            onClose={closeDeleteModal}
+            onClose={handleCloseDeleteModal}
             onCategoryDeleted={onCategoryDeleted}
           />
         )}

@@ -7,12 +7,13 @@ import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 
 import { Modal } from '@/components/Modal';
-import { CategoryView } from '@/features/category/components/CategoryView';
+import { CategoryView, type CategoryViewMode } from '@/features/category/components/CategoryView';
 import CollectionForm from '@/features/collection/components/CollectionForm';
 import { CollectionType } from '@/features/collection/types';
 import ItemForm from '@/features/item/components/ItemForm';
 import { usePreferences } from '@/features/settings/queries';
 
+import { AddModalTitle, EditModalTitle } from '../Modal/ModalTitle';
 import { SidebarNav } from '../Navigation/SidebarNav';
 
 import { SidebarPortal } from '.';
@@ -34,17 +35,18 @@ const MODAL_TITLES: Record<SidebarAction, string> = {
   'manage-categories': 'Categories',
 };
 
-function isSidebarAction(value: string | null): value is SidebarAction {
-  return SIDEBAR_ACTIONS.includes(value as SidebarAction);
-}
+const CATEGORY_DESKTOP_TITLES: Record<CategoryViewMode, string> = {
+  table: 'Categories',
+  add: 'Add category',
+  edit: 'Edit category',
+};
 
-function isValidUnits(value: unknown): value is Units {
-  return Object.values(Units).includes(value as Units);
-}
-
-const COLLECTION_TYPES = ['list', 'pack'] as const;
-function isCollectionType(v: string | undefined): v is CollectionType {
-  return COLLECTION_TYPES.includes(v as CollectionType);
+export function ActionPanel() {
+  return (
+    <Suspense fallback={null}>
+      <ActionPanelInner />
+    </Suspense>
+  );
 }
 
 function ActionPanelInner() {
@@ -61,7 +63,7 @@ function ActionPanelInner() {
   const id = searchParams.get('id') ?? undefined;
   const editCollectionType = searchParams.get('edit-type') ?? undefined;
 
-  const [categoryTitle, setCategoryTitle] = useState('Categories');
+  const [categoryMode, setCategoryMode] = useState<CategoryViewMode>('table');
 
   const closeAction = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -120,12 +122,12 @@ function ActionPanelInner() {
     panelContent = (
       <CategoryView
         onClose={closeAction}
-        onTitleChange={setCategoryTitle}
+        onModeChange={setCategoryMode}
         onCategoryRenamed={handleCategoryRenamed}
         onCategoryDeleted={handleCategoryDeleted}
       />
     );
-    desktopTitle = categoryTitle;
+    desktopTitle = CATEGORY_DESKTOP_TITLES[categoryMode];
   }
 
   if (isDesktop) {
@@ -145,21 +147,44 @@ function ActionPanelInner() {
 
   if (!action || !panelContent) return null;
 
-  const modalTitle = action === 'manage-categories' ? categoryTitle : MODAL_TITLES[action];
-
   return (
     <Modal.Root open onOpenChange={closeAction}>
-      <Modal.Content title={modalTitle} className="h-full">
+      <Modal.Content
+        title={getModalTitle(action, categoryMode, editCollectionType)}
+        className="h-full"
+      >
         {panelContent}
       </Modal.Content>
     </Modal.Root>
   );
 }
 
-export function ActionPanel() {
-  return (
-    <Suspense fallback={null}>
-      <ActionPanelInner />
-    </Suspense>
-  );
+function getModalTitle(
+  action: SidebarAction,
+  categoryMode: CategoryViewMode,
+  editCollectionType?: string,
+): React.ReactNode {
+  if (action === 'add-item') return <AddModalTitle label="Add item" />;
+  if (action === 'add-collection') return <AddModalTitle label="Add collection" />;
+  if (action === 'edit-item') return <EditModalTitle label="Edit item" />;
+  if (action === 'edit-collection') return <EditModalTitle label={`Edit ${editCollectionType}`} />;
+  if (action === 'manage-categories') {
+    if (categoryMode === 'add') return <AddModalTitle label="Add category" />;
+    if (categoryMode === 'edit') return <EditModalTitle label="Edit category" />;
+    return MODAL_TITLES['manage-categories'];
+  }
+  return MODAL_TITLES[action];
+}
+
+function isSidebarAction(value: string | null): value is SidebarAction {
+  return SIDEBAR_ACTIONS.includes(value as SidebarAction);
+}
+
+function isValidUnits(value: unknown): value is Units {
+  return Object.values(Units).includes(value as Units);
+}
+
+const COLLECTION_TYPES = ['list', 'pack'] as const;
+function isCollectionType(v: string | undefined): v is CollectionType {
+  return COLLECTION_TYPES.includes(v as CollectionType);
 }

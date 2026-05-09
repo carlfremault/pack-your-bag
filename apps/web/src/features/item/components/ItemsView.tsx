@@ -4,8 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
+import { EditDeleteActions } from '@repo/react-common/dialog';
 import { useBreakpoint } from '@repo/react-common/hooks';
-import { EditDeleteActions } from '@repo/react-common/table';
 import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
@@ -61,11 +61,9 @@ export default function ItemsView() {
     setDeleteItemId(id);
   }, []);
 
-  const closeDeleteModal = useCallback(() => {
-    setDeleteItemId(null);
-  }, []);
+  const handleCloseDeleteModal = () => setDeleteItemId(null);
 
-  const ItemsActions = useCallback(
+  const itemsActions = useCallback(
     ({ id, name }: ItemForDisplay) => {
       return (
         <EditDeleteActions
@@ -92,7 +90,7 @@ export default function ItemsView() {
   }
 
   const itemDeleteModal = deleteItemId && (
-    <ItemDeleteModal itemId={deleteItemId} onClose={closeDeleteModal} />
+    <ItemDeleteModal itemId={deleteItemId} onClose={handleCloseDeleteModal} />
   );
 
   if (!isDesktop) {
@@ -100,7 +98,7 @@ export default function ItemsView() {
       <>
         <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4">
           <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-          <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={ItemsActions} />
+          <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={itemsActions} />
         </div>
         {itemDeleteModal}
       </>
@@ -112,7 +110,7 @@ export default function ItemsView() {
       <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
-          <ItemsTable items={filteredItems} isLoading={isLoading} itemsActions={ItemsActions} />
+          <ItemsTable items={filteredItems} isLoading={isLoading} itemsActions={itemsActions} />
         </div>
       </div>
       {itemDeleteModal}

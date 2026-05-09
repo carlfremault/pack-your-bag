@@ -10,17 +10,17 @@ export interface ListFilterState {
   sortDirection: 'asc' | 'desc';
 }
 
-interface ListFilterProps {
-  filterState: ListFilterState;
-  onChange: (updates: Partial<ListFilterState>) => void;
-}
-
 const SORT_FIELD_OPTIONS: InputSelectOption[] = [
   { value: 'name', label: 'Name' },
   { value: 'weight', label: 'Weight' },
 ];
 
-export function ListFilter({ filterState, onChange }: ListFilterProps) {
+export interface ListFilterProps {
+  filterState: ListFilterState;
+  onChange: (updates: Partial<ListFilterState>) => void;
+}
+
+export default function ListFilter({ filterState, onChange }: ListFilterProps) {
   const hasActiveFilters = filterState.sortField !== 'name' || filterState.sortDirection !== 'asc';
 
   return (

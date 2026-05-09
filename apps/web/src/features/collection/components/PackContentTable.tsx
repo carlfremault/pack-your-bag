@@ -12,11 +12,11 @@ import { createColumnHelper } from '@tanstack/react-table';
 import ItemsTableSkeleton from '@/features/item/components/ItemsTableSkeleton';
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
-import { CollectionItemForDisplay, CollectionListForDisplayWithItems } from '../types';
-
-export type PackContentRow =
-  | (CollectionItemForDisplay & { entryType: 'item' })
-  | (CollectionListForDisplayWithItems & { entryType: 'list' });
+import {
+  CollectionItemForDisplay,
+  CollectionListForDisplayWithItems,
+  PackContentRow,
+} from '../types';
 
 export interface PackContentTableProps {
   entries: PackContentRow[];

@@ -8,6 +8,14 @@ interface ActionNavLinksProps {
   onNavigate?: () => void;
 }
 
+export default function ActionNavLinks(props: ActionNavLinksProps) {
+  return (
+    <Suspense fallback={null}>
+      <ActionNavLinksInner {...props} />
+    </Suspense>
+  );
+}
+
 function ActionNavLinksInner(props: ActionNavLinksProps) {
   const { onNavigate } = props;
   const pathname = usePathname();
@@ -72,13 +80,5 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
         Manage categories
       </LinkButton>
     </>
-  );
-}
-
-export default function ActionNavLinks(props: ActionNavLinksProps) {
-  return (
-    <Suspense fallback={null}>
-      <ActionNavLinksInner {...props} />
-    </Suspense>
   );
 }

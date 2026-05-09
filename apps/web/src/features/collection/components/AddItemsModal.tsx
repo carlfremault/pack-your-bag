@@ -8,6 +8,7 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
 import { Modal } from '@/components/Modal';
+import { AddModalTitle } from '@/components/Modal/ModalTitle';
 import { useUpsert } from '@/features/collection/hooks/useUpsert';
 import { ItemFilter } from '@/features/item/components/ItemFilter';
 import ItemsList from '@/features/item/components/ItemsList';
@@ -39,7 +40,11 @@ export default function AddItemsModal(props: AddItemsModalProps) {
           <span>Add items</span>
         </div>
       </Modal.Trigger>
-      <Modal.Content title="Add items" modalWidth="3xl" className="h-full">
+      <Modal.Content
+        title={<AddModalTitle label="Add items" />}
+        modalWidth="3xl"
+        className="h-full"
+      >
         <AddItemsModalContent
           collection={collection}
           handleUpsertItemInList={handleUpsertItemInList}

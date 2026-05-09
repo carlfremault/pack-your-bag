@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { CollectionListCard, ItemCard } from '@repo/react-common/card';
 
@@ -7,7 +7,7 @@ import { toItemCardProps } from '@/lib/mappers/item.mapper';
 
 import { CollectionItemForDisplay, CollectionListForDisplayWithItems } from '../types';
 
-import ListsListSkeleton from './ListsListSkeleton';
+import ListCardsListSkeleton from './ListCardsListSkeleton';
 
 interface ListsListProps {
   lists: CollectionListForDisplayWithItems[];
@@ -16,23 +16,23 @@ interface ListsListProps {
   listItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
 }
 
-export default function ListsList(props: ListsListProps) {
+export default function ListCardsList(props: ListsListProps) {
   const { lists, isLoading, upsertActions, listItemUpsertActions } = props;
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
-  const toggleExpandedList = useCallback((id: string) => {
+  const toggleExpandedList = (id: string) => {
     setExpandedLists((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  }, []);
+  };
 
   const containerClassName = 'flex w-full flex-col gap-2';
 
   if (isLoading) {
-    return <ListsListSkeleton className={containerClassName} />;
+    return <ListCardsListSkeleton className={containerClassName} />;
   }
 
   if (!lists.length) {

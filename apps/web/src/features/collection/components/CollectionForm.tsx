@@ -15,23 +15,18 @@ import { useFormState } from '@/hooks/useFormState';
 import { useCollection, useCreateCollection, useUpdateCollection } from '../queries';
 import { CollectionDetail, CollectionType } from '../types';
 
-export interface CollectionFormProps {
-  collectionId?: string;
-  collectionType?: CollectionType;
-  onClose: () => void;
-}
-
-interface CollectionFormInnerProps {
-  collection?: CollectionDetail;
-  onClose: () => void;
-}
-
 type CollectionFieldErrors = {
   name?: string;
   description?: string;
   colorTheme?: string;
   type?: string;
 };
+const COLLECTION_FORM_FIELDS: (keyof CollectionFieldErrors)[] = [
+  'name',
+  'description',
+  'colorTheme',
+  'type',
+];
 
 const TYPE_OPTIONS: InputSelectOption<CollectionType>[] = [
   {
@@ -54,21 +49,30 @@ const TYPE_OPTIONS: InputSelectOption<CollectionType>[] = [
   },
 ];
 
-const getInitialFormValues = (collection?: CollectionDetail) => {
-  return {
-    name: collection?.name ?? '',
-    description: collection?.description ?? '',
-    colorTheme: collection?.colorTheme ?? '',
-    type: collection?.type ?? '',
-  };
-};
+export interface CollectionFormProps {
+  collectionId?: string;
+  collectionType?: CollectionType;
+  onClose: () => void;
+}
 
-const COLLECTION_FORM_FIELDS: (keyof CollectionFieldErrors)[] = [
-  'name',
-  'description',
-  'colorTheme',
-  'type',
-];
+export default function CollectionForm({
+  collectionId,
+  collectionType,
+  onClose,
+}: CollectionFormProps) {
+  const { data: collectionToEdit, isLoading } = useCollection(collectionId, collectionType);
+
+  if (collectionId && isLoading && !collectionToEdit) {
+    return <FormNotReady />;
+  }
+
+  return <CollectionFormInner collection={collectionToEdit} onClose={onClose} />;
+}
+
+interface CollectionFormInnerProps {
+  collection?: CollectionDetail;
+  onClose: () => void;
+}
 
 function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) {
   const editMode = collection !== undefined;
@@ -172,16 +176,11 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
   );
 }
 
-export default function CollectionForm({
-  collectionId,
-  collectionType,
-  onClose,
-}: CollectionFormProps) {
-  const { data: collectionToEdit, isLoading } = useCollection(collectionId, collectionType);
-
-  if (collectionId && isLoading && !collectionToEdit) {
-    return <FormNotReady />;
-  }
-
-  return <CollectionFormInner collection={collectionToEdit} onClose={onClose} />;
-}
+const getInitialFormValues = (collection?: CollectionDetail) => {
+  return {
+    name: collection?.name ?? '',
+    description: collection?.description ?? '',
+    colorTheme: collection?.colorTheme ?? '',
+    type: collection?.type ?? '',
+  };
+};
