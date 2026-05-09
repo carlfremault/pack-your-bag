@@ -8,6 +8,7 @@ import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
 import { Modal } from '@/components/Modal';
+import { AddModalTitle } from '@/components/Modal/ModalTitle';
 import { usePreferences } from '@/features/settings/queries';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
@@ -25,8 +26,8 @@ import {
   toCollectionItemForDisplay,
 } from '../utils';
 
-import { ListFilter } from './ListFilter';
-import ListsList from './ListsList';
+import ListCardsList from './ListCardsList';
+import ListFilter from './ListFilter';
 
 export interface AddListsModalProps {
   pack: CollectionDetail & { type: 'pack' };
@@ -48,7 +49,11 @@ export default function AddListsModal(props: AddListsModalProps) {
           <span>Add lists</span>
         </div>
       </Modal.Trigger>
-      <Modal.Content title="Add lists" modalWidth="3xl" className="h-full">
+      <Modal.Content
+        title={<AddModalTitle label="Add lists" />}
+        modalWidth="3xl"
+        className="h-full"
+      >
         <AddListsModalContent
           pack={pack}
           handleUpsertItemInList={handleUpsertItemInList}
@@ -135,7 +140,7 @@ function AddListsModalContent(props: AddListsModalContentProps) {
     <div className="flex h-full flex-col gap-4">
       <ListFilter filterState={displayFilterState} onChange={handleFilterChange} />
       <div className="min-h-0 flex-1 md:overflow-y-auto">
-        <ListsList
+        <ListCardsList
           lists={filteredLists}
           isLoading={isLoading}
           upsertActions={renderListUpsertActions}

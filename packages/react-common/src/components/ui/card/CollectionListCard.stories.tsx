@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
 import { LONG_DESCRIPTION } from '../../../lib/constants';
-import { EditDeleteActions } from '../../table';
+import { EditDeleteActions } from '../dialog';
 import { QuantityStepper } from '../input/QuantityStepper';
 
 import { CollectionListCard } from './CollectionListCard';

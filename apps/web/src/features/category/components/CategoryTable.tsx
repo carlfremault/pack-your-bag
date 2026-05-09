@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
+import { EditDeleteActions } from '@repo/react-common/dialog';
 import { CategoryPill } from '@repo/react-common/pill';
-import { DataTable, EditDeleteActions } from '@repo/react-common/table';
+import { DataTable } from '@repo/react-common/table';
 
 import { createColumnHelper } from '@tanstack/react-table';
 

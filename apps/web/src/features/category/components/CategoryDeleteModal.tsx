@@ -2,13 +2,13 @@
 
 import toast from 'react-hot-toast';
 import { FiExternalLink } from 'react-icons/fi';
-import { TbTrash } from 'react-icons/tb';
 import Link from 'next/link';
 
 import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
 import { CheckedWrapper, DangerWrapper, FormNotReady } from '@repo/react-common/utils';
 
 import { Modal } from '@/components/Modal';
+import { DeleteModalTitle } from '@/components/Modal/ModalTitle';
 
 import { useCategoryDeleteImpact, useDeleteCategory } from '../queries';
 
@@ -44,7 +44,7 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
   return (
     <Modal.Root open onOpenChange={onClose}>
       <Modal.Content
-        title={<ModalTitle />}
+        title={<DeleteModalTitle label="Delete Category" />}
         role="alertdialog"
         ariaDescribedBy="confirmation-dialog-desc"
         className="max-w-md"
@@ -67,17 +67,6 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
         </>
       </Modal.Content>
     </Modal.Root>
-  );
-}
-
-function ModalTitle() {
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="bg-danger/10 flex h-8 w-8 items-center justify-center rounded-md">
-        <TbTrash size={16} className="text-danger" />
-      </div>
-      <span>Delete Category</span>
-    </div>
   );
 }
 

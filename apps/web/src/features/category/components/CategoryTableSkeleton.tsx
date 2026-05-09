@@ -1,4 +1,4 @@
-const SKELETON_ROW_COUNT = 4;
+const SKELETON_ROW_COUNT = 8;
 
 export function CategoryTableSkeleton() {
   return (
@@ -26,10 +26,10 @@ export function CategoryTableSkeleton() {
               className={index % 2 === 0 ? 'bg-surface' : 'bg-surface-overlay/70'}
             >
               <td className="px-4 py-3">
-                <div className="bg-surface-overlay h-6 w-56 animate-pulse rounded-full" />
+                <div className="bg-surface-overlay h-5 w-32 animate-pulse rounded-full" />
               </td>
               <td className="px-4 py-3">
-                <div className="bg-surface-overlay h-6 w-16 animate-pulse rounded" />
+                <div className="bg-surface-overlay h-5 w-16 animate-pulse rounded" />
               </td>
             </tr>
           ))}

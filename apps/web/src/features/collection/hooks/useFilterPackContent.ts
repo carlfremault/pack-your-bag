@@ -2,10 +2,10 @@ import { useCallback, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { PackContentFilterState } from '@/features/collection/components/PackContentFilter';
-import { PackContentRow } from '@/features/collection/components/PackContentTable';
 import {
   CollectionItemForDisplay,
   CollectionListForDisplayWithItems,
+  PackContentRow,
 } from '@/features/collection/types';
 import { useRestoreSortFromSession } from '@/hooks/useRestoreSortFromSession';
 import { useSearchDraft } from '@/hooks/useSearchDraft';

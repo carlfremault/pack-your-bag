@@ -1,4 +1,4 @@
-export default function ListsListSkeleton({ className }: { className?: string }) {
+export default function ListCardsListSkeleton({ className }: { className?: string }) {
   return (
     <div role="status" aria-busy="true" aria-label="Loading lists" className={className}>
       {Array.from({ length: 4 }).map((_, index) => (

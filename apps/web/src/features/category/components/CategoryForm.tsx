@@ -13,23 +13,18 @@ import { useFormState } from '@/hooks/useFormState';
 import { useCreateCategory, useUpdateCategory } from '../queries';
 import { Category } from '../types';
 
-export interface CategoryFormProps {
-  category?: Category;
-  onClose: () => void;
-  onCategoryRenamed: (oldName: string, newName: string) => void;
-}
-
 export type CategoryFieldErrors = {
   name?: string;
   colorTheme?: string;
 };
 
-const getInitialFormValues = (category?: Category) => ({
-  name: category?.name ?? '',
-  colorTheme: category?.colorTheme ?? '',
-});
-
 const CATEGORY_FORM_FIELDS: (keyof CategoryFieldErrors)[] = ['name', 'colorTheme'];
+
+export interface CategoryFormProps {
+  category?: Category;
+  onClose: () => void;
+  onCategoryRenamed: (oldName: string, newName: string) => void;
+}
 
 export function CategoryForm(props: CategoryFormProps) {
   const { category, onClose, onCategoryRenamed } = props;
@@ -116,3 +111,8 @@ export function CategoryForm(props: CategoryFormProps) {
     </FormWrapper>
   );
 }
+
+const getInitialFormValues = (category?: Category) => ({
+  name: category?.name ?? '',
+  colorTheme: category?.colorTheme ?? '',
+});

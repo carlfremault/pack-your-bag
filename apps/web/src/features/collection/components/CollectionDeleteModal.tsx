@@ -1,7 +1,7 @@
 'use client';
 
 import toast from 'react-hot-toast';
-import { TbExternalLink, TbTrash } from 'react-icons/tb';
+import { TbExternalLink } from 'react-icons/tb';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -9,6 +9,7 @@ import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
 import { CheckedWrapper, DangerWrapper, FormNotReady } from '@repo/react-common/utils';
 
 import { Modal } from '@/components/Modal';
+import { DeleteModalTitle } from '@/components/Modal/ModalTitle';
 import { capitalizeFirstLetter } from '@/utils/capitalizeFirstLetter';
 
 import { useCollectionDeleteImpact, useDeleteCollection } from '../queries';
@@ -66,7 +67,7 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
   return (
     <Modal.Root open onOpenChange={onClose}>
       <Modal.Content
-        title={<ModalTitle collectionType={collectionType} />}
+        title={<DeleteModalTitle label={`Delete ${collectionType}`} />}
         role="alertdialog"
         ariaDescribedBy="confirmation-dialog-desc"
       >
@@ -91,17 +92,6 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
   );
 }
 
-function ModalTitle({ collectionType }: { collectionType: CollectionType }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="bg-danger/10 flex h-8 w-8 items-center justify-center rounded-md">
-        <TbTrash size={16} className="text-danger" />
-      </div>
-      <span>Delete {collectionType}</span>
-    </div>
-  );
-}
-
 interface ImpactContentProps {
   impactedPacks: { id: string; name: string }[];
   collectionType: CollectionType;
@@ -115,7 +105,7 @@ function ImpactContent(props: ImpactContentProps) {
 
   if (isLoading) {
     dialogContent = <FormNotReady />;
-  } else if (true) {
+  } else if (isError) {
     dialogContent = <DangerWrapper>{ERROR_LOADING_IMPACT[collectionType]}</DangerWrapper>;
   } else if (impactedPacks.length === 0) {
     dialogContent = <CheckedWrapper>{NO_IMPACT[collectionType]}</CheckedWrapper>;

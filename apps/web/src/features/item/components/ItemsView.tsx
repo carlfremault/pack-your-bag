@@ -4,8 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert } from '@repo/react-common/alert';
+import { EditDeleteActions } from '@repo/react-common/dialog';
 import { useBreakpoint } from '@repo/react-common/hooks';
-import { EditDeleteActions } from '@repo/react-common/table';
 import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';

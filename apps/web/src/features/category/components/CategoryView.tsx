@@ -10,16 +10,18 @@ import CategoryDeleteModal from './CategoryDeleteModal';
 import { CategoryForm } from './CategoryForm';
 import CategoryTable from './CategoryTable';
 
+export type CategoryViewMode = 'table' | 'add' | 'edit';
+
 interface CategoryViewProps {
   onClose: () => void;
-  onTitleChange: (title: string) => void;
+  onModeChange: (mode: CategoryViewMode) => void;
   onCategoryRenamed: (oldName: string, newName: string) => void;
   onCategoryDeleted: (name: string) => void;
 }
 
 export function CategoryView({
   onClose,
-  onTitleChange,
+  onModeChange,
   onCategoryRenamed,
   onCategoryDeleted,
 }: CategoryViewProps) {
@@ -33,22 +35,22 @@ export function CategoryView({
   const closeForm = () => {
     setEditCategoryId(null);
     setMode('table');
-    onTitleChange('Categories');
+    onModeChange('table');
   };
 
   const handleAddCategory = () => {
     setEditCategoryId(null);
     setMode('form');
-    onTitleChange('Add category');
+    onModeChange('add');
   };
 
   const handleEditCategory = useCallback(
     (id: string) => {
       setEditCategoryId(id);
       setMode('form');
-      onTitleChange('Edit category');
+      onModeChange('edit');
     },
-    [onTitleChange],
+    [onModeChange],
   );
 
   const handleDeleteCategory = useCallback(

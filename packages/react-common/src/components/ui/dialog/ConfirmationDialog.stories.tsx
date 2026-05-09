@@ -24,7 +24,6 @@ export const Default: Story = {
   args: {
     isPending: false,
     onConfirm: fn(),
-    closeForm: fn(),
-    children: 'Are you sure you want to confirm this action?',
+    onClose: fn(),
   },
 };
