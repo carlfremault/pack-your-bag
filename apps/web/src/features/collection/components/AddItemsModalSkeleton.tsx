@@ -1,11 +1,7 @@
 import ItemsListSkeleton from '@/features/item/components/ItemsListSkeleton';
 import ItemsTableSkeleton from '@/features/item/components/ItemsTableSkeleton';
 
-interface AddItemsModalSkeletonProps {
-  isDesktop: boolean;
-}
-
-export default function AddItemsModalSkeleton({ isDesktop }: AddItemsModalSkeletonProps) {
+export default function AddItemsModalSkeleton() {
   return (
     <div
       className="flex h-full flex-col gap-4"
@@ -67,13 +63,14 @@ export default function AddItemsModalSkeleton({ isDesktop }: AddItemsModalSkelet
           </div>
         </div>
       </div>
-      {isDesktop ? (
-        <div className="min-h-0 flex-1">
-          <ItemsTableSkeleton />
-        </div>
-      ) : (
+      {/* Mobile */}
+      <div className="lh:hidden">
         <ItemsListSkeleton className="flex w-full flex-col gap-2" />
-      )}
+      </div>
+      {/* Desktop */}
+      <div className="hidden min-h-0 flex-1 lg:block">
+        <ItemsTableSkeleton />
+      </div>
     </div>
   );
 }

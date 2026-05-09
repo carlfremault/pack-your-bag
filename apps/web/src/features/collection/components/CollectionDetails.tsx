@@ -5,8 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { CollectionHeaderCard } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
-import { useBreakpoint } from '@repo/react-common/hooks';
-import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
 import { toCollectionHeaderCardProps } from '@/lib/mappers/collection.mapper';
@@ -35,7 +33,6 @@ export interface CollectionDetailsProps {
 export default function CollectionDetails(props: CollectionDetailsProps) {
   const { type, id } = props;
 
-  const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -94,10 +91,6 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     setDeleteCollectionId(null);
   };
 
-  if (!isReady) {
-    return <PageNotReady />;
-  }
-
   const collectionDeleteModal = deleteCollectionId && (
     <CollectionDeleteModal
       collectionId={deleteCollectionId}
@@ -116,8 +109,8 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
           })}
         />
       )}
-      {collection.type === 'list' && <ListContent collection={collection} isDesktop={isDesktop} />}
-      {collection.type === 'pack' && <PackContent collection={collection} isDesktop={isDesktop} />}
+      {collection.type === 'list' && <ListContent collection={collection} />}
+      {collection.type === 'pack' && <PackContent collection={collection} />}
       {collectionDeleteModal}
     </div>
   );
