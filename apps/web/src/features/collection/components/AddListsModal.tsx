@@ -1,9 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import { MdOutlineFormatListBulleted } from 'react-icons/md';
 
-import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
@@ -26,6 +25,7 @@ import {
   toCollectionItemForDisplay,
 } from '../utils';
 
+import AddListsModalSkeleton from './AddListsModalSkeleton';
 import ListCardsList from './ListCardsList';
 import ListFilter from './ListFilter';
 
@@ -54,11 +54,13 @@ export default function AddListsModal(props: AddListsModalProps) {
         modalWidth="3xl"
         className="h-full"
       >
-        <AddListsModalContent
-          pack={pack}
-          handleUpsertItemInList={handleUpsertItemInList}
-          handleUpsertListInPack={handleUpsertListInPack}
-        />
+        <Suspense fallback={<AddListsModalSkeleton />}>
+          <AddListsModalContent
+            pack={pack}
+            handleUpsertItemInList={handleUpsertItemInList}
+            handleUpsertListInPack={handleUpsertListInPack}
+          />
+        </Suspense>
       </Modal.Content>
     </Modal.Root>
   );
@@ -72,11 +74,7 @@ interface AddListsModalContentProps {
 
 function AddListsModalContent(props: AddListsModalContentProps) {
   const { pack, handleUpsertItemInList, handleUpsertListInPack } = props;
-  const {
-    data: collections = [],
-    isLoading: isListsLoading,
-    isError: isListsError,
-  } = useAllCollections();
+  const { data: collections } = useAllCollections();
   const { data: preferences } = usePreferences();
 
   const lists = useMemo(
@@ -84,8 +82,7 @@ function AddListsModalContent(props: AddListsModalContentProps) {
     [collections],
   );
   const listIds = useMemo(() => lists.map((collection) => collection.id), [lists]);
-  const { detailsById: listDetailsById, isLoading: isListDetailsLoading } = useAllLists(listIds);
-  const isLoading = isListsLoading || isListDetailsLoading;
+  const { detailsById: listDetailsById, isLoading } = useAllLists(listIds);
 
   const listsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
     return lists.map((entry) => {
@@ -128,13 +125,6 @@ function AddListsModalContent(props: AddListsModalContentProps) {
       onChange={(qty) => handleUpsertItemInList(item.id, qty, listId)}
     />
   );
-
-  if (isListsError && !collections.length)
-    return (
-      <div className="flex h-full w-full items-center justify-center p-8">
-        <Alert type="error" message="Failed to load lists. Please try again later." />
-      </div>
-    );
 
   return (
     <div className="flex h-full flex-col gap-4">

@@ -9,8 +9,6 @@ import { Button } from '../button';
 import { CategoryPill, CategoryPillProps } from '../pill/CategoryPill';
 import { ExpandableText } from '../utils';
 
-import { CollectionHeaderCardSkeleton } from './CollectionHeaderCardSkeleton';
-
 export interface CollectionHeaderCardProps {
   id: string;
   name: string;
@@ -24,7 +22,6 @@ export interface CollectionHeaderCardProps {
     category: CategoryPillProps;
     weight: string;
   }[];
-  isLoading: boolean;
   onEditCollection: (id: string, type: 'list' | 'pack') => void;
   onDeleteCollection: (id: string, type: 'list' | 'pack') => void;
 }
@@ -40,7 +37,6 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
     totalWeight,
     weightUnit,
     categoryWeights,
-    isLoading,
     onEditCollection,
     onDeleteCollection,
   } = props;
@@ -52,10 +48,6 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
   );
 
   const Icon = type === 'list' ? MdOutlineFormatListBulleted : BsBackpack;
-
-  if (isLoading) {
-    return <CollectionHeaderCardSkeleton className={collectionHeaderCardClassName} />;
-  }
 
   return (
     <div className={collectionHeaderCardClassName}>

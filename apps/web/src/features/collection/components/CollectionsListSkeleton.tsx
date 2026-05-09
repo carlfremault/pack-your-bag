@@ -1,6 +1,11 @@
 export default function CollectionsListSkeleton({ className }: { className?: string }) {
   return (
-    <div className={className} role="status" aria-busy="true" aria-label="Loading collections">
+    <div
+      className="grid w-full grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-4"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading collections"
+    >
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}

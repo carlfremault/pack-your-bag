@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Alert } from '@repo/react-common/alert';
 import { CollectionHeaderCard } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -42,7 +41,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const searchParams = useSearchParams();
 
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
-  const { data: collection, isLoading, isError } = useCollection(id, type);
+  const { data: collection } = useCollection(id, type);
   const { data: preferences } = usePreferences();
 
   const collectionForHeaderDisplay = useMemo((): CollectionForHeaderDisplay | undefined => {
@@ -100,14 +99,6 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     return <PageNotReady />;
   }
 
-  if (isError && !collection) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Alert type="error" message="Failed to load collection. Please try again later." />
-      </div>
-    );
-  }
-
   const collectionDeleteModal = deleteCollectionId && (
     <CollectionDeleteModal
       collectionId={deleteCollectionId}
@@ -120,7 +111,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     <div className="bg-surface border-primary-ring m-4 flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm">
       {collectionForHeaderDisplay && (
         <CollectionHeaderCard
-          {...toCollectionHeaderCardProps(collectionForHeaderDisplay, isLoading, {
+          {...toCollectionHeaderCardProps(collectionForHeaderDisplay, {
             onEditCollection: handleEditCollection,
             onDeleteCollection: handleDeleteCollection,
           })}

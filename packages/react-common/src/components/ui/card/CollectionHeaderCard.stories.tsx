@@ -20,19 +20,6 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Loading: Story = {
-  args: {
-    id: '1',
-    name: 'Loading...',
-    type: 'list',
-    itemCount: 0,
-    totalWeight: '0',
-    isLoading: true,
-    onEditCollection: fn(),
-    onDeleteCollection: fn(),
-  },
-};
-
 export const ListWith10Items: Story = {
   args: {
     name: 'List 1',

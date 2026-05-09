@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useMemo } from 'react';
 import { IoShirtOutline } from 'react-icons/io5';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
@@ -18,6 +18,8 @@ import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useStateFilterItems } from '../hooks/useStateFilterItems';
 import { CollectionDetail } from '../types';
+
+import AddItemsModalSkeleton from './AddItemsModalSkeleton';
 
 export interface AddItemsModalProps {
   collection: CollectionDetail;
@@ -44,12 +46,14 @@ export default function AddItemsModal(props: AddItemsModalProps) {
         modalWidth="3xl"
         className="h-full"
       >
-        <AddItemsModalContent
-          collection={collection}
-          handleUpsertItemInList={handleUpsertItemInList}
-          handleUpsertItemInPack={handleUpsertItemInPack}
-          isDesktop={isDesktop}
-        />
+        <Suspense fallback={<AddItemsModalSkeleton isDesktop={isDesktop} />}>
+          <AddItemsModalContent
+            collection={collection}
+            handleUpsertItemInList={handleUpsertItemInList}
+            handleUpsertItemInPack={handleUpsertItemInPack}
+            isDesktop={isDesktop}
+          />
+        </Suspense>
       </Modal.Content>
     </Modal.Root>
   );

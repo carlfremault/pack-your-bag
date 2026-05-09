@@ -4,6 +4,8 @@ import {
   useQuery,
   useQueryClient,
   UseQueryResult,
+  useSuspenseQuery,
+  UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
@@ -42,8 +44,8 @@ const fetchAllCollections = async (): Promise<Collection[]> => {
   return data;
 };
 
-const useAllCollections = (): UseQueryResult<Collection[]> => {
-  return useQuery({
+const useAllCollections = (): UseSuspenseQueryResult<Collection[]> => {
+  return useSuspenseQuery({
     queryKey: ['collections'],
     queryFn: fetchAllCollections,
   });
@@ -63,11 +65,13 @@ const fetchCollection = async (id?: string, type?: CollectionType): Promise<Coll
   return { ...data, type };
 };
 
-const useCollection = (id?: string, type?: CollectionType): UseQueryResult<CollectionDetail> => {
-  return useQuery({
+const useCollection = (
+  id: string,
+  type: CollectionType,
+): UseSuspenseQueryResult<CollectionDetail> => {
+  return useSuspenseQuery({
     queryKey: [type, id],
     queryFn: () => fetchCollection(id, type),
-    enabled: !!id,
   });
 };
 

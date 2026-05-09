@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 
-import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { PageNotReady } from '@repo/react-common/utils';
 
@@ -22,7 +21,7 @@ export default function CollectionsView() {
   const { isReady, isDesktop } = useBreakpoint();
   const actionQuery = useActionQuery();
 
-  const { data: collections = [], isLoading, isError: isCollectionsError } = useAllCollections();
+  const { data: collections } = useAllCollections();
   const { data: preferences } = usePreferences();
 
   const collectionsForDisplay: CollectionForDisplay[] = useMemo(() => {
@@ -40,21 +39,12 @@ export default function CollectionsView() {
     return <PageNotReady />;
   }
 
-  if (isCollectionsError && !collections.length) {
-    return (
-      <div className="flex h-full w-full items-center justify-center p-8">
-        <Alert type="error" message="Failed to load collections. Please try again later." />
-      </div>
-    );
-  }
-
   if (!isDesktop) {
     return (
       <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4 lg:p-8">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <CollectionsList
           collections={filteredCollections}
-          isLoading={isLoading}
           linkAs={Link}
           actionQuery={actionQuery}
         />
@@ -68,7 +58,6 @@ export default function CollectionsView() {
       <div className="min-h-0 flex-1 overflow-y-auto">
         <CollectionsList
           collections={filteredCollections}
-          isLoading={isLoading}
           linkAs={Link}
           actionQuery={actionQuery}
         />

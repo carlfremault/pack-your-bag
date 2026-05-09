@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, Units } from '@repo/constants';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
-import { FormNotReady } from '@repo/react-common/utils';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
@@ -32,13 +31,8 @@ export interface ItemFormProps {
 }
 
 export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
-  const { data: items = [], isLoading } = useAllItems();
+  const { data: items } = useAllItems();
   const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
-
-  if (itemId && isLoading && !itemToEdit) {
-    return <FormNotReady />;
-  }
-
   return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;
 }
 
