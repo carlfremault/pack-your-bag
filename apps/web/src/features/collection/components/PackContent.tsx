@@ -34,7 +34,7 @@ export interface PackContentProps {
 export default function PackContent(props: PackContentProps) {
   const { collection, isDesktop } = props;
 
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { data: preferences } = usePreferences();
   const { handleUpsertItemInList, handleUpsertItemInPack, handleUpsertListInPack } =
     useUpsert(collection);
 
@@ -96,7 +96,6 @@ export default function PackContent(props: PackContentProps) {
   const packContent = isDesktop ? (
     <PackContentTable
       entries={filteredContent}
-      isLoading={isPreferencesLoading}
       upsertActions={renderUpsertActions}
       listItemUpsertActions={renderListItemUpsertActions}
     />

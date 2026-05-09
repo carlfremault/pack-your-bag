@@ -42,9 +42,8 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const searchParams = useSearchParams();
 
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
-  const { data: collection, isLoading: isCollectionLoading, isError } = useCollection(id, type);
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
-  const isLoading = isCollectionLoading || isPreferencesLoading;
+  const { data: collection, isLoading, isError } = useCollection(id, type);
+  const { data: preferences } = usePreferences();
 
   const collectionForHeaderDisplay = useMemo((): CollectionForHeaderDisplay | undefined => {
     if (!collection) return undefined;

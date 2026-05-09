@@ -77,7 +77,7 @@ function AddListsModalContent(props: AddListsModalContentProps) {
     isLoading: isListsLoading,
     isError: isListsError,
   } = useAllCollections();
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { data: preferences } = usePreferences();
 
   const lists = useMemo(
     () => collections.filter((collection) => collection.type === 'list'),
@@ -85,7 +85,7 @@ function AddListsModalContent(props: AddListsModalContentProps) {
   );
   const listIds = useMemo(() => lists.map((collection) => collection.id), [lists]);
   const { detailsById: listDetailsById, isLoading: isListDetailsLoading } = useAllLists(listIds);
-  const isLoading = isListsLoading || isPreferencesLoading || isListDetailsLoading;
+  const isLoading = isListsLoading || isListDetailsLoading;
 
   const listsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
     return lists.map((entry) => {

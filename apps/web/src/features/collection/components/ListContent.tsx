@@ -24,7 +24,7 @@ export interface ListContentProps {
 export default function ListContent(props: ListContentProps) {
   const { collection, isDesktop } = props;
 
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { data: preferences } = usePreferences();
   const { handleUpsertItemInList } = useUpsert(collection);
 
   const itemsForListDisplay = useMemo(() => {
@@ -57,7 +57,6 @@ export default function ListContent(props: ListContentProps) {
     <div className="min-h-0 flex-1">
       <ItemsTable
         items={filteredItems}
-        isLoading={isPreferencesLoading}
         actionsTitle="Quantity"
         actionSize={120}
         itemsActions={renderItemsUpsertActions}
@@ -65,11 +64,7 @@ export default function ListContent(props: ListContentProps) {
     </div>
   ) : (
     <div className="mb-32">
-      <ItemsList
-        items={filteredItems}
-        isLoading={isPreferencesLoading}
-        itemsActions={renderItemsUpsertActions}
-      />
+      <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
     </div>
   );
 

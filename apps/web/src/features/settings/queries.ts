@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+  UseSuspenseQueryResult,
+} from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
 
@@ -17,8 +22,8 @@ const fetchPreferences = async (): Promise<Preferences | null> => {
   return data ?? null;
 };
 
-const usePreferences = (): UseQueryResult<Preferences | null> => {
-  return useQuery({
+const usePreferences = (): UseSuspenseQueryResult<Preferences | null> => {
+  return useSuspenseQuery({
     queryKey: ['preferences'],
     queryFn: fetchPreferences,
   });

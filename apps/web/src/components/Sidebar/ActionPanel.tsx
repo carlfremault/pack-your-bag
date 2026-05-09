@@ -55,7 +55,7 @@ function ActionPanelInner() {
   const router = useRouter();
   const { isReady, isDesktop } = useBreakpoint();
 
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { data: preferences } = usePreferences();
   const units = isValidUnits(preferences?.units) ? preferences.units : Units.METRIC;
 
   const rawAction = searchParams.get('action');
@@ -95,7 +95,7 @@ function ActionPanelInner() {
     [searchParams, pathname, router],
   );
 
-  if (!isReady || isPreferencesLoading) return null;
+  if (!isReady) return null;
 
   let panelContent: React.ReactNode = null;
   let desktopTitle: string | null = null;

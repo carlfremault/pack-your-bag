@@ -22,13 +22,8 @@ export default function CollectionsView() {
   const { isReady, isDesktop } = useBreakpoint();
   const actionQuery = useActionQuery();
 
-  const {
-    data: collections = [],
-    isLoading: isCollectionsLoading,
-    isError: isCollectionsError,
-  } = useAllCollections();
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
-  const isLoading = isCollectionsLoading || isPreferencesLoading;
+  const { data: collections = [], isLoading, isError: isCollectionsError } = useAllCollections();
+  const { data: preferences } = usePreferences();
 
   const collectionsForDisplay: CollectionForDisplay[] = useMemo(() => {
     return collections.map((collection) => {

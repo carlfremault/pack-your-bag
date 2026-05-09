@@ -5,12 +5,10 @@ import { useEffect } from 'react';
 import { usePreferences } from '../queries';
 
 export function ThemeSynchronizer() {
-  const { data, isLoading, isError } = usePreferences();
+  const { data } = usePreferences();
   const theme = data?.theme ?? null;
 
   useEffect(() => {
-    if (isLoading || isError) return;
-
     const html = document.documentElement;
 
     function applyTheme(e?: MediaQueryList | MediaQueryListEvent) {
@@ -55,7 +53,7 @@ export function ThemeSynchronizer() {
       observer.disconnect();
       mediaQuery.removeEventListener('change', onSystemChange);
     };
-  }, [theme, isLoading, isError]);
+  }, [theme]);
 
   return null;
 }

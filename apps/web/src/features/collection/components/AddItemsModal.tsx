@@ -3,7 +3,6 @@
 import { useCallback, useMemo } from 'react';
 import { IoShirtOutline } from 'react-icons/io5';
 
-import { Alert } from '@repo/react-common/alert';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
@@ -66,29 +65,28 @@ interface AddItemsModalContentProps {
 function AddItemsModalContent(props: AddItemsModalContentProps) {
   const { collection, handleUpsertItemInList, handleUpsertItemInPack, isDesktop } = props;
 
-  const { data = [], isLoading: isItemsLoading, isError } = useAllItems();
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
-  const isLoading = isItemsLoading || isPreferencesLoading;
+  const { data: items } = useAllItems();
+  const { data: preferences } = usePreferences();
 
   const itemsForDisplay = useMemo(() => {
     const collectionItemMap = new Map(
       collection.items?.map(({ item, quantity }) => [item.id, quantity]) ?? [],
     );
-    return data.map((entry) => {
-      const itemQuantity = collectionItemMap.get(entry.id) ?? 0;
-      const hasWeight = entry.weight != null;
+    return items.map((item) => {
+      const itemQuantity = collectionItemMap.get(item.id) ?? 0;
+      const hasWeight = item.weight != null;
       const { value, unit } = hasWeight
-        ? formatWeightForDisplay(Number(entry.weight), preferences?.units)
+        ? formatWeightForDisplay(Number(item.weight), preferences?.units)
         : { value: null, unit: null };
       return {
-        ...entry,
+        ...item,
         quantity: itemQuantity,
         displayWeight: value,
         displayUnit: unit,
         type: 'item' as const,
       };
     });
-  }, [data, collection.items, preferences?.units]);
+  }, [items, collection.items, preferences?.units]);
 
   const { filteredItems, displayFilterState, handleFilterChange } = useStateFilterItems({
     items: itemsForDisplay,
@@ -106,13 +104,6 @@ function AddItemsModalContent(props: AddItemsModalContentProps) {
     [handleUpsertItemInList, handleUpsertItemInPack, collection.id, collection.type],
   );
 
-  if (isError && !data.length)
-    return (
-      <div className="flex h-full w-full items-center justify-center p-8">
-        <Alert type="error" message="Failed to load items. Please try again later." />
-      </div>
-    );
-
   return (
     <div className="flex h-full flex-col gap-4">
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
@@ -120,18 +111,13 @@ function AddItemsModalContent(props: AddItemsModalContentProps) {
         <div className="min-h-0 flex-1">
           <ItemsTable
             items={filteredItems}
-            isLoading={isLoading}
             actionsTitle="Quantity"
             actionSize={120}
             itemsActions={renderItemsUpsertActions}
           />
         </div>
       ) : (
-        <ItemsList
-          items={filteredItems}
-          isLoading={isLoading}
-          itemsActions={renderItemsUpsertActions}
-        />
+        <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
       )}
     </div>
   );
