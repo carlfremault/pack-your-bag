@@ -9,7 +9,6 @@ import { ExpandableText } from '@repo/react-common/utils';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
-import ItemsTableSkeleton from '@/features/item/components/ItemsTableSkeleton';
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import {
@@ -20,7 +19,6 @@ import {
 
 export interface PackContentTableProps {
   entries: PackContentRow[];
-  isLoading: boolean;
   upsertActions: (
     row: CollectionItemForDisplay | CollectionListForDisplayWithItems,
   ) => React.ReactNode;
@@ -28,7 +26,7 @@ export interface PackContentTableProps {
 }
 
 export default function PackContentTable(props: PackContentTableProps) {
-  const { entries, isLoading, upsertActions, listItemUpsertActions } = props;
+  const { entries, upsertActions, listItemUpsertActions } = props;
 
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<PackContentRow>();
@@ -148,20 +146,16 @@ export default function PackContentTable(props: PackContentTableProps) {
 
   return (
     <div className="bg-background min-h-0 w-full flex-1">
-      {isLoading ? (
-        <ItemsTableSkeleton />
-      ) : (
-        <DataTable
-          data={entries}
-          columns={columns}
-          getSubRows={getSubRows}
-          getRowId={(row, _index, parent) =>
-            parent ? `${parent.id}_${row.entryType}-${row.id}` : `${row.entryType}-${row.id}`
-          }
-          emptyStateLabel="No content found"
-          scrollable
-        />
-      )}
+      <DataTable
+        data={entries}
+        columns={columns}
+        getSubRows={getSubRows}
+        getRowId={(row, _index, parent) =>
+          parent ? `${parent.id}_${row.entryType}-${row.id}` : `${row.entryType}-${row.id}`
+        }
+        emptyStateLabel="No content found"
+        scrollable
+      />
     </div>
   );
 }

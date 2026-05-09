@@ -6,13 +6,16 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from '@/components/Modal';
+import { CategoryTableSkeleton } from '@/features/category/components/CategoryTableSkeleton';
 import { CategoryView, type CategoryViewMode } from '@/features/category/components/CategoryView';
 import CollectionForm from '@/features/collection/components/CollectionForm';
 import { CollectionType } from '@/features/collection/types';
 import ItemForm from '@/features/item/components/ItemForm';
 import { usePreferences } from '@/features/settings/queries';
 
+import ErrorFallback from '../ErrorFallback';
 import { AddModalTitle, EditModalTitle } from '../Modal/ModalTitle';
 import { SidebarNav } from '../Navigation/SidebarNav';
 
@@ -55,7 +58,7 @@ function ActionPanelInner() {
   const router = useRouter();
   const { isReady, isDesktop } = useBreakpoint();
 
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
+  const { data: preferences } = usePreferences();
   const units = isValidUnits(preferences?.units) ? preferences.units : Units.METRIC;
 
   const rawAction = searchParams.get('action');
@@ -95,7 +98,7 @@ function ActionPanelInner() {
     [searchParams, pathname, router],
   );
 
-  if (!isReady || isPreferencesLoading) return null;
+  if (!isReady) return null;
 
   let panelContent: React.ReactNode = null;
   let desktopTitle: string | null = null;
@@ -120,12 +123,18 @@ function ActionPanelInner() {
     desktopTitle = 'Edit collection';
   } else if (action === 'manage-categories') {
     panelContent = (
-      <CategoryView
-        onClose={closeAction}
-        onModeChange={setCategoryMode}
-        onCategoryRenamed={handleCategoryRenamed}
-        onCategoryDeleted={handleCategoryDeleted}
-      />
+      <ErrorBoundary
+        fallback={<ErrorFallback message="Failed to load categories. Please try again later." />}
+      >
+        <Suspense fallback={<CategoryTableSkeleton />}>
+          <CategoryView
+            onClose={closeAction}
+            onModeChange={setCategoryMode}
+            onCategoryRenamed={handleCategoryRenamed}
+            onCategoryDeleted={handleCategoryDeleted}
+          />
+        </Suspense>
+      </ErrorBoundary>
     );
     desktopTitle = CATEGORY_DESKTOP_TITLES[categoryMode];
   }

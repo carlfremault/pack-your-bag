@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import toast from 'react-hot-toast';
 
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, Units } from '@repo/constants';
@@ -32,12 +33,26 @@ export interface ItemFormProps {
 }
 
 export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
-  const { data: items = [], isLoading } = useAllItems();
-  const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
-
-  if (itemId && isLoading && !itemToEdit) {
-    return <FormNotReady />;
+  if (itemId) {
+    return (
+      <Suspense fallback={<FormNotReady />}>
+        <ItemFormFetcher itemId={itemId} units={units} onClose={onClose} />
+      </Suspense>
+    );
   }
+  return <ItemFormInner item={undefined} units={units} onClose={onClose} />;
+}
+
+interface ItemFormFetcherProps {
+  itemId: string;
+  units: Units;
+  onClose: () => void;
+}
+
+function ItemFormFetcher(props: ItemFormFetcherProps) {
+  const { itemId, units, onClose } = props;
+  const { data: items } = useAllItems();
+  const itemToEdit = items.find((i) => i.id === itemId);
 
   return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;
 }
@@ -55,11 +70,10 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
 
   const { data: categories } = useAllCategories();
-  const categoryOptions =
-    categories?.map((category) => ({
-      label: <CategoryPill {...toCategoryPillProps(category)} />,
-      value: category.id,
-    })) ?? [];
+  const categoryOptions = categories.map((category) => ({
+    label: <CategoryPill {...toCategoryPillProps(category)} />,
+    value: category.id,
+  }));
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
     useFormState(getInitialFormValues(item, units), ITEM_FORM_FIELDS);
@@ -140,8 +154,8 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
       <InputSelect
         label="Category"
         isClearable
-        placeholder={categories?.length === 0 ? 'No categories yet' : 'Select a category'}
-        disabled={!!categories && categories.length === 0}
+        placeholder={categories.length === 0 ? 'No categories yet' : 'Select a category'}
+        disabled={categories.length === 0}
         options={categoryOptions}
         value={formValues.categoryId}
         onChange={(value) => handleFieldChange('categoryId', value)}

@@ -6,13 +6,13 @@ import { deriveDefaultPreferences } from '../defaults';
 import { useCreatePreferences, usePreferences } from '../queries';
 
 export function PreferencesInitializer() {
-  const { data, isLoading } = usePreferences();
+  const { data } = usePreferences();
   const { mutate: create, isPending } = useCreatePreferences();
 
   useEffect(() => {
-    if (isLoading || isPending || data !== null) return;
+    if (isPending || data !== null) return;
     create(deriveDefaultPreferences(navigator.language));
-  }, [isLoading, isPending, data, create]);
+  }, [isPending, data, create]);
 
   return null;
 }

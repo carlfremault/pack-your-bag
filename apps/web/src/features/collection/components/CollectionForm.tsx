@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import toast from 'react-hot-toast';
 import { BsBackpack } from 'react-icons/bs';
 import { MdOutlineFormatListBulleted } from 'react-icons/md';
@@ -60,11 +61,29 @@ export default function CollectionForm({
   collectionType,
   onClose,
 }: CollectionFormProps) {
-  const { data: collectionToEdit, isLoading } = useCollection(collectionId, collectionType);
-
-  if (collectionId && isLoading && !collectionToEdit) {
-    return <FormNotReady />;
+  if (collectionId && collectionType) {
+    return (
+      <Suspense fallback={<FormNotReady />}>
+        <CollectionFormFetcher
+          collectionId={collectionId}
+          collectionType={collectionType}
+          onClose={onClose}
+        />
+      </Suspense>
+    );
   }
+
+  return <CollectionFormInner collection={undefined} onClose={onClose} />;
+}
+
+interface CollectionFormFetcherProps {
+  collectionId: string;
+  collectionType: CollectionType;
+  onClose: () => void;
+}
+function CollectionFormFetcher(props: CollectionFormFetcherProps) {
+  const { collectionId, collectionType, onClose } = props;
+  const { data: collectionToEdit } = useCollection(collectionId, collectionType);
 
   return <CollectionFormInner collection={collectionToEdit} onClose={onClose} />;
 }

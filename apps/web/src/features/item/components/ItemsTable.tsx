@@ -12,18 +12,15 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import { ItemForDisplay } from '../types';
 
-import ItemsTableSkeleton from './ItemsTableSkeleton';
-
 export interface ItemsTableProps<TData extends ItemForDisplay> {
   items: TData[];
-  isLoading: boolean;
   actionsTitle?: string;
   actionSize?: number;
   itemsActions: (row: TData) => React.ReactNode;
 }
 
 export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTableProps<TData>) {
-  const { items, isLoading, actionsTitle = 'Actions', actionSize = 80, itemsActions } = props;
+  const { items, actionsTitle = 'Actions', actionSize = 80, itemsActions } = props;
 
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<TData>();
@@ -83,11 +80,7 @@ export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTab
 
   return (
     <div className="bg-background h-full w-full">
-      {isLoading ? (
-        <ItemsTableSkeleton />
-      ) : (
-        <DataTable data={items} columns={columns} emptyStateLabel="No items found" scrollable />
-      )}
+      <DataTable data={items} columns={columns} emptyStateLabel="No items found" scrollable />
     </div>
   );
 }

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+  UseSuspenseQueryResult,
+} from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
 
@@ -17,8 +22,8 @@ const fetchAllItems = async (): Promise<Item[]> => {
   return data;
 };
 
-const useAllItems = (): UseQueryResult<Item[]> => {
-  return useQuery({
+const useAllItems = (): UseSuspenseQueryResult<Item[]> => {
+  return useSuspenseQuery({
     queryKey: ['items'],
     queryFn: fetchAllItems,
   });

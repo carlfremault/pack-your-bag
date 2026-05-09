@@ -4,7 +4,6 @@ import { ComponentType } from 'react';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 
 import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
-import { Alert } from '@repo/react-common/alert';
 import { IconToggleOption, InputIconToggle } from '@repo/react-common/input';
 import { SectionNotReady } from '@repo/react-common/utils';
 
@@ -57,23 +56,15 @@ const TIME_FORMAT_OPTIONS: IconToggleOption<string>[] = [
 ];
 
 export function PreferencesForm() {
-  const { data: preferences, isLoading, isError } = usePreferences();
+  const { data: preferences } = usePreferences();
   const { mutate: updatePreferences, isPending } = useUpdatePreferences();
 
   const handleChange = (body: UpdatePreferencesBody) => {
     updatePreferences(body);
   };
 
-  if (isLoading || !preferences) {
+  if (!preferences) {
     return <SectionNotReady />;
-  }
-
-  if (isError) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Alert type="error" message="Failed to load preferences. Please try again later." />
-      </div>
-    );
   }
 
   return (

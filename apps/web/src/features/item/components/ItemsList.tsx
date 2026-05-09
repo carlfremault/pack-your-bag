@@ -4,26 +4,19 @@ import { toItemCardProps } from '@/lib/mappers/item.mapper';
 
 import { ItemForDisplay } from '../types';
 
-import ItemsListSkeleton from './ItemsListSkeleton';
-
 export interface ItemsListProps<ListData extends ItemForDisplay> {
   items: ListData[];
-  isLoading: boolean;
   itemsActions: (item: ListData) => React.ReactNode;
 }
 
 export default function ItemsList<ListData extends ItemForDisplay>(
   props: ItemsListProps<ListData>,
 ) {
-  const { items, isLoading, itemsActions } = props;
+  const { items, itemsActions } = props;
 
   const containerClassName = 'flex w-full flex-col gap-2';
 
   const cardActions = (item: ListData) => <div className="flex gap-8">{itemsActions(item)}</div>;
-
-  if (isLoading) {
-    return <ItemsListSkeleton className={containerClassName} />;
-  }
 
   if (!items.length) {
     return (

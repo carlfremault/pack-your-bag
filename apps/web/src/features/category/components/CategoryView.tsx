@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 
-import { Alert } from '@repo/react-common/alert';
 import { Button } from '@repo/react-common/button';
 
 import { useAllCategories } from '../queries';
@@ -29,7 +28,7 @@ export function CategoryView({
   const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
-  const { data = [], isLoading, isError } = useAllCategories();
+  const { data } = useAllCategories();
   const editCategory = data.find((category) => category.id === editCategoryId);
 
   const closeForm = () => {
@@ -65,14 +64,6 @@ export function CategoryView({
     setDeleteCategory(null);
   };
 
-  if (isError && !data.length) {
-    return (
-      <div className="flex h-full w-full items-center justify-center p-8">
-        <Alert type="error" message="Failed to load categories. Please try again later." />
-      </div>
-    );
-  }
-
   let content: React.ReactNode = null;
   if (mode === 'table') {
     content = (
@@ -80,7 +71,6 @@ export function CategoryView({
         <div className="min-h-0 overflow-hidden">
           <CategoryTable
             categories={data}
-            isLoading={isLoading}
             onEditCategory={handleEditCategory}
             onDeleteCategory={handleDeleteCategory}
           />

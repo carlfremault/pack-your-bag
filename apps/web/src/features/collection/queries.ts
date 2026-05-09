@@ -1,9 +1,11 @@
 import {
   useMutation,
-  useQueries,
   useQuery,
   useQueryClient,
   UseQueryResult,
+  useSuspenseQueries,
+  useSuspenseQuery,
+  UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
@@ -42,8 +44,8 @@ const fetchAllCollections = async (): Promise<Collection[]> => {
   return data;
 };
 
-const useAllCollections = (): UseQueryResult<Collection[]> => {
-  return useQuery({
+const useAllCollections = (): UseSuspenseQueryResult<Collection[]> => {
+  return useSuspenseQuery({
     queryKey: ['collections'],
     queryFn: fetchAllCollections,
   });
@@ -53,7 +55,7 @@ const useAllCollections = (): UseQueryResult<Collection[]> => {
 // Fetch collection (List or Pack)
 // -------------------------------
 
-const fetchCollection = async (id?: string, type?: CollectionType): Promise<CollectionDetail> => {
+const fetchCollection = async (id: string, type: CollectionType): Promise<CollectionDetail> => {
   const res = await fetch(`/api/${type}/${id}`);
 
   if (!res.ok) {
@@ -63,11 +65,13 @@ const fetchCollection = async (id?: string, type?: CollectionType): Promise<Coll
   return { ...data, type };
 };
 
-const useCollection = (id?: string, type?: CollectionType): UseQueryResult<CollectionDetail> => {
-  return useQuery({
+const useCollection = (
+  id: string,
+  type: CollectionType,
+): UseSuspenseQueryResult<CollectionDetail> => {
+  return useSuspenseQuery({
     queryKey: [type, id],
     queryFn: () => fetchCollection(id, type),
-    enabled: !!id,
   });
 };
 
@@ -76,18 +80,16 @@ const useCollection = (id?: string, type?: CollectionType): UseQueryResult<Colle
 // -------------------------------
 
 const useAllLists = (listIds: string[]) => {
-  return useQueries({
+  return useSuspenseQueries({
     queries: listIds.map((id) => ({
       queryKey: ['list', id],
       queryFn: () => fetchCollection(id, 'list'),
-      enabled: !!id,
     })),
     combine: (results) => ({
       detailsById: results.reduce<Record<string, CollectionDetail>>((acc, q) => {
-        if (q.data) acc[q.data.id] = q.data;
+        acc[q.data.id] = q.data;
         return acc;
       }, {}),
-      isLoading: results.some((q) => q.isPending),
     }),
   });
 };

@@ -28,7 +28,7 @@ const SORT_FIELD_OPTIONS: InputSelectOption[] = [
 ];
 
 export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
-  const { data: categories = [] } = useAllCategories();
+  const { data: categories } = useAllCategories();
 
   const hasActiveFilters =
     filterState.category !== '' ||
@@ -62,8 +62,8 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
           options={categoryOptions}
           value={filterState.category}
           onChange={(v) => onChange({ category: v })}
-          placeholder={categories?.length === 0 ? 'No categories yet' : 'All categories'}
-          disabled={!!categories && categories.length === 0}
+          placeholder={categories.length === 0 ? 'No categories yet' : 'All categories'}
+          disabled={categories.length === 0}
         />
       </div>
     </FilterWrapper>

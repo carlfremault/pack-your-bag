@@ -7,17 +7,14 @@ import { toItemCardProps } from '@/lib/mappers/item.mapper';
 
 import { CollectionItemForDisplay, CollectionListForDisplayWithItems } from '../types';
 
-import ListCardsListSkeleton from './ListCardsListSkeleton';
-
-interface ListsListProps {
+interface ListCardsListProps {
   lists: CollectionListForDisplayWithItems[];
-  isLoading: boolean;
   upsertActions: (upsertItem: CollectionListForDisplayWithItems) => React.ReactNode;
   listItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
 }
 
-export default function ListCardsList(props: ListsListProps) {
-  const { lists, isLoading, upsertActions, listItemUpsertActions } = props;
+export default function ListCardsList(props: ListCardsListProps) {
+  const { lists, upsertActions, listItemUpsertActions } = props;
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const toggleExpandedList = (id: string) => {
@@ -30,10 +27,6 @@ export default function ListCardsList(props: ListsListProps) {
   };
 
   const containerClassName = 'flex w-full flex-col gap-2';
-
-  if (isLoading) {
-    return <ListCardsListSkeleton className={containerClassName} />;
-  }
 
   if (!lists.length) {
     return (

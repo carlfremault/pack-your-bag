@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Alert } from '@repo/react-common/alert';
 import { EditDeleteActions } from '@repo/react-common/dialog';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { PageNotReady } from '@repo/react-common/utils';
@@ -27,9 +26,8 @@ export default function ItemsView() {
   const searchParams = useSearchParams();
 
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const { data = [], isLoading: isItemsLoading, isError: isItemsError } = useAllItems();
-  const { data: preferences, isLoading: isPreferencesLoading } = usePreferences();
-  const isLoading = isItemsLoading || isPreferencesLoading;
+  const { data } = useAllItems();
+  const { data: preferences } = usePreferences();
 
   const itemsForDisplay = useMemo(() => {
     return data.map((item) => {
@@ -81,14 +79,6 @@ export default function ItemsView() {
     return <PageNotReady />;
   }
 
-  if (isItemsError && !data.length) {
-    return (
-      <div className="flex h-full w-full items-center justify-center p-8">
-        <Alert type="error" message="Failed to load items. Please try again later." />
-      </div>
-    );
-  }
-
   const itemDeleteModal = deleteItemId && (
     <ItemDeleteModal itemId={deleteItemId} onClose={handleCloseDeleteModal} />
   );
@@ -98,7 +88,7 @@ export default function ItemsView() {
       <>
         <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4">
           <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-          <ItemsList items={filteredItems} isLoading={isLoading} itemsActions={itemsActions} />
+          <ItemsList items={filteredItems} itemsActions={itemsActions} />
         </div>
         {itemDeleteModal}
       </>
@@ -110,7 +100,7 @@ export default function ItemsView() {
       <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
-          <ItemsTable items={filteredItems} isLoading={isLoading} itemsActions={itemsActions} />
+          <ItemsTable items={filteredItems} itemsActions={itemsActions} />
         </div>
       </div>
       {itemDeleteModal}
