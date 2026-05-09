@@ -100,7 +100,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   );
 
   return (
-    <div className="bg-surface border-primary-ring m-4 flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm">
+    <div className="bg-surface border-primary-ring m-4 flex min-h-0 w-full flex-1 flex-col gap-4 rounded-md border p-4 shadow-sm">
       {collectionForHeaderDisplay && (
         <CollectionHeaderCard
           {...toCollectionHeaderCardProps(collectionForHeaderDisplay, {

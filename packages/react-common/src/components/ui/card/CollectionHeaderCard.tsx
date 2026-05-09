@@ -6,8 +6,8 @@ import classNames from 'classnames';
 
 import { ColorTheme, colorThemes } from '../../../lib/colorThemes';
 import { Button } from '../button';
-import { CategoryPill, CategoryPillProps } from '../pill/CategoryPill';
-import { ExpandableText } from '../utils';
+import { CategoryPillProps } from '../pill/CategoryPill';
+import { ExpandableCategoryPills, ExpandableText } from '../utils';
 
 export interface CollectionHeaderCardProps {
   id: string;
@@ -63,17 +63,7 @@ export function CollectionHeaderCard(props: CollectionHeaderCardProps) {
               {`${totalWeight}${weightUnit ? ` ${weightUnit}` : ''}`}
             </div>
           </div>
-          <div className="flex flex-col gap-2 text-nowrap">
-            {categoryWeights?.map(({ category, weight }, index) => (
-              <div
-                key={`${category.name}-${index}`}
-                className="flex items-center justify-between gap-2"
-              >
-                <CategoryPill {...category} />
-                <div className="text-xs">{weight}</div>
-              </div>
-            ))}
-          </div>
+          {categoryWeights && <ExpandableCategoryPills items={categoryWeights} />}
         </div>
       </div>
       <div className="flex flex-1 flex-col justify-between gap-4">

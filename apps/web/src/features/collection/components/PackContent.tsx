@@ -108,7 +108,7 @@ export default function PackContent(props: PackContentProps) {
         />
       </div>
       {/* Desktop */}
-      <div className="hidden lg:block">
+      <div className="hidden min-h-0 flex-1 lg:block">
         <PackContentTable
           entries={filteredContent}
           upsertActions={renderUpsertActions}

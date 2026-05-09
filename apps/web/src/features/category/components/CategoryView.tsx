@@ -29,6 +29,7 @@ export function CategoryView({
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
   const { data } = useAllCategories();
+  const sortedCategories = data.sort((a, b) => a.name.localeCompare(b.name));
   const editCategory = data.find((category) => category.id === editCategoryId);
 
   const closeForm = () => {
@@ -54,10 +55,10 @@ export function CategoryView({
 
   const handleDeleteCategory = useCallback(
     (id: string) => {
-      const category = data.find((c) => c.id === id);
+      const category = sortedCategories.find((c) => c.id === id);
       if (category) setDeleteCategory(category);
     },
-    [data],
+    [sortedCategories],
   );
 
   const handleCloseDeleteModal = () => {
@@ -70,7 +71,7 @@ export function CategoryView({
       <>
         <div className="min-h-0 overflow-hidden">
           <CategoryTable
-            categories={data}
+            categories={sortedCategories}
             onEditCategory={handleEditCategory}
             onDeleteCategory={handleDeleteCategory}
           />

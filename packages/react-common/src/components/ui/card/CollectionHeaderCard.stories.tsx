@@ -105,6 +105,29 @@ export const WeightInLbs: Story = {
   },
 };
 
+export const WithManyCategoryWeights: Story = {
+  args: {
+    name: 'Pack with Many Categories',
+    colorTheme: 'ocean',
+    type: 'pack',
+    itemCount: 24,
+    totalWeight: '6.80',
+    weightUnit: 'kg',
+    categoryWeights: [
+      { category: { name: 'Shelter', colorTheme: 'jungle' }, weight: '1.20 kg' },
+      { category: { name: 'Clothing', colorTheme: 'sand' }, weight: '800 g' },
+      { category: { name: 'Electronics', colorTheme: 'lavender' }, weight: '350 g' },
+      { category: { name: 'Food', colorTheme: 'ocean' }, weight: '600 g' },
+      { category: { name: 'Navigation', colorTheme: 'lagoon' }, weight: '120 g' },
+      { category: { name: 'First Aid', colorTheme: 'slate' }, weight: '200 g' },
+      { category: { name: 'Tools', colorTheme: 'default' }, weight: '450 g' },
+      { category: { name: 'Hygiene', colorTheme: 'sand' }, weight: '180 g' },
+    ],
+    onEditCollection: fn(),
+    onDeleteCollection: fn(),
+  },
+};
+
 export const WithCategoryWeights: Story = {
   args: {
     name: 'Pack with Categories',
