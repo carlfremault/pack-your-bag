@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useMemo } from 'react';
 import { IoShirtOutline } from 'react-icons/io5';
 
-import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
 import { Modal } from '@/components/Modal';
@@ -28,10 +27,7 @@ export interface AddItemsModalProps {
 export default function AddItemsModal(props: AddItemsModalProps) {
   const { collection } = props;
 
-  const { isReady, isDesktop } = useBreakpoint();
   const { handleUpsertItemInList, handleUpsertItemInPack } = useUpsert(collection);
-
-  if (!isReady) return null;
 
   return (
     <Modal.Root>
@@ -46,12 +42,11 @@ export default function AddItemsModal(props: AddItemsModalProps) {
         modalWidth="3xl"
         className="h-full"
       >
-        <Suspense fallback={<AddItemsModalSkeleton isDesktop={isDesktop} />}>
+        <Suspense fallback={<AddItemsModalSkeleton />}>
           <AddItemsModalContent
             collection={collection}
             handleUpsertItemInList={handleUpsertItemInList}
             handleUpsertItemInPack={handleUpsertItemInPack}
-            isDesktop={isDesktop}
           />
         </Suspense>
       </Modal.Content>
@@ -63,11 +58,10 @@ interface AddItemsModalContentProps {
   collection: CollectionDetail;
   handleUpsertItemInList: (itemId: string, quantity: number, listId: string) => void;
   handleUpsertItemInPack: (itemId: string, quantity: number, packId: string) => void;
-  isDesktop: boolean;
 }
 
 function AddItemsModalContent(props: AddItemsModalContentProps) {
-  const { collection, handleUpsertItemInList, handleUpsertItemInPack, isDesktop } = props;
+  const { collection, handleUpsertItemInList, handleUpsertItemInPack } = props;
 
   const { data: items } = useAllItems();
   const { data: preferences } = usePreferences();
@@ -111,18 +105,19 @@ function AddItemsModalContent(props: AddItemsModalContentProps) {
   return (
     <div className="flex h-full flex-col gap-4">
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-      {isDesktop ? (
-        <div className="min-h-0 flex-1">
-          <ItemsTable
-            items={filteredItems}
-            actionsTitle="Quantity"
-            actionSize={120}
-            itemsActions={renderItemsUpsertActions}
-          />
-        </div>
-      ) : (
+      {/* Mobile */}
+      <div className="lg:hidden">
         <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
-      )}
+      </div>
+      {/* Desktop */}
+      <div className="hidden min-h-0 flex-1 lg:block">
+        <ItemsTable
+          items={filteredItems}
+          actionsTitle="Quantity"
+          actionSize={120}
+          itemsActions={renderItemsUpsertActions}
+        />
+      </div>
     </div>
   );
 }

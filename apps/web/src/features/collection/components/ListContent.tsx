@@ -18,11 +18,10 @@ import AddItemsModal from './AddItemsModal';
 
 export interface ListContentProps {
   collection: CollectionDetail;
-  isDesktop: boolean;
 }
 
 export default function ListContent(props: ListContentProps) {
-  const { collection, isDesktop } = props;
+  const { collection } = props;
 
   const { data: preferences } = usePreferences();
   const { handleUpsertItemInList } = useUpsert(collection);
@@ -53,26 +52,23 @@ export default function ListContent(props: ListContentProps) {
     [handleUpsertItemInList, collection.id],
   );
 
-  const listContent = isDesktop ? (
-    <div className="min-h-0 flex-1">
-      <ItemsTable
-        items={filteredItems}
-        actionsTitle="Quantity"
-        actionSize={120}
-        itemsActions={renderItemsUpsertActions}
-      />
-    </div>
-  ) : (
-    <div className="mb-32">
-      <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
-    </div>
-  );
-
   return (
     <>
       <AddItemsModal collection={collection} />
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-      {listContent}
+      {/* Mobile */}
+      <div className="mb-32 lg:hidden">
+        <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
+      </div>
+      {/* Desktop */}
+      <div className="hidden min-h-0 flex-1 lg:block">
+        <ItemsTable
+          items={filteredItems}
+          actionsTitle="Quantity"
+          actionSize={120}
+          itemsActions={renderItemsUpsertActions}
+        />
+      </div>
     </>
   );
 }

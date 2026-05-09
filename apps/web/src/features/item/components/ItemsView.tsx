@@ -4,8 +4,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { EditDeleteActions } from '@repo/react-common/dialog';
-import { useBreakpoint } from '@repo/react-common/hooks';
-import { PageNotReady } from '@repo/react-common/utils';
 
 import { usePreferences } from '@/features/settings/queries';
 import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
@@ -20,7 +18,6 @@ import ItemsList from './ItemsList';
 import ItemsTable from './ItemsTable';
 
 export default function ItemsView() {
-  const { isReady, isDesktop } = useBreakpoint();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -75,29 +72,19 @@ export default function ItemsView() {
     [handleEditItem, handleDeleteItem],
   );
 
-  if (!isReady) {
-    return <PageNotReady />;
-  }
-
   const itemDeleteModal = deleteItemId && (
     <ItemDeleteModal itemId={deleteItemId} onClose={handleCloseDeleteModal} />
   );
 
-  if (!isDesktop) {
-    return (
-      <>
-        <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4">
-          <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-          <ItemsList items={filteredItems} itemsActions={itemsActions} />
-        </div>
-        {itemDeleteModal}
-      </>
-    );
-  }
-
   return (
     <>
-      <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
+      {/* Mobile */}
+      <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4 lg:hidden">
+        <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
+        <ItemsList items={filteredItems} itemsActions={itemsActions} />
+      </div>
+      {/* Desktop */}
+      <div className="hidden h-full w-full flex-col gap-4 overflow-hidden p-4 lg:flex">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
           <ItemsTable items={filteredItems} itemsActions={itemsActions} />

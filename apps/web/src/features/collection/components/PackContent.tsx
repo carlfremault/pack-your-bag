@@ -28,11 +28,10 @@ import PackContentTable from './PackContentTable';
 
 export interface PackContentProps {
   collection: CollectionDetail & { type: 'pack' };
-  isDesktop: boolean;
 }
 
 export default function PackContent(props: PackContentProps) {
-  const { collection, isDesktop } = props;
+  const { collection } = props;
 
   const { data: preferences } = usePreferences();
   const { handleUpsertItemInList, handleUpsertItemInPack, handleUpsertListInPack } =
@@ -93,20 +92,6 @@ export default function PackContent(props: PackContentProps) {
     [handleUpsertItemInList],
   );
 
-  const packContent = isDesktop ? (
-    <PackContentTable
-      entries={filteredContent}
-      upsertActions={renderUpsertActions}
-      listItemUpsertActions={renderListItemUpsertActions}
-    />
-  ) : (
-    <PackContentCards
-      entries={filteredContent}
-      renderUpsertActions={renderUpsertActions}
-      renderListItemUpsertActions={renderListItemUpsertActions}
-    />
-  );
-
   return (
     <>
       <div className="flex w-full items-center justify-between gap-4">
@@ -114,7 +99,22 @@ export default function PackContent(props: PackContentProps) {
         <AddListsModal pack={collection} />
       </div>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />
-      {packContent}
+      {/* Mobile */}
+      <div className="lg:hidden">
+        <PackContentCards
+          entries={filteredContent}
+          renderUpsertActions={renderUpsertActions}
+          renderListItemUpsertActions={renderListItemUpsertActions}
+        />
+      </div>
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        <PackContentTable
+          entries={filteredContent}
+          upsertActions={renderUpsertActions}
+          listItemUpsertActions={renderListItemUpsertActions}
+        />
+      </div>
     </>
   );
 }
