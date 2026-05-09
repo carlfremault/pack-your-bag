@@ -55,11 +55,10 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
 
   const { data: categories } = useAllCategories();
-  const categoryOptions =
-    categories?.map((category) => ({
-      label: <CategoryPill {...toCategoryPillProps(category)} />,
-      value: category.id,
-    })) ?? [];
+  const categoryOptions = categories.map((category) => ({
+    label: <CategoryPill {...toCategoryPillProps(category)} />,
+    value: category.id,
+  }));
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
     useFormState(getInitialFormValues(item, units), ITEM_FORM_FIELDS);
@@ -140,8 +139,8 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
       <InputSelect
         label="Category"
         isClearable
-        placeholder={categories?.length === 0 ? 'No categories yet' : 'Select a category'}
-        disabled={!!categories && categories.length === 0}
+        placeholder={categories.length === 0 ? 'No categories yet' : 'Select a category'}
+        disabled={categories.length === 0}
         options={categoryOptions}
         value={formValues.categoryId}
         onChange={(value) => handleFieldChange('categoryId', value)}

@@ -10,11 +10,8 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import { Category } from '../types';
 
-import { CategoryTableSkeleton } from './CategoryTableSkeleton';
-
 export interface CategoryTableProps {
   categories: Category[];
-  isLoading: boolean;
   onEditCategory: (id: string) => void;
   onDeleteCategory: (id: string) => void;
 }
@@ -22,7 +19,7 @@ export interface CategoryTableProps {
 const columnHelper = createColumnHelper<Category>();
 
 export default function CategoryTable(props: CategoryTableProps) {
-  const { categories, isLoading, onEditCategory, onDeleteCategory } = props;
+  const { categories, onEditCategory, onDeleteCategory } = props;
 
   const columns = useMemo(
     () => [
@@ -55,9 +52,7 @@ export default function CategoryTable(props: CategoryTableProps) {
     [onEditCategory, onDeleteCategory],
   );
 
-  return isLoading ? (
-    <CategoryTableSkeleton />
-  ) : (
+  return (
     <DataTable
       data={categories}
       columns={columns}

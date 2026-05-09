@@ -3,7 +3,6 @@ import { Suspense } from 'react';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { getAllCategories } from '@/features/category/api';
 import { getAllItems } from '@/features/item/api';
 import ItemsErrorFallback from '@/features/item/components/ItemsErrorFallback';
 import ItemsTableSkeleton from '@/features/item/components/ItemsTableSkeleton';
@@ -15,11 +14,6 @@ export default async function Page() {
   await queryClient.prefetchQuery({
     queryKey: ['items'],
     queryFn: () => getAllItems(),
-  });
-
-  await queryClient.prefetchQuery({
-    queryKey: ['categories'],
-    queryFn: () => getAllCategories(),
   });
 
   return (

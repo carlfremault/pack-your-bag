@@ -1,4 +1,11 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+  useSuspenseQuery,
+  UseSuspenseQueryResult,
+} from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
 
@@ -17,8 +24,8 @@ const fetchAllCategories = async (): Promise<Category[]> => {
   return data;
 };
 
-const useAllCategories = (): UseQueryResult<Category[]> => {
-  return useQuery({
+const useAllCategories = (): UseSuspenseQueryResult<Category[]> => {
+  return useSuspenseQuery({
     queryKey: ['categories'],
     queryFn: fetchAllCategories,
   });

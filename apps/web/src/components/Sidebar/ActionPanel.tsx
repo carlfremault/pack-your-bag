@@ -6,7 +6,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from '@/components/Modal';
+import { CategoryErrorFallback } from '@/features/category/components/CategoryErrorFallback';
+import { CategoryTableSkeleton } from '@/features/category/components/CategoryTableSkeleton';
 import { CategoryView, type CategoryViewMode } from '@/features/category/components/CategoryView';
 import CollectionForm from '@/features/collection/components/CollectionForm';
 import { CollectionType } from '@/features/collection/types';
@@ -120,12 +123,16 @@ function ActionPanelInner() {
     desktopTitle = 'Edit collection';
   } else if (action === 'manage-categories') {
     panelContent = (
-      <CategoryView
-        onClose={closeAction}
-        onModeChange={setCategoryMode}
-        onCategoryRenamed={handleCategoryRenamed}
-        onCategoryDeleted={handleCategoryDeleted}
-      />
+      <ErrorBoundary fallback={<CategoryErrorFallback />}>
+        <Suspense fallback={<CategoryTableSkeleton />}>
+          <CategoryView
+            onClose={closeAction}
+            onModeChange={setCategoryMode}
+            onCategoryRenamed={handleCategoryRenamed}
+            onCategoryDeleted={handleCategoryDeleted}
+          />
+        </Suspense>
+      </ErrorBoundary>
     );
     desktopTitle = CATEGORY_DESKTOP_TITLES[categoryMode];
   }
