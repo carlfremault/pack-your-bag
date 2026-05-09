@@ -55,7 +55,7 @@ const useAllCollections = (): UseSuspenseQueryResult<Collection[]> => {
 // Fetch collection (List or Pack)
 // -------------------------------
 
-const fetchCollection = async (id?: string, type?: CollectionType): Promise<CollectionDetail> => {
+const fetchCollection = async (id: string, type: CollectionType): Promise<CollectionDetail> => {
   const res = await fetch(`/api/${type}/${id}`);
 
   if (!res.ok) {

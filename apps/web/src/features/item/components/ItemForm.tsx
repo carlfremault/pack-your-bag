@@ -1,10 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import toast from 'react-hot-toast';
 
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, Units } from '@repo/constants';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CategoryPill } from '@repo/react-common/pill';
+import { FormNotReady } from '@repo/react-common/utils';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useAllCategories } from '@/features/category/queries';
@@ -31,8 +33,27 @@ export interface ItemFormProps {
 }
 
 export default function ItemForm({ itemId, units, onClose }: ItemFormProps) {
+  if (itemId) {
+    return (
+      <Suspense fallback={<FormNotReady />}>
+        <ItemFormFetcher itemId={itemId} units={units} onClose={onClose} />
+      </Suspense>
+    );
+  }
+  return <ItemFormInner item={undefined} units={units} onClose={onClose} />;
+}
+
+interface ItemFormFetcherProps {
+  itemId: string;
+  units: Units;
+  onClose: () => void;
+}
+
+function ItemFormFetcher(props: ItemFormFetcherProps) {
+  const { itemId, units, onClose } = props;
   const { data: items } = useAllItems();
-  const itemToEdit = itemId ? items.find((i) => i.id === itemId) : undefined;
+  const itemToEdit = items.find((i) => i.id === itemId);
+
   return <ItemFormInner item={itemToEdit} units={units} onClose={onClose} />;
 }
 

@@ -44,8 +44,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const { data: collection } = useCollection(id, type);
   const { data: preferences } = usePreferences();
 
-  const collectionForHeaderDisplay = useMemo((): CollectionForHeaderDisplay | undefined => {
-    if (!collection) return undefined;
+  const collectionForHeaderDisplay = useMemo((): CollectionForHeaderDisplay => {
     const totalWeight =
       collection.type === 'list'
         ? getTotalWeightInList(collection)
@@ -117,8 +116,8 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
           })}
         />
       )}
-      {collection?.type === 'list' && <ListContent collection={collection} isDesktop={isDesktop} />}
-      {collection?.type === 'pack' && <PackContent collection={collection} isDesktop={isDesktop} />}
+      {collection.type === 'list' && <ListContent collection={collection} isDesktop={isDesktop} />}
+      {collection.type === 'pack' && <PackContent collection={collection} isDesktop={isDesktop} />}
       {collectionDeleteModal}
     </div>
   );
