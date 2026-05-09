@@ -1,9 +1,9 @@
 import {
   useMutation,
-  useQueries,
   useQuery,
   useQueryClient,
   UseQueryResult,
+  useSuspenseQueries,
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
@@ -80,18 +80,16 @@ const useCollection = (
 // -------------------------------
 
 const useAllLists = (listIds: string[]) => {
-  return useQueries({
+  return useSuspenseQueries({
     queries: listIds.map((id) => ({
       queryKey: ['list', id],
       queryFn: () => fetchCollection(id, 'list'),
-      enabled: !!id,
     })),
     combine: (results) => ({
       detailsById: results.reduce<Record<string, CollectionDetail>>((acc, q) => {
-        if (q.data) acc[q.data.id] = q.data;
+        acc[q.data.id] = q.data;
         return acc;
       }, {}),
-      isLoading: results.some((q) => q.isPending),
     }),
   });
 };

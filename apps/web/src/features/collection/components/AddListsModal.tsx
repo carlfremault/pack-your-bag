@@ -82,7 +82,7 @@ function AddListsModalContent(props: AddListsModalContentProps) {
     [collections],
   );
   const listIds = useMemo(() => lists.map((collection) => collection.id), [lists]);
-  const { detailsById: listDetailsById, isLoading } = useAllLists(listIds);
+  const { detailsById: listDetailsById } = useAllLists(listIds);
 
   const listsForDisplay = useMemo((): CollectionListForDisplayWithItems[] => {
     return lists.map((entry) => {
@@ -132,7 +132,6 @@ function AddListsModalContent(props: AddListsModalContentProps) {
       <div className="min-h-0 flex-1 md:overflow-y-auto">
         <ListCardsList
           lists={filteredLists}
-          isLoading={isLoading}
           upsertActions={renderListUpsertActions}
           listItemUpsertActions={renderListItemUpsertActions}
         />
