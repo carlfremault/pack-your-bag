@@ -145,7 +145,7 @@ export default function PackContentTable(props: PackContentTableProps) {
   );
 
   return (
-    <div className="bg-background min-h-0 w-full flex-1">
+    <div className="bg-background h-full w-full flex-1">
       <DataTable
         data={entries}
         columns={columns}

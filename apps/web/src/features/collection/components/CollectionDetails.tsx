@@ -1,13 +1,16 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { CollectionHeaderCard } from '@repo/react-common/card';
+import { LinkButton } from '@repo/react-common/button';
+import { CollectionSummaryCard } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
+import { SidebarPortal } from '@/components/Sidebar';
 import { usePreferences } from '@/features/settings/queries';
-import { toCollectionHeaderCardProps } from '@/lib/mappers/collection.mapper';
+import { toCollectionSummaryCardProps } from '@/lib/mappers/collection.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useCollection } from '../queries';
@@ -21,6 +24,8 @@ import {
   getTotalWeightInPack,
 } from '../utils';
 
+import AddItemsModal from './AddItemsModal';
+import AddListsModal from './AddListsModal';
 import CollectionDeleteModal from './CollectionDeleteModal';
 import ListContent from './ListContent';
 import PackContent from './PackContent';
@@ -36,6 +41,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const action = searchParams.get('action');
 
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
   const { data: collection } = useCollection(id, type);
@@ -99,15 +105,35 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     />
   );
 
+  const headerCardProps = toCollectionSummaryCardProps(collectionForHeaderDisplay, {
+    onEditCollection: handleEditCollection,
+    onDeleteCollection: handleDeleteCollection,
+  });
+
+  const collectionSummaryContent = (
+    <>
+      <CollectionSummaryCard {...headerCardProps} />
+      <div className="flex w-full items-center justify-between gap-4">
+        <AddItemsModal collection={collection} />
+        {collection.type === 'pack' && <AddListsModal pack={collection} />}
+      </div>
+    </>
+  );
+
   return (
-    <div className="bg-surface border-primary-ring m-4 flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm">
-      {collectionForHeaderDisplay && (
-        <CollectionHeaderCard
-          {...toCollectionHeaderCardProps(collectionForHeaderDisplay, {
-            onEditCollection: handleEditCollection,
-            onDeleteCollection: handleDeleteCollection,
-          })}
-        />
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-4 p-4">
+      {/* Mobile */}
+      <div className="flex flex-col gap-4 lg:hidden">{collectionSummaryContent}</div>
+      {/* Desktop */}
+      {!action && (
+        <SidebarPortal>
+          <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
+            {collectionSummaryContent}
+            <LinkButton href="/collections" variant="outline" linkAs={Link} className="w-full">
+              Back
+            </LinkButton>
+          </div>
+        </SidebarPortal>
       )}
       {collection.type === 'list' && <ListContent collection={collection} />}
       {collection.type === 'pack' && <PackContent collection={collection} />}
