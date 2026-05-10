@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
@@ -7,6 +8,11 @@ import ErrorFallback from '@/components/ErrorFallback';
 import { getAllItems } from '@/features/item/api';
 import ItemsView from '@/features/item/components/ItemsView';
 import ItemsViewSkeleton from '@/features/item/components/ItemsViewSkeleton';
+
+export const metadata: Metadata = {
+  title: 'Items',
+  description: 'An overview of your items.',
+};
 
 export default async function Page() {
   const queryClient = new QueryClient();

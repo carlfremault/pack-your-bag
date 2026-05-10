@@ -9,6 +9,7 @@ import SettingsView from '@/features/settings/components/SettingsView';
 
 export const metadata: Metadata = {
   title: 'Settings',
+  description: 'Manage your preferences.',
 };
 
 export default function SettingsPage() {

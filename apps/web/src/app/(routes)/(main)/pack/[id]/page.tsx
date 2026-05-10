@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
@@ -7,6 +8,11 @@ import ErrorFallback from '@/components/ErrorFallback';
 import { getPack } from '@/features/collection/api';
 import CollectionDetails from '@/features/collection/components/CollectionDetails';
 import CollectionDetailsSkeleton from '@/features/collection/components/CollectionDetailsSkeleton';
+
+export const metadata: Metadata = {
+  title: 'Pack details',
+  description: 'Manage a pack.',
+};
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

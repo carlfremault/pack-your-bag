@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 
@@ -7,6 +8,11 @@ import ErrorFallback from '@/components/ErrorFallback';
 import { getAllCollections } from '@/features/collection/api';
 import CollectionsView from '@/features/collection/components/CollectionsView';
 import CollectionsViewSkeleton from '@/features/collection/components/CollectionsViewSkeleton';
+
+export const metadata: Metadata = {
+  title: 'Collections',
+  description: 'An overview of your lists and packs.',
+};
 
 export default async function Page() {
   const queryClient = new QueryClient();
