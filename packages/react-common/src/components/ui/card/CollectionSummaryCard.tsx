@@ -26,7 +26,6 @@ export interface CollectionSummaryCardProps {
   }[];
   onEditCollection: (id: string, type: 'list' | 'pack') => void;
   onDeleteCollection: (id: string, type: 'list' | 'pack') => void;
-  linkAs?: React.ElementType;
 }
 
 export function CollectionSummaryCard(props: CollectionSummaryCardProps) {
@@ -42,7 +41,6 @@ export function CollectionSummaryCard(props: CollectionSummaryCardProps) {
     categoryWeights,
     onEditCollection,
     onDeleteCollection,
-    linkAs: LinkComponent = 'a',
   } = props;
 
   const { className: colorThemeClassName } = colorThemes[colorTheme] ?? colorThemes['default'];
@@ -82,11 +80,8 @@ export function CollectionSummaryCard(props: CollectionSummaryCardProps) {
             <div className="flex flex-col gap-2">
               {[...categoryWeights]
                 .sort((a, b) => a.category.name.localeCompare(b.category.name))
-                .map(({ category, weight }, index) => (
-                  <div
-                    key={`${category.name}-${index}`}
-                    className="flex items-center justify-between gap-2"
-                  >
+                .map(({ category, weight }) => (
+                  <div key={category.name} className="flex items-center justify-between gap-2">
                     <div className="max-w-3/4">
                       <CategoryPill {...category} />
                     </div>

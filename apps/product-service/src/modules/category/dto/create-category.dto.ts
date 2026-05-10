@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import {
@@ -18,6 +19,7 @@ export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(CATEGORY_NAME_MAX_LENGTH)
+  @Transform(({ value }: { value: string }) => value.trim().toLowerCase())
   name: string;
 
   @ApiProperty({

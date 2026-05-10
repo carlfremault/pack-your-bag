@@ -114,9 +114,10 @@ export abstract class BasePrismaExceptionsFilter implements ExceptionFilter {
     }
 
     // Standard case: Duplicate entry (User Error)
-    const fieldList = fields.join(', ');
+    const filteredFields = fields.filter((f) => f !== '"userId"');
+    const fieldList = filteredFields.join(', ');
     const userMessage = fields.length
-      ? `${capitalizeFirstLetter(fieldList)} already exist${fields.length > 1 ? '' : 's'}.`
+      ? `${capitalizeFirstLetter(fieldList)} already exist${filteredFields.length > 1 ? '' : 's'}.`
       : 'Record already exists.';
 
     return {

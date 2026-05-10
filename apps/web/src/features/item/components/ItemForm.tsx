@@ -72,12 +72,10 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   const { data: categories } = useAllCategories();
   const categoryOptions = useMemo(
     () =>
-      [...categories]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((category) => ({
-          label: <CategoryPill {...toCategoryPillProps(category)} />,
-          value: category.id,
-        })),
+      categories.map((category) => ({
+        label: <CategoryPill {...toCategoryPillProps(category)} />,
+        value: category.id,
+      })),
     [categories],
   );
 
