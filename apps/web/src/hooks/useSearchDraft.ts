@@ -47,7 +47,7 @@ export function useSearchDraft() {
       } else {
         params.delete('search');
       }
-      router.replace(`${pathname}?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }, SEARCH_DEBOUNCE_MS);
   };
 
