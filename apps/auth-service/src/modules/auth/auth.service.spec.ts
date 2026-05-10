@@ -11,10 +11,12 @@ import crypto from 'crypto';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
 import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
+import { PrismaService } from '@/prisma/prisma.service';
 
 import { AuthService } from './auth.service';
 import { AuthEventProvider } from './auth-event.provider';
@@ -25,6 +27,7 @@ const MOCK_CONFIG = {
   AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS: 1234,
   AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS: 4321,
   AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: 5678,
+  AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_MS: 91011,
 } as const;
 
 vi.mock('crypto');
@@ -41,6 +44,7 @@ describe('AuthService', () => {
   const mockUserService = {
     createUser: vi.fn(),
     getUser: vi.fn(),
+    updateUser: vi.fn(),
     updatePassword: vi.fn(),
     resetPasswordWithToken: vi.fn(),
   };
@@ -59,11 +63,13 @@ describe('AuthService', () => {
   const mockVerificationTokenService = {
     upsertVerificationToken: vi.fn(),
     getVerificationToken: vi.fn(),
+    markTokenAsUsed: vi.fn(),
   };
 
   const mockAuthEventProvider = {
     emitPasswordResetRequested: vi.fn(),
     emitPasswordResetConfirmed: vi.fn(),
+    emitAccountVerificationRequested: vi.fn(),
   };
 
   const mockConfigService = {
@@ -73,6 +79,15 @@ describe('AuthService', () => {
         throw new Error(`Configuration key "${key}" does not exist`);
       }
       return (value ?? defaultValue) as T;
+    }),
+  };
+
+  const mockPrismaService = {
+    user: {
+      update: vi.fn(),
+    },
+    $transaction: vi.fn((callback: (tx: typeof mockPrismaService) => Promise<unknown>) => {
+      return callback(mockPrismaService);
     }),
   };
 
@@ -90,6 +105,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: PrismaService, useValue: mockPrismaService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: VerificationTokenService, useValue: mockVerificationTokenService },
@@ -113,12 +129,24 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
+    const expectedRawToken = Buffer.from('a'.repeat(64), 'hex').toString('hex');
+
+    beforeEach(() => {
+      mockedRandomBytes.mockImplementation(() => expectedRawToken);
+
+      const mockHashInstance = {
+        update: vi.fn().mockReturnThis(),
+        digest: vi.fn().mockReturnValue('hashed_token'),
+      };
+      mockedCreateHash.mockReturnValue(mockHashInstance as unknown as crypto.Hash);
+    });
+
     it('should create a user with normalized data and return a token pair', async () => {
       const userDto = { email: 'TESTEMAIL@test.com', password: 'validPassword123' };
-      const mockUser = { id: 'uuid-123', roleId: 1 };
+      const mockUser = { id: 'uuid-123', roleId: 1, email: userDto.email.toLowerCase() };
       mockUserService.createUser.mockResolvedValue(mockUser);
 
-      const result = await service.register(userDto);
+      await service.register(userDto);
 
       expect(mockUserService.createUser).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -130,29 +158,23 @@ describe('AuthService', () => {
           role: {
             connect: { id: 1 },
           },
+          isEmailVerified: false,
+          emailVerifiedAt: null,
         }),
       );
-
-      expect(mockRefreshTokenService.createRefreshToken).toHaveBeenCalledWith(
+      expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
+        mockUser.id,
+        expect.any(String),
+        expect.any(Date),
+        TokenType.EMAIL_VERIFICATION,
+      );
+      expect(mockAuthEventProvider.emitAccountVerificationRequested).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: expect.any(String) as string,
-          family: expect.any(String) as string,
-          isRevoked: false,
-          revokedAt: null,
-          expiresAt: expect.any(Date) as Date,
-          user: { connect: { id: mockUser.id } },
+          userId: mockUser.id,
+          email: userDto.email.toLowerCase(),
+          verificationToken: expect.any(String) as string,
         }),
       );
-
-      expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
-
-      expect(result).toEqual({
-        access_token: 'mock-jwt-token',
-        refresh_token: 'mock-jwt-token',
-        token_type: 'Bearer',
-        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
-      });
     });
   });
 
@@ -161,7 +183,11 @@ describe('AuthService', () => {
     const mockUser = { id: 'uuid-123', roleId: 1 };
 
     it('should normalize input and return tokens for valid credentials', async () => {
-      mockUserService.getUser.mockResolvedValue({ ...mockUser, password: hashedPassword });
+      mockUserService.getUser.mockResolvedValue({
+        ...mockUser,
+        password: hashedPassword,
+        isEmailVerified: true,
+      });
 
       const result = await service.login(userDto);
 
@@ -213,6 +239,16 @@ describe('AuthService', () => {
       mockUserService.getUser.mockResolvedValue({ ...mockUser, password: wrongHashedPassword });
 
       await expect(service.login(userDto)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw EmailNotVerifiedException if user is not verified', async () => {
+      mockUserService.getUser.mockResolvedValue({
+        ...mockUser,
+        password: hashedPassword,
+        isEmailVerified: false,
+      });
+
+      await expect(service.login(userDto)).rejects.toThrow(EmailNotVerifiedException);
     });
   });
 
@@ -722,11 +758,173 @@ describe('AuthService', () => {
     });
   });
 
-  describe('JWT token generation (common for register/login/refreshToken/updatePassword)', () => {
+  describe('verifyEmail', () => {
+    const mockVerificationRecord = {
+      id: 'token-123',
+      userId: 'user-123',
+      token: 'hashed_token',
+      type: TokenType.EMAIL_VERIFICATION,
+      expiresAt: new Date(Date.now() + 3600000),
+      used: false,
+    };
+
+    it('should verify email with valid token', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockVerificationRecord);
+      mockUserService.getUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isEmailVerified: false,
+      });
+      await service.verifyEmail(dto);
+
+      expect(mockPrismaService.$transaction).toHaveBeenCalledOnce();
+      expect(mockVerificationTokenService.getVerificationToken).toHaveBeenCalledWith(
+        {
+          where: {
+            token: 'hashed_token',
+            type: TokenType.EMAIL_VERIFICATION,
+            used: false,
+          },
+        },
+        mockPrismaService,
+      );
+      expect(mockUserService.getUser).toHaveBeenCalledWith({ id: 'user-123' }, mockPrismaService);
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(
+        {
+          id: 'user-123',
+        },
+        {
+          isEmailVerified: true,
+          emailVerifiedAt: expect.any(Date) as Date,
+        },
+        mockPrismaService,
+      );
+      expect(mockVerificationTokenService.markTokenAsUsed).toHaveBeenCalledWith(
+        'token-123',
+        mockPrismaService,
+      );
+    });
+
+    it('should throw InvalidTokenException if token is not found', async () => {
+      const dto = { token: 'invalid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(null);
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if token is expired', async () => {
+      const dto = { token: 'expired_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue({
+        ...mockVerificationRecord,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if user does not exist', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockVerificationRecord);
+      mockUserService.getUser.mockResolvedValue(null);
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if user is deleted', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockVerificationRecord);
+      mockUserService.getUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isDeleted: true,
+      });
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+  });
+
+  describe('resendVerificationEmail', () => {
+    const expectedRawToken = Buffer.from('a'.repeat(64), 'hex').toString('hex');
+
+    beforeEach(() => {
+      mockedRandomBytes.mockImplementation(() => expectedRawToken);
+
+      const mockHashInstance = {
+        update: vi.fn().mockReturnThis(),
+        digest: vi.fn().mockReturnValue('hashed_token'),
+      };
+      mockedCreateHash.mockReturnValue(mockHashInstance as unknown as crypto.Hash);
+    });
+
+    it('should resend verification email if user is not verified', async () => {
+      const dto = { email: 'testemail@test.com' };
+      const mockUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isEmailVerified: false,
+      };
+      mockUserService.getUser.mockResolvedValue(mockUser);
+
+      await service.resendVerificationEmail(dto);
+
+      expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
+        mockUser.id,
+        'hashed_token',
+        expect.any(Date),
+        TokenType.EMAIL_VERIFICATION,
+      );
+      expect(mockAuthEventProvider.emitAccountVerificationRequested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: mockUser.id,
+          email: mockUser.email,
+          verificationToken: expectedRawToken,
+        }),
+      );
+    });
+
+    it('should return silently if user is verified', async () => {
+      const dto = { email: 'testemail@test.com' };
+      const mockUser = {
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isEmailVerified: true,
+      };
+      mockUserService.getUser.mockResolvedValue(mockUser);
+
+      await service.resendVerificationEmail(dto);
+
+      expect(mockVerificationTokenService.upsertVerificationToken).not.toHaveBeenCalled();
+      expect(mockAuthEventProvider.emitAccountVerificationRequested).not.toHaveBeenCalled();
+    });
+
+    it('should return silently if user does not exist', async () => {
+      const dto = { email: 'testemail@test.com' };
+      mockUserService.getUser.mockResolvedValue(null);
+
+      await service.resendVerificationEmail(dto);
+      expect(mockVerificationTokenService.upsertVerificationToken).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('JWT token generation (common for login/refreshToken/updatePassword)', () => {
     it('should generate access token and refresh token with correct payload structure and consistent token IDs', async () => {
       const userDto = { email: 'TESTEMAIL@test.com', password: 'validPassword123' };
-      const mockUser = { id: 'uuid-123', roleId: 1 };
-      mockUserService.createUser.mockResolvedValue(mockUser);
+      const mockUser = {
+        id: 'uuid-123',
+        roleId: 1,
+        password: hashedPassword,
+        isEmailVerified: true,
+      };
+      mockUserService.getUser.mockResolvedValue(mockUser);
 
       let capturedNewTokenId: string | undefined;
       mockRefreshTokenService.createRefreshToken.mockImplementationOnce(
@@ -736,7 +934,7 @@ describe('AuthService', () => {
         },
       );
 
-      const result = await service.register(userDto);
+      const result = await service.login(userDto);
 
       expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
       expect(mockJwtService.signAsync).toHaveBeenCalledWith(

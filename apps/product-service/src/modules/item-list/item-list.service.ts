@@ -35,8 +35,8 @@ export class ItemListService {
     });
   }
 
-  async removeItemFromList(itemId: string, listId: string, userId: string): Promise<ItemList> {
-    return this.prisma.$transaction(async (tx) => {
+  async removeItemFromList(itemId: string, listId: string, userId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
       const [item, list] = await Promise.all([
         tx.item.findUnique({ where: { id: itemId, userId } }),
         tx.list.findUnique({ where: { id: listId, userId } }),
@@ -45,7 +45,7 @@ export class ItemListService {
       if (!item) throw new NotFoundException('Item not found');
       if (!list) throw new NotFoundException('List not found');
 
-      return tx.itemList.delete({ where: { itemId_listId: { itemId, listId } } });
+      await tx.itemList.delete({ where: { itemId_listId: { itemId, listId } } });
     });
   }
 }

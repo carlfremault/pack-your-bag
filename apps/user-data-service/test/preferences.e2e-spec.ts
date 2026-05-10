@@ -1,12 +1,13 @@
 import { HttpStatus } from '@nestjs/common';
 
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
+
 import request from 'supertest';
 import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CreatePreferencesDto } from '@/preferences/dto/create-preferences.dto';
 import { UpdatePreferencesDto } from '@/preferences/dto/update-preferences.dto';
-import { DateFormat, Theme, TimeFormat, Units } from '@/preferences/types/preferences.types';
 
 import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
@@ -255,6 +256,21 @@ describe('Preferences (e2e)', () => {
 
       // NestJS returns an empty body (no content) when the handler returns null
       expect(body).not.toHaveProperty('userId');
+    });
+
+    it('should unset a nullable field when patched with null', async () => {
+      await ctx.preferencesHelpers.createPreferences({
+        payload: preferencesDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.preferencesHelpers.updatePreferences({
+        payload: { theme: null },
+        accessToken: validAccessToken,
+      });
+
+      expect(body).toMatchObject({ userId });
+      expect(body).not.toHaveProperty('theme');
     });
 
     it('should return 401 if not authenticated', async () => {

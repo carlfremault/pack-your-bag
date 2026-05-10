@@ -39,7 +39,7 @@ export class ItemListHelpers {
   }): Promise<{
     body: ItemList;
   }> {
-    const { itemId, listId, accessToken, expectedStatus = HttpStatus.OK } = options;
+    const { itemId, listId, accessToken, expectedStatus = HttpStatus.NO_CONTENT } = options;
 
     const req = request(this.app.getHttpServer())
       .delete(`/item-list/${itemId}/${listId}`)

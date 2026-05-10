@@ -250,7 +250,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Item deleted successfully."
           },
           "400": {
@@ -527,7 +527,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Category deleted successfully."
           },
           "400": {
@@ -567,7 +567,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ListResponseDto"
+                    "$ref": "#/components/schemas/ListSummaryResponseDto"
                   }
                 }
               }
@@ -804,7 +804,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "List deleted successfully."
           },
           "400": {
@@ -844,7 +844,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PackResponseDto"
+                    "$ref": "#/components/schemas/PackSummaryResponseDto"
                   }
                 }
               }
@@ -1081,7 +1081,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Pack deleted successfully."
           },
           "400": {
@@ -1309,7 +1309,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Trip deleted successfully."
           },
           "400": {
@@ -1353,7 +1353,14 @@
         },
         "responses": {
           "200": {
-            "description": "Item upserted to list successfully."
+            "description": "Item upserted to list successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemListResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed (dto)"
@@ -1399,7 +1406,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Item removed from list successfully."
           },
           "400": {
@@ -1440,7 +1447,14 @@
         },
         "responses": {
           "200": {
-            "description": "Item upserted to pack successfully."
+            "description": "Item upserted to pack successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemPackResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed (dto)"
@@ -1486,7 +1500,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Item removed from pack successfully."
           },
           "400": {
@@ -1527,7 +1541,14 @@
         },
         "responses": {
           "200": {
-            "description": "List upserted to pack successfully."
+            "description": "List upserted to pack successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPackResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed (dto)"
@@ -1573,7 +1594,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "List removed from pack successfully."
           },
           "400": {
@@ -1595,6 +1616,175 @@
         "summary": "Remove a list from a pack",
         "tags": [
           "list-pack"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check service health (database, disk, memory)",
+        "tags": [
+          "health"
         ]
       }
     }
@@ -1641,11 +1831,10 @@
             "example": "Category description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
             "description": "Category color code",
-            "example": "#000000",
-            "nullable": true
+            "example": "slate"
           },
           "createdAt": {
             "format": "date-time",
@@ -1664,7 +1853,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt"
         ]
@@ -1689,13 +1878,14 @@
             "nullable": true
           },
           "weight": {
-            "type": "object",
+            "type": "number",
             "description": "Item weight",
             "example": 100,
             "nullable": true
           },
           "category": {
             "description": "Item category",
+            "nullable": true,
             "allOf": [
               {
                 "$ref": "#/components/schemas/CategoryResponseDto"
@@ -1766,7 +1956,7 @@
             "example": "List description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
             "description": "List color code",
             "example": "#000000",
@@ -1796,7 +1986,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt"
         ]
@@ -1842,10 +2032,10 @@
             "example": "Pack description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000",
+            "description": "Pack color theme",
+            "example": "slate",
             "nullable": true
           },
           "createdAt": {
@@ -1879,7 +2069,7 @@
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt"
         ]
@@ -1979,22 +2169,29 @@
           "name": {
             "type": "string",
             "description": "Item name",
-            "example": "Item name"
+            "example": "Item name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Item description",
-            "example": "Item description"
+            "example": "Item description",
+            "maxLength": 1000
           },
           "weight": {
             "type": "number",
             "description": "Item weight",
-            "example": 100
+            "example": 100,
+            "nullable": true,
+            "minimum": 0
           },
           "categoryId": {
             "type": "string",
             "description": "Item category uuid",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "nullable": true
           }
         },
         "required": [
@@ -2007,22 +2204,29 @@
           "name": {
             "type": "string",
             "description": "Item name",
-            "example": "Item name"
+            "example": "Item name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Item description",
-            "example": "Item description"
+            "example": "Item description",
+            "maxLength": 1000
           },
           "weight": {
             "type": "number",
             "description": "Item weight",
-            "example": 100
+            "example": 100,
+            "nullable": true,
+            "minimum": 0
           },
           "categoryId": {
             "type": "string",
             "description": "Item category uuid",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "nullable": true
           }
         }
       },
@@ -2050,21 +2254,24 @@
           "name": {
             "type": "string",
             "description": "Category name",
-            "example": "Category name"
+            "example": "Category name",
+            "maxLength": 32,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Category description",
             "example": "Category description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Category color code",
-            "example": "#000000"
+            "description": "Category color theme",
+            "example": "slate"
           }
         },
         "required": [
-          "name"
+          "name",
+          "colorTheme"
         ]
       },
       "UpdateCategoryDto": {
@@ -2073,17 +2280,19 @@
           "name": {
             "type": "string",
             "description": "Category name",
-            "example": "Category name"
+            "example": "Category name",
+            "maxLength": 32,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Category description",
             "example": "Category description"
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Category color code",
-            "example": "#000000"
+            "description": "Category color theme",
+            "example": "slate"
           }
         }
       },
@@ -2106,7 +2315,7 @@
             "example": "List description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
             "description": "List color code",
             "example": "#000000",
@@ -2126,25 +2335,78 @@
           },
           "itemCount": {
             "type": "number",
-            "description": "List item count",
-            "example": 1
+            "description": "Total quantity of items in the list",
+            "example": 3
+          },
+          "totalWeight": {
+            "type": "number",
+            "description": "Total weight of all items in the list in grams",
+            "example": 1500
           }
         },
         "required": [
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt",
-          "itemCount"
+          "itemCount",
+          "totalWeight"
+        ]
+      },
+      "ListBaseResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name"
+          },
+          "description": {
+            "type": "string",
+            "description": "List description",
+            "example": "List description",
+            "nullable": true
+          },
+          "colorTheme": {
+            "type": "string",
+            "description": "List color code",
+            "example": "#000000",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "List updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorTheme",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "ListDeleteImpactDto": {
         "type": "object",
         "properties": {
           "list": {
-            "$ref": "#/components/schemas/ListSummaryResponseDto"
+            "$ref": "#/components/schemas/ListBaseResponseDto"
           },
           "packs": {
             "type": "array",
@@ -2171,17 +2433,20 @@
           "name": {
             "type": "string",
             "description": "List name",
-            "example": "List name"
+            "example": "List name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "List description",
-            "example": "List description"
+            "example": "List description",
+            "maxLength": 1000
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "List color code",
-            "example": "#000000"
+            "description": "List color theme",
+            "example": "slate"
           }
         },
         "required": [
@@ -2194,17 +2459,20 @@
           "name": {
             "type": "string",
             "description": "List name",
-            "example": "List name"
+            "example": "List name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "List description",
-            "example": "List description"
+            "example": "List description",
+            "maxLength": 1000
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "List color code",
-            "example": "#000000"
+            "description": "List color theme",
+            "example": "slate"
           }
         }
       },
@@ -2227,10 +2495,10 @@
             "example": "Pack description",
             "nullable": true
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000",
+            "description": "Pack color theme",
+            "example": "slate",
             "nullable": true
           },
           "createdAt": {
@@ -2247,31 +2515,78 @@
           },
           "itemCount": {
             "type": "number",
-            "description": "Pack item count",
-            "example": 1
+            "description": "Total quantity of all items in the pack, including items in lists",
+            "example": 30
           },
-          "listCount": {
+          "totalWeight": {
             "type": "number",
-            "description": "Pack list count",
-            "example": 1
+            "description": "Total weight of all items in the pack in grams",
+            "example": 2500
           }
         },
         "required": [
           "id",
           "name",
           "description",
-          "colorCode",
+          "colorTheme",
           "createdAt",
           "updatedAt",
           "itemCount",
-          "listCount"
+          "totalWeight"
+        ]
+      },
+      "PackBaseResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Pack description",
+            "example": "Pack description",
+            "nullable": true
+          },
+          "colorTheme": {
+            "type": "string",
+            "description": "Pack color theme",
+            "example": "slate",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Pack updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "colorTheme",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "PackDeleteImpactDto": {
         "type": "object",
         "properties": {
           "pack": {
-            "$ref": "#/components/schemas/PackSummaryResponseDto"
+            "$ref": "#/components/schemas/PackBaseResponseDto"
           },
           "trips": {
             "type": "array",
@@ -2291,17 +2606,20 @@
           "name": {
             "type": "string",
             "description": "Pack name",
-            "example": "Pack name"
+            "example": "Pack name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Pack description",
-            "example": "Pack description"
+            "example": "Pack description",
+            "maxLength": 1000
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000"
+            "description": "Pack color theme",
+            "example": "slate"
           }
         },
         "required": [
@@ -2314,17 +2632,20 @@
           "name": {
             "type": "string",
             "description": "Pack name",
-            "example": "Pack name"
+            "example": "Pack name",
+            "maxLength": 128,
+            "minLength": 1
           },
           "description": {
             "type": "string",
             "description": "Pack description",
-            "example": "Pack description"
+            "example": "Pack description",
+            "maxLength": 1000
           },
-          "colorCode": {
+          "colorTheme": {
             "type": "string",
-            "description": "Pack color code",
-            "example": "#000000"
+            "description": "Pack color theme",
+            "example": "slate"
           }
         }
       },
@@ -2411,6 +2732,37 @@
           "quantity"
         ]
       },
+      "ItemListResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ItemList uuid",
+            "example": "019de406-4785-71b8-8b00-b1706a4c05f2"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          },
+          "itemId": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "019de3fc-ce73-70cd-a76b-edb429342fb7"
+          },
+          "listId": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "019de402-dcc9-758e-af7b-b2cf9339b175"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "itemId",
+          "listId"
+        ]
+      },
       "UpsertItemInPackDto": {
         "type": "object",
         "properties": {
@@ -2436,6 +2788,37 @@
           "quantity"
         ]
       },
+      "ItemPackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ItemPack uuid",
+            "example": "019de406-4785-71b8-8b00-b1706a4c05f2"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Item quantity",
+            "example": 1
+          },
+          "itemId": {
+            "type": "string",
+            "description": "Item uuid",
+            "example": "019de3fc-ce73-70cd-a76b-edb429342fb7"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "019de402-dcc9-758e-af7b-b2cf9339b175"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "itemId",
+          "packId"
+        ]
+      },
       "UpsertListInPackDto": {
         "type": "object",
         "properties": {
@@ -2459,6 +2842,37 @@
           "listId",
           "packId",
           "quantity"
+        ]
+      },
+      "ListPackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ListPack uuid",
+            "example": "019de406-4785-71b8-8b00-b1706a4c05f2"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "List quantity",
+            "example": 1
+          },
+          "listId": {
+            "type": "string",
+            "description": "List uuid",
+            "example": "019de3fc-ce73-70cd-a76b-edb429342fb7"
+          },
+          "packId": {
+            "type": "string",
+            "description": "Pack uuid",
+            "example": "019de402-dcc9-758e-af7b-b2cf9339b175"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "listId",
+          "packId"
         ]
       }
     }

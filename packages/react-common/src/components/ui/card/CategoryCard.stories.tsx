@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
-import CategoryCard from './CategoryCard';
+import { colorThemes } from '../../../lib/colorThemes';
+import { LONG_DESCRIPTION } from '../../../lib/constants';
 
-import { colorThemes } from '#lib/colorThemes';
-import { LONG_DESCRIPTION } from '#lib/constants';
+import { CategoryCard } from './CategoryCard';
 
 const meta: Meta<typeof CategoryCard> = {
   title: 'Components/CategoryCard',

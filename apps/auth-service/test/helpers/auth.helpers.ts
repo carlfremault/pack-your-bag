@@ -3,13 +3,15 @@ import { JwtService } from '@nestjs/jwt';
 
 import { Prisma, TokenType } from '@repo/db';
 
-import request from 'supertest';
+import request, { Response } from 'supertest';
 import { App } from 'supertest/types';
 
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { AuthForgotPasswordDto } from '@/modules/auth/dto/auth-forgot-password.dto';
+import { AuthResendVerificationEmailDto } from '@/modules/auth/dto/auth-resend-verification-email.dto';
 import { AuthResetPasswordDto } from '@/modules/auth/dto/auth-reset-password.dto';
 import { AuthResponseDto } from '@/modules/auth/dto/auth-response.dto';
+import { AuthVerifyEmailDto } from '@/modules/auth/dto/auth-verify-email.dto';
 import { CancelDeletionDto } from '@/modules/user/dto/cancel-deletion.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -29,10 +31,8 @@ export class AuthHelpers {
     payload?: Partial<AuthCredentialsDto>;
     expectedStatus?: number;
     headers?: Record<string, string>;
-  }): Promise<{
-    body: AuthResponseDto;
-  }> {
-    const { payload, expectedStatus = HttpStatus.CREATED, headers = {} } = options ?? {};
+  }): Promise<Response> {
+    const { payload, expectedStatus = HttpStatus.NO_CONTENT, headers = {} } = options ?? {};
 
     const req = request(this.app.getHttpServer())
       .post('/auth/register')
@@ -149,6 +149,25 @@ export class AuthHelpers {
       .post('/user/cancel-deletion')
       .send(body)
       .set('x-bff-secret', this.bffSecret)
+      .expect(expectedStatus);
+  }
+
+  async verifyEmail(body: AuthVerifyEmailDto, expectedStatus = HttpStatus.NO_CONTENT) {
+    return request(this.app.getHttpServer())
+      .post('/auth/verify-email')
+      .set('x-bff-secret', this.bffSecret)
+      .send(body)
+      .expect(expectedStatus);
+  }
+
+  async resendVerificationEmail(
+    body: AuthResendVerificationEmailDto,
+    expectedStatus = HttpStatus.NO_CONTENT,
+  ) {
+    return request(this.app.getHttpServer())
+      .post('/auth/resend-verification-email')
+      .set('x-bff-secret', this.bffSecret)
+      .send(body)
       .expect(expectedStatus);
   }
 

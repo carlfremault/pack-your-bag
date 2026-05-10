@@ -16,20 +16,13 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "User registered.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthResponseDto"
-                }
-              }
-            }
+          "204": {
+            "description": "User registered and verification email sent."
           },
           "400": {
             "description": "Validation failed."
           },
-          "403": {
+          "401": {
             "description": "Missing or invalid BFF secret."
           },
           "409": {
@@ -44,7 +37,7 @@
             "bff-secret": []
           }
         ],
-        "summary": "Register a new user and issue tokens",
+        "summary": "Register a new user and send verification email",
         "tags": [
           "auth"
         ]
@@ -82,7 +75,7 @@
             "description": "Invalid email or password."
           },
           "403": {
-            "description": "Missing or invalid BFF secret."
+            "description": "Email not verified."
           },
           "429": {
             "description": "Rate limit exceeded."
@@ -117,9 +110,6 @@
           "401": {
             "description": "Invalid or expired refresh token."
           },
-          "403": {
-            "description": "Missing or invalid BFF secret."
-          },
           "429": {
             "description": "Rate limit exceeded."
           }
@@ -147,9 +137,6 @@
           "401": {
             "description": "Invalid or expired refresh token."
           },
-          "403": {
-            "description": "Missing or invalid BFF secret."
-          },
           "429": {
             "description": "Rate limit exceeded."
           }
@@ -176,9 +163,6 @@
           },
           "401": {
             "description": "Invalid or expired access token."
-          },
-          "403": {
-            "description": "Missing or invalid BFF secret."
           },
           "429": {
             "description": "Rate limit exceeded."
@@ -227,9 +211,6 @@
           "401": {
             "description": "Invalid or expired access token."
           },
-          "403": {
-            "description": "Missing or invalid BFF secret."
-          },
           "429": {
             "description": "Rate limit exceeded."
           }
@@ -267,7 +248,7 @@
           "400": {
             "description": "Validation failed."
           },
-          "403": {
+          "401": {
             "description": "Missing or invalid BFF secret."
           },
           "429": {
@@ -306,7 +287,7 @@
           "400": {
             "description": "Token invalid, expired, or already used."
           },
-          "403": {
+          "401": {
             "description": "Missing or invalid BFF secret."
           },
           "429": {
@@ -319,6 +300,84 @@
           }
         ],
         "summary": "Reset password using a token from the reset email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "operationId": "AuthController_verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthVerifyEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Email verified successfully."
+          },
+          "400": {
+            "description": "Token invalid, expired, or already used."
+          },
+          "401": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Verify email address using a token from the verification email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/resend-verification-email": {
+      "post": {
+        "operationId": "AuthController_resendVerificationEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthResendVerificationEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Verification email resent if the address is registered and unverified. Response is identical either way to prevent user enumeration."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Resend verification email",
         "tags": [
           "auth"
         ]
@@ -344,9 +403,6 @@
           },
           "401": {
             "description": "Invalid password."
-          },
-          "403": {
-            "description": "Missing or invalid BFF secret."
           },
           "429": {
             "description": "Rate limit exceeded."
@@ -385,7 +441,7 @@
           "400": {
             "description": "Token invalid, expired, or already used."
           },
-          "403": {
+          "401": {
             "description": "Missing or invalid BFF secret."
           },
           "429": {
@@ -607,12 +663,16 @@
           "email": {
             "type": "string",
             "example": "john.doe@example.com",
-            "format": "email"
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 1
           },
           "password": {
             "type": "string",
             "example": "v4l1dPassw0rd",
-            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+            "maxLength": 128,
+            "minLength": 8
           }
         },
         "required": [
@@ -668,12 +728,15 @@
         "properties": {
           "currentPassword": {
             "type": "string",
-            "example": "v4l1dPassw0rd"
+            "example": "v4l1dPassw0rd",
+            "minLength": 1
           },
           "newPassword": {
             "type": "string",
             "example": "4n0th3rP4ssw0rd",
-            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+            "maxLength": 128,
+            "minLength": 8
           }
         },
         "required": [
@@ -687,7 +750,9 @@
           "email": {
             "type": "string",
             "example": "john.doe@example.com",
-            "format": "email"
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 1
           }
         },
         "required": [
@@ -699,23 +764,54 @@
         "properties": {
           "token": {
             "type": "string",
-            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a"
+            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a",
+            "minLength": 1
           },
           "password": {
             "type": "string",
             "example": "v4l1dPassw0rd",
-            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+            "maxLength": 128,
+            "minLength": 8
           },
           "locale": {
             "type": "string",
             "example": "fr-FR",
-            "description": "User locale, to enable date localization in email templates"
+            "description": "User locale, to enable date localization in email templates",
+            "maxLength": 10
           }
         },
         "required": [
           "token",
-          "password",
-          "locale"
+          "password"
+        ]
+      },
+      "AuthVerifyEmailDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "AuthResendVerificationEmailDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email"
         ]
       },
       "DeleteUserDto": {
@@ -723,17 +819,18 @@
         "properties": {
           "password": {
             "type": "string",
-            "example": "v4l1dPassw0rd"
+            "example": "v4l1dPassw0rd",
+            "minLength": 1
           },
           "locale": {
             "type": "string",
             "example": "fr-FR",
-            "description": "User locale, to enable date localization in email templates"
+            "description": "User locale, to enable date localization in email templates",
+            "maxLength": 10
           }
         },
         "required": [
-          "password",
-          "locale"
+          "password"
         ]
       },
       "CancelDeletionDto": {
@@ -741,11 +838,13 @@
         "properties": {
           "token": {
             "type": "string",
-            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a"
+            "example": "4e1a9b2c8f3d5e7a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a",
+            "minLength": 1
           },
           "password": {
             "type": "string",
-            "example": "v4l1dPassw0rd"
+            "example": "v4l1dPassw0rd",
+            "minLength": 1
           }
         },
         "required": [

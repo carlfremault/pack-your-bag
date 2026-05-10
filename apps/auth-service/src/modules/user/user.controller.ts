@@ -20,7 +20,7 @@ import { DeleteUserDto } from './dto/delete-user.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
-@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Missing or invalid BFF secret.' })
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Missing or invalid BFF secret.' })
 @ApiResponse({ status: HttpStatus.TOO_MANY_REQUESTS, description: 'Rate limit exceeded.' })
 @Controller('user')
 @UseGuards(BffGuard)

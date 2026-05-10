@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
-import { PackSummaryResponseDto } from '@/modules/pack/dto/pack-response.dto';
+import { PackBaseResponseDto } from '@/modules/pack/dto/pack-response.dto';
 import { UpdatePackDto } from '@/modules/pack/dto/update-pack.dto';
 
 import {
@@ -54,7 +54,7 @@ describe('Pack (e2e)', () => {
         id: expect.any(String) as string,
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -86,7 +86,7 @@ describe('Pack (e2e)', () => {
 
     it('should return 400 if the payload is missing required fields', async () => {
       const { body } = await ctx.packHelpers.createPack({
-        payload: { description: 'Test Description', colorCode: '#000000' },
+        payload: { description: 'Test Description', colorTheme: 'slate' },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });
@@ -113,7 +113,7 @@ describe('Pack (e2e)', () => {
         id: body.id,
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -131,7 +131,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -154,7 +154,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -175,7 +175,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         lists: [{ quantity: 1, list }],
@@ -198,7 +198,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -209,7 +209,7 @@ describe('Pack (e2e)', () => {
           id: list1.id,
           name: list1.name,
           description: list1.description,
-          colorCode: list1.colorCode,
+          colorTheme: list1.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         }) as ListResponseDto,
@@ -220,7 +220,7 @@ describe('Pack (e2e)', () => {
           id: list2.id,
           name: list2.name,
           description: list2.description,
-          colorCode: list2.colorCode,
+          colorTheme: list2.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         }) as ListResponseDto,
@@ -239,7 +239,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -320,10 +320,20 @@ describe('Pack (e2e)', () => {
 
       expect(packs).toHaveLength(2);
       expect(packs).toContainEqual(
-        expect.objectContaining({ id: pack1.id, name: pack1.name, itemCount: 0, listCount: 0 }),
+        expect.objectContaining({
+          id: pack1.id,
+          name: pack1.name,
+          itemCount: 0,
+          totalWeight: 0,
+        }),
       );
       expect(packs).toContainEqual(
-        expect.objectContaining({ id: pack2.id, name: pack2.name, itemCount: 0, listCount: 0 }),
+        expect.objectContaining({
+          id: pack2.id,
+          name: pack2.name,
+          itemCount: 0,
+          totalWeight: 0,
+        }),
       );
     });
 
@@ -336,12 +346,13 @@ describe('Pack (e2e)', () => {
       });
 
       expect(packs).toHaveLength(2);
+      // 1 direct item (weight=1, qty=1), 1 empty list (qty=1) → itemCount:1, totalWeight:1
       expect(packs).toContainEqual(
         expect.objectContaining({
           id: pack1.id,
           name: pack1.name,
           itemCount: 1,
-          listCount: 1,
+          totalWeight: 1,
         }),
       );
       expect(packs).toContainEqual(
@@ -349,7 +360,7 @@ describe('Pack (e2e)', () => {
           id: pack2.id,
           name: pack2.name,
           itemCount: 1,
-          listCount: 1,
+          totalWeight: 1,
         }),
       );
     });
@@ -379,7 +390,7 @@ describe('Pack (e2e)', () => {
 
       expect(packsUser1).toHaveLength(1);
       expect(packsUser1).toContainEqual(
-        expect.objectContaining({ id: pack.id, name: pack.name, itemCount: 0, listCount: 0 }),
+        expect.objectContaining({ id: pack.id, name: pack.name, itemCount: 0, totalWeight: 0 }),
       );
 
       expect(packsUser2).toEqual([]);
@@ -410,14 +421,18 @@ describe('Pack (e2e)', () => {
       expect(createdPack).toMatchObject({
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
 
       await ctx.packHelpers.updatePack({
         id: pack.id,
-        payload: { name: 'Updated Pack', description: 'Updated Description', colorCode: '#FFFFFF' },
+        payload: {
+          name: 'Updated Pack',
+          description: 'Updated Description',
+          colorTheme: 'slate',
+        },
         accessToken: validAccessToken,
       });
 
@@ -429,7 +444,7 @@ describe('Pack (e2e)', () => {
       expect(updatedPack).toMatchObject({
         name: 'Updated Pack',
         description: 'Updated Description',
-        colorCode: '#FFFFFF',
+        colorTheme: 'slate',
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -449,7 +464,7 @@ describe('Pack (e2e)', () => {
       expect(createdPack).toMatchObject({
         name: packDto.name,
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -468,7 +483,7 @@ describe('Pack (e2e)', () => {
       expect(updatedPack).toMatchObject({
         name: 'Updated Pack',
         description: packDto.description,
-        colorCode: packDto.colorCode,
+        colorTheme: packDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -613,7 +628,7 @@ describe('Pack (e2e)', () => {
         id: pack.id,
         name: pack.name,
         description: pack.description,
-        colorCode: pack.colorCode,
+        colorTheme: pack.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
         items: [{ quantity: 1, item }],
@@ -743,12 +758,10 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 0,
-          listCount: 0,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
         trips: [],
       });
     });
@@ -766,12 +779,10 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 0,
-          listCount: 0,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
         trips: [{ id: trip.id, name: trip.name, date: trip.date, remarks: trip.remarks }],
       });
     });
@@ -789,12 +800,10 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 1,
-          listCount: 1,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
         trips: [{ id: trip.id, name: trip.name, date: trip.date, remarks: trip.remarks }],
       });
     });
@@ -812,12 +821,10 @@ describe('Pack (e2e)', () => {
           id: pack.id,
           name: pack.name,
           description: pack.description,
-          colorCode: pack.colorCode,
+          colorTheme: pack.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
-          itemCount: 0,
-          listCount: 0,
-        }) as PackSummaryResponseDto,
+        }) as PackBaseResponseDto,
       });
       expect(impact.trips).toHaveLength(2);
       expect(impact.trips).toEqual(

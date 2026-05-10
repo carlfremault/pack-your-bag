@@ -12,12 +12,17 @@ import {
 } from '@/common/constants/auth.constants';
 
 export class UpdatePasswordDto {
-  @ApiProperty({ example: 'v4l1dPassw0rd' })
+  @ApiProperty({ example: 'v4l1dPassw0rd', minLength: 1 })
   @IsNotEmpty()
   @IsString()
   readonly currentPassword: string;
 
-  @ApiProperty({ example: '4n0th3rP4ssw0rd', pattern: PASSWORD_REGEX.source })
+  @ApiProperty({
+    example: '4n0th3rP4ssw0rd',
+    pattern: PASSWORD_REGEX.source,
+    maxLength: PASSWORD_MAX_LENGTH,
+    minLength: PASSWORD_MIN_LENGTH,
+  })
   @IsNotEmpty()
   @IsString()
   @Matches(PASSWORD_REGEX, {

@@ -146,7 +146,7 @@ describe('ItemPackService', () => {
       expect(mockPrismaService.itemPack.delete).toHaveBeenCalledWith({
         where: { itemId_packId: { itemId, packId } },
       });
-      expect(result).toEqual({ id: 'mocked-uuid', itemId, packId, quantity: 1 });
+      expect(result).toBeUndefined();
     });
 
     it('should throw an error if the item is not found', async () => {

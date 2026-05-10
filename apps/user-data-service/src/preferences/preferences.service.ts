@@ -38,11 +38,25 @@ export class PreferencesService {
     userId: string,
     preference: UpdatePreferencesDto,
   ): Promise<PreferencesResponseDto | null> {
-    const result = await this.preferenceModel.findOneAndUpdate(
-      { userId },
-      { ...preference, userId },
-      { returnDocument: 'after' },
-    );
+    const $set: Record<string, unknown> = { userId };
+    const $unset: Record<string, 1> = {};
+
+    for (const [key, value] of Object.entries(preference)) {
+      if (value === null) {
+        $unset[key] = 1;
+      } else if (value !== undefined) {
+        $set[key] = value;
+      }
+    }
+
+    const update: Record<string, unknown> = { $set };
+    if (Object.keys($unset).length > 0) {
+      update.$unset = $unset;
+    }
+
+    const result = await this.preferenceModel.findOneAndUpdate({ userId }, update, {
+      returnDocument: 'after',
+    });
     return result ? plainToInstance(PreferencesResponseDto, result) : null;
   }
 

@@ -11,7 +11,7 @@ export interface TripCardProps {
   onOpenTrip: (id: string) => void;
 }
 
-export default function TripCard(props: TripCardProps) {
+export function TripCard(props: TripCardProps) {
   const { id, name, date, remarks, packName, numberOfItems, numberOfItemsPacked, onOpenTrip } =
     props;
 

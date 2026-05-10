@@ -3,6 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { registerVerifyAndLoginUser } from './fixtures/auth.fixtures';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Auth Update Password (e2e)', () => {
@@ -13,6 +14,7 @@ describe('Auth Update Password (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await ctx.clearMailpit();
     await ctx.resetDb();
   });
 
@@ -40,7 +42,7 @@ describe('Auth Update Password (e2e)', () => {
           payload: { currentPassword: 'validPassword123', newPassword: 'unsafepassword' },
         },
       ])('should return BAD_REQUEST(400) when $condition', async ({ payload }) => {
-        const { body: user } = await ctx.authHelpers.registerUser();
+        const { body: user } = await registerVerifyAndLoginUser(ctx);
         const { body } = await ctx.authHelpers.updatePassword({
           token: user.access_token,
           payload,
@@ -52,7 +54,7 @@ describe('Auth Update Password (e2e)', () => {
     });
 
     it('should update password and return a new token pair - old token should be revoked', async () => {
-      const { body: user } = await ctx.authHelpers.registerUser();
+      const { body: user } = await registerVerifyAndLoginUser(ctx);
       const { body } = await ctx.authHelpers.updatePassword({
         token: user.access_token,
         payload: {
@@ -79,7 +81,7 @@ describe('Auth Update Password (e2e)', () => {
     });
 
     it('should not update password with identical current and new password', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
       const samePassword = ctx.authHelpers.defaultUser.password;
       const payload = { currentPassword: samePassword, newPassword: samePassword };
       const response = await ctx.authHelpers.updatePassword({
@@ -91,7 +93,7 @@ describe('Auth Update Password (e2e)', () => {
     });
 
     it('should not update password with incorrect current password', async () => {
-      const { body: user } = await ctx.authHelpers.registerUser();
+      const { body: user } = await registerVerifyAndLoginUser(ctx);
       const payload = { currentPassword: 'IncorrectPassword123', newPassword: 'newPassword123' };
       const { body } = await ctx.authHelpers.updatePassword({
         token: user.access_token,
@@ -102,7 +104,7 @@ describe('Auth Update Password (e2e)', () => {
     });
 
     it('should not update password when user not found', async () => {
-      const { body: user } = await ctx.authHelpers.registerUser();
+      const { body: user } = await registerVerifyAndLoginUser(ctx);
       await ctx.prisma.user.delete({ where: { email: ctx.authHelpers.defaultUser.email } });
       const payload = {
         currentPassword: ctx.authHelpers.defaultUser.password,
@@ -117,7 +119,7 @@ describe('Auth Update Password (e2e)', () => {
     });
 
     it('should allow login with updated password', async () => {
-      const { body } = await ctx.authHelpers.registerUser();
+      const { body } = await registerVerifyAndLoginUser(ctx);
       const payload = {
         currentPassword: ctx.authHelpers.defaultUser.password,
         newPassword: 'newPassword123',

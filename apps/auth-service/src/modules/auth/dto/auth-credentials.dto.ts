@@ -14,7 +14,12 @@ import {
 } from '@/common/constants/auth.constants';
 
 export class AuthCredentialsDto {
-  @ApiProperty({ example: 'john.doe@example.com', format: 'email' })
+  @ApiProperty({
+    example: 'john.doe@example.com',
+    format: 'email',
+    maxLength: EMAIL_MAX_LENGTH,
+    minLength: 1,
+  })
   @IsNotEmpty()
   @IsString()
   @IsEmail()
@@ -24,7 +29,12 @@ export class AuthCredentialsDto {
   )
   readonly email: string;
 
-  @ApiProperty({ example: 'v4l1dPassw0rd', pattern: PASSWORD_REGEX.source })
+  @ApiProperty({
+    example: 'v4l1dPassw0rd',
+    pattern: PASSWORD_REGEX.source,
+    maxLength: PASSWORD_MAX_LENGTH,
+    minLength: PASSWORD_MIN_LENGTH,
+  })
   @IsNotEmpty()
   @IsString()
   @Matches(PASSWORD_REGEX, {

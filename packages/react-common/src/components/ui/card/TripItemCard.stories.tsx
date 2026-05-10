@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import TripItemCard from './TripItemCard';
+import { TripItemCard } from './TripItemCard';
 
 const meta: Meta<typeof TripItemCard> = {
   title: 'Components/TripItemCard',

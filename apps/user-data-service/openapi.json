@@ -188,22 +188,43 @@
           "units": {
             "type": "string",
             "description": "Units",
-            "example": "metric"
+            "example": "metric",
+            "enum": [
+              "metric",
+              "imperial"
+            ]
           },
           "theme": {
             "type": "string",
             "description": "Theme",
-            "example": "light"
+            "example": "light",
+            "nullable": true,
+            "enum": [
+              "light",
+              "dark"
+            ]
           },
           "dateFormat": {
             "type": "string",
             "description": "Date format",
-            "example": "DD/MM/YYYY"
+            "example": "DD/MM/YYYY",
+            "enum": [
+              "DD/MM/YYYY",
+              "MM/DD/YYYY",
+              "YYYY/MM/DD",
+              "DD-MM-YYYY",
+              "MM-DD-YYYY",
+              "YYYY-MM-DD"
+            ]
           },
           "timeFormat": {
             "type": "string",
             "description": "Time format",
-            "example": "12h"
+            "example": "12h",
+            "enum": [
+              "12h",
+              "24h"
+            ]
           },
           "createdAt": {
             "format": "date-time",
@@ -234,22 +255,43 @@
           "units": {
             "type": "string",
             "description": "Units",
-            "example": "metric"
+            "example": "metric",
+            "enum": [
+              "metric",
+              "imperial"
+            ]
           },
           "theme": {
             "type": "string",
             "description": "Theme",
-            "example": "light"
+            "example": "light",
+            "nullable": true,
+            "enum": [
+              "light",
+              "dark"
+            ]
           },
           "dateFormat": {
             "type": "string",
             "description": "Date format",
-            "example": "DD/MM/YYYY"
+            "example": "DD/MM/YYYY",
+            "enum": [
+              "DD/MM/YYYY",
+              "MM/DD/YYYY",
+              "YYYY/MM/DD",
+              "DD-MM-YYYY",
+              "MM-DD-YYYY",
+              "YYYY-MM-DD"
+            ]
           },
           "timeFormat": {
             "type": "string",
             "description": "Time format",
-            "example": "12h"
+            "example": "12h",
+            "enum": [
+              "12h",
+              "24h"
+            ]
           }
         },
         "required": [
@@ -265,22 +307,43 @@
           "units": {
             "type": "string",
             "description": "Units",
-            "example": "metric"
+            "example": "metric",
+            "enum": [
+              "metric",
+              "imperial"
+            ]
           },
           "theme": {
             "type": "string",
             "description": "Theme",
-            "example": "light"
+            "example": "light",
+            "nullable": true,
+            "enum": [
+              "light",
+              "dark"
+            ]
           },
           "dateFormat": {
             "type": "string",
             "description": "Date format",
-            "example": "DD/MM/YYYY"
+            "example": "DD/MM/YYYY",
+            "enum": [
+              "DD/MM/YYYY",
+              "MM/DD/YYYY",
+              "YYYY/MM/DD",
+              "DD-MM-YYYY",
+              "MM-DD-YYYY",
+              "YYYY-MM-DD"
+            ]
           },
           "timeFormat": {
             "type": "string",
             "description": "Time format",
-            "example": "12h"
+            "example": "12h",
+            "enum": [
+              "12h",
+              "24h"
+            ]
           }
         }
       }

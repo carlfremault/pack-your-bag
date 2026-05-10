@@ -136,4 +136,58 @@ describe('AuthEventProvider', () => {
       expect(mockEventEmitter.emit).toHaveBeenCalled();
     });
   });
+
+  describe('emitAccountVerificationRequested', () => {
+    it('should emit account verification requested event with correct data', async () => {
+      const eventData = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        verificationToken: 'abc123token',
+      };
+
+      authEventProvider.emitAccountVerificationRequested(eventData);
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        AUTH_EVENTS.ACCOUNT_VERIFICATION_REQUESTED,
+        eventData,
+      );
+      expect(mockEventEmitter.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not block execution', async () => {
+      const eventData = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        verificationToken: 'abc123token',
+      };
+
+      authEventProvider.emitAccountVerificationRequested(eventData);
+
+      // Event should not be emitted immediately (before setImmediate executes)
+      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockEventEmitter.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle emission errors gracefully', async () => {
+      const eventData = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        verificationToken: 'abc123token',
+      };
+
+      mockEventEmitter.emit.mockImplementation(() => {
+        throw new Error('EventEmitter error');
+      });
+
+      expect(() => authEventProvider.emitAccountVerificationRequested(eventData)).not.toThrow();
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(mockEventEmitter.emit).toHaveBeenCalled();
+    });
+  });
 });

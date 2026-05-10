@@ -359,6 +359,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Check service health (database, disk, memory) */
+    get: operations['HealthController_check'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -381,9 +398,9 @@ export interface components {
       description: string | null;
       /**
        * @description Category color code
-       * @example #000000
+       * @example slate
        */
-      colorCode: string | null;
+      colorTheme: string;
       /**
        * Format: date-time
        * @description Category created at
@@ -417,9 +434,9 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight: Record<string, never> | null;
+      weight: number | null;
       /** @description Item category */
-      category: components['schemas']['CategoryResponseDto'];
+      category: components['schemas']['CategoryResponseDto'] | null;
       /**
        * Format: date-time
        * @description Item created at
@@ -462,7 +479,7 @@ export interface components {
        * @description List color code
        * @example #000000
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description List created at
@@ -504,10 +521,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description Pack created at
@@ -583,12 +600,13 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight?: number;
+      weight?: number | null;
       /**
+       * Format: uuid
        * @description Item category uuid
        * @example 123e4567-e89b-12d3-a456-426614174000
        */
-      categoryId?: string;
+      categoryId?: string | null;
     };
     UpdateItemDto: {
       /**
@@ -605,12 +623,13 @@ export interface components {
        * @description Item weight
        * @example 100
        */
-      weight?: number;
+      weight?: number | null;
       /**
+       * Format: uuid
        * @description Item category uuid
        * @example 123e4567-e89b-12d3-a456-426614174000
        */
-      categoryId?: string;
+      categoryId?: string | null;
     };
     CategoryDeleteImpactDto: {
       category: components['schemas']['CategoryResponseDto'];
@@ -628,10 +647,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Category color code
-       * @example #000000
+       * @description Category color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme: string;
     };
     UpdateCategoryDto: {
       /**
@@ -645,10 +664,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Category color code
-       * @example #000000
+       * @description Category color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     ListSummaryResponseDto: {
       /**
@@ -670,7 +689,7 @@ export interface components {
        * @description List color code
        * @example #000000
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description List created at
@@ -684,13 +703,52 @@ export interface components {
        */
       updatedAt: string;
       /**
-       * @description List item count
-       * @example 1
+       * @description Total quantity of items in the list
+       * @example 3
        */
       itemCount: number;
+      /**
+       * @description Total weight of all items in the list in grams
+       * @example 1500
+       */
+      totalWeight: number;
+    };
+    ListBaseResponseDto: {
+      /**
+       * @description List uuid
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description List name
+       * @example List name
+       */
+      name: string;
+      /**
+       * @description List description
+       * @example List description
+       */
+      description: string | null;
+      /**
+       * @description List color code
+       * @example #000000
+       */
+      colorTheme: string | null;
+      /**
+       * Format: date-time
+       * @description List created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description List updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     ListDeleteImpactDto: {
-      list: components['schemas']['ListSummaryResponseDto'];
+      list: components['schemas']['ListBaseResponseDto'];
       packs: components['schemas']['PackResponseDto'][];
       trips: components['schemas']['TripResponseDto'][];
     };
@@ -706,10 +764,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description List color code
-       * @example #000000
+       * @description List color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     UpdateListDto: {
       /**
@@ -723,10 +781,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description List color code
-       * @example #000000
+       * @description List color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     PackSummaryResponseDto: {
       /**
@@ -745,10 +803,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode: string | null;
+      colorTheme: string | null;
       /**
        * Format: date-time
        * @description Pack created at
@@ -762,18 +820,52 @@ export interface components {
        */
       updatedAt: string;
       /**
-       * @description Pack item count
-       * @example 1
+       * @description Total quantity of all items in the pack, including items in lists
+       * @example 30
        */
       itemCount: number;
       /**
-       * @description Pack list count
-       * @example 1
+       * @description Total weight of all items in the pack in grams
+       * @example 2500
        */
-      listCount: number;
+      totalWeight: number;
+    };
+    PackBaseResponseDto: {
+      /**
+       * @description Pack uuid
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description Pack name
+       * @example Pack name
+       */
+      name: string;
+      /**
+       * @description Pack description
+       * @example Pack description
+       */
+      description: string | null;
+      /**
+       * @description Pack color theme
+       * @example slate
+       */
+      colorTheme: string | null;
+      /**
+       * Format: date-time
+       * @description Pack created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Pack updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
     };
     PackDeleteImpactDto: {
-      pack: components['schemas']['PackSummaryResponseDto'];
+      pack: components['schemas']['PackBaseResponseDto'];
       trips: components['schemas']['TripResponseDto'][];
     };
     CreatePackDto: {
@@ -788,10 +880,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     UpdatePackDto: {
       /**
@@ -805,10 +897,10 @@ export interface components {
        */
       description?: string;
       /**
-       * @description Pack color code
-       * @example #000000
+       * @description Pack color theme
+       * @example slate
        */
-      colorCode?: string;
+      colorTheme?: string;
     };
     CreateTripDto: {
       /**
@@ -873,6 +965,28 @@ export interface components {
        */
       quantity: number;
     };
+    ItemListResponseDto: {
+      /**
+       * @description ItemList uuid
+       * @example 019de406-4785-71b8-8b00-b1706a4c05f2
+       */
+      id: string;
+      /**
+       * @description Item quantity
+       * @example 1
+       */
+      quantity: number;
+      /**
+       * @description Item uuid
+       * @example 019de3fc-ce73-70cd-a76b-edb429342fb7
+       */
+      itemId: string;
+      /**
+       * @description List uuid
+       * @example 019de402-dcc9-758e-af7b-b2cf9339b175
+       */
+      listId: string;
+    };
     UpsertItemInPackDto: {
       /**
        * @description Item uuid
@@ -890,6 +1004,28 @@ export interface components {
        */
       quantity: number;
     };
+    ItemPackResponseDto: {
+      /**
+       * @description ItemPack uuid
+       * @example 019de406-4785-71b8-8b00-b1706a4c05f2
+       */
+      id: string;
+      /**
+       * @description Item quantity
+       * @example 1
+       */
+      quantity: number;
+      /**
+       * @description Item uuid
+       * @example 019de3fc-ce73-70cd-a76b-edb429342fb7
+       */
+      itemId: string;
+      /**
+       * @description Pack uuid
+       * @example 019de402-dcc9-758e-af7b-b2cf9339b175
+       */
+      packId: string;
+    };
     UpsertListInPackDto: {
       /**
        * @description List uuid
@@ -906,6 +1042,28 @@ export interface components {
        * @example 1
        */
       quantity: number;
+    };
+    ListPackResponseDto: {
+      /**
+       * @description ListPack uuid
+       * @example 019de406-4785-71b8-8b00-b1706a4c05f2
+       */
+      id: string;
+      /**
+       * @description List quantity
+       * @example 1
+       */
+      quantity: number;
+      /**
+       * @description List uuid
+       * @example 019de3fc-ce73-70cd-a76b-edb429342fb7
+       */
+      listId: string;
+      /**
+       * @description Pack uuid
+       * @example 019de402-dcc9-758e-af7b-b2cf9339b175
+       */
+      packId: string;
     };
   };
   responses: never;
@@ -1107,7 +1265,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Item deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1388,7 +1546,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Category deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1493,7 +1651,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ListResponseDto'][];
+          'application/json': components['schemas']['ListSummaryResponseDto'][];
         };
       };
       /** @description Unauthorized. */
@@ -1669,7 +1827,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description List deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1774,7 +1932,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['PackResponseDto'][];
+          'application/json': components['schemas']['PackSummaryResponseDto'][];
         };
       };
       /** @description Unauthorized. */
@@ -1950,7 +2108,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Pack deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2181,7 +2339,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Trip deleted successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2289,7 +2447,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ItemListResponseDto'];
+        };
       };
       /** @description Validation failed (dto) */
       400: {
@@ -2327,7 +2487,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Item removed from list successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2374,7 +2534,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ItemPackResponseDto'];
+        };
       };
       /** @description Validation failed (dto) */
       400: {
@@ -2412,7 +2574,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Item removed from pack successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2459,7 +2621,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ListPackResponseDto'];
+        };
       };
       /** @description Validation failed (dto) */
       400: {
@@ -2497,7 +2661,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description List removed from pack successfully. */
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2523,6 +2687,124 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  HealthController_check: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Health Check is successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example ok */
+            status?: string;
+            /**
+             * @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     }
+             */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /** @example {} */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /**
+             * @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     }
+             */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
+      };
+      /** @description The Health Check is not successful */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example error */
+            status?: string;
+            /**
+             * @example {
+             *       "database": {
+             *         "status": "up"
+             *       }
+             *     }
+             */
+            info?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /**
+             * @example {
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     }
+             */
+            error?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            } | null;
+            /**
+             * @example {
+             *       "database": {
+             *         "status": "up"
+             *       },
+             *       "redis": {
+             *         "status": "down",
+             *         "message": "Could not connect"
+             *       }
+             *     }
+             */
+            details?: {
+              [key: string]: {
+                status: string;
+              } & {
+                [key: string]: unknown;
+              };
+            };
+          };
+        };
       };
     };
   };

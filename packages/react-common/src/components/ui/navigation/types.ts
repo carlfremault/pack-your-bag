@@ -1,1 +1,6 @@
-export type NavTab = 'items' | 'collections' | 'trips';
+export interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+}

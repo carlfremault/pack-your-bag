@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch --debug 127.0.0.1:9231",
+    "dev": "nest start --debug 127.0.0.1:9231",
     "start": "nest start",
     "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
@@ -21,6 +21,7 @@
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.2.0",
+    "@repo/constants": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/nestjs-common": "workspace:*",
     "@sentry/nestjs": "^10.37.0",

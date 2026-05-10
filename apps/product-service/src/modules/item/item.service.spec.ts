@@ -323,14 +323,14 @@ describe('ItemService', () => {
         id: 'list-1',
         name: 'Test List',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
       };
       const pack = {
         id: 'pack-1',
         name: 'Test Pack',
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
         userId,
       };
       const trip = {
@@ -354,7 +354,7 @@ describe('ItemService', () => {
             id: 'list-1',
             name: 'Test List',
             description: 'Test Description',
-            colorCode: '#000000',
+            colorTheme: 'slate',
           },
         ],
         packs: [
@@ -362,7 +362,7 @@ describe('ItemService', () => {
             id: 'pack-1',
             name: 'Test Pack',
             description: 'Test Description',
-            colorCode: '#000000',
+            colorTheme: 'slate',
           },
         ],
         trips: [{ id: 'trip-1', name: 'Test Trip', date, remarks: 'Test Remarks' }],

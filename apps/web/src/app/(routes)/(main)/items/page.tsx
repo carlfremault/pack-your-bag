@@ -1,0 +1,39 @@
+import { Suspense } from 'react';
+import { Metadata } from 'next';
+
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
+
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ErrorFallback from '@/components/ErrorFallback';
+import { getAllItems } from '@/features/item/api';
+import ItemsView from '@/features/item/components/ItemsView';
+import ItemsViewSkeleton from '@/features/item/components/ItemsViewSkeleton';
+
+export const metadata: Metadata = {
+  title: 'Items',
+  description: 'An overview of your items.',
+};
+
+export default async function Page() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['items'],
+    queryFn: () => getAllItems(),
+  });
+
+  return (
+    <div className="flex w-full justify-center lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+      <h1 className="sr-only">Items</h1>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ErrorBoundary
+          fallback={<ErrorFallback message="Failed to load items. Please try again later." />}
+        >
+          <Suspense fallback={<ItemsViewSkeleton />}>
+            <ItemsView />
+          </Suspense>
+        </ErrorBoundary>
+      </HydrationBoundary>
+    </div>
+  );
+}

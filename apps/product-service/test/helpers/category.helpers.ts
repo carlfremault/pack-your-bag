@@ -18,7 +18,7 @@ export class CategoryHelpers {
     return {
       name: 'Test Category',
       description: 'Test Description',
-      colorCode: '#000000',
+      colorTheme: 'slate',
     };
   }
 

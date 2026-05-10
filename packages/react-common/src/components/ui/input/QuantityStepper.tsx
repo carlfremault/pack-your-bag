@@ -1,3 +1,7 @@
+'use client';
+
+import { useLayoutEffect, useRef, useState } from 'react';
+
 import classNames from 'classnames';
 
 export interface QuantityStepperProps {
@@ -6,15 +10,51 @@ export interface QuantityStepperProps {
   min?: number;
   max?: number;
   groupAriaLabel?: string;
+  disabled?: boolean;
 }
 
-export default function QuantityStepper(props: QuantityStepperProps) {
-  const { quantity, onChange, min = 0, max = Infinity, groupAriaLabel = 'Quantity' } = props;
+export function QuantityStepper(props: QuantityStepperProps) {
+  const {
+    quantity,
+    onChange,
+    min = 0,
+    max = Infinity,
+    groupAriaLabel = 'Quantity',
+    disabled,
+  } = props;
+
+  const [localQuantity, setLocalQuantity] = useState(quantity);
+  const latestQuantity = useRef(quantity);
+
+  // Syncs display state and the rapid-click ref when the server confirms a different value
+  // than what the user set (e.g. server-side validation). useLayoutEffect fires before paint
+  // so there is no visible intermediate render — the "cascading render" warning does not apply.
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalQuantity(quantity);
+    latestQuantity.current = quantity;
+  }, [quantity]);
+
+  const handleDecrement = () => {
+    const next = Math.max(min, latestQuantity.current - 1);
+    latestQuantity.current = next;
+    setLocalQuantity(next);
+    onChange(next);
+  };
+
+  const handleIncrement = () => {
+    const next = Math.min(max, latestQuantity.current + 1);
+    latestQuantity.current = next;
+    setLocalQuantity(next);
+    onChange(next);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     if (value >= min && value <= max && !isNaN(value)) {
-      onChange(Number(value));
+      latestQuantity.current = value;
+      setLocalQuantity(value);
+      onChange(value);
     }
   };
 
@@ -32,11 +72,11 @@ export default function QuantityStepper(props: QuantityStepperProps) {
       <button
         type="button"
         aria-label="Decrease quantity"
-        onClick={() => onChange(Math.max(min, quantity - 1))}
-        disabled={quantity <= min}
+        onClick={handleDecrement}
+        disabled={localQuantity <= min || disabled}
         className={classNames(
           stepperButtonClassName,
-          quantity <= min ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+          localQuantity <= min ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
         )}
       >
         -
@@ -44,18 +84,19 @@ export default function QuantityStepper(props: QuantityStepperProps) {
       <input
         type="number"
         aria-label="Quantity value"
-        value={quantity}
+        value={localQuantity}
         onChange={handleChange}
         className={inputClassName}
+        disabled={disabled}
       />
       <button
         type="button"
         aria-label="Increase quantity"
-        onClick={() => onChange(Math.min(max, quantity + 1))}
-        disabled={quantity >= max}
+        onClick={handleIncrement}
+        disabled={localQuantity >= max || disabled}
         className={classNames(
           stepperButtonClassName,
-          quantity >= max ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+          localQuantity >= max ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
         )}
       >
         +

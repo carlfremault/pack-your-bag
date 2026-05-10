@@ -1,8 +1,9 @@
 @import 'tailwindcss';
-@import '../../../packages/react-common/src/theme/default-values.css';
-@import '../../../packages/react-common/src/theme/category-colors.css';
-@import '../../../packages/react-common/src/theme/tokens.css';
-@source '../../../packages/react-common/src';
+@variant dark (&:where(.dark, .dark *));
+@import '@repo/react-common/theme/default-values.css';
+@import '@repo/react-common/theme/color-themes.css';
+@import '@repo/react-common/theme/tokens.css';
+@source '../../../../packages/react-common/src';
 
 body {
   background: var(--background);

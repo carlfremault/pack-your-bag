@@ -42,7 +42,7 @@ describe('Category (e2e)', () => {
         id: expect.any(String) as string,
         name: categoryDto.name,
         description: categoryDto.description,
-        colorCode: categoryDto.colorCode,
+        colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -75,7 +75,7 @@ describe('Category (e2e)', () => {
     it('should return 400 if the payload is missing required fields', async () => {
       const invalidDto = {
         description: 'Test Description',
-        colorCode: '#000000',
+        colorTheme: 'slate',
       };
 
       const { body } = await ctx.categoryHelpers.createCategory({
@@ -106,7 +106,7 @@ describe('Category (e2e)', () => {
         id: body.id,
         name: categoryDto.name,
         description: categoryDto.description,
-        colorCode: categoryDto.colorCode,
+        colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -224,7 +224,7 @@ describe('Category (e2e)', () => {
       expect(createdCategory).toMatchObject({
         name: categoryDto.name,
         description: categoryDto.description,
-        colorCode: categoryDto.colorCode,
+        colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -234,7 +234,7 @@ describe('Category (e2e)', () => {
         payload: {
           name: 'Updated Category',
           description: 'Updated Description',
-          colorCode: '#FFFFFF',
+          colorTheme: 'slate',
         },
         accessToken: validAccessToken,
       });
@@ -247,7 +247,7 @@ describe('Category (e2e)', () => {
       expect(updatedCategory).toMatchObject({
         name: 'Updated Category',
         description: 'Updated Description',
-        colorCode: '#FFFFFF',
+        colorTheme: 'slate',
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -267,7 +267,7 @@ describe('Category (e2e)', () => {
       expect(createdCategory).toMatchObject({
         name: categoryDto.name,
         description: categoryDto.description,
-        colorCode: categoryDto.colorCode,
+        colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -288,7 +288,7 @@ describe('Category (e2e)', () => {
       expect(updatedCategory).toMatchObject({
         name: 'Updated Category',
         description: categoryDto.description,
-        colorCode: categoryDto.colorCode,
+        colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -386,7 +386,7 @@ describe('Category (e2e)', () => {
       expect(createdCategory).toMatchObject({
         name: categoryDto.name,
         description: categoryDto.description,
-        colorCode: categoryDto.colorCode,
+        colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
         updatedAt: isoDateMatcher,
       });
@@ -488,7 +488,7 @@ describe('Category (e2e)', () => {
           id: category.id,
           name: categoryDto.name,
           description: categoryDto.description,
-          colorCode: categoryDto.colorCode,
+          colorTheme: categoryDto.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         },
@@ -514,7 +514,7 @@ describe('Category (e2e)', () => {
           id: category.id,
           name: categoryDto.name,
           description: categoryDto.description,
-          colorCode: categoryDto.colorCode,
+          colorTheme: categoryDto.colorTheme,
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         },

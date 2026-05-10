@@ -12,7 +12,11 @@ import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
 import { CreateListDto } from './dto/create-list.dto';
 import { ListDeleteImpactDto } from './dto/list-delete-impact.dto';
-import { ListResponseDto, ListSummaryResponseDto } from './dto/list-response.dto';
+import {
+  ListBaseResponseDto,
+  ListResponseDto,
+  ListSummaryResponseDto,
+} from './dto/list-response.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 
 @Injectable()
@@ -27,9 +31,7 @@ export class ListService {
     const result = await this.prisma.list.findMany({
       where,
       include: {
-        _count: {
-          select: { items: true },
-        },
+        items: { include: { item: true } },
       },
     });
 
@@ -97,11 +99,6 @@ export class ListService {
   async getListDeleteImpact(id: string, userId: string): Promise<ListDeleteImpactDto> {
     const list = await this.prisma.list.findUnique({
       where: { id, userId },
-      include: {
-        _count: {
-          select: { items: true },
-        },
-      },
     });
     if (!list) {
       throw new NotFoundException('List not found');
@@ -126,7 +123,7 @@ export class ListService {
     }
 
     return {
-      list: plainToInstance(ListSummaryResponseDto, list),
+      list: plainToInstance(ListBaseResponseDto, list),
       packs: plainToInstance(PackResponseDto, packs),
       trips: plainToInstance(TripResponseDto, trips),
     };

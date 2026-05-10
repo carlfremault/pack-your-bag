@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
-    "dev": "tsc --project tsconfig.build.json --watch",
+    "dev": "tsc --project tsconfig.build.json",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",

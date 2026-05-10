@@ -2,11 +2,27 @@
   "name": "@repo/react-common",
   "version": "0.0.1",
   "private": true,
-  "imports": {
-    "#lib/*": "./src/lib/*"
-  },
   "exports": {
-    ".": "./src/index.ts"
+    "./table": "./src/components/table/index.ts",
+    "./alert": "./src/components/ui/alert/Alert.tsx",
+    "./button": "./src/components/ui/button/index.ts",
+    "./card": "./src/components/ui/card/index.ts",
+    "./confirmation-dialog": "./src/components/ui/dialog/ConfirmationDialog.tsx",
+    "./dialog": "./src/components/ui/dialog/index.ts",
+    "./header": "./src/components/ui/header/index.ts",
+    "./input": "./src/components/ui/input/index.ts",
+    "./logo": "./src/components/ui/logo/Logo.tsx",
+    "./navigation": "./src/components/ui/navigation/index.ts",
+    "./pill": "./src/components/ui/pill/CategoryPill.tsx",
+    "./sidebar": "./src/components/ui/sidebar/Sidebar.tsx",
+    "./spinner": "./src/components/ui/spinner/Spinner.tsx",
+    "./tooltip": "./src/components/ui/tooltip/Tooltip.tsx",
+    "./utils": "./src/components/ui/utils/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./color-themes": "./src/lib/colorThemes.ts",
+    "./theme/default-values.css": "./src/theme/default-values.css",
+    "./theme/color-themes.css": "./src/theme/color-themes.css",
+    "./theme/tokens.css": "./src/theme/tokens.css"
   },
   "scripts": {
     "lint": "eslint .",
@@ -28,16 +44,17 @@
     "@storybook/addon-vitest": "^10.3.2",
     "@storybook/react-vite": "^10.3.2",
     "@tailwindcss/vite": "^4.2.2",
-    "@types/react": "19.2.6",
-    "@types/react-dom": "^19",
+    "@tanstack/react-table": "^8.21.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitest/browser": "^4.1.1",
     "@vitest/browser-playwright": "^4.1.1",
     "@vitest/coverage-v8": "^4.1.1",
     "classnames": "^2.5.1",
     "eslint": "^9.7.0",
     "playwright": "^1.58.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "react-icons": "^5.6.0",
     "storybook": "^10.3.2",
     "tailwindcss": "^4.2.2",
@@ -46,9 +63,10 @@
     "vitest": "^4.1.1"
   },
   "peerDependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "react-icons": "^5.6.0"
   }
 }

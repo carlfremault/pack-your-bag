@@ -1,38 +1,37 @@
 import classNames from 'classnames';
 
-import { navTabs } from './constants';
-import { NavTab } from './types';
+import type { NavItem } from './types';
 
 export interface DesktopNavButtonsProps {
-  activeTab: NavTab;
-  onTabChange: (tab: NavTab) => void;
+  tabs: NavItem[];
+  activeTabId?: string;
+  linkAs?: React.ElementType;
 }
 
-export default function DesktopNavButtons(props: DesktopNavButtonsProps) {
-  const { activeTab, onTabChange } = props;
+export function DesktopNavButtons(props: DesktopNavButtonsProps) {
+  const { tabs, activeTabId, linkAs: LinkComponent = 'a' } = props;
 
-  const buttonClassName =
-    'cursor-pointer active:scale-90 active:bg-primary/10 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide';
-  const activeButtonClassName = 'bg-surface text-primary shadow-sm';
-  const inactiveButtonClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
+  const tabClassName =
+    'cursor-pointer active:scale-90 active:bg-primary/10 transition-all duration-150 ease-out flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium tracking-wide focus-visible:ring-primary-ring focus-visible:ring-2 focus-visible:outline-none';
+  const activeClassName = 'bg-surface text-primary shadow-sm dark:bg-primary/20';
+  const inactiveClassName = 'text-nav-inactive hover:text-nav-inactive-hover';
 
   return (
-    <div className="bg-surface-overlay flex w-fit rounded-md p-1">
-      {navTabs.map(({ id, label, icon: Icon }) => (
-        <button
+    <nav aria-label="Main navigation" className="bg-surface-overlay flex w-fit rounded-md p-1">
+      {tabs.map(({ id, label, icon: Icon, href }) => (
+        <LinkComponent
           key={id}
-          type="button"
-          onClick={() => onTabChange(id)}
-          aria-pressed={activeTab === id}
+          href={href}
+          aria-current={activeTabId === id ? 'page' : undefined}
           className={classNames(
-            buttonClassName,
-            activeTab === id ? activeButtonClassName : inactiveButtonClassName,
+            tabClassName,
+            activeTabId === id ? activeClassName : inactiveClassName,
           )}
         >
           <Icon className="h-6 w-6" />
           {label}
-        </button>
+        </LinkComponent>
       ))}
-    </div>
+    </nav>
   );
 }

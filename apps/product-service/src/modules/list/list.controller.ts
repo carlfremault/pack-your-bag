@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -25,7 +26,7 @@ import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.con
 
 import { CreateListDto } from './dto/create-list.dto';
 import { ListDeleteImpactDto } from './dto/list-delete-impact.dto';
-import { ListResponseDto } from './dto/list-response.dto';
+import { ListResponseDto, ListSummaryResponseDto } from './dto/list-response.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ListService } from './list.service';
 
@@ -46,7 +47,7 @@ export class ListController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Lists retrieved successfully.',
-    type: [ListResponseDto],
+    type: [ListSummaryResponseDto],
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LISTS.GET_ALL, ttl: THROTTLE_TTL_MS } })
@@ -145,7 +146,7 @@ export class ListController {
   @Delete(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Delete a list by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'List deleted successfully.' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'List deleted successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -153,10 +154,11 @@ export class ListController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'List not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LISTS.DELETE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteList(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.listService.handleListDeletion(id, userId);
+    await this.listService.handleListDeletion(id, userId);
   }
 }

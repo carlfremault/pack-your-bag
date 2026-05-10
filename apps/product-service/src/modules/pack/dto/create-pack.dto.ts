@@ -9,21 +9,31 @@ import {
 } from '@/common/constants/product.constants';
 
 export class CreatePackDto {
-  @ApiProperty({ description: 'Pack name', example: 'Pack name' })
+  @ApiProperty({
+    description: 'Pack name',
+    example: 'Pack name',
+    maxLength: NAME_MAX_LENGTH,
+    minLength: 1,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(NAME_MAX_LENGTH)
   name: string;
 
-  @ApiProperty({ description: 'Pack description', example: 'Pack description', required: false })
+  @ApiProperty({
+    description: 'Pack description',
+    example: 'Pack description',
+    required: false,
+    maxLength: DESCRIPTION_MAX_LENGTH,
+  })
   @IsString()
   @IsOptional()
   @MaxLength(DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ description: 'Pack color code', example: '#000000', required: false })
+  @ApiProperty({ description: 'Pack color theme', example: 'slate', required: false })
   @IsString()
   @IsOptional()
   @MaxLength(COLOR_CODE_MAX_LENGTH)
-  colorCode?: string;
+  colorTheme?: string;
 }

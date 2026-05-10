@@ -17,6 +17,7 @@ import Joi from 'joi';
 
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { MongooseExceptionFilter } from './common/filters/mongoose-exception.filter';
+import { HealthModule } from './health/health.module';
 import { PreferencesModule } from './preferences/preferences.module';
 
 const validationSchema = Joi.object({
@@ -65,8 +66,8 @@ const validationSchema = Joi.object({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
         {
-          ttl: config.get('PRODUCT_THROTTLE_TTL', 60000),
-          limit: config.get('PRODUCT_THROTTLE_LIMIT', 100),
+          ttl: config.get('USER_DATA_THROTTLE_TTL', 60000),
+          limit: config.get('USER_DATA_THROTTLE_LIMIT', 100),
           skipIf: (context) => {
             const isTestEnv = config.get('NODE_ENV') === 'test';
             if (!isTestEnv) return false;
@@ -87,6 +88,7 @@ const validationSchema = Joi.object({
     CustomThrottlerModule,
     JwtAuthModule,
     PreferencesModule,
+    HealthModule,
   ],
 
   providers: [

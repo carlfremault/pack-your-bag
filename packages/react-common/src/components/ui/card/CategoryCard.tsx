@@ -2,9 +2,8 @@ import { MdDeleteOutline, MdOutlineEdit } from 'react-icons/md';
 
 import classNames from 'classnames';
 
-import Button from '../button/Button';
-
-import { ColorTheme, colorThemes } from '#lib/colorThemes';
+import { ColorTheme, colorThemes } from '../../../lib/colorThemes';
+import { Button } from '../button/Button';
 
 export interface CategoryCardProps {
   id: string;
@@ -15,7 +14,7 @@ export interface CategoryCardProps {
   onDeleteCategory: (id: string) => void;
 }
 
-export default function CategoryCard(props: CategoryCardProps) {
+export function CategoryCard(props: CategoryCardProps) {
   const { id, name, description, colorTheme = 'slate', onEditCategory, onDeleteCategory } = props;
 
   const { className: colorThemeClassName } = colorThemes[colorTheme] ?? colorThemes['slate'];

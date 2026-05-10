@@ -17,6 +17,7 @@ describe('Audit Log (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await ctx.clearMailpit();
     await ctx.resetDb();
   });
 
@@ -29,15 +30,15 @@ describe('Audit Log (e2e)', () => {
       const { user } = await createAuthenticatedUser(ctx);
       const log = await ctx.authHelpers.waitForMostRecentLog({
         userId: user.id,
-        eventType: AuditEventType.USER_REGISTERED,
+        eventType: AuditEventType.USER_LOGIN_SUCCESS,
       });
 
       expect(log).toMatchObject({
         severity: AuditSeverity.INFO,
         userId: user.id,
-        path: '/auth/register',
+        path: '/auth/login',
         method: 'POST',
-        statusCode: HttpStatus.CREATED,
+        statusCode: HttpStatus.OK,
       });
     });
 

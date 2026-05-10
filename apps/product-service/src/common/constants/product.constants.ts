@@ -1,22 +1,23 @@
-// Product
-export const NAME_MAX_LENGTH = 128;
-export const DESCRIPTION_MAX_LENGTH = 1000;
-export const COLOR_CODE_MAX_LENGTH = 64; // TODO: decide on color code implementation. Custom strings or rgb/hex/etc.
-export const REMARKS_MAX_LENGTH = 1000;
+export {
+  NAME_MAX_LENGTH,
+  CATEGORY_NAME_MAX_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+  COLOR_CODE_MAX_LENGTH,
+  REMARKS_MAX_LENGTH,
+} from '@repo/constants';
 
-// Throttling
 const DEFAULT_RESOURCE_THROTTLE = {
   GET_ALL: 60,
-  GET: 20,
+  GET: 60,
   POST: 10,
   PATCH: 20,
-  DELETE: 5,
-  GET_DELETE_IMPACT: 5,
+  DELETE: 20,
+  GET_DELETE_IMPACT: 20,
 } as const;
 
 const DEFAULT_JOIN_TABLE_THROTTLE = {
-  UPSERT: 10,
-  REMOVE: 10,
+  UPSERT: 120,
+  REMOVE: 120,
 } as const;
 
 export const THROTTLE_TTL_MS = 60000;

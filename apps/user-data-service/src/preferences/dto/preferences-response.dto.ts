@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Exclude, Expose } from 'class-transformer';
+import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
 
-import { DateFormat, Theme, TimeFormat, Units } from '../types/preferences.types';
+import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
 export class PreferencesResponseDto {
@@ -10,19 +10,19 @@ export class PreferencesResponseDto {
   @Expose()
   userId: string;
 
-  @ApiProperty({ description: 'Units', example: 'metric' })
+  @ApiProperty({ description: 'Units', example: 'metric', enum: Units })
   @Expose()
   units: Units;
 
-  @ApiProperty({ description: 'Theme', example: 'light' })
+  @ApiProperty({ description: 'Theme', example: 'light', nullable: true, enum: Theme })
   @Expose()
-  theme: Theme;
+  theme: Theme | null;
 
-  @ApiProperty({ description: 'Date format', example: 'DD/MM/YYYY' })
+  @ApiProperty({ description: 'Date format', example: 'DD/MM/YYYY', enum: DateFormat })
   @Expose()
   dateFormat: DateFormat;
 
-  @ApiProperty({ description: 'Time format', example: '12h' })
+  @ApiProperty({ description: 'Time format', example: '12h', enum: TimeFormat })
   @Expose()
   timeFormat: TimeFormat;
 

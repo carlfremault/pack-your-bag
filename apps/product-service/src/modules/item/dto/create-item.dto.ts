@@ -4,39 +4,62 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MaxLength,
+  Min,
+  ValidateIf,
 } from 'class-validator';
 
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH } from '@/common/constants/product.constants';
 
 export class CreateItemDto {
-  @ApiProperty({ description: 'Item name', example: 'Item name' })
+  @ApiProperty({
+    description: 'Item name',
+    example: 'Item name',
+    maxLength: NAME_MAX_LENGTH,
+    minLength: 1,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(NAME_MAX_LENGTH)
   name: string;
 
-  @ApiProperty({ description: 'Item description', example: 'Item description', required: false })
+  @ApiProperty({
+    description: 'Item description',
+    example: 'Item description',
+    required: false,
+    maxLength: DESCRIPTION_MAX_LENGTH,
+  })
   @IsString()
   @IsOptional()
   @MaxLength(DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ description: 'Item weight', example: 100, required: false })
+  @ApiProperty({
+    description: 'Item weight',
+    type: 'number',
+    example: 100,
+    required: false,
+    nullable: true,
+    minimum: 0,
+  })
+  @ValidateIf((_object, value) => value !== null)
   @IsNumber()
-  @IsPositive()
   @IsOptional()
-  weight?: number;
+  @Min(0)
+  weight?: number | null;
 
   @ApiProperty({
     description: 'Item category uuid',
+    type: String,
+    format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
     required: false,
+    nullable: true,
   })
+  @ValidateIf((_object, value) => value !== null)
   @IsUUID()
   @IsOptional()
-  categoryId?: string;
+  categoryId?: string | null;
 }

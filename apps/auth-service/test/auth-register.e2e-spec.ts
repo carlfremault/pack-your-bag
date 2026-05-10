@@ -2,6 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { getMailpitMessages } from './fixtures/auth.fixtures';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Auth Register (e2e)', () => {
@@ -12,6 +13,7 @@ describe('Auth Register (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await ctx.clearMailpit();
     await ctx.resetDb();
   });
 
@@ -43,34 +45,39 @@ describe('Auth Register (e2e)', () => {
           payload: { email: 'invalidemail', password: 'validPassword123' },
         },
       ])('should return HttpStatus.BAD_REQUEST(400) when $condition', async ({ payload }) => {
-        const { body } = await ctx.authHelpers.registerUser({
+        const response = await ctx.authHelpers.registerUser({
           payload,
           expectedStatus: HttpStatus.BAD_REQUEST,
         });
-        expect(body).toMatchObject({
+        expect(response.body).toMatchObject({
           error: 'Bad Request',
         });
       });
     });
 
-    it('should register a new user and return a pair of tokens', async () => {
-      const { body } = await ctx.authHelpers.registerUser({ payload: ctx.authHelpers.defaultUser });
+    it('should register a new user and send a verification email', async () => {
+      await ctx.authHelpers.registerUser({ payload: ctx.authHelpers.defaultUser });
 
-      expect(body).toMatchObject({
-        access_token: expect.any(String) as string,
-        refresh_token: expect.any(String) as string,
-        token_type: 'Bearer',
-        expires_in: ctx.configService.get<number>('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS', 900),
+      // Wait for async event processing
+      await ctx.authHelpers.sleep(100);
+
+      const messages = await getMailpitMessages(ctx);
+      expect(messages).toHaveLength(1);
+      const email = messages.find((m) => m.To[0]?.Address === ctx.authHelpers.defaultUser.email);
+
+      expect(email).toBeDefined();
+      expect(email).toMatchObject({
+        Subject: 'Account Verification Request',
       });
     });
 
     it('should not accept a duplicate email', async () => {
       await ctx.authHelpers.registerUser({ payload: ctx.authHelpers.defaultUser });
-      const { body } = await ctx.authHelpers.registerUser({
+      const response = await ctx.authHelpers.registerUser({
         payload: ctx.authHelpers.defaultUser,
         expectedStatus: HttpStatus.CONFLICT,
       });
-      expect(body).toMatchObject({
+      expect(response.body).toMatchObject({
         error: 'Conflict',
         message: 'Email already exists.',
       });
@@ -82,11 +89,11 @@ describe('Auth Register (e2e)', () => {
         ...ctx.authHelpers.defaultUser,
         email: ctx.authHelpers.defaultUser.email.toUpperCase(),
       };
-      const { body } = await ctx.authHelpers.registerUser({
+      const response = await ctx.authHelpers.registerUser({
         payload: uppercaseDto,
         expectedStatus: HttpStatus.CONFLICT,
       });
-      expect(body).toMatchObject({
+      expect(response.body).toMatchObject({
         error: 'Conflict',
         message: 'Email already exists.',
       });

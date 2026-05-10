@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -25,7 +26,7 @@ import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.con
 
 import { CreatePackDto } from './dto/create-pack.dto';
 import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
-import { PackResponseDto } from './dto/pack-response.dto';
+import { PackResponseDto, PackSummaryResponseDto } from './dto/pack-response.dto';
 import { UpdatePackDto } from './dto/update-pack.dto';
 import { PackService } from './pack.service';
 
@@ -46,7 +47,7 @@ export class PackController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Packs retrieved successfully.',
-    type: [PackResponseDto],
+    type: [PackSummaryResponseDto],
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.GET_ALL, ttl: THROTTLE_TTL_MS } })
@@ -141,7 +142,7 @@ export class PackController {
   @Delete(':id')
   @ApiBffAndAccessSecurity()
   @ApiOperation({ summary: 'Delete a pack by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Pack deleted successfully.' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Pack deleted successfully.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Validation failed (uuid v7 is expected)',
@@ -149,10 +150,11 @@ export class PackController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Pack not found.' })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.DELETE, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deletePack(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.packService.deletePack(id, userId);
+    await this.packService.deletePack(id, userId);
   }
 }

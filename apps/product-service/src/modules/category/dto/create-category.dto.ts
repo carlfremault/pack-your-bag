@@ -1,18 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import {
+  CATEGORY_NAME_MAX_LENGTH,
   COLOR_CODE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
-  NAME_MAX_LENGTH,
 } from '@/common/constants/product.constants';
 
 export class CreateCategoryDto {
-  @ApiProperty({ description: 'Category name', example: 'Category name' })
+  @ApiProperty({
+    description: 'Category name',
+    example: 'Category name',
+    maxLength: CATEGORY_NAME_MAX_LENGTH,
+    minLength: 1,
+  })
   @IsString()
   @IsNotEmpty()
-  @MaxLength(NAME_MAX_LENGTH)
+  @MaxLength(CATEGORY_NAME_MAX_LENGTH)
+  @Transform(({ value }: { value: string }) => value.trim().toLowerCase())
   name: string;
 
   @ApiProperty({
@@ -25,9 +32,8 @@ export class CreateCategoryDto {
   @MaxLength(DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ description: 'Category color code', example: '#000000', required: false })
+  @ApiProperty({ description: 'Category color theme', example: 'slate' })
   @IsString()
-  @IsOptional()
   @MaxLength(COLOR_CODE_MAX_LENGTH)
-  colorCode?: string;
+  colorTheme: string;
 }

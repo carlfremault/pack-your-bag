@@ -1,5 +1,7 @@
 import type { paths } from './schema';
+import * as schemas from './schema.zod';
 
+export { schemas };
 export type { paths } from './schema';
 
 export type SuccessResponse<P extends keyof paths, M extends keyof paths[P]> = paths[P][M] extends {

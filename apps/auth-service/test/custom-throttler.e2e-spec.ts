@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import { THROTTLE_LIMITS } from '@/common/constants/auth.constants';
 
+import { createVerifiedUser } from './fixtures/auth.fixtures';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
 describe('Custom Throttler Log (e2e)', () => {
@@ -16,6 +17,7 @@ describe('Custom Throttler Log (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await ctx.clearMailpit();
     await ctx.resetDb();
   });
 
@@ -70,6 +72,10 @@ describe('Custom Throttler Log (e2e)', () => {
 
     it('should trigger custom throttler guard and create an audit log entry - email based tracking', async () => {
       await ctx.authHelpers.registerUser({ headers: { 'x-force-throttling': 'true' } });
+      await ctx.prisma.user.update({
+        where: { email: ctx.authHelpers.defaultUser.email },
+        data: { isEmailVerified: true, emailVerifiedAt: new Date() },
+      });
       for (let i = 0; i < THROTTLE_LIMITS.LOGIN; i++) {
         await ctx.authHelpers.loginUser({ headers: { 'x-force-throttling': 'true' } });
       }
@@ -96,7 +102,8 @@ describe('Custom Throttler Log (e2e)', () => {
     });
 
     it('should trigger custom throttler guard and create an audit log entry - userId based tracking', async () => {
-      const { body } = await ctx.authHelpers.registerUser({
+      await createVerifiedUser(ctx);
+      const { body } = await ctx.authHelpers.loginUser({
         headers: { 'x-force-throttling': 'true' },
       });
       await ctx.authHelpers.updatePassword({

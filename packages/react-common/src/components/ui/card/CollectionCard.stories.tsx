@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 
-import CollectionCard from './CollectionCard';
+import { colorThemes } from '../../../lib/colorThemes';
+import { LONG_DESCRIPTION } from '../../../lib/constants';
 
-import { colorThemes } from '#lib/colorThemes';
-import { LONG_DESCRIPTION } from '#lib/constants';
+import { CollectionCard } from './CollectionCard';
 
 const meta: Meta<typeof CollectionCard> = {
   title: 'Components/CollectionCard',
@@ -27,8 +26,8 @@ export const ListWith10Items: Story = {
     description: 'Collection 1 description',
     colorTheme: 'ocean',
     type: 'list',
-    numberOfItems: 10,
-    onOpenCollection: fn(),
+    itemCount: 10,
+    href: '/',
   },
 };
 
@@ -39,8 +38,8 @@ export const PackWith1Item: Story = {
     description: 'Collection 1 description',
     colorTheme: 'jungle',
     type: 'pack',
-    numberOfItems: 1,
-    onOpenCollection: fn(),
+    itemCount: 1,
+    href: '/',
   },
 };
 
@@ -51,8 +50,8 @@ export const PackWithoutItems: Story = {
     description: 'Collection 1 description',
     colorTheme: 'lagoon',
     type: 'pack',
-    numberOfItems: 0,
-    onOpenCollection: fn(),
+    itemCount: 0,
+    href: '/',
   },
 };
 
@@ -62,8 +61,8 @@ export const ListWithoutDescription: Story = {
     name: 'List 1',
     colorTheme: 'lavender',
     type: 'list',
-    numberOfItems: 10,
-    onOpenCollection: fn(),
+    itemCount: 10,
+    href: '/',
   },
 };
 
@@ -74,7 +73,33 @@ export const ListWithLongDescription: Story = {
     description: LONG_DESCRIPTION,
     colorTheme: 'slate',
     type: 'list',
-    numberOfItems: 10,
-    onOpenCollection: fn(),
+    itemCount: 10,
+    href: '/',
+  },
+};
+
+export const WeightInKg: Story = {
+  args: {
+    id: 'collection-6',
+    name: 'Heavy Pack',
+    colorTheme: 'ocean',
+    type: 'pack',
+    itemCount: 12,
+    totalWeight: '2.35',
+    weightUnit: 'kg',
+    href: '/',
+  },
+};
+
+export const WeightInLbs: Story = {
+  args: {
+    id: 'collection-7',
+    name: 'Heavy List',
+    colorTheme: 'jungle',
+    type: 'list',
+    itemCount: 8,
+    totalWeight: '5.18',
+    weightUnit: 'lbs',
+    href: '/',
   },
 };
