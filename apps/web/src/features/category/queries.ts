@@ -28,6 +28,7 @@ const useAllCategories = (): UseSuspenseQueryResult<Category[]> => {
   return useSuspenseQuery({
     queryKey: ['categories'],
     queryFn: fetchAllCategories,
+    select: (data) => [...data].sort((a, b) => a.name.localeCompare(b.name)),
   });
 };
 

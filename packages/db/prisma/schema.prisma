@@ -180,6 +180,7 @@ model Category {
 
   items       Item[]
 
+  @@unique([userId, name])
   @@index([userId])
   @@schema("app_product")
 }
