@@ -350,23 +350,28 @@ As part of generating the `user-data-client` package, all three HTTP clients (`a
 
 ### 6.5 Phase 4: Frontend
 
-With three backend services operational and their typed HTTP clients published, the focus shifted to the presentation layer. Rather than building UI directly inside the Next.js app, I split this phase into two stages: first, build a shared component library in isolation; then, integrate it into the application with real data and routing.
+With three backend services operational and their typed HTTP clients published, the focus shifted to the presentation layer. Before building the UI, I extended the Auth Service with email verification. The phase then followed two stages: a shared component library built in isolation, then integration into the Next.js application with real data and routing.
 
-To maintain consistency during component development, I codified the component design philosophy into a Cursor Rule — a machine-readable contract that enforces presentational purity, story coverage, and export conventions as components are built. I also installed several Agent Skills (Next.js best practices, React composition patterns, React performance guidelines) to keep AI-assisted development aligned with current framework idioms.
+#### 6.5.1 API Contract & Type Generation
 
-#### 6.5.1 Component Library & Design System
+Each HTTP client package (`auth-client`, `product-client`, `user-data-client`) takes the service's OpenAPI spec as its single source of truth. Two artifacts are generated from that spec:
 
-The UI components live in `@repo/react-common`, a shared monorepo package following the same pattern established with `nestjs-common` and `db` in earlier phases.
+- **TypeScript types** via `openapi-typescript`: strongly-typed request and response interfaces that track any API change.
+- **Zod schemas** via `openapi-zod-client`: runtime validation schemas for request bodies, surfacing errors at the form layer without duplicating schema definitions.
 
-The design system is built on a CSS custom property token layer. Semantic tokens (`--primary`, `--accent`, `--danger`) are defined in `tokens.css` and mapped to concrete values in `default-values.css`, with full light and dark mode support. Components reference only the semantic tokens, so theme changes propagate without touching component code. For entities that need visual differentiation (Categories, Lists and Packs), a 10-color theme palette (ocean, sunset, jungle, lavender, etc.) provides color coding via a `colorTheme` prop.
+Backend contract changes propagate automatically to frontend types and validators — no manual schema maintenance, no drift between validation and API shape.
 
-#### 6.5.2 Component-Driven Development
+#### 6.5.2 Authentication Extension
 
-Every component has a colocated Storybook story file. Stories serve as the source of truth for a component's valid states — if a state isn't represented in a story, it isn't designed. This replaces the traditional cycle of spinning up the full application, logging in, navigating to the right screen, and creating test data just to verify a visual change. Each story covers the happy path, meaningful visual variants, and edge cases that are likely to break layout (1000-character descriptions, missing optional props, zero-item states).
+I extended the Auth Service with an email verification flow using time-limited tokens, blocking protected resource access for unverified accounts. This completed the account lifecycle alongside the password reset and deletion flows already in place.
 
-#### 6.5.3 Presentational Components
+#### 6.5.3 Component Library (`@repo/react-common`)
 
-All components are purely presentational: no data fetching, no API calls, no internal state management beyond controlled inputs. Data enters exclusively through typed props, and user interactions are communicated upward via callback props (`onEditItem`, `onOpenCollection`, `onTabChange`). This draws a hard boundary between UI and logic — the components don't know where their data comes from or what happens when a button is clicked.
+The UI components live in `@repo/react-common`, following the shared-package pattern established in Phases 2–3.
+
+The design system supports full light and dark mode via a semantic token layer, with theme changes propagating without touching component code. Entities requiring visual differentiation (Categories, Lists, Packs) use a 10-color palette via a `colorTheme` prop.
+
+All components are purely presentational: no data fetching, no API calls, no internal state management beyond controlled inputs. Data enters through typed props; user interactions propagate upward via callback props (`onEditItem`, `onOpenCollection`). This draws a hard boundary between UI and logic — components don't know where their data comes from or what happens when a button is clicked.
 
 <p align="center">
     <br>
@@ -375,7 +380,7 @@ All components are purely presentational: no data fetching, no API calls, no int
     <i>Desktop header</i>
 </p>
 
-Where a component needs to appear differently across contexts, it uses composition rather than conditional logic. `ItemCard`, for example, accepts an `actions` slot as a `React.ReactNode` prop. In a list view, the parent can pass a quantity stepper; in a read-only view, it passes nothing. The card itself doesn't know the difference, and neither rendering path requires a boolean flag or internal branching.
+Where a component needs to behave differently across contexts, it uses composition over conditional logic. E.g. `ItemCard` accepts an `actions` slot as a `React.ReactNode` prop — a quantity stepper in list view, Edit/Delete buttons in items view — no boolean flags or internal branching required.
 
 <p align="center">
     <br>
@@ -383,6 +388,16 @@ Where a component needs to appear differently across contexts, it uses compositi
     <br>
     <i>Item card with quantity stepper</i>
 </p>
+
+#### 6.5.4 Component-Driven Development with Storybook
+
+Components in `@repo/react-common` have a colocated Storybook story file. Stories serve as the source of truth for a component's valid states — if a state isn't in a story, it isn't designed. This replaces the traditional cycle of spinning up the full app, logging in, navigating to the right screen, and creating test data just to verify a visual change. Each story covers the happy path, meaningful visual variants, and layout-breaking edge cases (1000-character descriptions, missing optional props, zero-item states).
+
+#### 6.5.5 Application Integration
+
+With the component library stable, integration into the Next.js app leaned into the async React paradigm: Server Components prefetch data before rendering, with Suspense boundaries and skeleton fallbacks handling the async client layer. This keeps the data-fetching waterfall on the server and eliminates loading spinners on initial navigation.
+
+Accessibility was treated as a first-class concern throughout — ARIA attributes, keyboard navigation, screen reader support, and semantic markup applied consistently across all routes.
 
 ## License
 
