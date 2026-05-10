@@ -14,7 +14,7 @@ import { toCollectionSummaryCardProps } from '@/lib/mappers/collection.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useCollection } from '../queries';
-import { CollectionForHeaderDisplay, CollectionType } from '../types';
+import { CollectionForSummaryDisplay, CollectionType } from '../types';
 import {
   getCategoryWeightsInList,
   getCategoryWeightsInPack,
@@ -47,7 +47,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const { data: collection } = useCollection(id, type);
   const { data: preferences } = usePreferences();
 
-  const collectionForHeaderDisplay = useMemo((): CollectionForHeaderDisplay => {
+  const collectionForSummaryDisplay = useMemo((): CollectionForSummaryDisplay => {
     const totalWeight =
       collection.type === 'list'
         ? getTotalWeightInList(collection)
@@ -105,7 +105,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     />
   );
 
-  const headerCardProps = toCollectionSummaryCardProps(collectionForHeaderDisplay, {
+  const headerCardProps = toCollectionSummaryCardProps(collectionForSummaryDisplay, {
     onEditCollection: handleEditCollection,
     onDeleteCollection: handleDeleteCollection,
   });
