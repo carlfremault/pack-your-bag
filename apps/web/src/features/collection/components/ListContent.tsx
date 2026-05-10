@@ -14,8 +14,6 @@ import { formatWeightForDisplay } from '@/utils/weightUtils';
 import { useUpsert } from '../hooks/useUpsert';
 import { CollectionDetail } from '../types';
 
-import AddItemsModal from './AddItemsModal';
-
 export interface ListContentProps {
   collection: CollectionDetail;
 }
@@ -54,7 +52,6 @@ export default function ListContent(props: ListContentProps) {
 
   return (
     <>
-      <AddItemsModal collection={collection} />
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {/* Mobile */}
       <div className="mb-32 lg:hidden">

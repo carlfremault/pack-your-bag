@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 import { DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH, Units } from '@repo/constants';
@@ -70,10 +70,16 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
 
   const { data: categories } = useAllCategories();
-  const categoryOptions = categories.map((category) => ({
-    label: <CategoryPill {...toCategoryPillProps(category)} />,
-    value: category.id,
-  }));
+  const categoryOptions = useMemo(
+    () =>
+      [...categories]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((category) => ({
+          label: <CategoryPill {...toCategoryPillProps(category)} />,
+          value: category.id,
+        })),
+    [categories],
+  );
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
     useFormState(getInitialFormValues(item, units), ITEM_FORM_FIELDS);

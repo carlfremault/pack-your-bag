@@ -103,7 +103,7 @@ export function useUrlFilterItems<T extends FilterableItem>({
         params.set('dir', updates.sortDirection);
         sessionStorage.setItem(sortDirKey, updates.sortDirection);
       }
-      router.replace(`${pathname}?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [handleSearchChange, pathname, router, searchParams, sortFieldKey, sortDirKey],
   );

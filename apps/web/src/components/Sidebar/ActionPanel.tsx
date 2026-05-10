@@ -139,21 +139,32 @@ function ActionPanelInner() {
     desktopTitle = CATEGORY_DESKTOP_TITLES[categoryMode];
   }
 
+  const isCollectionDetailPage = /^\/(list|pack)\/[^/]+/.test(pathname);
+  const isCollectionAction = action === 'add-collection' || action === 'edit-collection';
+
+  // Desktop: Sidebar
   if (isDesktop) {
-    return (
-      <SidebarPortal>
-        {panelContent ? (
+    // Collection detail page loads collection summary card
+    if (isCollectionDetailPage && !isCollectionAction) return null;
+    if (panelContent) {
+      return (
+        <SidebarPortal>
           <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
             {desktopTitle && <h2 className="text-primary text-xl">{desktopTitle}</h2>}
             {panelContent}
           </div>
-        ) : (
-          <SidebarNav pathname={pathname} />
-        )}
+        </SidebarPortal>
+      );
+    }
+
+    return (
+      <SidebarPortal>
+        <SidebarNav pathname={pathname} />
       </SidebarPortal>
     );
   }
 
+  // Mobile: Modal
   if (!action || !panelContent) return null;
 
   return (

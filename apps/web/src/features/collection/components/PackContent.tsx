@@ -20,8 +20,6 @@ import {
   CollectionListForDisplayWithItems,
 } from '../types';
 
-import AddItemsModal from './AddItemsModal';
-import AddListsModal from './AddListsModal';
 import PackContentCards from './PackContentCards';
 import { PackContentFilter } from './PackContentFilter';
 import PackContentTable from './PackContentTable';
@@ -94,10 +92,6 @@ export default function PackContent(props: PackContentProps) {
 
   return (
     <>
-      <div className="flex w-full items-center justify-between gap-4">
-        <AddItemsModal collection={collection} />
-        <AddListsModal pack={collection} />
-      </div>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {/* Mobile */}
       <div className="lg:hidden">
@@ -108,7 +102,7 @@ export default function PackContent(props: PackContentProps) {
         />
       </div>
       {/* Desktop */}
-      <div className="hidden lg:block">
+      <div className="hidden min-h-0 flex-1 lg:flex">
         <PackContentTable
           entries={filteredContent}
           upsertActions={renderUpsertActions}

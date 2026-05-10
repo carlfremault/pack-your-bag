@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 
 import { usePreferences } from '@/features/settings/queries';
-import { useActionQuery } from '@/hooks/useActionQuery';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useFilterCollections } from '../hooks/useFilterCollections';
@@ -15,8 +14,6 @@ import { CollectionFilter } from './CollectionFilter';
 import CollectionsList from './CollectionsList';
 
 export default function CollectionsView() {
-  const actionQuery = useActionQuery();
-
   const { data: collections } = useAllCollections();
   const { data: preferences } = usePreferences();
 
@@ -36,21 +33,13 @@ export default function CollectionsView() {
       {/* Mobile */}
       <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4 lg:hidden lg:p-8">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
-        <CollectionsList
-          collections={filteredCollections}
-          linkAs={Link}
-          actionQuery={actionQuery}
-        />
+        <CollectionsList collections={filteredCollections} linkAs={Link} />
       </div>
       {/* Desktop */}
       <div className="hidden h-full w-full flex-col gap-4 p-4 lg:flex">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <CollectionsList
-            collections={filteredCollections}
-            linkAs={Link}
-            actionQuery={actionQuery}
-          />
+          <CollectionsList collections={filteredCollections} linkAs={Link} />
         </div>
       </div>
     </>

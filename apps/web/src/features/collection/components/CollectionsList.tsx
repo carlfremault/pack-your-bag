@@ -7,11 +7,10 @@ import { CollectionForDisplay } from '../types';
 export interface CollectionsListProps {
   collections: CollectionForDisplay[];
   linkAs: React.ElementType;
-  actionQuery?: string;
 }
 
 export default function CollectionsList(props: CollectionsListProps) {
-  const { collections, linkAs, actionQuery } = props;
+  const { collections, linkAs } = props;
 
   const containerClassName = 'grid w-full gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4';
 
@@ -28,10 +27,7 @@ export default function CollectionsList(props: CollectionsListProps) {
   return (
     <div className={containerClassName}>
       {collections.map((collection) => (
-        <CollectionCard
-          key={collection.id}
-          {...toCollectionCardProps(collection, linkAs, actionQuery)}
-        />
+        <CollectionCard key={collection.id} {...toCollectionCardProps(collection, linkAs)} />
       ))}
     </div>
   );

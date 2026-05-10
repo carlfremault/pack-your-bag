@@ -1,19 +1,16 @@
 import type {
   CollectionCardProps,
-  CollectionHeaderCardProps,
   CollectionListCardProps,
+  CollectionSummaryCardProps,
 } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
-import { CollectionForDisplay, CollectionForHeaderDisplay } from '@/features/collection/types';
+import { CollectionForDisplay, CollectionForSummaryDisplay } from '@/features/collection/types';
 
 export function toCollectionCardProps(
   collection: CollectionForDisplay,
   linkAs?: React.ElementType,
-  actionQuery?: string,
 ): CollectionCardProps {
-  const basePath = `/${collection.type}/${collection.id}`;
-
   return {
     id: collection.id,
     name: collection.name,
@@ -23,15 +20,15 @@ export function toCollectionCardProps(
     totalWeight: collection.displayWeight,
     weightUnit: collection.displayUnit,
     itemCount: collection.itemCount,
-    href: actionQuery ? `${basePath}?${actionQuery}` : basePath,
+    href: `/${collection.type}/${collection.id}`,
     linkAs,
   };
 }
 
-export function toCollectionHeaderCardProps(
-  collection: CollectionForHeaderDisplay,
-  handlers: Pick<CollectionHeaderCardProps, 'onEditCollection' | 'onDeleteCollection'>,
-): CollectionHeaderCardProps {
+export function toCollectionSummaryCardProps(
+  collection: CollectionForSummaryDisplay,
+  handlers: Pick<CollectionSummaryCardProps, 'onEditCollection' | 'onDeleteCollection'>,
+): CollectionSummaryCardProps {
   return {
     id: collection.id,
     name: collection.name,
