@@ -40,7 +40,7 @@ describe('Category (e2e)', () => {
 
       expect(body).toMatchObject({
         id: expect.any(String) as string,
-        name: categoryDto.name,
+        name: categoryDto.name.toLowerCase(),
         description: categoryDto.description,
         colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
@@ -88,6 +88,42 @@ describe('Category (e2e)', () => {
         error: 'Bad Request',
       });
     });
+
+    it('should return 409 if a category with the same name already exists for the user', async () => {
+      await ctx.categoryHelpers.createCategory({
+        payload: categoryDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.categoryHelpers.createCategory({
+        payload: categoryDto,
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.CONFLICT,
+      });
+
+      expect(body).toMatchObject({
+        error: 'Conflict',
+      });
+    });
+
+    it('should allow the same category name for different users', async () => {
+      await ctx.categoryHelpers.createCategory({
+        payload: categoryDto,
+        accessToken: validAccessToken,
+      });
+
+      const userId2 = uuidv7();
+      const validAccessToken2 = ctx.authHelpers.getValidAccessToken(userId2);
+
+      const { body } = await ctx.categoryHelpers.createCategory({
+        payload: categoryDto,
+        accessToken: validAccessToken2,
+      });
+
+      expect(body).toMatchObject({
+        name: categoryDto.name.toLowerCase(),
+      });
+    });
   });
 
   describe('Category - /category/:id (GET)', () => {
@@ -104,7 +140,7 @@ describe('Category (e2e)', () => {
 
       expect(category).toMatchObject({
         id: body.id,
-        name: categoryDto.name,
+        name: categoryDto.name.toLowerCase(),
         description: categoryDto.description,
         colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
@@ -171,11 +207,19 @@ describe('Category (e2e)', () => {
   describe('Category - /category (GET)', () => {
     it('should return all categories', async () => {
       const { body: category1 } = await ctx.categoryHelpers.createCategory({
-        payload: categoryDto,
+        payload: {
+          name: 'Test Category 1',
+          description: 'Test Description',
+          colorTheme: 'slate',
+        },
         accessToken: validAccessToken,
       });
       const { body: category2 } = await ctx.categoryHelpers.createCategory({
-        payload: categoryDto,
+        payload: {
+          name: 'Test Category 2',
+          description: 'Test Description',
+          colorTheme: 'slate',
+        },
         accessToken: validAccessToken,
       });
 
@@ -222,7 +266,7 @@ describe('Category (e2e)', () => {
       });
 
       expect(createdCategory).toMatchObject({
-        name: categoryDto.name,
+        name: categoryDto.name.toLowerCase(),
         description: categoryDto.description,
         colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
@@ -245,7 +289,7 @@ describe('Category (e2e)', () => {
       });
 
       expect(updatedCategory).toMatchObject({
-        name: 'Updated Category',
+        name: 'updated category',
         description: 'Updated Description',
         colorTheme: 'slate',
         createdAt: isoDateMatcher,
@@ -265,7 +309,7 @@ describe('Category (e2e)', () => {
       });
 
       expect(createdCategory).toMatchObject({
-        name: categoryDto.name,
+        name: categoryDto.name.toLowerCase(),
         description: categoryDto.description,
         colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
@@ -286,7 +330,7 @@ describe('Category (e2e)', () => {
       });
 
       expect(updatedCategory).toMatchObject({
-        name: 'Updated Category',
+        name: 'updated category',
         description: categoryDto.description,
         colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
@@ -384,7 +428,7 @@ describe('Category (e2e)', () => {
       });
 
       expect(createdCategory).toMatchObject({
-        name: categoryDto.name,
+        name: categoryDto.name.toLowerCase(),
         description: categoryDto.description,
         colorTheme: categoryDto.colorTheme,
         createdAt: isoDateMatcher,
@@ -486,7 +530,7 @@ describe('Category (e2e)', () => {
       expect(impact).toMatchObject({
         category: {
           id: category.id,
-          name: categoryDto.name,
+          name: categoryDto.name.toLowerCase(),
           description: categoryDto.description,
           colorTheme: categoryDto.colorTheme,
           createdAt: isoDateMatcher,
@@ -512,7 +556,7 @@ describe('Category (e2e)', () => {
       expect(impact).toMatchObject({
         category: {
           id: category.id,
-          name: categoryDto.name,
+          name: categoryDto.name.toLowerCase(),
           description: categoryDto.description,
           colorTheme: categoryDto.colorTheme,
           createdAt: isoDateMatcher,

@@ -96,7 +96,7 @@ export class CategoryHelpers {
   }): Promise<{
     body: CategoryResponseDto;
   }> {
-    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+    const { id, accessToken, expectedStatus = HttpStatus.NO_CONTENT } = options;
 
     const req = request(this.app.getHttpServer())
       .delete(`/category/${id}`)
