@@ -1121,7 +1121,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/TripResponseDto"
+                    "$ref": "#/components/schemas/TripSummaryResponseDto"
                   }
                 }
               }
@@ -1332,6 +1332,66 @@
           }
         ],
         "summary": "Delete a trip by ID",
+        "tags": [
+          "trip"
+        ]
+      }
+    },
+    "/trip/{id}/items/{itemId}/packed": {
+      "patch": {
+        "operationId": "TripController_setTripItemStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTripItemStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Item packing status updated."
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Trip not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Set packed quantity for an item in a trip",
         "tags": [
           "trip"
         ]
@@ -1930,6 +1990,11 @@
                 "$ref": "#/components/schemas/ItemResponseDto"
               }
             ]
+          },
+          "packedQuantity": {
+            "type": "number",
+            "description": "Packed quantity (trip context only)",
+            "example": 0
           }
         },
         "required": [
@@ -2100,14 +2165,6 @@
             "example": "Trip remarks",
             "nullable": true
           },
-          "pack": {
-            "description": "Pack used in trip",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PackResponseDto"
-              }
-            ]
-          },
           "createdAt": {
             "format": "date-time",
             "type": "string",
@@ -2119,6 +2176,14 @@
             "type": "string",
             "description": "Trip updated at",
             "example": "2026-01-01T00:00:00.000Z"
+          },
+          "pack": {
+            "description": "Pack used in trip",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackResponseDto"
+              }
+            ]
           }
         },
         "required": [
@@ -2126,9 +2191,9 @@
           "name",
           "date",
           "remarks",
-          "pack",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "pack"
         ]
       },
       "ItemDeleteImpactDto": {
@@ -2649,6 +2714,69 @@
           }
         }
       },
+      "TripSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trip uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trip name",
+            "example": "Trip name"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip date",
+            "example": "2026-01-01T00:00:00.000Z",
+            "nullable": true
+          },
+          "remarks": {
+            "type": "string",
+            "description": "Trip remarks",
+            "example": "Trip remarks",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip created at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Trip updated at",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "pack": {
+            "description": "Pack Summary used in trip",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackSummaryResponseDto"
+              }
+            ]
+          },
+          "packedItemCount": {
+            "type": "number",
+            "description": "Number of items packed in the assigned pack",
+            "example": 5
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "date",
+          "remarks",
+          "createdAt",
+          "updatedAt",
+          "pack",
+          "packedItemCount"
+        ]
+      },
       "CreateTripDto": {
         "type": "object",
         "properties": {
@@ -2706,6 +2834,20 @@
             "nullable": true
           }
         }
+      },
+      "UpdateTripItemStatusDto": {
+        "type": "object",
+        "properties": {
+          "packedQuantity": {
+            "type": "number",
+            "description": "Number of items packed",
+            "example": 1,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "packedQuantity"
+        ]
       },
       "UpsertItemOnListDto": {
         "type": "object",

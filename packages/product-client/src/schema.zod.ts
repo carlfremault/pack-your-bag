@@ -30,7 +30,7 @@ export const CreateItemDto = z
   })
   .passthrough();
 export const ItemWithQuantityResponseDto = z
-  .object({ quantity: z.number(), item: ItemResponseDto })
+  .object({ quantity: z.number(), item: ItemResponseDto, packedQuantity: z.number().optional() })
   .passthrough();
 export const ListResponseDto = z
   .object({
@@ -64,9 +64,9 @@ export const TripResponseDto = z
     name: z.string(),
     date: z.string().datetime({ offset: true }).nullable(),
     remarks: z.string().nullable(),
-    pack: PackResponseDto,
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
+    pack: PackResponseDto,
   })
   .passthrough();
 export const ItemDeleteImpactDto = z
@@ -184,6 +184,18 @@ export const UpdatePackDto = z
   })
   .partial()
   .passthrough();
+export const TripSummaryResponseDto = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    date: z.string().datetime({ offset: true }).nullable(),
+    remarks: z.string().nullable(),
+    createdAt: z.string().datetime({ offset: true }),
+    updatedAt: z.string().datetime({ offset: true }),
+    pack: PackSummaryResponseDto,
+    packedItemCount: z.number(),
+  })
+  .passthrough();
 export const CreateTripDto = z
   .object({
     name: z.string(),
@@ -200,6 +212,9 @@ export const UpdateTripDto = z
     packId: z.string().nullable(),
   })
   .partial()
+  .passthrough();
+export const UpdateTripItemStatusDto = z
+  .object({ packedQuantity: z.number().gte(0) })
   .passthrough();
 export const UpsertItemOnListDto = z
   .object({ itemId: z.string(), listId: z.string(), quantity: z.number() })

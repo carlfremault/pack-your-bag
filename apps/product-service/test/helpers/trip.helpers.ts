@@ -4,8 +4,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { CreateTripDto } from '@/modules/trip/dto/create-trip.dto';
-import { TripResponseDto } from '@/modules/trip/dto/trip-response.dto';
+import { TripResponseDto, TripSummaryResponseDto } from '@/modules/trip/dto/trip-response.dto';
 import { UpdateTripDto } from '@/modules/trip/dto/update-trip.dto';
+import { UpdateTripItemStatusDto } from '@/modules/trip/dto/update-trip-item-status.dto';
 
 export class TripHelpers {
   constructor(
@@ -53,7 +54,7 @@ export class TripHelpers {
   }
 
   async getTrips(options: { accessToken: string; expectedStatus?: number }): Promise<{
-    body: TripResponseDto[];
+    body: TripSummaryResponseDto[];
   }> {
     const { accessToken, expectedStatus = HttpStatus.OK } = options;
 
@@ -87,10 +88,34 @@ export class TripHelpers {
   async deleteTrip(options: { id: string; accessToken: string; expectedStatus?: number }): Promise<{
     body: TripResponseDto;
   }> {
-    const { id, accessToken, expectedStatus = HttpStatus.OK } = options;
+    const { id, accessToken, expectedStatus = HttpStatus.NO_CONTENT } = options;
 
     const req = request(this.app.getHttpServer())
       .delete(`/trip/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async setTripItemStatus(options: {
+    tripId: string;
+    itemId: string;
+    payload: Partial<UpdateTripItemStatusDto> | null;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{ body: Record<string, never> }> {
+    const {
+      tripId,
+      itemId,
+      payload,
+      accessToken,
+      expectedStatus = HttpStatus.NO_CONTENT,
+    } = options;
+
+    const req = request(this.app.getHttpServer())
+      .patch(`/trip/${tripId}/items/${itemId}/packed`)
+      .send(payload ?? undefined)
       .set('Authorization', `Bearer ${accessToken}`)
       .set('x-bff-secret', this.bffSecret);
 

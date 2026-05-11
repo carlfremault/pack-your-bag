@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Exclude, Expose, Type } from 'class-transformer';
 
-import { PackResponseDto } from '@/modules/pack/dto/pack-response.dto';
+import { PackResponseDto, PackSummaryResponseDto } from '@/modules/pack/dto/pack-response.dto';
 
 @Exclude()
-export class TripResponseDto {
+export class TripBaseResponseDto {
   @ApiProperty({ description: 'Trip uuid', example: '123e4567-e89b-12d3-a456-426614174000' })
   @Expose()
   id: string;
@@ -32,11 +32,6 @@ export class TripResponseDto {
   @Expose()
   remarks: string | null;
 
-  @ApiProperty({ description: 'Pack used in trip', type: PackResponseDto })
-  @Expose()
-  @Type(() => PackResponseDto)
-  pack: PackResponseDto;
-
   @ApiProperty({ description: 'Trip created at', example: '2026-01-01T00:00:00.000Z' })
   @Expose()
   createdAt: Date;
@@ -44,4 +39,24 @@ export class TripResponseDto {
   @ApiProperty({ description: 'Trip updated at', example: '2026-01-01T00:00:00.000Z' })
   @Expose()
   updatedAt: Date;
+}
+
+@Exclude()
+export class TripSummaryResponseDto extends TripBaseResponseDto {
+  @ApiProperty({ description: 'Pack Summary used in trip', type: PackSummaryResponseDto })
+  @Expose()
+  @Type(() => PackSummaryResponseDto)
+  pack: PackSummaryResponseDto;
+
+  @ApiProperty({ description: 'Number of items packed in the assigned pack', example: 5 })
+  @Expose()
+  packedItemCount: number;
+}
+
+@Exclude()
+export class TripResponseDto extends TripBaseResponseDto {
+  @ApiProperty({ description: 'Pack used in trip', type: PackResponseDto })
+  @Expose()
+  @Type(() => PackResponseDto)
+  pack: PackResponseDto;
 }

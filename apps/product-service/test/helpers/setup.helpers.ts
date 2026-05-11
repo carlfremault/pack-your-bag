@@ -71,6 +71,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     await prisma.listPack.deleteMany();
     await prisma.list.deleteMany();
     await prisma.pack.deleteMany();
+    await prisma.tripItemStatus.deleteMany();
     await prisma.trip.deleteMany();
   };
 

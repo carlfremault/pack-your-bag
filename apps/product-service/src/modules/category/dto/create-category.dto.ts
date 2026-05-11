@@ -19,7 +19,9 @@ export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(CATEGORY_NAME_MAX_LENGTH)
-  @Transform(({ value }: { value: string }) => value.trim().toLowerCase())
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   name: string;
 
   @ApiProperty({
