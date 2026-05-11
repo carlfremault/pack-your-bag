@@ -8,7 +8,7 @@ import { PackResponseDto } from '@/modules/pack/dto/pack-response.dto';
 import { CreateTripDto } from '@/modules/trip/dto/create-trip.dto';
 import { UpdateTripDto } from '@/modules/trip/dto/update-trip.dto';
 
-import { createTripWithPack } from './fixtures/product.fixtures';
+import { createItemInPackInTrip, createTripWithPack } from './fixtures/product.fixtures';
 import { isoDateMatcher } from './helpers/matchers.helpers';
 import { createIntegrationContext, IntegrationTestContext } from './helpers/setup.helpers';
 
@@ -178,6 +178,8 @@ describe('Trip (e2e)', () => {
           name: pack.name,
           description: pack.description,
           colorTheme: pack.colorTheme,
+          items: [],
+          lists: [],
           createdAt: isoDateMatcher,
           updatedAt: isoDateMatcher,
         }) as PackResponseDto,
@@ -254,6 +256,7 @@ describe('Trip (e2e)', () => {
             name: trip1.name,
             date: trip1.date,
             remarks: trip1.remarks,
+            packedItemCount: 0,
             pack: null,
           }),
           expect.objectContaining({
@@ -261,6 +264,7 @@ describe('Trip (e2e)', () => {
             name: trip2.name,
             date: trip2.date,
             remarks: trip2.remarks,
+            packedItemCount: 0,
             pack: null,
           }),
         ]),
@@ -291,14 +295,17 @@ describe('Trip (e2e)', () => {
       });
 
       expect(trips).toHaveLength(1);
-      expect(trips).toContainEqual(trip);
       expect(trips).toContainEqual(
         expect.objectContaining({
+          id: trip.id,
+          name: trip.name,
+          packedItemCount: 0,
           pack: expect.objectContaining({
             id: pack.id,
             name: pack.name,
             description: pack.description,
             colorTheme: pack.colorTheme,
+            itemCount: 0,
           }) as PackResponseDto,
         }),
       );
@@ -320,7 +327,7 @@ describe('Trip (e2e)', () => {
       });
 
       expect(tripsUser1).toHaveLength(1);
-      expect(tripsUser1).toContainEqual(trip1);
+      expect(tripsUser1).toContainEqual({ ...trip1, packedItemCount: 0 });
 
       expect(tripsUser2).toHaveLength(0);
       expect(tripsUser2).toEqual([]);
@@ -713,6 +720,178 @@ describe('Trip (e2e)', () => {
     it('should return 400 if the id is not a valid uuid v7', async () => {
       const { body } = await ctx.tripHelpers.deleteTrip({
         id: 'invalid-id',
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+  });
+
+  describe('Trip - /trip/:id/items/:itemId/packed (PATCH)', () => {
+    it('should set packed quantity and reflect it in getTrip and getTrips', async () => {
+      const { item, pack, trip } = await createItemInPackInTrip(ctx, validAccessToken);
+
+      await ctx.tripHelpers.setTripItemStatus({
+        tripId: trip.id,
+        itemId: item.id,
+        payload: { packedQuantity: 1 },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedTrip } = await ctx.tripHelpers.getTrip({
+        id: trip.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedTrip.pack).toMatchObject({
+        id: pack.id,
+        items: expect.arrayContaining([expect.objectContaining({ packedQuantity: 1 })]) as object[],
+      });
+
+      const { body: trips } = await ctx.tripHelpers.getTrips({
+        accessToken: validAccessToken,
+      });
+
+      expect(trips).toContainEqual(expect.objectContaining({ id: trip.id, packedItemCount: 1 }));
+    });
+
+    it('should update packed quantity on subsequent calls', async () => {
+      const { item, trip } = await createItemInPackInTrip(ctx, validAccessToken);
+
+      await ctx.tripHelpers.setTripItemStatus({
+        tripId: trip.id,
+        itemId: item.id,
+        payload: { packedQuantity: 1 },
+        accessToken: validAccessToken,
+      });
+
+      await ctx.tripHelpers.setTripItemStatus({
+        tripId: trip.id,
+        itemId: item.id,
+        payload: { packedQuantity: 0 },
+        accessToken: validAccessToken,
+      });
+
+      const { body: trips } = await ctx.tripHelpers.getTrips({
+        accessToken: validAccessToken,
+      });
+
+      expect(trips).toContainEqual(expect.objectContaining({ id: trip.id, packedItemCount: 0 }));
+    });
+
+    it('should be independent per trip when the same pack is reused', async () => {
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: ctx.packHelpers.defaultPackDto,
+        accessToken: validAccessToken,
+      });
+      const { body: item } = await ctx.itemHelpers.createItem({
+        payload: ctx.itemHelpers.defaultItemDto,
+        accessToken: validAccessToken,
+      });
+      await ctx.itemPackHelpers.upsertItemPack({
+        payload: { itemId: item.id, packId: pack.id, quantity: 1 },
+        accessToken: validAccessToken,
+      });
+      const [{ body: trip1 }, { body: trip2 }] = await Promise.all([
+        ctx.tripHelpers.createTrip({
+          payload: { ...ctx.tripHelpers.defaultTripDto, packId: pack.id },
+          accessToken: validAccessToken,
+        }),
+        ctx.tripHelpers.createTrip({
+          payload: { ...ctx.tripHelpers.defaultTripDto, packId: pack.id },
+          accessToken: validAccessToken,
+        }),
+      ]);
+
+      await ctx.tripHelpers.setTripItemStatus({
+        tripId: trip1.id,
+        itemId: item.id,
+        payload: { packedQuantity: 1 },
+        accessToken: validAccessToken,
+      });
+
+      const { body: trips } = await ctx.tripHelpers.getTrips({
+        accessToken: validAccessToken,
+      });
+
+      const fetchedTrip1 = trips.find((t) => t.id === trip1.id);
+      const fetchedTrip2 = trips.find((t) => t.id === trip2.id);
+      expect(fetchedTrip1).toMatchObject({ packedItemCount: 1 });
+      expect(fetchedTrip2).toMatchObject({ packedItemCount: 0 });
+    });
+
+    it('should return 404 if the trip is not found', async () => {
+      const { body } = await ctx.tripHelpers.setTripItemStatus({
+        tripId: tripId,
+        itemId: uuidv7(),
+        payload: { packedQuantity: 1 },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.NOT_FOUND,
+      });
+
+      expect(body).toMatchObject({ error: 'Not Found' });
+    });
+
+    it('should return 404 if the trip belongs to another user', async () => {
+      const { item, trip } = await createItemInPackInTrip(ctx, validAccessToken);
+      const userId2 = uuidv7();
+      const validAccessToken2 = ctx.authHelpers.getValidAccessToken(userId2);
+
+      const { body } = await ctx.tripHelpers.setTripItemStatus({
+        tripId: trip.id,
+        itemId: item.id,
+        payload: { packedQuantity: 1 },
+        accessToken: validAccessToken2,
+        expectedStatus: HttpStatus.NOT_FOUND,
+      });
+
+      expect(body).toMatchObject({ error: 'Not Found' });
+    });
+
+    it('should return 401 if the user is not authenticated', async () => {
+      const { body } = await ctx.tripHelpers.setTripItemStatus({
+        tripId: tripId,
+        itemId: uuidv7(),
+        payload: { packedQuantity: 1 },
+        accessToken: '',
+        expectedStatus: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(body).toMatchObject({ error: 'Unauthorized' });
+    });
+
+    it('should return 400 if packedQuantity is negative', async () => {
+      const { item, trip } = await createItemInPackInTrip(ctx, validAccessToken);
+
+      const { body } = await ctx.tripHelpers.setTripItemStatus({
+        tripId: trip.id,
+        itemId: item.id,
+        payload: { packedQuantity: -1 },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+
+    it('should return 400 if the trip id is not a valid uuid v7', async () => {
+      const { body } = await ctx.tripHelpers.setTripItemStatus({
+        tripId: 'invalid-id',
+        itemId: uuidv7(),
+        payload: { packedQuantity: 1 },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+
+    it('should return 400 if the item id is not a valid uuid v7', async () => {
+      const { body } = await ctx.tripHelpers.setTripItemStatus({
+        tripId: tripId,
+        itemId: 'invalid-id',
+        payload: { packedQuantity: 1 },
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });

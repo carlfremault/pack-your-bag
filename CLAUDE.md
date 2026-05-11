@@ -16,7 +16,7 @@ packages/  db, nestjs-common, react-common, auth-client, product-client, user-da
 Single workspace: yarn workspace @repo/<name> <script> for packages, yarn workspace <name> <script> for apps
 
 ```bash
-yarn dev / build / lint / format
+yarn dev / build / lint
 
 yarn test / test:watch / test:browser
 
@@ -56,3 +56,4 @@ Common infrastructure lives in `@repo/nestjs-common` (JWT strategies, BFF guard,
 - **Dependencies**: do not add or remove without asking first.
 - **Zod v4**: root `package.json` pins it via `resolutions` — use it for all validation schemas.
 - **No infrastructure changes**: do not modify `docker-compose.yml`, Turborepo pipeline, or database schemas without explicit instruction.
+- **Project Philosophy**: Code quality and best practices are paramount and should prime above 'fitting in with the current codebase'.

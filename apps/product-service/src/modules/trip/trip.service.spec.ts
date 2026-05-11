@@ -23,6 +23,9 @@ describe('TripService', () => {
     pack: {
       findUnique: vi.fn(),
     },
+    tripItemStatus: {
+      upsert: vi.fn(),
+    },
     $transaction: vi.fn((callback: (tx: typeof mockPrismaService) => Promise<Trip>) => {
       return callback(mockPrismaService);
     }),
@@ -201,7 +204,14 @@ describe('TripService', () => {
       const id = 'trip-1';
       const userId = 'user-1';
       const testDate = new Date();
-      const trip = { id, name: 'Test Trip', date: testDate, remarks: 'Test Remarks', userId };
+      const trip = {
+        id,
+        name: 'Test Trip',
+        date: testDate,
+        remarks: 'Test Remarks',
+        userId,
+        tripItemStatuses: [],
+      };
 
       mockPrismaService.trip.findUnique.mockResolvedValue(trip);
 
@@ -214,6 +224,39 @@ describe('TripService', () => {
         remarks: 'Test Remarks',
         pack: undefined,
       });
+    });
+  });
+
+  describe('setTripItemStatus', () => {
+    it('should upsert the packing status for an item in a trip', async () => {
+      const tripId = 'trip-1';
+      const itemId = 'item-1';
+      const userId = 'user-1';
+      mockPrismaService.trip.findUnique.mockResolvedValue({ id: tripId, userId });
+      mockPrismaService.tripItemStatus.upsert.mockResolvedValue({});
+
+      await service.setTripItemStatus(tripId, itemId, userId, 2);
+
+      expect(mockPrismaService.trip.findUnique).toHaveBeenCalledWith({
+        where: { id: tripId, userId },
+      });
+      expect(mockPrismaService.tripItemStatus.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { tripId_itemId: { tripId, itemId } },
+          create: expect.objectContaining({ tripId, itemId, packedQuantity: 2 }) as object,
+          update: { packedQuantity: 2 },
+        }),
+      );
+    });
+
+    it('should throw if trip is not found for user', async () => {
+      mockPrismaService.trip.findUnique.mockResolvedValue(null);
+
+      await expect(service.setTripItemStatus('trip-1', 'item-1', 'user-1', 1)).rejects.toThrow(
+        'Trip not found',
+      );
+
+      expect(mockPrismaService.tripItemStatus.upsert).not.toHaveBeenCalled();
     });
   });
 });

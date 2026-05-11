@@ -257,6 +257,23 @@ export interface paths {
     patch: operations['TripController_updateTrip'];
     trace?: never;
   };
+  '/trip/{id}/items/{itemId}/packed': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Set packed quantity for an item in a trip */
+    patch: operations['TripController_setTripItemStatus'];
+    trace?: never;
+  };
   '/item-list': {
     parameters: {
       query?: never;
@@ -458,6 +475,11 @@ export interface components {
       quantity: number;
       /** @description Item */
       item: components['schemas']['ItemResponseDto'];
+      /**
+       * @description Packed quantity (trip context only)
+       * @example 0
+       */
+      packedQuantity?: number;
     };
     ListResponseDto: {
       /**
@@ -564,8 +586,6 @@ export interface components {
        * @example Trip remarks
        */
       remarks: string | null;
-      /** @description Pack used in trip */
-      pack: components['schemas']['PackResponseDto'];
       /**
        * Format: date-time
        * @description Trip created at
@@ -578,6 +598,8 @@ export interface components {
        * @example 2026-01-01T00:00:00.000Z
        */
       updatedAt: string;
+      /** @description Pack used in trip */
+      pack: components['schemas']['PackResponseDto'];
     };
     ItemDeleteImpactDto: {
       item: components['schemas']['ItemResponseDto'];
@@ -902,6 +924,48 @@ export interface components {
        */
       colorTheme?: string;
     };
+    TripSummaryResponseDto: {
+      /**
+       * @description Trip uuid
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description Trip name
+       * @example Trip name
+       */
+      name: string;
+      /**
+       * Format: date-time
+       * @description Trip date
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      date: string | null;
+      /**
+       * @description Trip remarks
+       * @example Trip remarks
+       */
+      remarks: string | null;
+      /**
+       * Format: date-time
+       * @description Trip created at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Trip updated at
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      updatedAt: string;
+      /** @description Pack Summary used in trip */
+      pack: components['schemas']['PackSummaryResponseDto'];
+      /**
+       * @description Number of items packed in the assigned pack
+       * @example 5
+       */
+      packedItemCount: number;
+    };
     CreateTripDto: {
       /**
        * @description Trip name
@@ -947,6 +1011,13 @@ export interface components {
        * @example 123e4567-e89b-12d3-a456-426614174000
        */
       packId?: string | null;
+    };
+    UpdateTripItemStatusDto: {
+      /**
+       * @description Number of items packed
+       * @example 1
+       */
+      packedQuantity: number;
     };
     UpsertItemOnListDto: {
       /**
@@ -2213,7 +2284,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['TripResponseDto'][];
+          'application/json': components['schemas']['TripSummaryResponseDto'][];
         };
       };
       /** @description Unauthorized. */
@@ -2398,6 +2469,59 @@ export interface operations {
         content: {
           'application/json': components['schemas']['TripResponseDto'];
         };
+      };
+      /** @description Validation failed (invalid UUID v7 format or invalid body). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Trip not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description ThrottlerException: Too Many Requests. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TripController_setTripItemStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateTripItemStatusDto'];
+      };
+    };
+    responses: {
+      /** @description Item packing status updated. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation failed (invalid UUID v7 format or invalid body). */
       400: {

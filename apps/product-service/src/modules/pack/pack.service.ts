@@ -5,6 +5,7 @@ import { Prisma } from '@repo/db';
 import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
+import { computeItemCount, computeTotalWeight } from '@/common/helpers/pack-summary.helpers';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { TripResponseDto } from '../trip/dto/trip-response.dto';
@@ -27,7 +28,7 @@ export class PackService {
   // ============================================
 
   async getPacks(where: Prisma.PackWhereInput): Promise<PackSummaryResponseDto[]> {
-    const result = await this.prisma.pack.findMany({
+    const results = await this.prisma.pack.findMany({
       where,
       include: {
         items: { include: { item: true } },
@@ -35,7 +36,13 @@ export class PackService {
       },
     });
 
-    return plainToInstance(PackSummaryResponseDto, result);
+    const shaped = results.map((pack) => ({
+      ...pack,
+      itemCount: computeItemCount(pack),
+      totalWeight: computeTotalWeight(pack),
+    }));
+
+    return plainToInstance(PackSummaryResponseDto, shaped);
   }
 
   async getPack(where: Prisma.PackWhereUniqueInput): Promise<PackResponseDto> {

@@ -186,20 +186,21 @@ model Category {
 }
 
 model Item {
-  id          String      @id @db.Uuid
-  name        String
-  description String?
-  weight      Float?
-  userId      String      @db.Uuid
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                String      @id @db.Uuid
+  name              String
+  description       String?
+  weight            Float?
+  userId            String      @db.Uuid
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
   
-  category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId  String?     @db.Uuid
+  category          Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId        String?     @db.Uuid
 
   // Join table relations
-  itemLists   ItemList[]
-  itemPacks   ItemPack[]
+  itemLists         ItemList[]
+  itemPacks         ItemPack[]
+  tripItemStatuses  TripItemStatus[]
 
   @@index([userId])
   @@schema("app_product")
@@ -215,8 +216,8 @@ model List {
   updatedAt     DateTime    @updatedAt
 
   // Join table relations
-  items       ItemList[]
-  listPacks   ListPack[]
+  items         ItemList[]
+  listPacks     ListPack[]
 
   @@index([userId])
   @@schema("app_product")
@@ -226,7 +227,7 @@ model Pack {
   id          String      @id @db.Uuid
   name        String
   description String?
-  colorTheme   String?
+  colorTheme  String?
   userId      String      @db.Uuid
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -241,16 +242,19 @@ model Pack {
 }
 
 model Trip {
-  id      String          @id @db.Uuid
-  name    String
-  date    DateTime?
-  remarks String?
-  userId  String          @db.Uuid
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                String      @id @db.Uuid
+  name              String
+  date              DateTime?
+  remarks           String?
+  userId            String      @db.Uuid
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
-  pack    Pack?           @relation(fields: [packId], references: [id], onDelete: SetNull)
-  packId  String?         @db.Uuid
+  pack              Pack?       @relation(fields: [packId], references: [id], onDelete: SetNull)
+  packId            String?     @db.Uuid
+
+  // Join table relations
+  tripItemStatuses  TripItemStatus[]
 
   @@index([userId])
   @@schema("app_product")
@@ -299,4 +303,19 @@ model ListPack {
   @@unique([listId, packId])
   @@schema("app_product")
 }
+
+ model TripItemStatus {
+   id             String   @id @db.Uuid
+   packedQuantity Int      @default(0)
+
+   trip           Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+   tripId         String   @db.Uuid
+
+   item           Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+   itemId         String   @db.Uuid
+
+   @@unique([tripId, itemId])
+   @@index([tripId])
+   @@schema("app_product")
+ }
 
