@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 
 import { ItemWithQuantityResponseDto } from '@/common/dto/item-response.dto';
 
@@ -64,16 +64,9 @@ export class ListWithQuantityResponseDto {
 export class ListSummaryResponseDto extends ListBaseResponseDto {
   @ApiProperty({ description: 'Total quantity of items in the list', example: 3 })
   @Expose()
-  @Transform(({ obj }: { obj: { items?: Array<{ quantity: number }> } }) =>
-    (obj.items ?? []).reduce((sum, { quantity }) => sum + quantity, 0),
-  )
   itemCount: number;
 
   @ApiProperty({ description: 'Total weight of all items in the list in grams', example: 1500 })
   @Expose()
-  @Transform(
-    ({ obj }: { obj: { items?: Array<{ quantity: number; item: { weight: number | null } }> } }) =>
-      (obj.items ?? []).reduce((sum, { quantity, item }) => sum + quantity * (item.weight ?? 0), 0),
-  )
   totalWeight: number;
 }

@@ -5,6 +5,7 @@ import { Prisma } from '@repo/db';
 import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
+import { computeItemCount, computeTotalWeight } from '@/common/helpers/pack-summary.helpers';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { CreateTripDto } from './dto/create-trip.dto';
@@ -33,14 +34,19 @@ export class TripService {
       },
     });
 
-    for (const trip of results) {
-      (trip as Record<string, unknown>).packedItemCount = trip.tripItemStatuses.reduce(
-        (sum, s) => sum + s.packedQuantity,
-        0,
-      );
-    }
+    const shaped = results.map((trip) => ({
+      ...trip,
+      packedItemCount: trip.tripItemStatuses.reduce((sum, s) => sum + s.packedQuantity, 0),
+      pack: trip.pack
+        ? {
+            ...trip.pack,
+            itemCount: computeItemCount(trip.pack),
+            totalWeight: computeTotalWeight(trip.pack),
+          }
+        : null,
+    }));
 
-    return plainToInstance(TripSummaryResponseDto, results);
+    return plainToInstance(TripSummaryResponseDto, shaped);
   }
 
   async getTrip(where: Prisma.TripWhereUniqueInput): Promise<TripResponseDto> {
