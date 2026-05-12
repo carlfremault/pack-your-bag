@@ -167,7 +167,7 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
         </div>
       )}
 
-      <div className="flex flex-none justify-end gap-8 p-4">
+      <div className="flex flex-none justify-end gap-8">
         <Button
           variant="unstyledIcon"
           color="primary"
