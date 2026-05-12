@@ -19,7 +19,7 @@ export default function TripsView() {
   });
 
   return (
-    <div className="mb-32 flex w-full max-w-7xl flex-col gap-4 p-4">
+    <div className="flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 p-4">
       <TripFilter filterState={displayFilterState} onChange={handleFilterChange} />
       <TripsList trips={filteredTrips} linkAs={Link} dateFormat={preferences?.dateFormat} />
     </div>

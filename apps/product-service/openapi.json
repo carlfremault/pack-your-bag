@@ -2192,8 +2192,7 @@
           "date",
           "remarks",
           "createdAt",
-          "updatedAt",
-          "pack"
+          "updatedAt"
         ]
       },
       "ItemDeleteImpactDto": {
@@ -2773,7 +2772,6 @@
           "remarks",
           "createdAt",
           "updatedAt",
-          "pack",
           "packedItemCount"
         ]
       },

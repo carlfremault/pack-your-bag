@@ -43,10 +43,14 @@ export class TripBaseResponseDto {
 
 @Exclude()
 export class TripSummaryResponseDto extends TripBaseResponseDto {
-  @ApiProperty({ description: 'Pack Summary used in trip', type: PackSummaryResponseDto })
+  @ApiProperty({
+    description: 'Pack Summary used in trip',
+    type: PackSummaryResponseDto,
+    required: false,
+  })
   @Expose()
   @Type(() => PackSummaryResponseDto)
-  pack: PackSummaryResponseDto;
+  pack?: PackSummaryResponseDto;
 
   @ApiProperty({ description: 'Number of items packed in the assigned pack', example: 5 })
   @Expose()
@@ -55,8 +59,8 @@ export class TripSummaryResponseDto extends TripBaseResponseDto {
 
 @Exclude()
 export class TripResponseDto extends TripBaseResponseDto {
-  @ApiProperty({ description: 'Pack used in trip', type: PackResponseDto })
+  @ApiProperty({ description: 'Pack used in trip', type: PackResponseDto, required: false })
   @Expose()
   @Type(() => PackResponseDto)
-  pack: PackResponseDto;
+  pack?: PackResponseDto;
 }

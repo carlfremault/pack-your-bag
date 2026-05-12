@@ -66,7 +66,7 @@ export const TripResponseDto = z
     remarks: z.string().nullable(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
-    pack: PackResponseDto,
+    pack: PackResponseDto.optional(),
   })
   .passthrough();
 export const ItemDeleteImpactDto = z
@@ -192,7 +192,7 @@ export const TripSummaryResponseDto = z
     remarks: z.string().nullable(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
-    pack: PackSummaryResponseDto,
+    pack: PackSummaryResponseDto.optional(),
     packedItemCount: z.number(),
   })
   .passthrough();

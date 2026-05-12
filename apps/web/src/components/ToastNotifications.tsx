@@ -1,12 +1,16 @@
 'use client';
 
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useSyncExternalStore } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useBreakpoint } from '@repo/react-common/hooks';
 
 import { SESSION_EXPIRED_MESSAGE } from '@/lib/constants';
+
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 function ToastTrigger() {
   const router = useRouter();
@@ -41,28 +45,32 @@ export function ToastNotifications() {
   const { isDesktop } = useBreakpoint();
   const position = isDesktop ? 'bottom-center' : 'top-center';
 
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
   return (
     <>
       <Suspense fallback={null}>
         <ToastTrigger />
       </Suspense>
-      <Toaster
-        position={position}
-        toastOptions={{
-          success: {
-            duration: 5000,
-          },
-          error: {
-            duration: 6000,
-          },
-          style: { border: '1px solid var(--info-ring)' },
-          ariaProps: {
-            role: 'status',
-            'aria-live': 'polite',
-          },
-        }}
-        containerStyle={{ zIndex: 9999 }}
-      />
+      {mounted && (
+        <Toaster
+          position={position}
+          toastOptions={{
+            success: {
+              duration: 5000,
+            },
+            error: {
+              duration: 6000,
+            },
+            style: { border: '1px solid var(--info-ring)' },
+            ariaProps: {
+              role: 'status',
+              'aria-live': 'polite',
+            },
+          }}
+          containerStyle={{ zIndex: 9999 }}
+        />
+      )}
     </>
   );
 }

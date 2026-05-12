@@ -26,12 +26,16 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     const search = searchParams.get('search');
     const category = searchParams.get('category');
     const type = searchParams.get('type');
+    const dateFrom = searchParams.get('date-from');
+    const dateUntil = searchParams.get('date-until');
     const sortField = searchParams.get('sort');
     const sortDir = searchParams.get('dir');
 
     if (search) params.set('search', search);
     if (category) params.set('category', category);
     if (type) params.set('type', type);
+    if (dateFrom) params.set('date-from', dateFrom);
+    if (dateUntil) params.set('date-until', dateUntil);
     if (sortField) params.set('sort', sortField);
     if (sortDir) params.set('dir', sortDir);
 
@@ -43,6 +47,7 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     pathname.startsWith('/collections') ||
     pathname.startsWith('/list') ||
     pathname.startsWith('/pack');
+  const tripsView = pathname.startsWith('/trips');
 
   return (
     <>
@@ -67,6 +72,17 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
         onClick={onNavigate}
       >
         Add new collections
+      </LinkButton>
+      <LinkButton
+        href={`?action=add-trip${query ? `&${query}` : ''}`}
+        variant={tripsView ? 'solid' : 'outline'}
+        color="primary"
+        size="large"
+        className="w-full"
+        linkAs={Link}
+        onClick={onNavigate}
+      >
+        Add new trips
       </LinkButton>
       <LinkButton
         href={`?action=manage-categories${query ? `&${query}` : ''}`}

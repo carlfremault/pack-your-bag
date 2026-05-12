@@ -599,7 +599,7 @@ export interface components {
        */
       updatedAt: string;
       /** @description Pack used in trip */
-      pack: components['schemas']['PackResponseDto'];
+      pack?: components['schemas']['PackResponseDto'];
     };
     ItemDeleteImpactDto: {
       item: components['schemas']['ItemResponseDto'];
@@ -959,7 +959,7 @@ export interface components {
        */
       updatedAt: string;
       /** @description Pack Summary used in trip */
-      pack: components['schemas']['PackSummaryResponseDto'];
+      pack?: components['schemas']['PackSummaryResponseDto'];
       /**
        * @description Number of items packed in the assigned pack
        * @example 5

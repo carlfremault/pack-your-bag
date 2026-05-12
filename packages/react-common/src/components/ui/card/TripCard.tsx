@@ -1,11 +1,16 @@
 import { BsBackpack } from 'react-icons/bs';
 
+import classNames from 'classnames';
+
+import { getColorThemeClassName } from '../../../utilities';
+
 export interface TripCardProps {
   id: string;
   name: string;
   date?: string;
   remarks?: string;
   packName?: string;
+  packColorTheme?: string;
   numberOfItems: number;
   numberOfItemsPacked: number;
   href: string;
@@ -19,6 +24,7 @@ export function TripCard(props: TripCardProps) {
     date,
     remarks,
     packName,
+    packColorTheme,
     numberOfItems,
     numberOfItemsPacked,
     href,
@@ -42,6 +48,13 @@ export function TripCard(props: TripCardProps) {
     statsId,
   ].filter(Boolean) as string[];
   const describedBy = describedByParts.join(' ');
+
+  const colorThemeClassName = getColorThemeClassName(packColorTheme);
+  const packNameClassName = classNames(
+    'rounded-xl border px-2 py-1 text-xs font-medium',
+    'w-fit max-w-full wrap-break-word whitespace-normal',
+    colorThemeClassName,
+  );
 
   const tripCardClassName =
     'bg-surface text-primary border-primary-ring flex w-full cursor-pointer flex-col items-start justify-between gap-6 rounded-md border p-3 text-left shadow-sm transition-transform duration-150 ease-out hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2  focus-visible:ring-primary-ring focus-visible:outline-none active:translate-y-0.5';
@@ -68,9 +81,15 @@ export function TripCard(props: TripCardProps) {
               </div>
             )}
           </div>
-          <div id={packId} className="flex min-w-0 items-center gap-1 text-xs">
+          <div
+            id={packId}
+            className={classNames(
+              'flex min-w-0 flex-row items-center justify-start gap-2 text-xs',
+              packName && packNameClassName,
+            )}
+          >
             <BsBackpack className="h-4 w-4" aria-hidden="true" />
-            <span className="me-4 block truncate">{packName ?? '--'}</span>
+            {packName ?? '--'}
           </div>
         </div>
         <div id={statsId} className="flex flex-col items-center gap-0">
