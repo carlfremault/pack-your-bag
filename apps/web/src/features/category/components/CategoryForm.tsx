@@ -112,7 +112,9 @@ export function CategoryForm(props: CategoryFormProps) {
   );
 }
 
-const getInitialFormValues = (category?: Category) => ({
-  name: category?.name ?? '',
-  colorTheme: category?.colorTheme ?? '',
-});
+function getInitialFormValues(category?: Category) {
+  return {
+    name: category?.name ?? '',
+    colorTheme: category?.colorTheme ?? '',
+  };
+}

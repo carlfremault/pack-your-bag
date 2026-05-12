@@ -20,6 +20,7 @@ export function toTripCardProps(
     date: rawDate && dateFormat ? formatTripDate(rawDate, dateFormat) : rawDate,
     remarks: tripSummary.remarks ?? undefined,
     packName: tripSummary.pack?.name,
+    packColorTheme: tripSummary.pack?.colorTheme ?? undefined,
     numberOfItems: tripSummary.pack?.itemCount ?? 0,
     numberOfItemsPacked: tripSummary.packedItemCount,
     href: `/trip/${tripSummary.id}`,

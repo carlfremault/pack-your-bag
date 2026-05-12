@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
-
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from '@/components/Modal';
 import { CategoryTableSkeleton } from '@/features/category/components/CategoryTableSkeleton';
@@ -14,6 +13,7 @@ import CollectionForm from '@/features/collection/components/CollectionForm';
 import { CollectionType } from '@/features/collection/types';
 import ItemForm from '@/features/item/components/ItemForm';
 import { usePreferences } from '@/features/settings/queries';
+import TripForm from '@/features/trip/components/TripForm';
 
 import ErrorFallback from '../ErrorFallback';
 import { AddModalTitle, EditModalTitle } from '../Modal/ModalTitle';
@@ -26,6 +26,7 @@ const SIDEBAR_ACTIONS = [
   'edit-item',
   'add-collection',
   'edit-collection',
+  'add-trip',
   'manage-categories',
 ] as const;
 type SidebarAction = (typeof SIDEBAR_ACTIONS)[number];
@@ -35,6 +36,7 @@ const MODAL_TITLES: Record<SidebarAction, string> = {
   'edit-item': 'Edit item',
   'add-collection': 'Add collection',
   'edit-collection': 'Edit collection',
+  'add-trip': 'Add trip',
   'manage-categories': 'Categories',
 };
 
@@ -121,6 +123,9 @@ function ActionPanelInner() {
       />
     );
     desktopTitle = 'Edit collection';
+  } else if (action === 'add-trip') {
+    panelContent = <TripForm key="addTrip" onClose={closeAction} />;
+    desktopTitle = 'Add trip';
   } else if (action === 'manage-categories') {
     panelContent = (
       <ErrorBoundary
@@ -188,6 +193,7 @@ function getModalTitle(
   if (action === 'add-collection') return <AddModalTitle label="Add collection" />;
   if (action === 'edit-item') return <EditModalTitle label="Edit item" />;
   if (action === 'edit-collection') return <EditModalTitle label={`Edit ${editCollectionType}`} />;
+  if (action === 'add-trip') return <AddModalTitle label="Add trip" />;
   if (action === 'manage-categories') {
     if (categoryMode === 'add') return <AddModalTitle label="Add category" />;
     if (categoryMode === 'edit') return <EditModalTitle label="Edit category" />;

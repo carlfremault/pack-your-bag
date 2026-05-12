@@ -195,11 +195,11 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
   );
 }
 
-const getInitialFormValues = (collection?: CollectionDetail) => {
+function getInitialFormValues(collection?: CollectionDetail) {
   return {
     name: collection?.name ?? '',
     description: collection?.description ?? '',
     colorTheme: collection?.colorTheme ?? '',
     type: collection?.type ?? '',
   };
-};
+}

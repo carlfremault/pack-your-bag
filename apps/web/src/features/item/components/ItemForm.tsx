@@ -169,7 +169,7 @@ function ItemFormInner({ item, units, onClose }: ItemFormInnerProps) {
   );
 }
 
-const getInitialFormValues = (item?: Item, units?: Units) => {
+function getInitialFormValues(item?: Item, units?: Units) {
   const convertedWeight =
     units === Units.IMPERIAL && item?.weight
       ? convertGramsToOunces(Number(item?.weight))
@@ -181,4 +181,4 @@ const getInitialFormValues = (item?: Item, units?: Units) => {
     weight: convertedWeight?.toString() ?? '',
     categoryId: item?.category?.id ?? '',
   };
-};
+}

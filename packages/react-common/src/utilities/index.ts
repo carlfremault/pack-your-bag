@@ -1,0 +1,1 @@
+export { getColorThemeClassName } from './getColorThemeClassName';

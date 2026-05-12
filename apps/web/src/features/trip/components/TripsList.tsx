@@ -24,7 +24,7 @@ export default function TripsList(props: TripsListProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 overflow-y-auto">
       {trips.map((trip) => (
         <TripCard key={trip.id} {...toTripCardProps(trip, linkAs, dateFormat)} />
       ))}
