@@ -62,7 +62,7 @@ export function TripCard(props: TripCardProps) {
             {date && (
               <div
                 id={dateId}
-                className="bg-slate-bg border-slate-border text-slate-text rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
+                className="bg-surface border-primary-ring text-primary rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
               >
                 {date}
               </div>
