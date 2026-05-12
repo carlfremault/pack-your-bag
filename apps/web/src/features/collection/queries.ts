@@ -347,12 +347,16 @@ const useUpsertItemInCollection = () => {
       const previousCollection = queryClient.getQueryData<CollectionDetail>([type, id]);
 
       if (body.quantity === 0) {
-        queryClient.setQueryData([type, id], (old: CollectionDetail) => ({
-          ...old,
-          items: (old.items ?? []).filter(({ item }) => item.id !== body.itemId),
-        }));
+        queryClient.setQueryData([type, id], (old: CollectionDetail | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            items: (old.items ?? []).filter(({ item }) => item.id !== body.itemId),
+          };
+        });
       } else {
-        queryClient.setQueryData([type, id], (old: CollectionDetail) => {
+        queryClient.setQueryData([type, id], (old: CollectionDetail | undefined) => {
+          if (!old) return old;
           const existingItems = old.items ?? [];
           const existingIndex = existingItems.findIndex(({ item }) => item.id === body.itemId);
           const existing = existingItems[existingIndex];

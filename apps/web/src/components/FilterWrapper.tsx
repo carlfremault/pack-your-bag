@@ -53,9 +53,9 @@ export function FilterWrapper({
 
   return (
     <div className="bg-surface border-primary-ring w-full rounded-md border p-4 shadow-sm">
-      <div className="flex flex-col md:flex-row md:gap-4">
+      <div className="flex flex-col lg:flex-row lg:gap-4">
         {/* Row 1: Search + Filter toggle (mobile only) */}
-        <div className="flex gap-4 md:contents">
+        <div className="flex gap-4 lg:contents">
           <div className="min-w-0 flex-1">
             <Input
               label="Search"
@@ -65,7 +65,7 @@ export function FilterWrapper({
               placeholder="Search by name or description"
             />
           </div>
-          <div className="flex flex-none flex-col justify-end md:hidden">
+          <div className="flex flex-none flex-col justify-end lg:hidden">
             <div className="relative">
               <button
                 type="button"
@@ -106,10 +106,10 @@ export function FilterWrapper({
         </div>
 
         {/* Row 2: Feature filter slot + Sort by + Sort direction */}
-        {/* Mobile: animated collapsible. Desktop: transparent via md:contents */}
+        {/* Mobile: animated collapsible. Desktop: transparent via lg:contents */}
         <div
           className={classNames(
-            'grid transition-[grid-template-rows] duration-300 ease-in-out md:contents',
+            'grid transition-[grid-template-rows] duration-300 ease-in-out lg:contents',
             isFilterRowOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
           )}
           onTransitionEnd={(e) => {
@@ -118,13 +118,13 @@ export function FilterWrapper({
         >
           <div
             className={classNames(
-              'min-h-0 md:contents',
+              'min-h-0 min-w-0 lg:contents',
               (!isFilterRowOpen || isTransitioning) && 'overflow-hidden',
             )}
           >
-            <div className="flex flex-col gap-4 pt-4 md:contents md:pt-0">
+            <div className="flex min-w-0 flex-col gap-4 pt-4 lg:contents lg:pt-0">
               {children}
-              <div className="flex gap-4 md:contents">
+              <div className="flex gap-4 lg:contents">
                 <div className="min-w-0 flex-1">
                   <InputSelect
                     label="Sort by"
@@ -135,7 +135,7 @@ export function FilterWrapper({
                     }}
                   />
                 </div>
-                <div className="self-start md:flex-none">
+                <div className="self-start lg:flex-none">
                   <InputIconToggle
                     label="Sort order"
                     options={SORT_DIRECTION_OPTIONS}

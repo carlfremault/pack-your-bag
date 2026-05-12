@@ -3,17 +3,27 @@ import { BsBackpack } from 'react-icons/bs';
 export interface TripCardProps {
   id: string;
   name: string;
-  date?: Date;
+  date?: string;
   remarks?: string;
   packName?: string;
   numberOfItems: number;
   numberOfItemsPacked: number;
-  onOpenTrip: (id: string) => void;
+  href: string;
+  linkAs?: React.ElementType;
 }
 
 export function TripCard(props: TripCardProps) {
-  const { id, name, date, remarks, packName, numberOfItems, numberOfItemsPacked, onOpenTrip } =
-    props;
+  const {
+    id,
+    name,
+    date,
+    remarks,
+    packName,
+    numberOfItems,
+    numberOfItemsPacked,
+    href,
+    linkAs: LinkComponent = 'a',
+  } = props;
 
   const percentagePacked =
     numberOfItems > 0 ? Math.round((numberOfItemsPacked / numberOfItems) * 100) : 0;
@@ -33,16 +43,18 @@ export function TripCard(props: TripCardProps) {
   ].filter(Boolean) as string[];
   const describedBy = describedByParts.join(' ');
 
+  const tripCardClassName =
+    'bg-surface text-primary border-primary-ring flex w-full cursor-pointer flex-col items-start justify-between gap-6 rounded-md border p-3 text-left shadow-sm transition-transform duration-150 ease-out hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2  focus-visible:ring-primary-ring focus-visible:outline-none active:translate-y-0.5';
+
   return (
-    <button
-      type="button"
-      onClick={() => onOpenTrip(id)}
+    <LinkComponent
+      href={href}
       aria-labelledby={nameId}
       aria-describedby={describedBy}
-      className="bg-surface text-primary border-primary-ring flex w-full cursor-pointer flex-col items-start justify-between gap-3 rounded-md border p-3 text-left shadow-sm transition-transform duration-150 ease-out hover:shadow-md focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-0.5"
+      className={tripCardClassName}
     >
       <div className="flex w-full items-center justify-between">
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex gap-2">
             <span id={nameId} className="truncate text-sm font-bold">
               {name}
@@ -50,9 +62,9 @@ export function TripCard(props: TripCardProps) {
             {date && (
               <div
                 id={dateId}
-                className="bg-surface-overlay border-primary-ring rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
+                className="bg-slate-bg border-slate-border text-slate-text rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
               >
-                {date.toLocaleDateString()}
+                {date}
               </div>
             )}
           </div>
@@ -77,6 +89,6 @@ export function TripCard(props: TripCardProps) {
           {remarks}
         </div>
       )}
-    </button>
+    </LinkComponent>
   );
 }
