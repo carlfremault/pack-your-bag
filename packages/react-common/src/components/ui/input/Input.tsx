@@ -6,6 +6,8 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label: string;
   required?: boolean;
   maxLength?: number;
+  min?: string | number;
+  max?: string | number;
   errorMessage?: string;
 }
 
@@ -17,7 +19,7 @@ export const inputFieldClassName =
   'border-primary-ring bg-primary-foreground text-primary focus:ring-info-ring rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none';
 
 export function Input(props: InputProps) {
-  const { className, label, required = false, maxLength, errorMessage, ...rest } = props;
+  const { className, label, required = false, maxLength, min, max, errorMessage, ...rest } = props;
   const errorId = useId();
   const valueLength = String(rest.value ?? '').length;
   const isValueLengthExceeded = maxLength && valueLength > maxLength;
@@ -51,6 +53,8 @@ export function Input(props: InputProps) {
         required={required}
         aria-invalid={!!errorMessage}
         aria-describedby={errorMessage ? errorId : undefined}
+        min={min}
+        max={max}
         {...rest}
       />
       {errorMessage && (

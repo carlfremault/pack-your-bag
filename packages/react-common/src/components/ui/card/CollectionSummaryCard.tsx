@@ -57,9 +57,9 @@ export function CollectionSummaryCard(props: CollectionSummaryCardProps) {
         <div className="flex-none p-4">
           <div className="flex items-center gap-3">
             <div className="flex-none p-2">
-              <Icon size={24} className="text-primary" aria-hidden="true" />
+              <Icon size={24} aria-hidden="true" />
             </div>
-            <h2 className="text-primary text-xl">{name}</h2>
+            <h2 className="text-xl">{name}</h2>
           </div>
           {description && (
             <div className="mt-4">

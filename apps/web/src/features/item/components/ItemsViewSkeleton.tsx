@@ -12,10 +12,10 @@ export default function ItemsViewSkeleton() {
       <div className="bg-surface border-primary-ring w-full rounded-md border p-4 shadow-sm">
         <div className="flex gap-4">
           <div className="bg-surface-overlay h-9 min-w-0 flex-1 animate-pulse rounded-md" />
-          <div className="bg-surface-overlay h-9 w-9 flex-none animate-pulse rounded-md md:hidden" />
-          <div className="bg-surface-overlay hidden h-9 min-w-0 flex-1 animate-pulse rounded-md md:block" />
-          <div className="bg-surface-overlay hidden h-9 min-w-0 flex-1 animate-pulse rounded-md md:block" />
-          <div className="bg-surface-overlay hidden h-9 w-9 flex-none animate-pulse rounded-md md:block" />
+          <div className="bg-surface-overlay h-9 w-9 flex-none animate-pulse rounded-md lg:hidden" />
+          <div className="bg-surface-overlay hidden h-9 min-w-0 flex-1 animate-pulse rounded-md lg:block" />
+          <div className="bg-surface-overlay hidden h-9 min-w-0 flex-1 animate-pulse rounded-md lg:block" />
+          <div className="bg-surface-overlay hidden h-9 w-9 flex-none animate-pulse rounded-md lg:block" />
         </div>
       </div>
       <ItemsListSkeleton className="flex w-full flex-col gap-2 lg:hidden" />

@@ -121,7 +121,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   );
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col gap-4 p-4">
+    <div className="flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 p-4">
       {/* Mobile */}
       <div className="flex flex-col gap-4 lg:hidden">{collectionSummaryContent}</div>
       {/* Desktop */}

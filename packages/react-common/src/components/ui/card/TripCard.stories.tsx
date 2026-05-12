@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 
 import { LONG_DESCRIPTION } from '../../../lib/constants';
 
@@ -17,12 +16,13 @@ export const Default: Story = {
   args: {
     id: 'trip-1',
     name: 'Trip 1',
-    date: new Date(),
+    date: '2026-01-01',
     remarks: 'Trip 1 remarks',
     packName: 'Pack 1',
     numberOfItems: 10,
     numberOfItemsPacked: 5,
-    onOpenTrip: fn(),
+    href: '/trips/trip-1',
+    linkAs: 'a',
   },
 };
 

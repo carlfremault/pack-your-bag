@@ -36,7 +36,7 @@ export default function CollectionsView() {
         <CollectionsList collections={filteredCollections} linkAs={Link} />
       </div>
       {/* Desktop */}
-      <div className="hidden h-full w-full flex-col gap-4 p-4 lg:flex">
+      <div className="hidden h-full w-full max-w-7xl flex-col gap-4 p-4 lg:flex">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1 overflow-y-auto">
           <CollectionsList collections={filteredCollections} linkAs={Link} />
