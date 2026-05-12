@@ -1,7 +1,7 @@
 import type {
   CollectionCardProps,
+  CollectionDetailsCardProps,
   CollectionListCardProps,
-  CollectionSummaryCardProps,
 } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
@@ -25,10 +25,10 @@ export function toCollectionCardProps(
   };
 }
 
-export function toCollectionSummaryCardProps(
+export function toCollectionDetailsCardProps(
   collection: CollectionForSummaryDisplay,
-  handlers: Pick<CollectionSummaryCardProps, 'onEditCollection' | 'onDeleteCollection'>,
-): CollectionSummaryCardProps {
+  handlers: Pick<CollectionDetailsCardProps, 'onEditCollection' | 'onDeleteCollection'>,
+): CollectionDetailsCardProps {
   return {
     id: collection.id,
     name: collection.name,

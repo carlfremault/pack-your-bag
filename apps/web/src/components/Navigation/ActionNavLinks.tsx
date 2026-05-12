@@ -26,16 +26,16 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     const search = searchParams.get('search');
     const category = searchParams.get('category');
     const type = searchParams.get('type');
-    const dateFrom = searchParams.get('date-from');
-    const dateUntil = searchParams.get('date-until');
+    const dateFrom = searchParams.get('from');
+    const dateUntil = searchParams.get('until');
     const sortField = searchParams.get('sort');
     const sortDir = searchParams.get('dir');
 
     if (search) params.set('search', search);
     if (category) params.set('category', category);
     if (type) params.set('type', type);
-    if (dateFrom) params.set('date-from', dateFrom);
-    if (dateUntil) params.set('date-until', dateUntil);
+    if (dateFrom) params.set('from', dateFrom);
+    if (dateUntil) params.set('until', dateUntil);
     if (sortField) params.set('sort', sortField);
     if (sortDir) params.set('dir', sortDir);
 

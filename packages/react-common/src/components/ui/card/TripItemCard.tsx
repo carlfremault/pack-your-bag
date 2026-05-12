@@ -1,17 +1,20 @@
 import { MdCheckCircleOutline, MdOutlineCircle } from 'react-icons/md';
 
 import { QuantityStepper } from '../input/QuantityStepper';
+import { CategoryPill, CategoryPillProps } from '../pill/CategoryPill';
 
 export interface TripItemCardProps {
   itemId: string;
   itemName: string;
+  itemCategory: CategoryPillProps | null;
   quantityNeeded: number;
   quantityPacked: number;
   onQuantityPackedChange: (id: string, quantity: number) => void;
 }
 
 export function TripItemCard(props: TripItemCardProps) {
-  const { itemId, itemName, quantityNeeded, quantityPacked, onQuantityPackedChange } = props;
+  const { itemId, itemName, itemCategory, quantityNeeded, quantityPacked, onQuantityPackedChange } =
+    props;
 
   const handleQuantityChange = (quantity: number) => onQuantityPackedChange(itemId, quantity);
 
@@ -31,6 +34,7 @@ export function TripItemCard(props: TripItemCardProps) {
         <h3 className="text-sm font-bold">{itemName}</h3>
         <div className="text-xs font-light">Need: {quantityNeeded}</div>
       </div>
+      {itemCategory && <CategoryPill {...itemCategory} />}
       <div className="text-xs font-bold">{`${quantityPacked} / ${quantityNeeded}`}</div>
       <div>
         <QuantityStepper

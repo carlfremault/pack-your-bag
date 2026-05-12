@@ -48,3 +48,13 @@ export const WithLongItemName: Story = {
       'This is a very long item name that should wrap to multiple lines so we can test the wrapping behavior of this text in the card',
   },
 };
+
+export const WithCategory: Story = {
+  args: {
+    ...Default.args,
+    itemCategory: {
+      name: 'Category 1',
+      colorTheme: 'lavender',
+    },
+  },
+};
