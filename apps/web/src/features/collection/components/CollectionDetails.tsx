@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { LinkButton } from '@repo/react-common/button';
-import { CollectionSummaryCard } from '@repo/react-common/card';
+import { CollectionDetailsCard } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
 import { SidebarPortal } from '@/components/Sidebar';
 import { usePreferences } from '@/features/settings/queries';
-import { toCollectionSummaryCardProps } from '@/lib/mappers/collection.mapper';
+import { toCollectionDetailsCardProps } from '@/lib/mappers/collection.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useCollection } from '../queries';
@@ -105,14 +105,14 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     />
   );
 
-  const headerCardProps = toCollectionSummaryCardProps(collectionForSummaryDisplay, {
+  const detailsCardProps = toCollectionDetailsCardProps(collectionForSummaryDisplay, {
     onEditCollection: handleEditCollection,
     onDeleteCollection: handleDeleteCollection,
   });
 
   const collectionSummaryContent = (
     <>
-      <CollectionSummaryCard {...headerCardProps} />
+      <CollectionDetailsCard {...detailsCardProps} />
       <div className="flex w-full items-center justify-between gap-4">
         <AddItemsModal collection={collection} />
         {collection.type === 'pack' && <AddListsModal pack={collection} />}

@@ -27,8 +27,8 @@ export function useFilterTrips({ trips }: { trips: TripSummary[] }) {
     const rawDir = searchParams.get('dir') ?? sessionSort.dir;
     return {
       search: searchParams.get('search') ?? '',
-      dateFrom: searchParams.get('date-from') ?? undefined,
-      dateUntil: searchParams.get('date-until') ?? undefined,
+      dateFrom: searchParams.get('from') ?? undefined,
+      dateUntil: searchParams.get('until') ?? undefined,
       sortField: rawSort === 'date' ? rawSort : 'name',
       sortDirection: rawDir === 'desc' ? 'desc' : 'asc',
     };
@@ -88,16 +88,16 @@ export function useFilterTrips({ trips }: { trips: TripSummary[] }) {
       const params = new URLSearchParams(searchParams.toString());
       if ('dateFrom' in updates) {
         if (updates.dateFrom) {
-          params.set('date-from', updates.dateFrom);
+          params.set('from', updates.dateFrom);
         } else {
-          params.delete('date-from');
+          params.delete('from');
         }
       }
       if ('dateUntil' in updates) {
         if (updates.dateUntil) {
-          params.set('date-until', updates.dateUntil);
+          params.set('until', updates.dateUntil);
         } else {
-          params.delete('date-until');
+          params.delete('until');
         }
       }
       if (updates.sortField !== undefined) {

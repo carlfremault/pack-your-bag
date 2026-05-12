@@ -11,7 +11,7 @@ import { ExpandableText } from '@repo/react-common/utils';
 
 import classNames from 'classnames';
 
-export interface CollectionSummaryCardProps {
+export interface CollectionDetailsCardProps {
   id: string;
   name: string;
   description?: string;
@@ -28,7 +28,7 @@ export interface CollectionSummaryCardProps {
   onDeleteCollection: (id: string, type: 'list' | 'pack') => void;
 }
 
-export function CollectionSummaryCard(props: CollectionSummaryCardProps) {
+export function CollectionDetailsCard(props: CollectionDetailsCardProps) {
   const {
     id,
     name,

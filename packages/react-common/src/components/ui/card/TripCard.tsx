@@ -55,9 +55,11 @@ export function TripCard(props: TripCardProps) {
     'w-fit max-w-full wrap-break-word whitespace-normal',
     colorThemeClassName,
   );
-
   const tripCardClassName =
     'bg-surface text-primary border-primary-ring flex w-full cursor-pointer flex-col items-start justify-between gap-6 rounded-md border p-3 text-left shadow-sm transition-transform duration-150 ease-out hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2  focus-visible:ring-primary-ring focus-visible:outline-none active:translate-y-0.5';
+  const progressBarColorClassName = clampedPercentage === 100 ? 'bg-success' : 'bg-accent';
+  const percentagePackedColorClassName =
+    clampedPercentage === 100 ? 'text-success' : 'text-accent-emphasis';
 
   return (
     <LinkComponent
@@ -93,13 +95,22 @@ export function TripCard(props: TripCardProps) {
           </div>
         </div>
         <div id={statsId} className="flex flex-col items-center gap-0">
-          <div className="text-accent-emphasis text-lg font-bold">{percentagePacked}%</div>
-          <div className="text-accent-emphasis text-[10px] font-bold uppercase">ready</div>
+          <div className={classNames(percentagePackedColorClassName, 'text-lg font-bold')}>
+            {percentagePacked}%
+          </div>
+          <div
+            className={classNames(
+              percentagePackedColorClassName,
+              'text-[10px] font-bold uppercase',
+            )}
+          >
+            ready
+          </div>
         </div>
       </div>
       <div className="bg-accent-ring h-2 w-full rounded-full">
         <div
-          className="bg-accent h-full rounded-full"
+          className={classNames(progressBarColorClassName, 'h-full rounded-full')}
           style={{ width: `${clampedPercentage}%` }}
         ></div>
       </div>
