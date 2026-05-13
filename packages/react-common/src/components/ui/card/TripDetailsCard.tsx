@@ -65,14 +65,14 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
     clampedPercentage === 100 ? 'text-success' : 'text-accent-emphasis';
 
   return (
-    <div className="bg-surface border-primary-ring text-primary flex min-h-0 flex-col gap-6 rounded-md border p-4 shadow-sm">
-      <div className="flex items-start justify-between">
+    <div className="bg-surface border-primary-ring text-primary flex min-h-0 flex-col gap-6 rounded-md border shadow-sm">
+      <div className="flex items-start justify-between px-4 pt-4">
         <div className="flex items-start gap-2">
-          <div className="flex-none px-2">
+          <div className="flex-none">
             <MdHiking size={32} aria-hidden="true" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-xl">{name}</h2>
+            <h2 className="me-4 text-xl break-all">{name}</h2>
             {date && <div className="text-[10px] font-medium text-nowrap">{date}</div>}
           </div>
         </div>
@@ -91,19 +91,21 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
         </div>
       </div>
 
-      <div className="bg-accent-ring h-2 w-full rounded-full">
-        <div
-          className={classNames(progressBarColorClassName, 'h-full rounded-full')}
-          style={{ width: `${clampedPercentage}%` }}
-          role="progressbar"
-          aria-valuenow={clampedPercentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Packing progress"
-        ></div>
+      <div className="px-4">
+        <div className="bg-accent-ring h-2 w-full rounded-full">
+          <div
+            className={classNames(progressBarColorClassName, 'h-full rounded-full')}
+            style={{ width: `${clampedPercentage}%` }}
+            role="progressbar"
+            aria-valuenow={clampedPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Packing progress"
+          ></div>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-4">
         <div
           className={classNames(
             'me-2 flex min-w-0 flex-row items-center justify-start gap-2 text-xs',
@@ -123,7 +125,7 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
       </div>
 
       {categoryItems && categoryItems.length > 0 && (
-        <div className="min-h-0 flex-1 overflow-y-auto pb-2">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
           <div className="flex flex-col gap-2">
             {[...categoryItems]
               .sort((a, b) => a.category.name.localeCompare(b.category.name))
@@ -165,12 +167,12 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
       )}
 
       {remarks && (
-        <div className="mt-4">
+        <div className="mt-4 px-4">
           <ExpandableText text={remarks} maxLines={3} />
         </div>
       )}
 
-      <div className="flex flex-none justify-end gap-8">
+      <div className="flex flex-none justify-end gap-8 p-4">
         <Button
           variant="unstyledIcon"
           color="primary"
