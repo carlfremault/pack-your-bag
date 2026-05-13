@@ -1,4 +1,5 @@
 'use client';
+
 import { BsBackpack } from 'react-icons/bs';
 import { HiOutlineScale } from 'react-icons/hi2';
 import { MdCheckCircleOutline, MdHiking, MdOutlineCircle } from 'react-icons/md';
@@ -64,14 +65,14 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
     clampedPercentage === 100 ? 'text-success' : 'text-accent-emphasis';
 
   return (
-    <div className="bg-surface border-primary-ring text-primary flex min-h-0 flex-1 flex-col gap-6 rounded-md border p-4 shadow-sm">
-      <div className="flex items-start justify-between">
+    <div className="bg-surface border-primary-ring text-primary flex min-h-0 flex-col gap-6 rounded-md border shadow-sm">
+      <div className="flex items-start justify-between px-4 pt-4">
         <div className="flex items-start gap-2">
-          <div className="flex-none px-2">
+          <div className="flex-none">
             <MdHiking size={32} aria-hidden="true" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-xl">{name}</h2>
+            <h2 className="me-4 text-xl break-all">{name}</h2>
             {date && <div className="text-[10px] font-medium text-nowrap">{date}</div>}
           </div>
         </div>
@@ -90,29 +91,31 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
         </div>
       </div>
 
-      <div className="bg-accent-ring h-2 w-full rounded-full">
-        <div
-          className={classNames(progressBarColorClassName, 'h-full rounded-full')}
-          style={{ width: `${clampedPercentage}%` }}
-          role="progressbar"
-          aria-valuenow={clampedPercentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Packing progress"
-        ></div>
+      <div className="px-4">
+        <div className="bg-accent-ring h-2 w-full rounded-full">
+          <div
+            className={classNames(progressBarColorClassName, 'h-full rounded-full')}
+            style={{ width: `${clampedPercentage}%` }}
+            role="progressbar"
+            aria-valuenow={clampedPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Packing progress"
+          ></div>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-4">
         <div
           className={classNames(
-            'flex min-w-0 flex-row items-center justify-start gap-2 text-xs',
+            'me-2 flex min-w-0 flex-row items-center justify-start gap-2 text-xs',
             packName && packNameClassName,
           )}
         >
-          <BsBackpack className="h-4 w-4" aria-hidden="true" />
+          <BsBackpack className="min-h-4 min-w-4" aria-hidden="true" />
           {packName ?? '--'}
         </div>
-        <div className="flex gap-4 text-xs text-nowrap">
+        <div className="flex flex-col items-end gap-2 text-xs text-nowrap">
           <span>{`${numberOfItems} ${numberOfItems === 1 ? 'item' : 'items'}`}</span>
           <span className="flex items-center gap-1">
             <HiOutlineScale className="h-3 w-3" aria-hidden="true" />
@@ -122,52 +125,54 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
       </div>
 
       {categoryItems && categoryItems.length > 0 && (
-        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-          {[...categoryItems]
-            .sort((a, b) => a.category.name.localeCompare(b.category.name))
-            .map(({ category, itemsNeeded, itemsPacked }) => (
-              <div key={category.name} className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  {itemsNeeded === itemsPacked ? (
-                    <>
-                      <MdCheckCircleOutline
-                        className="text-success h-5 w-5 shrink-0"
-                        aria-hidden="true"
-                      />
-                      <span className="sr-only">Fully packed</span>
-                    </>
-                  ) : (
-                    <>
-                      <MdOutlineCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-                      <span className="sr-only">Not fully packed</span>
-                    </>
-                  )}
-                  <div className="max-w-3/4">
-                    <CategoryPill {...category} />
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
+          <div className="flex flex-col gap-2">
+            {[...categoryItems]
+              .sort((a, b) => a.category.name.localeCompare(b.category.name))
+              .map(({ category, itemsNeeded, itemsPacked }) => (
+                <div key={category.name} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {itemsNeeded === itemsPacked ? (
+                      <>
+                        <MdCheckCircleOutline
+                          className="text-success h-5 w-5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="sr-only">Fully packed</span>
+                      </>
+                    ) : (
+                      <>
+                        <MdOutlineCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+                        <span className="sr-only">Not fully packed</span>
+                      </>
+                    )}
+                    <div className="max-w-3/4">
+                      <CategoryPill {...category} />
+                    </div>
+                  </div>
+                  <div
+                    className={classNames(
+                      'flex items-center gap-1 text-xs',
+                      itemsNeeded === itemsPacked && 'text-success',
+                    )}
+                  >
+                    <span>{itemsPacked}</span>
+                    <span>/</span>
+                    <span>{itemsNeeded}</span>
                   </div>
                 </div>
-                <div
-                  className={classNames(
-                    'flex items-center gap-1 text-xs',
-                    itemsNeeded === itemsPacked && 'text-success',
-                  )}
-                >
-                  <span>{itemsPacked}</span>
-                  <span>/</span>
-                  <span>{itemsNeeded}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </div>
       )}
 
       {remarks && (
-        <div className="mt-4">
+        <div className="mt-4 px-4">
           <ExpandableText text={remarks} maxLines={3} />
         </div>
       )}
 
-      <div className="flex flex-none justify-end gap-8">
+      <div className="flex flex-none justify-end gap-8 p-4">
         <Button
           variant="unstyledIcon"
           color="primary"

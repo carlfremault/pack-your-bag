@@ -5,4 +5,5 @@ export { CollectionDetailsCard, type CollectionDetailsCardProps } from './Collec
 export { CollectionListCard, type CollectionListCardProps } from './CollectionListCard';
 export { ItemCard, type ItemCardProps } from './ItemCard';
 export { TripCard, type TripCardProps } from './TripCard';
+export { TripDetailsCard, type TripDetailsCardProps } from './TripDetailsCard';
 export { TripItemCard } from './TripItemCard';

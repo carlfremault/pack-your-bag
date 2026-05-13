@@ -31,7 +31,7 @@ export type CollectionForDisplay = Collection & {
   displayUnit: string;
 };
 
-export type CollectionForSummaryDisplay = CollectionForDisplay & {
+export type CollectionForDetailsCardDisplay = CollectionForDisplay & {
   categoryWeights?: {
     category: { name: string; colorTheme: ColorTheme };
     weight: string;

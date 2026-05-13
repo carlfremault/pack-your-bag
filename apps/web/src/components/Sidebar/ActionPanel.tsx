@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Units } from '@repo/constants';
 import { useBreakpoint } from '@repo/react-common/hooks';
+
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from '@/components/Modal';
 import { CategoryTableSkeleton } from '@/features/category/components/CategoryTableSkeleton';
@@ -27,6 +28,7 @@ const SIDEBAR_ACTIONS = [
   'add-collection',
   'edit-collection',
   'add-trip',
+  'edit-trip',
   'manage-categories',
 ] as const;
 type SidebarAction = (typeof SIDEBAR_ACTIONS)[number];
@@ -37,6 +39,7 @@ const MODAL_TITLES: Record<SidebarAction, string> = {
   'add-collection': 'Add collection',
   'edit-collection': 'Edit collection',
   'add-trip': 'Add trip',
+  'edit-trip': 'Edit trip',
   'manage-categories': 'Categories',
 };
 
@@ -126,6 +129,9 @@ function ActionPanelInner() {
   } else if (action === 'add-trip') {
     panelContent = <TripForm key="addTrip" onClose={closeAction} />;
     desktopTitle = 'Add trip';
+  } else if (action === 'edit-trip' && id) {
+    panelContent = <TripForm key={`edit-${id}`} tripId={id} onClose={closeAction} />;
+    desktopTitle = 'Edit trip';
   } else if (action === 'manage-categories') {
     panelContent = (
       <ErrorBoundary
@@ -146,11 +152,14 @@ function ActionPanelInner() {
 
   const isCollectionDetailPage = /^\/(list|pack)\/[^/]+/.test(pathname);
   const isCollectionAction = action === 'add-collection' || action === 'edit-collection';
+  const isTripDetailPage = /^\/trips\/[^/]+/.test(pathname);
+  const isTripAction = action === 'add-trip' || action === 'edit-trip';
 
   // Desktop: Sidebar
   if (isDesktop) {
     // Collection detail page loads collection summary card
     if (isCollectionDetailPage && !isCollectionAction) return null;
+    if (isTripDetailPage && !isTripAction) return null;
     if (panelContent) {
       return (
         <SidebarPortal>

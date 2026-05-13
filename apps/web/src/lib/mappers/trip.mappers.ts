@@ -1,12 +1,8 @@
-import type { TripCardProps } from '@repo/react-common/card';
+import type { TripCardProps, TripDetailsCardProps } from '@repo/react-common/card';
+import { ColorTheme } from '@repo/react-common/color-themes';
 
-import { TripSummary } from '@/features/trip/types';
-
-function formatTripDate(isoDate: string, format: string): string {
-  const [year, month, day] = isoDate.substring(0, 10).split('-');
-  if (!year || !month || !day) return isoDate;
-  return format.replace('YYYY', year).replace('MM', month).replace('DD', day);
-}
+import { TripForDetailsCardDisplay, TripSummary } from '@/features/trip/types';
+import { formatTripDate } from '@/features/trip/utils';
 
 export function toTripCardProps(
   tripSummary: TripSummary,
@@ -14,6 +10,7 @@ export function toTripCardProps(
   dateFormat?: string,
 ): TripCardProps {
   const rawDate = tripSummary.date ? tripSummary.date.substring(0, 10) : undefined;
+
   return {
     id: tripSummary.id,
     name: tripSummary.name,
@@ -23,7 +20,30 @@ export function toTripCardProps(
     packColorTheme: tripSummary.pack?.colorTheme ?? undefined,
     numberOfItems: tripSummary.pack?.itemCount ?? 0,
     numberOfItemsPacked: tripSummary.packedItemCount,
-    href: `/trip/${tripSummary.id}`,
+    href: `/trips/${tripSummary.id}`,
     linkAs,
+  };
+}
+
+export function toTripDetailsCardProps(
+  trip: TripForDetailsCardDisplay,
+  handlers: Pick<TripDetailsCardProps, 'onEditTrip' | 'onDeleteTrip'>,
+  dateFormat?: string,
+): TripDetailsCardProps {
+  const rawDate = trip.date ? trip.date.substring(0, 10) : undefined;
+
+  return {
+    id: trip.id,
+    name: trip.name,
+    date: rawDate && dateFormat ? formatTripDate(rawDate, dateFormat) : rawDate,
+    remarks: trip.remarks ?? undefined,
+    packName: trip.pack?.name,
+    packColorTheme: trip.pack?.colorTheme as ColorTheme,
+    numberOfItems: trip.numberOfItems,
+    numberOfItemsPacked: trip.numberOfItemsPacked,
+    totalWeight: trip.displayWeight,
+    weightUnit: trip.displayUnit,
+    categoryItems: trip.categoryItems,
+    ...handlers,
   };
 }
