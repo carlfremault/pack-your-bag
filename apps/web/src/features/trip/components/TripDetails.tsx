@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -17,6 +17,8 @@ import { useTrip } from '../queries';
 import { TripForDetailsCardDisplay } from '../types';
 import { getCategoryItemsInPack, getTotalPackedItemQuantityInPack } from '../utils';
 
+import TripDeleteModal from './TripDeleteModal';
+
 export interface TripDetailsProps {
   id: string;
 }
@@ -29,6 +31,7 @@ export default function TripDetails(props: TripDetailsProps) {
   const searchParams = useSearchParams();
   const action = searchParams.get('action');
 
+  const [deleteTripId, setDeleteTripId] = useState<string | null>(null);
   const { data: trip } = useTrip(id);
   const { data: preferences } = usePreferences();
 
@@ -56,11 +59,23 @@ export default function TripDetails(props: TripDetailsProps) {
     router.replace(`${pathname}?${params.toString()}`);
   }, [id, pathname, router, searchParams]);
 
+  const handleDeleteTrip = () => {
+    setDeleteTripId(id);
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteTripId(null);
+  };
+
+  const tripDeleteModal = deleteTripId && (
+    <TripDeleteModal tripId={deleteTripId} onClose={closeDeleteModal} />
+  );
+
   const detailsCardProps = toTripDetailsCardProps(
     tripForDetailsCardDisplay,
     {
       onEditTrip: handleEditTrip,
-      onDeleteTrip: () => {},
+      onDeleteTrip: handleDeleteTrip,
     },
     preferences?.dateFormat,
   );
@@ -83,6 +98,7 @@ export default function TripDetails(props: TripDetailsProps) {
         </SidebarPortal>
       )}
       <p>items come here</p>
+      {tripDeleteModal}
     </div>
   );
 }

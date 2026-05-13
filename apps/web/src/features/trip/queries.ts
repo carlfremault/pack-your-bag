@@ -171,4 +171,44 @@ const useUpdateTrip = () => {
   });
 };
 
-export { useAllTrips, useTrip, useCreateTrip, useUpdateTrip };
+// -------------------------------
+// Delete trip
+// -------------------------------
+const deleteTrip = async (id: string): Promise<void> => {
+  const res = await fetch(`/api/trip/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+};
+
+const useDeleteTrip = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteTrip,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['trips'] });
+
+      const previousTrips = queryClient.getQueryData<TripSummary[]>(['trips']) ?? [];
+
+      queryClient.setQueryData(['trips'], (old: TripSummary[] = []) =>
+        old.filter((trip) => trip.id !== id),
+      );
+
+      return { previousTrips };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousTrips !== undefined) {
+        queryClient.setQueryData(['trips'], context.previousTrips);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'], exact: true });
+    },
+  });
+};
+
+export { useAllTrips, useTrip, useCreateTrip, useUpdateTrip, useDeleteTrip };

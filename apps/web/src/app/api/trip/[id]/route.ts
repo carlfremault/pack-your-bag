@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import z from 'zod';
 
-import { getTrip, updateTrip } from '@/features/trip/api';
+import { deleteTrip, getTrip, updateTrip } from '@/features/trip/api';
 import { updateTripSchema } from '@/features/trip/schema';
 import { withErrorHandling } from '@/lib/api-handlers';
 
@@ -38,5 +38,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const data = await updateTrip(id, parsedBody.data);
 
     return NextResponse.json({ data }, { status: 200 });
+  });
+}
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  return withErrorHandling(async () => {
+    const { id } = await params;
+
+    await deleteTrip(id);
+
+    return new NextResponse(null, { status: 204 });
   });
 }
