@@ -315,8 +315,8 @@ const useDeleteCollection = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
-      queryClient.invalidateQueries({ queryKey: ['pack'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
+      queryClient.invalidateQueries({ queryKey: ['pack'], exact: true });
     },
   });
 };

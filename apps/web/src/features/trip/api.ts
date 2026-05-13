@@ -1,4 +1,4 @@
-import { handleApiResponse } from '@/lib/api-handlers';
+import { handleApiResponse, handleApiVoidResponse } from '@/lib/api-handlers';
 import { getProductClient } from '@/lib/clients/product-client';
 
 import { CreateTripBody, Trip, TripSummary, UpdateTripBody } from './types';
@@ -30,4 +30,12 @@ export async function updateTrip(id: string, body: UpdateTripBody): Promise<Trip
     body,
   });
   return handleApiResponse(data, error, response);
+}
+
+export async function deleteTrip(id: string): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.DELETE('/trip/{id}', {
+    params: { path: { id } },
+  });
+  handleApiVoidResponse(error, response);
 }

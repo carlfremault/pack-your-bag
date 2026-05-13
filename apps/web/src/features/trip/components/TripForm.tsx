@@ -51,6 +51,7 @@ interface TripFormFetcherProps {
   tripId: string;
   onClose: () => void;
 }
+
 function TripFormFetcher(props: TripFormFetcherProps) {
   const { tripId, onClose } = props;
   const { data: tripToEdit } = useTrip(tripId);

@@ -64,7 +64,7 @@ export function CollectionCard(props: CollectionCardProps) {
     >
       <Icon className="h-5 w-5" aria-hidden="true" />
       <div className="flex w-full min-w-0 flex-col items-start justify-between gap-1">
-        <span id={nameId} className="text-sm font-bold">
+        <span id={nameId} className="text-sm font-bold break-all">
           {name}
         </span>
         {description && (

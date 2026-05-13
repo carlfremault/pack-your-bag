@@ -49,7 +49,7 @@ export function CollectionDetailsCard(props: CollectionDetailsCardProps) {
   return (
     <div
       className={classNames(
-        'flex min-h-0 flex-1 flex-col gap-4 rounded-md border shadow-sm',
+        'flex min-h-0 flex-col gap-4 rounded-md border shadow-sm',
         colorThemeClassName,
       )}
     >
