@@ -106,11 +106,11 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
       <div className="flex items-center justify-between">
         <div
           className={classNames(
-            'flex min-w-0 flex-row items-center justify-start gap-2 text-xs',
+            'me-2 flex min-w-0 flex-row items-center justify-start gap-2 text-xs',
             packName && packNameClassName,
           )}
         >
-          <BsBackpack className="h-4 w-4" aria-hidden="true" />
+          <BsBackpack className="min-h-4 min-w-4" aria-hidden="true" />
           {packName ?? '--'}
         </div>
         <div className="flex flex-col items-end gap-2 text-xs text-nowrap">
