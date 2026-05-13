@@ -7,7 +7,7 @@ import {
 
 import { toHttpError } from '@/utils/http-error';
 
-import { CreateTripBody, Trip, TripSummary } from './types';
+import { CreateTripBody, Trip, TripSummary, UpdateTripBody } from './types';
 
 // -------------------------------
 // Fetch all trips
@@ -26,6 +26,26 @@ const useAllTrips = (): UseSuspenseQueryResult<TripSummary[]> => {
   return useSuspenseQuery({
     queryKey: ['trips'],
     queryFn: fetchAllTrips,
+  });
+};
+
+// -------------------------------
+// Fetch trip
+// -------------------------------
+const fetchTrip = async (id: string): Promise<Trip> => {
+  const res = await fetch(`/api/trip/${id}`);
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useTrip = (id: string): UseSuspenseQueryResult<Trip> => {
+  return useSuspenseQuery({
+    queryKey: ['trips', id],
+    queryFn: () => fetchTrip(id),
   });
 };
 
@@ -98,4 +118,57 @@ const useCreateTrip = () => {
   });
 };
 
-export { useAllTrips, useCreateTrip };
+// -------------------------------
+// Update Trip
+// -------------------------------
+const updateTrip = async ({ id, body }: { id: string; body: UpdateTripBody }): Promise<Trip> => {
+  const res = await fetch(`/api/trip/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useUpdateTrip = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTrip,
+    onMutate: async ({ id, body }) => {
+      await queryClient.cancelQueries({ queryKey: ['trips'] });
+
+      const previousTrip = queryClient.getQueryData<Trip>(['trips', id]);
+
+      queryClient.setQueryData(['trips', id], (old: Trip | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          name: body.name ?? old.name,
+          date: body.date ?? old.date,
+          remarks: body.remarks ?? old.remarks,
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return { previousTrip, id };
+    },
+    onError: (_error, _body, context) => {
+      if (context?.previousTrip !== undefined) {
+        queryClient.setQueryData(['trips', context.id], context.previousTrip);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
+    },
+  });
+};
+
+export { useAllTrips, useTrip, useCreateTrip, useUpdateTrip };

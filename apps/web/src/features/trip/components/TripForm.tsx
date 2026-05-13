@@ -5,6 +5,7 @@ import { NAME_MAX_LENGTH, REMARKS_MAX_LENGTH } from '@repo/constants';
 import { Input, InputSelect, InputTextarea } from '@repo/react-common/input';
 import { CenteredSpinner } from '@repo/react-common/spinner';
 import { getColorThemeClassName } from '@repo/react-common/utilities';
+import { FormNotReady } from '@repo/react-common/utils';
 
 import classNames from 'classnames';
 
@@ -15,8 +16,9 @@ import { usePreferences } from '@/features/settings/queries';
 import { useFormState } from '@/hooks/useFormState';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
-import { useCreateTrip } from '../queries';
+import { useCreateTrip, useTrip, useUpdateTrip } from '../queries';
 import { Trip } from '../types';
+import { formatTripDate } from '../utils';
 
 type TripFieldErrors = {
   name?: string;
@@ -34,10 +36,26 @@ export interface TripFormProps {
 export default function TripForm(props: TripFormProps) {
   const { tripId, onClose } = props;
 
-  // TODO edit trip
-  if (tripId) console.log('tripId', tripId);
+  if (tripId) {
+    return (
+      <Suspense fallback={<FormNotReady />}>
+        <TripFormFetcher tripId={tripId} onClose={onClose} />
+      </Suspense>
+    );
+  }
 
   return <TripFormInner trip={undefined} onClose={onClose} />;
+}
+
+interface TripFormFetcherProps {
+  tripId: string;
+  onClose: () => void;
+}
+function TripFormFetcher(props: TripFormFetcherProps) {
+  const { tripId, onClose } = props;
+  const { data: tripToEdit } = useTrip(tripId);
+
+  return <TripFormInner trip={tripToEdit} onClose={onClose} />;
 }
 
 interface TripFormInnerProps {
@@ -49,8 +67,7 @@ function TripFormInner({ trip, onClose }: TripFormInnerProps) {
   const editMode = trip !== undefined;
 
   const { mutate: createTrip, isPending: isCreating } = useCreateTrip();
-  // TODO edit trip
-  const isUpdating = false;
+  const { mutate: updateTrip, isPending: isUpdating } = useUpdateTrip();
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
     useFormState(getInitialFormValues(trip), TRIP_FORM_FIELDS);
@@ -84,8 +101,10 @@ function TripFormInner({ trip, onClose }: TripFormInnerProps) {
     };
 
     if (editMode) {
-      // TODO edit trip
-      console.log('edit trip', payload);
+      updateTrip(
+        { id: trip.id, body: payload },
+        { onSuccess: handleSuccess, onError: handleError },
+      );
     } else {
       createTrip(payload, { onSuccess: handleSuccess, onError: handleError });
     }
@@ -186,10 +205,12 @@ function PackSelectField({ value, onChange, errorMessage }: PackSelectFieldProps
 }
 
 function getInitialFormValues(trip?: Trip) {
+  const date = trip?.date ? formatTripDate(trip.date, 'YYYY-MM-DD') : '';
+
   return {
     name: trip?.name ?? '',
     remarks: trip?.remarks ?? '',
-    date: trip?.date ?? '',
+    date,
     packId: trip?.pack?.id ?? '',
   };
 }

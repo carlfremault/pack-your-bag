@@ -113,6 +113,7 @@ const useAllPacks = (): UseSuspenseQueryResult<PackSummary[]> => {
   return useSuspenseQuery({
     queryKey: ['pack'],
     queryFn: fetchAllPacks,
+    select: (data) => [...data].sort((a, b) => a.name.localeCompare(b.name)),
   });
 };
 

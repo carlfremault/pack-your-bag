@@ -59,7 +59,7 @@ export function CollectionDetailsCard(props: CollectionDetailsCardProps) {
             <div className="flex-none p-2">
               <Icon size={24} aria-hidden="true" />
             </div>
-            <h2 className="text-xl">{name}</h2>
+            <h2 className="text-xl break-all">{name}</h2>
           </div>
           {description && (
             <div className="mt-4">
