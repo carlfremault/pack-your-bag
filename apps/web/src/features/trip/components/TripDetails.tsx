@@ -17,6 +17,7 @@ import { useTrip } from '../queries';
 import { TripForDetailsCardDisplay } from '../types';
 import { getCategoryItemsInPack, getTotalPackedItemQuantityInPack } from '../utils';
 
+import TripContent from './TripContent';
 import TripDeleteModal from './TripDeleteModal';
 
 export interface TripDetailsProps {
@@ -81,6 +82,13 @@ export default function TripDetails(props: TripDetailsProps) {
   );
 
   const tripDetailsContent = <TripDetailsCard {...detailsCardProps} />;
+  const tripContent = trip.pack ? (
+    <TripContent tripId={trip.id} pack={trip.pack} />
+  ) : (
+    <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
+      <p>No pack selected yet for this trip</p>
+    </div>
+  );
 
   return (
     <div className="flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 p-4">
@@ -97,7 +105,7 @@ export default function TripDetails(props: TripDetailsProps) {
           </div>
         </SidebarPortal>
       )}
-      <p>items come here</p>
+      {tripContent}
       {tripDeleteModal}
     </div>
   );

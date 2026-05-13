@@ -9,6 +9,7 @@ export interface QuantityStepperProps {
   onChange: (quantity: number) => void;
   min?: number;
   max?: number;
+
   groupAriaLabel?: string;
   disabled?: boolean;
 }

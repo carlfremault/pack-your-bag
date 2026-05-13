@@ -67,12 +67,12 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
   return (
     <div className="bg-surface border-primary-ring text-primary flex min-h-0 flex-col gap-6 rounded-md border shadow-sm">
       <div className="flex items-start justify-between px-4 pt-4">
-        <div className="flex items-start gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           <div className="flex-none">
             <MdHiking size={32} aria-hidden="true" />
           </div>
-          <div className="flex flex-col">
-            <h2 className="me-4 text-xl break-all">{name}</h2>
+          <div className="flex min-w-0 flex-col">
+            <h2 className="me-4 text-xl wrap-break-word">{name}</h2>
             {date && <div className="text-[10px] font-medium text-nowrap">{date}</div>}
           </div>
         </div>
