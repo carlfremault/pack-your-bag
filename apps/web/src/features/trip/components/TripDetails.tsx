@@ -99,7 +99,7 @@ export default function TripDetails(props: TripDetailsProps) {
         <SidebarPortal>
           <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
             {tripDetailsContent}
-            <LinkButton href="/trips" variant="outline" linkAs={Link} className="w-full">
+            <LinkButton href="/trip" variant="outline" linkAs={Link} className="w-full">
               Back
             </LinkButton>
           </div>

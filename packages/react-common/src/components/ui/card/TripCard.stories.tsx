@@ -21,7 +21,7 @@ export const Default: Story = {
     packName: 'Pack 1',
     numberOfItems: 10,
     numberOfItemsPacked: 5,
-    href: '/trips/trip-1',
+    href: '/trip/trip-1',
     linkAs: 'a',
   },
 };

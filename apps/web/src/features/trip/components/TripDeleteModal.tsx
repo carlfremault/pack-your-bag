@@ -26,7 +26,7 @@ export default function TripDeleteModal(props: TripDeleteModalProps) {
     deleteTrip(tripId, {
       onSuccess: () => {
         onClose();
-        router.replace('/trips');
+        router.replace('/trip');
         toast.success('Trip deleted successfully');
       },
     });

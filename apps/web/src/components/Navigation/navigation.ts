@@ -6,7 +6,7 @@ import type { NavItem } from '@repo/react-common/navigation';
 export const navTabs: NavItem[] = [
   { id: 'items', label: 'Items', icon: IoShirt, href: '/items' },
   { id: 'collections', label: 'Collections', icon: MdShoppingBag, href: '/collections' },
-  { id: 'trips', label: 'Trips', icon: MdHiking, href: '/trips' },
+  { id: 'trips', label: 'Trips', icon: MdHiking, href: '/trip' },
 ];
 
 export const settingsLink: NavItem = {

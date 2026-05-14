@@ -47,7 +47,7 @@ function ActionNavLinksInner(props: ActionNavLinksProps) {
     pathname.startsWith('/collections') ||
     pathname.startsWith('/list') ||
     pathname.startsWith('/pack');
-  const tripsView = pathname.startsWith('/trips');
+  const tripsView = pathname.startsWith('/trip');
 
   return (
     <>

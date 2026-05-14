@@ -140,28 +140,27 @@ export class ItemService {
       throw new NotFoundException('Item not found');
     }
 
-    const [lists, packs] = await Promise.all([
-      this.prisma.list.findMany({
-        where: {
-          items: {
-            some: { itemId: id },
-          },
-        },
-      }),
-      this.prisma.pack.findMany({
-        where: {
-          items: {
-            some: { itemId: id },
-          },
-        },
-      }),
-    ]);
+    const lists = await this.prisma.list.findMany({
+      where: { userId, items: { some: { itemId: id } } },
+    });
+
+    const listIds = lists.map((list) => list.id);
+    const packs = await this.prisma.pack.findMany({
+      where: {
+        userId,
+        OR: [
+          { items: { some: { itemId: id } } },
+          ...(listIds.length > 0 ? [{ lists: { some: { listId: { in: listIds } } } }] : []),
+        ],
+      },
+    });
 
     let trips: Trip[] = [];
     const packIds = packs.map((pack) => pack.id);
     if (packIds.length > 0) {
       trips = await this.prisma.trip.findMany({
         where: {
+          userId,
           packId: { in: packIds },
         },
       });

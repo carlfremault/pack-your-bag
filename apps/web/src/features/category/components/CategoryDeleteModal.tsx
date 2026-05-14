@@ -49,22 +49,20 @@ export default function CategoryDeleteModal(props: CategoryDeleteModalProps) {
         ariaDescribedBy="confirmation-dialog-desc"
         className="max-w-md"
       >
-        <>
-          <ImpactContent
-            impactedItems={impactedItems}
-            categoryName={categoryName}
-            isLoading={isLoading}
-            isError={isError}
-          />
-          <ConfirmationDialog
-            isPending={isDeleting}
-            isLoading={isLoading}
-            onConfirm={confirmDeleteCategory}
-            onClose={onClose}
-            submitButtonColor="danger"
-            submitButtonText="Delete"
-          />
-        </>
+        <ImpactContent
+          impactedItems={impactedItems}
+          categoryName={categoryName}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        <ConfirmationDialog
+          isPending={isDeleting}
+          isLoading={isLoading}
+          onConfirm={confirmDeleteCategory}
+          onClose={onClose}
+          submitButtonColor="danger"
+          submitButtonText="Delete"
+        />
       </Modal.Content>
     </Modal.Root>
   );

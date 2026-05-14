@@ -418,6 +418,7 @@ const useUpsertItemInCollection = () => {
       const id = variables.type === 'list' ? variables.body.listId : variables.body.packId;
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: ['pack'] });
+      queryClient.invalidateQueries({ queryKey: ['deleteImpact'] });
       queryClient.invalidateQueries({ queryKey: [variables.type, id] });
     },
   });

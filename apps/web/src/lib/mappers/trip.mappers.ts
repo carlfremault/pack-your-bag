@@ -24,7 +24,7 @@ export function toTripCardProps(
     packColorTheme: tripSummary.pack?.colorTheme ?? undefined,
     numberOfItems: tripSummary.pack?.itemCount ?? 0,
     numberOfItemsPacked: tripSummary.packedItemCount,
-    href: `/trips/${tripSummary.id}`,
+    href: `/trip/${tripSummary.id}`,
     linkAs,
   };
 }

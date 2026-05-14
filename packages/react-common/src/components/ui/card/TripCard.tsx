@@ -115,7 +115,10 @@ export function TripCard(props: TripCardProps) {
         ></div>
       </div>
       {remarks && (
-        <div id={remarksId} className="text-xs font-light">
+        <div
+          id={remarksId}
+          className="line-clamp-3 max-w-full min-w-0 text-xs font-light wrap-break-word"
+        >
           {remarks}
         </div>
       )}
