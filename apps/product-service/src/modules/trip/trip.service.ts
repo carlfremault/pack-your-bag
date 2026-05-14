@@ -88,24 +88,6 @@ export class TripService {
     return plainToInstance(TripResponseDto, result);
   }
 
-  async setTripItemStatus(
-    tripId: string,
-    itemId: string,
-    userId: string,
-    packedQuantity: number,
-  ): Promise<void> {
-    const trip = await this.prisma.trip.findUnique({ where: { id: tripId, userId } });
-    if (!trip) {
-      throw new NotFoundException('Trip not found');
-    }
-
-    await this.prisma.tripItemStatus.upsert({
-      where: { tripId_itemId: { tripId, itemId } },
-      create: { id: uuidv7(), tripId, itemId, packedQuantity },
-      update: { packedQuantity },
-    });
-  }
-
   async createTrip(trip: CreateTripDto, userId: string): Promise<TripResponseDto> {
     return this.prisma.$transaction(async (tx) => {
       const uuid = uuidv7();
@@ -173,5 +155,27 @@ export class TripService {
 
       await tx.trip.delete({ where: { id, userId } });
     });
+  }
+
+  async setTripItemStatus(
+    tripId: string,
+    itemId: string,
+    userId: string,
+    packedQuantity: number,
+  ): Promise<void> {
+    const trip = await this.prisma.trip.findUnique({ where: { id: tripId, userId } });
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+
+    if (packedQuantity === 0) {
+      await this.prisma.tripItemStatus.deleteMany({ where: { tripId, itemId } });
+    } else {
+      await this.prisma.tripItemStatus.upsert({
+        where: { tripId_itemId: { tripId, itemId } },
+        create: { id: uuidv7(), tripId, itemId, packedQuantity },
+        update: { packedQuantity },
+      });
+    }
   }
 }

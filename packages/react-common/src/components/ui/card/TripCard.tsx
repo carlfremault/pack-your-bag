@@ -71,7 +71,7 @@ export function TripCard(props: TripCardProps) {
       <div className="flex w-full items-center justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex gap-2">
-            <span id={nameId} className="truncate text-sm font-bold">
+            <span id={nameId} className="me-2 min-w-0 text-sm font-bold wrap-break-word">
               {name}
             </span>
             {date && (

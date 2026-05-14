@@ -1,7 +1,11 @@
-import type { TripCardProps, TripDetailsCardProps } from '@repo/react-common/card';
+import type {
+  TripCardProps,
+  TripDetailsCardProps,
+  TripItemCardProps,
+} from '@repo/react-common/card';
 import { ColorTheme } from '@repo/react-common/color-themes';
 
-import { TripForDetailsCardDisplay, TripSummary } from '@/features/trip/types';
+import { TripForDetailsCardDisplay, TripItemForDisplay, TripSummary } from '@/features/trip/types';
 import { formatTripDate } from '@/features/trip/utils';
 
 export function toTripCardProps(
@@ -45,5 +49,25 @@ export function toTripDetailsCardProps(
     weightUnit: trip.displayUnit,
     categoryItems: trip.categoryItems,
     ...handlers,
+  };
+}
+
+export function toTripItemCardProps(
+  item: TripItemForDisplay,
+  actions: React.ReactNode,
+): TripItemCardProps {
+  return {
+    name: item.name,
+    category: item.category
+      ? {
+          name: item.category.name,
+          colorTheme: item.category.colorTheme as ColorTheme,
+        }
+      : null,
+    quantity: item.quantity,
+    packedQuantity: item.packedQuantity,
+    displayWeight: item.displayWeight,
+    displayUnit: item.displayUnit,
+    actions,
   };
 }

@@ -211,4 +211,88 @@ const useDeleteTrip = () => {
   });
 };
 
-export { useAllTrips, useTrip, useCreateTrip, useUpdateTrip, useDeleteTrip };
+// --------------------------------------------------
+// Update Trip Item Status (packed items)
+// --------------------------------------------------
+
+const updateTripItemStatus = async ({
+  id,
+  itemId,
+  body,
+}: {
+  id: string;
+  itemId: string;
+  body: { packedQuantity: number };
+}): Promise<void> => {
+  const res = await fetch(`/api/trip/${id}/items/${itemId}/packed`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+};
+
+const useUpdateTripItemStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTripItemStatus,
+    onMutate: async ({ id, itemId, body }) => {
+      await queryClient.cancelQueries({ queryKey: ['trips', id] });
+
+      const previousTrip = queryClient.getQueryData<Trip>(['trips', id]);
+
+      queryClient.setQueryData(['trips', id], (old: Trip | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pack: old.pack
+            ? {
+                ...old.pack,
+                items: old.pack.items?.map((entry) =>
+                  entry.item.id === itemId
+                    ? { ...entry, packedQuantity: body.packedQuantity }
+                    : entry,
+                ),
+                lists: old.pack.lists?.map((listEntry) => ({
+                  ...listEntry,
+                  list: {
+                    ...listEntry.list,
+                    items: listEntry.list.items?.map((entry) =>
+                      entry.item.id === itemId
+                        ? { ...entry, packedQuantity: body.packedQuantity }
+                        : entry,
+                    ),
+                  },
+                })),
+              }
+            : old.pack,
+        };
+      });
+
+      return { previousTrip, id };
+    },
+    onError: (_error, _body, context) => {
+      if (context?.previousTrip !== undefined) {
+        queryClient.setQueryData(['trips', context.id], context.previousTrip);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
+    },
+  });
+};
+
+export {
+  useAllTrips,
+  useTrip,
+  useCreateTrip,
+  useUpdateTrip,
+  useDeleteTrip,
+  useUpdateTripItemStatus,
+};

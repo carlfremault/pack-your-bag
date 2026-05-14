@@ -10,6 +10,8 @@ type CategoryItemEntry = TripForDetailsCardDisplay['categoryItems'][number];
 type ItemEntry = {
   item: {
     id: string;
+    name: string;
+    weight: number | null;
     category: { id: string; name: string; colorTheme: string } | null;
   };
   quantity: number;
@@ -97,6 +99,57 @@ export const getCategoryItemsInPack = (pack: Pack): TripForDetailsCardDisplay['c
     });
   }
   return result;
+};
+
+/*
+ * Accumulates the total quantity of items and packed items for an array of items.
+ *
+ * Due to API data structure, each item coming in carries the same packedQuantity value
+ * (coming from the TripItemStatus table).
+ * Therefore only the first packedQuantity value is used (countedItemIds Set).
+ * */
+const accumulateItemQuantities = (
+  acc: Map<string, ItemEntry>,
+  items: ItemEntry[],
+  multiplier: number = 1,
+  countedItemIds: Set<string>,
+): void => {
+  items.forEach((entry) => {
+    const itemsNeeded = entry.quantity * multiplier;
+    const itemsPacked = countedItemIds.has(entry.item.id) ? 0 : (entry.packedQuantity ?? 0);
+    countedItemIds.add(entry.item.id);
+
+    const existing = acc.get(entry.item.id);
+    if (existing) {
+      acc.set(entry.item.id, {
+        ...existing,
+        quantity: existing.quantity + itemsNeeded,
+        packedQuantity: (existing.packedQuantity ?? 0) + itemsPacked,
+      });
+    } else {
+      acc.set(entry.item.id, {
+        item: entry.item,
+        quantity: itemsNeeded,
+        packedQuantity: itemsPacked,
+      });
+    }
+  });
+};
+
+/*
+ * Calculates the total quantity of items and packed items for a given pack.
+ * */
+export const getItemQuantitiesInPack = (pack: Pack): ItemEntry[] => {
+  const acc = new Map<string, ItemEntry>();
+  const countedItemIds = new Set<string>();
+
+  accumulateItemQuantities(acc, pack.items ?? [], 1, countedItemIds);
+
+  pack.lists?.forEach((listEntry) => {
+    accumulateItemQuantities(acc, listEntry.list.items ?? [], listEntry.quantity, countedItemIds);
+  });
+
+  return Array.from(acc.values());
 };
 
 /**

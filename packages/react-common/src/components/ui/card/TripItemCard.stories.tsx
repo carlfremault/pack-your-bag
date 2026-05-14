@@ -1,4 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
+
+import { QuantityStepper } from '../input';
 
 import { TripItemCard } from './TripItemCard';
 
@@ -12,49 +15,65 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    itemId: '1',
-    itemName: 'Item 1',
-    quantityNeeded: 2,
-    quantityPacked: 1,
+    name: 'Item 1',
+    quantity: 2,
+    packedQuantity: 1,
+    actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };
 
 export const FullyPacked: Story = {
   args: {
     ...Default.args,
-    quantityPacked: 2,
+    packedQuantity: 2,
+    actions: <QuantityStepper quantity={2} onChange={fn()} />,
   },
 };
 
 export const AlmostPacked: Story = {
   args: {
     ...Default.args,
-    quantityNeeded: 5,
-    quantityPacked: 4,
+    quantity: 5,
+    packedQuantity: 4,
+    actions: <QuantityStepper quantity={4} onChange={fn()} />,
   },
 };
 
 export const NotPacked: Story = {
   args: {
     ...Default.args,
-    quantityPacked: 0,
+    packedQuantity: 0,
+    actions: <QuantityStepper quantity={0} onChange={fn()} />,
   },
 };
 
-export const WithLongItemName: Story = {
+export const WithLongname: Story = {
   args: {
     ...Default.args,
-    itemName:
-      'This is a very long item name that should wrap to multiple lines so we can test the wrapping behavior of this text in the card',
+    name: 'This is a very long item name that should wrap to multiple lines so we can test the wrapping behavior of this text in the card',
+    actions: <QuantityStepper quantity={1} onChange={fn()} />,
+  },
+};
+
+export const WithLongnameAndCategory: Story = {
+  args: {
+    ...Default.args,
+    name: 'This is a very long item name that should wrap to multiple lines so we can test the wrapping behavior of this text in the card',
+    category: {
+      name: 'CategorynameCategoryname',
+      colorTheme: 'lavender',
+    },
+    actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };
 
 export const WithCategory: Story = {
   args: {
     ...Default.args,
-    itemCategory: {
+    category: {
       name: 'Category 1',
       colorTheme: 'lavender',
     },
+    actions: <QuantityStepper quantity={1} onChange={fn()} />,
   },
 };

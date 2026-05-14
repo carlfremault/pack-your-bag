@@ -1,7 +1,13 @@
 import { handleApiResponse, handleApiVoidResponse } from '@/lib/api-handlers';
 import { getProductClient } from '@/lib/clients/product-client';
 
-import { CreateTripBody, Trip, TripSummary, UpdateTripBody } from './types';
+import {
+  CreateTripBody,
+  Trip,
+  TripSummary,
+  UpdateTripBody,
+  UpdateTripItemStatusBody,
+} from './types';
 
 export async function getAllTrips(): Promise<TripSummary[]> {
   const productClient = await getProductClient();
@@ -36,6 +42,19 @@ export async function deleteTrip(id: string): Promise<void> {
   const productClient = await getProductClient();
   const { error, response } = await productClient.DELETE('/trip/{id}', {
     params: { path: { id } },
+  });
+  handleApiVoidResponse(error, response);
+}
+
+export async function updateTripItemStatus(
+  id: string,
+  itemId: string,
+  body: UpdateTripItemStatusBody,
+): Promise<void> {
+  const productClient = await getProductClient();
+  const { error, response } = await productClient.PATCH('/trip/{id}/items/{itemId}/packed', {
+    params: { path: { id, itemId } },
+    body,
   });
   handleApiVoidResponse(error, response);
 }

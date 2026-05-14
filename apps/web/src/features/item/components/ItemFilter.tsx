@@ -3,11 +3,17 @@
 import { useMemo } from 'react';
 
 import { InputSelect, InputSelectOption } from '@repo/react-common/input';
-import { CategoryPill } from '@repo/react-common/pill';
+import { CategoryPill, CategoryPillProps } from '@repo/react-common/pill';
 
 import { FilterWrapper } from '@/components/FilterWrapper';
 import { useAllCategories } from '@/features/category/queries';
 import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
+
+const SORT_FIELD_OPTIONS: InputSelectOption[] = [
+  { value: 'name', label: 'Name' },
+  { value: 'weight', label: 'Weight' },
+  { value: 'category', label: 'Category' },
+];
 
 export interface ItemFilterState {
   search: string;
@@ -16,18 +22,14 @@ export interface ItemFilterState {
   sortDirection: 'asc' | 'desc';
 }
 
-interface ItemFilterProps {
+export interface ItemFilterProps {
   filterState: ItemFilterState;
   onChange: (updates: Partial<ItemFilterState>) => void;
+  collectionCategories?: CategoryPillProps[];
 }
 
-const SORT_FIELD_OPTIONS: InputSelectOption[] = [
-  { value: 'name', label: 'Name' },
-  { value: 'weight', label: 'Weight' },
-  { value: 'category', label: 'Category' },
-];
-
-export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
+export function ItemFilter(props: ItemFilterProps) {
+  const { filterState, onChange, collectionCategories } = props;
   const { data: categories } = useAllCategories();
 
   const hasActiveFilters =
@@ -35,14 +37,18 @@ export function ItemFilter({ filterState, onChange }: ItemFilterProps) {
     filterState.sortField !== 'name' ||
     filterState.sortDirection !== 'asc';
 
-  const categoryOptions = useMemo<InputSelectOption[]>(
-    () =>
-      categories.map((category) => ({
+  const categoryOptions = useMemo<InputSelectOption[]>(() => {
+    const categoriesAllowed = collectionCategories
+      ? new Set(collectionCategories.map((c) => c.name))
+      : null;
+
+    return categories
+      .filter((category) => !categoriesAllowed || categoriesAllowed.has(category.name))
+      .map((category) => ({
         value: category.name,
         label: <CategoryPill {...toCategoryPillProps(category)} />,
-      })),
-    [categories],
-  );
+      }));
+  }, [categories, collectionCategories]);
 
   return (
     <FilterWrapper
