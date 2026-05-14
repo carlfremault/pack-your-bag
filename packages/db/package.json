@@ -11,12 +11,12 @@
     "test:setup": "node -e \"if(process.env.NODE_ENV!=='test')throw new Error('Must set NODE_ENV=test')\"  && prisma db push --accept-data-loss && prisma generate && prisma db seed"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "dotenv": "^17.2.3"
   },
   "devDependencies": {
-    "prisma": "^7.5.0"
+    "prisma": "^7.8.0"
   },
   "exports": {
     ".": "./src/index.ts"
