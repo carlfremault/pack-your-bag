@@ -152,7 +152,7 @@ function ActionPanelInner() {
 
   const isCollectionDetailPage = /^\/(list|pack)\/[^/]+/.test(pathname);
   const isCollectionAction = action === 'add-collection' || action === 'edit-collection';
-  const isTripDetailPage = /^\/trips\/[^/]+/.test(pathname);
+  const isTripDetailPage = /^\/trip\/[^/]+/.test(pathname);
   const isTripAction = action === 'add-trip' || action === 'edit-trip';
 
   // Desktop: Sidebar

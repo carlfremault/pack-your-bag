@@ -167,7 +167,7 @@ export function TripDetailsCard(props: TripDetailsCardProps) {
       )}
 
       {remarks && (
-        <div className="mt-4 px-4">
+        <div className="mt-4 overflow-y-auto px-4">
           <ExpandableText text={remarks} maxLines={3} />
         </div>
       )}

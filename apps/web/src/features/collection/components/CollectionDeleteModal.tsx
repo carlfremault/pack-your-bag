@@ -156,6 +156,7 @@ function AffectedPacksList({ packs }: { packs: { id: string; name: string }[] })
             href={`/pack/${pack.id}`}
             target="_blank"
             rel="noopener"
+            aria-label={`${pack.name} (opens in new tab)`}
             className="hover:text-info flex items-center justify-between"
           >
             <span className="text-sm">{pack.name}</span>

@@ -14,7 +14,7 @@ export function SidebarNav(props: SidebarNavProps) {
     pathname.startsWith('/collections') ||
     pathname.startsWith('/list') ||
     pathname.startsWith('/pack');
-  const tripsView = pathname.startsWith('/trips');
+  const tripsView = pathname.startsWith('/trip');
   const settingsView = pathname.startsWith('/settings');
 
   let icon: React.ReactNode;
