@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ErrorFallback from '@/components/ErrorFallback';
 import { getTrip } from '@/features/trip/api';
 import TripDetails from '@/features/trip/components/TripDetails';
+import TripDetailsSkeleton from '@/features/trip/components/TripDetailsSkeleton';
 
 export const metadata: Metadata = {
   title: 'Trip details',
@@ -29,7 +30,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         <ErrorBoundary
           fallback={<ErrorFallback message="Failed to load trip. Please try again later." />}
         >
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<TripDetailsSkeleton />}>
             <TripDetails id={id} />
           </Suspense>
         </ErrorBoundary>
