@@ -212,7 +212,7 @@ const useDeleteTrip = () => {
 };
 
 // --------------------------------------------------
-// Upsert or remove packed item in trip
+// Update Trip Item Status (packed items)
 // --------------------------------------------------
 
 const updateTripItemStatus = async ({

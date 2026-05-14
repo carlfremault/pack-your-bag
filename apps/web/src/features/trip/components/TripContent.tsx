@@ -75,15 +75,13 @@ export default function TripContent(props: TripContentProps) {
         collectionCategories={categories}
       />
       {/* Mobile */}
-      <div className="mb-32 lg:hidden">
-        <div className="flex w-full flex-col gap-2">
-          {filteredItems.map((item) => (
-            <TripItemCard
-              key={item.id}
-              {...toTripItemCardProps(item, renderItemsUpsertActions(item))}
-            />
-          ))}
-        </div>
+      <div className="mb-32 flex w-full flex-col gap-2 lg:hidden">
+        {filteredItems.map((item) => (
+          <TripItemCard
+            key={item.id}
+            {...toTripItemCardProps(item, renderItemsUpsertActions(item))}
+          />
+        ))}
       </div>
       {/* Desktop */}
       <div className="hidden min-h-0 flex-1 lg:block">

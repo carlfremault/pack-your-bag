@@ -137,8 +137,7 @@ const accumulateItemQuantities = (
 };
 
 /*
- * Accumulates the total quantity of items and packed items
- * for a given pack.
+ * Calculates the total quantity of items and packed items for a given pack.
  * */
 export const getItemQuantitiesInPack = (pack: Pack): ItemEntry[] => {
   const acc = new Map<string, ItemEntry>();

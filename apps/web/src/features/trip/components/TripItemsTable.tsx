@@ -32,21 +32,22 @@ export default function TripItemsTable<TData extends TripItemForDisplay>(
         id: 'fullyPacked',
         header: () => <div className="text-center">Ready</div>,
         size: 60,
-        cell: ({ row }) => (
-          <div className="flex w-full items-center justify-center">
-            {row.original.quantity === row.original.packedQuantity ? (
-              <>
+        cell: ({ row }) => {
+          const fullyPacked = row.original.quantity === row.original.packedQuantity;
+          return (
+            <div
+              className="flex w-full items-center justify-center"
+              role="img"
+              aria-label={fullyPacked ? 'Fully packed' : 'Not fully packed'}
+            >
+              {fullyPacked ? (
                 <MdCheckCircleOutline className="text-success h-5 w-5 shrink-0" aria-hidden />
-                <span className="sr-only">Fully packed</span>
-              </>
-            ) : (
-              <>
+              ) : (
                 <MdOutlineCircle className="h-5 w-5 shrink-0" aria-hidden />
-                <span className="sr-only">Not fully packed</span>
-              </>
-            )}
-          </div>
-        ),
+              )}
+            </div>
+          );
+        },
       }),
       columnHelper.display({
         id: 'name',
