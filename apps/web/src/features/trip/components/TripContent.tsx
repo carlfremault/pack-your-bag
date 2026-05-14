@@ -27,7 +27,10 @@ export default function TripContent(props: TripContentProps) {
   const { data: preferences } = usePreferences();
   const { handleUpdateTripItemStatus } = useUpdateTrip();
 
-  const categories = useMemo(() => getAllCategoriesInCollection({ ...pack, type: 'pack' }), [pack]);
+  const packCategories = useMemo(
+    () => getAllCategoriesInCollection({ ...pack, type: 'pack' }),
+    [pack],
+  );
 
   const itemsForTripDisplay = useMemo(() => {
     const itemQuantities = getItemQuantitiesInPack(pack);
@@ -72,7 +75,7 @@ export default function TripContent(props: TripContentProps) {
       <ItemFilter
         filterState={displayFilterState}
         onChange={handleFilterChange}
-        collectionCategories={categories}
+        collectionCategories={packCategories}
       />
       {/* Mobile */}
       <div className="mb-32 flex w-full flex-col gap-2 lg:hidden">
