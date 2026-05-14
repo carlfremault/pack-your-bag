@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 
 import { QuantityStepper } from '@repo/react-common/input';
 
+import { getAllCategoriesInCollection } from '@/features/collection/utils';
 import { ItemFilter } from '@/features/item/components/ItemFilter';
 import ItemsList from '@/features/item/components/ItemsList';
 import ItemsTable from '@/features/item/components/ItemsTable';
@@ -23,6 +24,11 @@ export default function ListContent(props: ListContentProps) {
 
   const { data: preferences } = usePreferences();
   const { handleUpsertItemInList } = useUpsert(collection);
+
+  const listCategories = useMemo(
+    () => getAllCategoriesInCollection({ ...collection, type: 'list' }),
+    [collection],
+  );
 
   const itemsForListDisplay = useMemo(() => {
     return (collection.items ?? []).map(({ quantity, item }) => {
@@ -52,7 +58,11 @@ export default function ListContent(props: ListContentProps) {
 
   return (
     <>
-      <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
+      <ItemFilter
+        filterState={displayFilterState}
+        onChange={handleFilterChange}
+        collectionCategories={listCategories}
+      />
       {/* Mobile */}
       <div className="mb-32 lg:hidden">
         <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
