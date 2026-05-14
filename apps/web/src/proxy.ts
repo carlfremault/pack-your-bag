@@ -89,7 +89,14 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean, expired = tru
   return response;
 }
 
-export default async function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest): Promise<NextResponse> {
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const response = await handleRequest(req, nonce);
+  response.headers.set('Content-Security-Policy', buildCsp(nonce));
+  return response;
+}
+
+async function handleRequest(req: NextRequest, nonce: string): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
 
   // Internal auth API routes manage their own session — skip all checks.
@@ -105,9 +112,10 @@ export default async function middleware(req: NextRequest) {
 
   if (isPublic) {
     // Redirect already-authenticated users away from auth-related pages.
-    return session.isLoggedIn && shouldRedirectIfAuthed
-      ? NextResponse.redirect(new URL('/items', req.url))
-      : NextResponse.next();
+    if (session.isLoggedIn && shouldRedirectIfAuthed) {
+      return NextResponse.redirect(new URL('/items', req.url));
+    }
+    return NextResponse.next({ request: { headers: withNonce(req, nonce) } });
   }
 
   // ── Protected route ─────────────────────────────────────────────────────────
@@ -137,7 +145,7 @@ export default async function middleware(req: NextRequest) {
     // Build response with:
     //   1. Modified request headers so downstream handlers see the new token.
     //   2. The refreshed session cookie so the browser gets it too.
-    const requestHeaders = new Headers(req.headers);
+    const requestHeaders = withNonce(req, nonce);
     requestHeaders.set(INTERNAL_TOKEN_HEADER, refreshed.accessToken);
     const response = NextResponse.next({ request: { headers: requestHeaders } });
 
@@ -155,9 +163,30 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Token is still fresh — inject it as a header for downstream use.
-  const requestHeaders = new Headers(req.headers);
+  const requestHeaders = withNonce(req, nonce);
   requestHeaders.set(INTERNAL_TOKEN_HEADER, session.accessToken);
   return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+function buildCsp(nonce: string): string {
+  return [
+    `default-src 'self'`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    `style-src 'self' 'nonce-${nonce}'`,
+    `img-src 'self' data: blob:`,
+    `font-src 'self'`,
+    `connect-src 'self'`,
+    `object-src 'none'`,
+    `base-uri 'self'`,
+    `form-action 'self'`,
+    `frame-ancestors 'none'`,
+  ].join('; ');
+}
+
+function withNonce(req: NextRequest, nonce: string): Headers {
+  const headers = new Headers(req.headers);
+  headers.set('x-nonce', nonce);
+  return headers;
 }
 
 export const config = {
