@@ -511,6 +511,7 @@ const useUpsertListInPack = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: ['pack'] });
+      queryClient.invalidateQueries({ queryKey: ['deleteImpact'] });
     },
   });
 };

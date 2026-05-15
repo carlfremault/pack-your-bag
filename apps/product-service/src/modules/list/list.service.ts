@@ -116,6 +116,7 @@ export class ListService {
 
     const packs = await this.prisma.pack.findMany({
       where: {
+        userId,
         lists: {
           some: { listId: id },
         },
@@ -127,6 +128,7 @@ export class ListService {
     if (packIds.length > 0) {
       trips = await this.prisma.trip.findMany({
         where: {
+          userId,
           packId: { in: packIds },
         },
       });
