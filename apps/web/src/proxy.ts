@@ -183,6 +183,7 @@ function buildCsp(nonce: string): string {
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
+    `frame-src 'self' chrome-extension: moz-extension:`,
     `frame-ancestors 'none'`,
   ].join('; ');
 }

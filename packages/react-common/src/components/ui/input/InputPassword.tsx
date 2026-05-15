@@ -27,15 +27,17 @@ export function InputPassword(props: InputPasswordProps) {
     ...rest
   } = props;
   const [isVisible, setIsVisible] = useState(defaultVisible);
+  const inputId = useId();
   const errorId = useId();
 
   return (
-    <label className={inputWrapperClassName}>
+    <label htmlFor={inputId} className={inputWrapperClassName}>
       <span className="text-primary flex items-center gap-1 text-[10px] font-medium uppercase">
         {label} {required && <span className={inputRequiredClassName}>*</span>}
       </span>
       <div className={classNames(inputPasswordContainerClassName, className)}>
         <input
+          id={inputId}
           className="flex-1 border-0 bg-transparent outline-none focus:ring-0 focus:outline-none"
           type={isVisible ? 'text' : 'password'}
           required={required}
