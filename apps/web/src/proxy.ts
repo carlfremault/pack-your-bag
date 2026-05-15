@@ -92,7 +92,11 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean, expired = tru
 export default async function middleware(req: NextRequest): Promise<NextResponse> {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const response = await handleRequest(req, nonce);
-  response.headers.set('Content-Security-Policy', buildCsp(nonce));
+  const cspHeader =
+    process.env.NODE_ENV === 'development'
+      ? 'Content-Security-Policy-Report-Only'
+      : 'Content-Security-Policy';
+  response.headers.set(cspHeader, buildCsp(nonce));
   return response;
 }
 
