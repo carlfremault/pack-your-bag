@@ -117,7 +117,7 @@ export class PackService {
       throw new NotFoundException('Pack not found');
     }
 
-    const trips = await this.prisma.trip.findMany({ where: { packId: id } });
+    const trips = await this.prisma.trip.findMany({ where: { userId, packId: id } });
 
     return {
       pack: plainToInstance(PackBaseResponseDto, pack),

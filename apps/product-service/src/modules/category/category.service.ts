@@ -102,7 +102,7 @@ export class CategoryService {
     }
 
     const items = await this.prisma.item.findMany({
-      where: { categoryId: id },
+      where: { userId, categoryId: id },
     });
 
     return {

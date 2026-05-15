@@ -1,13 +1,11 @@
 'use client';
 
 import toast from 'react-hot-toast';
-import { TbExternalLink } from 'react-icons/tb';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { ConfirmationDialog } from '@repo/react-common/confirmation-dialog';
-import { CheckedWrapper, DangerWrapper, FormNotReady } from '@repo/react-common/utils';
 
+import DeleteImpactContent from '@/components/DeleteImpactContent';
 import { Modal } from '@/components/Modal';
 import { DeleteModalTitle } from '@/components/Modal/ModalTitle';
 import { capitalizeFirstLetter } from '@/utils/capitalizeFirstLetter';
@@ -61,8 +59,7 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
   };
 
   const impactedPacks = data && 'packs' in data ? data.packs : [];
-  // TODO: add trip impact
-  // const impactedTrips = [];
+  const impactedTrips = data && 'trips' in data ? data.trips : [];
 
   return (
     <Modal.Root open onOpenChange={onClose}>
@@ -71,13 +68,19 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
         role="alertdialog"
         ariaDescribedBy="confirmation-dialog-desc"
       >
-        <>
-          <ImpactContent
-            impactedPacks={impactedPacks}
-            collectionType={collectionType}
-            isLoading={isLoading}
-            isError={isError}
-          />
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <DeleteImpactContent
+              deleteEntry={collectionType}
+              impactedPacks={impactedPacks}
+              impactedTrips={impactedTrips}
+              errorLoadingMessage={ERROR_LOADING_IMPACT[collectionType]}
+              noImpactMessage={NO_IMPACT[collectionType]}
+              reassuranceMessage={IMPACT_REASSURANCE[collectionType]}
+              isLoading={isLoading}
+              isError={isError}
+            />
+          </div>
           <ConfirmationDialog
             isPending={isDeleting}
             isLoading={isLoading}
@@ -86,86 +89,8 @@ export default function CollectionDeleteModal(props: CollectionDeleteModalProps)
             submitButtonColor="danger"
             submitButtonText="Delete"
           />
-        </>
+        </div>
       </Modal.Content>
     </Modal.Root>
-  );
-}
-
-interface ImpactContentProps {
-  impactedPacks: { id: string; name: string }[];
-  collectionType: CollectionType;
-  isLoading: boolean;
-  isError: boolean;
-}
-function ImpactContent(props: ImpactContentProps) {
-  const { impactedPacks, collectionType, isLoading, isError } = props;
-
-  let dialogContent: React.ReactNode;
-
-  if (isLoading) {
-    dialogContent = <FormNotReady />;
-  } else if (isError) {
-    dialogContent = <DangerWrapper>{ERROR_LOADING_IMPACT[collectionType]}</DangerWrapper>;
-  } else if (impactedPacks.length === 0) {
-    dialogContent = <CheckedWrapper>{NO_IMPACT[collectionType]}</CheckedWrapper>;
-  } else if (collectionType === 'list') {
-    dialogContent = <ListImpact packs={impactedPacks} />;
-  } else {
-    dialogContent = <p>Todo: impact content for packs</p>;
-  }
-
-  return (
-    <div
-      id="confirmation-dialog-desc"
-      className="text-primary mb-6 flex min-h-0 flex-1 flex-col gap-4 py-4 text-sm"
-    >
-      {dialogContent}
-      {!isLoading && <CheckedWrapper>{IMPACT_REASSURANCE[collectionType]}</CheckedWrapper>}
-    </div>
-  );
-}
-
-function ListImpact({ packs }: { packs: { id: string; name: string }[] }) {
-  const packsCount = packs.length;
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <p className="mb-4">
-        This list is used in{' '}
-        <strong className="font-medium">
-          {packsCount} pack{packsCount === 1 ? '' : 's'}
-        </strong>
-        . Deleting it will remove its content from all of them.
-      </p>
-      <p className="mb-2 text-xs font-medium tracking-wider uppercase">Affected packs</p>
-      <AffectedPacksList packs={packs} />
-    </div>
-  );
-}
-
-function AffectedPacksList({ packs }: { packs: { id: string; name: string }[] }) {
-  return (
-    <div className="border-primary-ring min-h-0 flex-1 overflow-y-auto rounded-md border">
-      {packs.map((pack, index) => (
-        <div
-          key={pack.id}
-          className={`px-3 py-2 ${index > 0 ? 'border-primary-ring border-t' : ''}`}
-        >
-          <Link
-            href={`/pack/${pack.id}`}
-            target="_blank"
-            rel="noopener"
-            aria-label={`${pack.name} (opens in new tab)`}
-            className="hover:text-info flex items-center justify-between"
-          >
-            <span className="text-sm">{pack.name}</span>
-            <div className="flex">
-              <TbExternalLink size={14} />
-            </div>
-          </Link>
-        </div>
-      ))}
-    </div>
   );
 }
