@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { type NextRequest, type NextResponse } from 'next/server';
 
 import { getIronSession, type SessionOptions } from 'iron-session';
 
@@ -40,4 +41,32 @@ export const sessionOptions: SessionOptions = {
  */
 export async function getSession() {
   return getIronSession<SessionData>(await cookies(), sessionOptions);
+}
+
+interface LoginResponseForSession {
+  user: { id?: string; role?: number };
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
+/**
+ * Saves a full auth session onto a route handler redirect response.
+ * Use this instead of `getSession()` when you need the session cookie
+ * baked onto a `NextResponse.redirect()`.
+ */
+export async function createRouteSession(
+  request: NextRequest,
+  response: NextResponse,
+  loginResponse: LoginResponseForSession,
+): Promise<void> {
+  const session = await getIronSession<SessionData>(request, response, sessionOptions);
+  session.isLoggedIn = true;
+  session.userId = loginResponse.user.id;
+  session.role = loginResponse.user.role;
+  session.accessToken = loginResponse.access_token;
+  session.refreshToken = loginResponse.refresh_token;
+  session.accessTokenExpiresAt = Math.floor(Date.now() / 1000) + loginResponse.expires_in;
+  session.pendingVerificationEmail = undefined;
+  await session.save();
 }

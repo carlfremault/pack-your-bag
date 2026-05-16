@@ -92,11 +92,11 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean, expired = tru
 export default async function middleware(req: NextRequest): Promise<NextResponse> {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const response = await handleRequest(req, nonce);
-  const cspHeader =
-    process.env.NODE_ENV === 'development'
-      ? 'Content-Security-Policy-Report-Only'
-      : 'Content-Security-Policy';
-  response.headers.set(cspHeader, buildCsp(nonce));
+  // const cspHeader =
+  //   process.env.NODE_ENV === 'development'
+  //     ? 'Content-Security-Policy-Report-Only'
+  //     : 'Content-Security-Policy';
+  // response.headers.set(cspHeader, buildCsp(nonce));
   return response;
 }
 
@@ -116,10 +116,13 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
 
   if (isPublic) {
     // Redirect already-authenticated users away from auth-related pages.
-    if (session.isLoggedIn && shouldRedirectIfAuthed) {
-      return NextResponse.redirect(new URL('/items', req.url));
-    }
-    return NextResponse.next({ request: { headers: withNonce(req, nonce) } });
+    // if (session.isLoggedIn && shouldRedirectIfAuthed) {
+    //   return NextResponse.redirect(new URL('/items', req.url));
+    // }
+    // return NextResponse.next({ request: { headers: withNonce(req, nonce) } });
+    return session.isLoggedIn && shouldRedirectIfAuthed
+      ? NextResponse.redirect(new URL('/items', req.url))
+      : NextResponse.next();
   }
 
   // ── Protected route ─────────────────────────────────────────────────────────
@@ -149,7 +152,8 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
     // Build response with:
     //   1. Modified request headers so downstream handlers see the new token.
     //   2. The refreshed session cookie so the browser gets it too.
-    const requestHeaders = withNonce(req, nonce);
+    // const requestHeaders = withNonce(req, nonce);
+    const requestHeaders = new Headers(req.headers);
     requestHeaders.set(INTERNAL_TOKEN_HEADER, refreshed.accessToken);
     const response = NextResponse.next({ request: { headers: requestHeaders } });
 
@@ -167,32 +171,33 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
   }
 
   // Token is still fresh — inject it as a header for downstream use.
-  const requestHeaders = withNonce(req, nonce);
+  // const requestHeaders = withNonce(req, nonce);
+  const requestHeaders = new Headers(req.headers);
   requestHeaders.set(INTERNAL_TOKEN_HEADER, session.accessToken);
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
-function buildCsp(nonce: string): string {
-  return [
-    `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    `img-src 'self' data: blob:`,
-    `font-src 'self'`,
-    `connect-src 'self'`,
-    `object-src 'none'`,
-    `base-uri 'self'`,
-    `form-action 'self'`,
-    `frame-src 'self' chrome-extension: moz-extension:`,
-    `frame-ancestors 'none'`,
-  ].join('; ');
-}
+// function buildCsp(nonce: string): string {
+//   return [
+//     `default-src 'self'`,
+//     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+//     `style-src 'self' 'nonce-${nonce}'`,
+//     `img-src 'self' data: blob:`,
+//     `font-src 'self'`,
+//     `connect-src 'self'`,
+//     `object-src 'none'`,
+//     `base-uri 'self'`,
+//     `form-action 'self'`,
+//     `frame-src 'self' chrome-extension: moz-extension:`,
+//     `frame-ancestors 'none'`,
+//   ].join('; ');
+// }
 
-function withNonce(req: NextRequest, nonce: string): Headers {
-  const headers = new Headers(req.headers);
-  headers.set('x-nonce', nonce);
-  return headers;
-}
+// function withNonce(req: NextRequest, nonce: string): Headers {
+//   const headers = new Headers(req.headers);
+//   headers.set('x-nonce', nonce);
+//   return headers;
+// }
 
 export const config = {
   // Run on all routes except static assets.

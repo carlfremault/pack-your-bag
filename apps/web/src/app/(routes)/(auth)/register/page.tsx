@@ -9,10 +9,12 @@ export const metadata: Metadata = {
   description: 'Create a new PackYourBag account',
 };
 
-export default function Page() {
+export default async function Page(props: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await props.searchParams;
+
   return (
     <CenteredSurfaceCard title="Create an account">
-      <RegisterForm />
+      <RegisterForm error={error} />
     </CenteredSurfaceCard>
   );
 }

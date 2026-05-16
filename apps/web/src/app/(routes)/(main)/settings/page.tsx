@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   description: 'Manage your preferences.',
 };
 
-export default function SettingsPage() {
+export default async function SettingsPage(props: {
+  searchParams: Promise<{ error?: string; success?: string }>;
+}) {
+  const { error, success } = await props.searchParams;
+
   return (
     <div className="flex min-h-full w-full justify-center pb-32 lg:pb-0">
       <h1 className="sr-only">Settings</h1>
@@ -20,7 +24,7 @@ export default function SettingsPage() {
         fallback={<ErrorFallback message="Failed to load preferences. Please try again later." />}
       >
         <Suspense fallback={<SectionNotReady />}>
-          <SettingsView />
+          <SettingsView error={error} success={success} />
         </Suspense>
       </ErrorBoundary>
     </div>

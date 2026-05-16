@@ -9,10 +9,12 @@ export const metadata: Metadata = {
   description: 'Sign in to your PackYourBag account',
 };
 
-export default function Page() {
+export default async function Page(props: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await props.searchParams;
+
   return (
     <CenteredSurfaceCard title="Sign in">
-      <LoginForm />
+      <LoginForm error={error} />
     </CenteredSurfaceCard>
   );
 }

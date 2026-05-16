@@ -3,7 +3,7 @@ import {
   getPublicAuthClient,
   getRefreshTokenAuthClient,
 } from '@/lib/clients/auth-client';
-import { ApiError } from '@/lib/errors';
+import { ApiError, isApiError } from '@/lib/errors';
 import { extractErrorMessage, extractErrorType } from '@/utils/extractApiErrorDetails';
 
 import { AuthApiError } from './errors';
@@ -35,7 +35,8 @@ export async function login(body: LoginBody): Promise<LoginResponse> {
     if (!data) throw new ApiError('No data returned', 500);
     return data;
   } catch (e) {
-    if (e instanceof ApiError) throw e;
+    console.log('login error', e);
+    if (isApiError(e)) throw e;
     throw new ApiError('Authentication service unavailable', 503);
   }
 }
@@ -85,7 +86,7 @@ export async function updatePassword(body: UpdatePasswordBody): Promise<LoginRes
     if (!data) throw new ApiError('No data returned', 500);
     return data as LoginResponse;
   } catch (e) {
-    if (e instanceof ApiError) throw e;
+    if (isApiError(e)) throw e;
     throw new ApiError('Authentication service unavailable', 503);
   }
 }
@@ -102,7 +103,7 @@ export async function deleteAccount(body: DeleteAccountBody): Promise<void> {
       throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
     }
   } catch (e) {
-    if (e instanceof ApiError) throw e;
+    if (isApiError(e)) throw e;
     throw new ApiError('Authentication service unavailable', 503);
   }
 }
@@ -146,7 +147,7 @@ async function postPublicAuthRequest(
       throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
     }
   } catch (e) {
-    if (e instanceof ApiError) throw e;
+    if (isApiError(e)) throw e;
     throw new ApiError('Authentication service unavailable', 503);
   }
 }

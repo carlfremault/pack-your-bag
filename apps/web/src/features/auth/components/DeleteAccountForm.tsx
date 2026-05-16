@@ -44,7 +44,7 @@ export default function DeleteAccountForm(props: DeleteAccountFormProps) {
           link will only work within the 30-day grace period.
         </p>
       </div>
-      <form action={formAction} className="flex flex-col gap-4">
+      <form action={formAction} className="mx-1 flex flex-col gap-4">
         <InputPassword
           label="Password"
           name="password"

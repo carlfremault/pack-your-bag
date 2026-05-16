@@ -11,6 +11,15 @@ export class ApiError extends Error {
   }
 }
 
+export function isApiError(e: unknown): e is ApiError {
+  return (
+    e instanceof Error &&
+    'status' in e &&
+    'digest' in e &&
+    typeof (e as { status: unknown }).status === 'number'
+  );
+}
+
 export class HttpError extends Error {
   details?: unknown;
 

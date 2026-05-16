@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['react-icons'],
   },
+  logging: {
+    fetches: {
+      fullUrl: false, // Prevents Next.js from intercepting the error stream
+    },
+  },
 };
 
 export default nextConfig;

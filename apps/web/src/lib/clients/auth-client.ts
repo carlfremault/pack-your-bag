@@ -17,7 +17,12 @@ import 'server-only';
 export async function getPublicAuthClient() {
   const { authServiceUrl, bffSecret } = getAuthConfig();
 
-  const client = createClient<paths>({ baseUrl: authServiceUrl });
+  const client = createClient<paths>({
+    baseUrl: authServiceUrl,
+    fetch: (globalThis as any)[Symbol.for('Next.js patched fetch')]
+      ? (globalThis as any).fetch.__proto__.constructor
+      : globalThis.fetch,
+  });
   client.use({
     async onRequest({ request }) {
       request.headers.set('Content-Type', 'application/json');

@@ -8,7 +8,13 @@ import DeleteAccountCard from './DeleteAccountCard';
 import LogoutAllDevicesCard from './LogoutAllDevicesCard';
 import { PreferencesForm } from './PreferencesForm';
 
-export default async function SettingsView() {
+export interface SettingsViewProps {
+  error?: string;
+  success?: string;
+}
+
+export default async function SettingsView(props: SettingsViewProps) {
+  const { error, success } = props;
   const locale = extractLocaleFromHeaders(await headers());
 
   return (
@@ -16,7 +22,7 @@ export default async function SettingsView() {
       <h2 className="text-primary text-xl font-semibold">Preferences</h2>
       <PreferencesForm />
       <h2 className="text-primary text-xl font-semibold">Password change</h2>
-      <PasswordUpdateForm />
+      <PasswordUpdateForm error={error} success={success} />
       <h2 className="text-primary text-xl font-semibold">Sign out all devices</h2>
       <LogoutAllDevicesCard />
       <h2 className="text-primary text-xl font-semibold">Delete account</h2>
