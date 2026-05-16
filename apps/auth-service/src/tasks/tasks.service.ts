@@ -8,6 +8,7 @@ import { MS_PER_DAY } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
@@ -27,6 +28,7 @@ export class TasksService {
     private readonly auditLogProvider: AuditLogProvider,
     private readonly auditLogService: AuditLogService,
     private readonly userService: UserService,
+    private readonly serviceClientService: ServiceClientService,
     private readonly configService: ConfigService,
   ) {
     this.refreshTokenRetentionDays = this.configService.getOrThrow(
@@ -174,6 +176,9 @@ export class TasksService {
           ...result,
           deletedUsersCutoff: deletedUsersCutoff.toISOString(),
         };
+
+        const downstreamResult = await this.cleanupDownstreamServices(userIds);
+        metadata = { ...metadata, downstream: downstreamResult };
       }
 
       this.logger.log(auditMessage);
@@ -239,5 +244,44 @@ export class TasksService {
         message: `Verification token cleanup failed: ${errorMessage}`,
       });
     }
+  }
+
+  private async cleanupDownstreamServices(userIds: string[]): Promise<Prisma.InputJsonValue> {
+    const [productResult, userDataResult] = await Promise.allSettled([
+      this.serviceClientService.cleanupProductData(userIds),
+      this.serviceClientService.cleanupUserData(userIds),
+    ]);
+
+    const downstream: Record<string, Prisma.InputJsonValue> = {};
+
+    if (productResult.status === 'fulfilled') {
+      downstream.product = productResult.value as unknown as Prisma.InputJsonValue;
+      this.logger.log(`Product cleanup succeeded: ${JSON.stringify(productResult.value)}`);
+    } else {
+      const errorMessage =
+        productResult.reason instanceof Error
+          ? productResult.reason.message
+          : String(productResult.reason);
+      downstream.product = { error: errorMessage };
+      this.logger.warn(
+        `Product cleanup failed for user IDs [${userIds.join(', ')}]: ${errorMessage}`,
+      );
+    }
+
+    if (userDataResult.status === 'fulfilled') {
+      downstream.userData = userDataResult.value as unknown as Prisma.InputJsonValue;
+      this.logger.log(`User data cleanup succeeded: ${JSON.stringify(userDataResult.value)}`);
+    } else {
+      const errorMessage =
+        userDataResult.reason instanceof Error
+          ? userDataResult.reason.message
+          : String(userDataResult.reason);
+      downstream.userData = { error: errorMessage };
+      this.logger.warn(
+        `User data cleanup failed for user IDs [${userIds.join(', ')}]: ${errorMessage}`,
+      );
+    }
+
+    return downstream as Prisma.InputJsonValue;
   }
 }

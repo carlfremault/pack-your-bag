@@ -6,6 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import {
   BffGuardModule,
   CustomThrottlerModule,
+  InternalGuardModule,
   JwtAuthModule,
   RequestIdMiddleware,
 } from '@repo/nestjs-common';
@@ -17,6 +18,7 @@ import Joi from 'joi';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { CategoryModule } from './modules/category/category.module';
+import { CleanupModule } from './modules/cleanup/cleanup.module';
 import { HealthModule } from './modules/health/health.module';
 import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
@@ -34,6 +36,7 @@ const validationSchema = Joi.object({
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
   BFF_SHARED_SECRET: Joi.string().required(),
+  INTERNAL_SERVICE_SECRET: Joi.string().required(),
 
   // Application
   PRODUCT_PORT: Joi.number().default(8002),
@@ -93,8 +96,10 @@ const validationSchema = Joi.object({
     }),
     PrismaModule,
     BffGuardModule,
+    InternalGuardModule,
     CustomThrottlerModule,
     JwtAuthModule,
+    CleanupModule,
     ItemModule,
     CategoryModule,
     ListModule,
