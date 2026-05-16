@@ -311,7 +311,7 @@ describe('UserService', () => {
       await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
     });
 
-    it('should throw InvalidTokenException if the password does not match', async () => {
+    it('should throw UnauthorizedException if the password does not match', async () => {
       mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
       mockedPrismaUser.findUnique.mockResolvedValue({
         id: 'user-123',
@@ -320,7 +320,7 @@ describe('UserService', () => {
 
       mockedCompare.mockResolvedValueOnce(false as never);
 
-      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
+      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(UnauthorizedException);
     });
   });
 

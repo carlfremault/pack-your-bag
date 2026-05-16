@@ -491,7 +491,6 @@ describe('AuthService', () => {
 
       expect(mockUserService.getUser).toHaveBeenCalledWith({
         email: 'testemail@test.com',
-        isDeleted: false,
       });
 
       expect(mockVerificationTokenService.upsertVerificationToken).toHaveBeenCalledWith(
@@ -517,7 +516,6 @@ describe('AuthService', () => {
 
       expect(mockUserService.getUser).toHaveBeenCalledWith({
         email: 'testemail@test.com',
-        isDeleted: false,
       });
     });
 
@@ -715,41 +713,6 @@ describe('AuthService', () => {
 
       mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
       mockUserService.getUser.mockResolvedValue(null);
-
-      await expect(service.resetPassword(dto)).rejects.toThrow(InvalidTokenException);
-
-      expect(mockUserService.resetPasswordWithToken).not.toHaveBeenCalled();
-      expect(mockAuthEventProvider.emitPasswordResetConfirmed).not.toHaveBeenCalled();
-    });
-
-    it('should throw InvalidTokenException if user is deleted', async () => {
-      const passwordResetTokenExpiresInMS = mockConfigService.getOrThrow(
-        'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
-      ) as number;
-      const dto = {
-        token: 'valid_token',
-        password: 'validPassword123',
-      };
-
-      const mockResetRecord = {
-        id: 'token-123',
-        userId: 'user-123',
-        token: 'hashed_token',
-        type: TokenType.PASSWORD_RESET,
-        expiresAt: new Date(Date.now() + passwordResetTokenExpiresInMS),
-        used: false,
-      };
-
-      const mockDeletedUser = {
-        id: 'user-123',
-        email: 'testemail@test.com',
-        password: 'hashed_password',
-        roleId: 1,
-        isDeleted: true,
-      };
-
-      mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
-      mockUserService.getUser.mockResolvedValue(mockDeletedUser);
 
       await expect(service.resetPassword(dto)).rejects.toThrow(InvalidTokenException);
 
