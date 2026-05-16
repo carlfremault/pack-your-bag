@@ -152,7 +152,7 @@ describe('CategoryService', () => {
         where: { id, userId },
       });
       expect(mockPrismaService.item.findMany).toHaveBeenCalledWith({
-        where: { categoryId: id },
+        where: { userId, categoryId: id },
       });
 
       expect(result).toMatchObject({

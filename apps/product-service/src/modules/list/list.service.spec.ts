@@ -270,10 +270,10 @@ describe('ListService', () => {
         where: { id, userId },
       });
       expect(mockPrismaService.pack.findMany).toHaveBeenCalledWith({
-        where: { lists: { some: { listId: id } } },
+        where: { userId, lists: { some: { listId: id } } },
       });
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: { in: ['pack-1'] } },
+        where: { userId, packId: { in: ['pack-1'] } },
       });
 
       expect(result).toMatchObject({
@@ -342,7 +342,7 @@ describe('ListService', () => {
       const result = await service.getListDeleteImpact(id, userId);
 
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: { in: ['p1', 'p2'] } },
+        where: { userId, packId: { in: ['p1', 'p2'] } },
       });
       expect(result.packs).toHaveLength(2);
       expect(result.trips).toEqual([trip1]);
@@ -359,7 +359,7 @@ describe('ListService', () => {
       const result = await service.getListDeleteImpact(id, userId);
 
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: { in: ['p1'] } },
+        where: { userId, packId: { in: ['p1'] } },
       });
       expect(result.trips).toEqual([]);
       expect(result.packs).toEqual([pack1]);

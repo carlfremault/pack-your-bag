@@ -273,7 +273,7 @@ describe('User Deletion (e2e)', () => {
           token,
           password: 'invalid-password',
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNAUTHORIZED,
       );
     });
   });

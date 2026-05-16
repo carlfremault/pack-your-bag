@@ -209,8 +209,12 @@ describe('ItemService', () => {
 
   describe('getItemDeleteImpact', () => {
     it('should return the item, lists, packs, and trips', async () => {
-      const itemId = '123';
+      const itemId = 'item-123';
       const userId = 'user-1';
+
+      const mockLists = [{ id: '123' } as List];
+      const listIds = mockLists.map((l) => l.id);
+
       mockPrismaService.item.findUnique.mockResolvedValue({ id: itemId, userId });
       mockPrismaService.list.findMany.mockResolvedValue([{ id: '123' } as List]);
       mockPrismaService.pack.findMany.mockResolvedValue([{ id: '123' } as Pack]);
@@ -223,13 +227,19 @@ describe('ItemService', () => {
         include: { category: true },
       });
       expect(mockPrismaService.list.findMany).toHaveBeenCalledWith({
-        where: { items: { some: { itemId } } },
+        where: { userId, items: { some: { itemId } } },
       });
       expect(mockPrismaService.pack.findMany).toHaveBeenCalledWith({
-        where: { items: { some: { itemId } } },
+        where: {
+          userId,
+          OR: [
+            { items: { some: { itemId } } },
+            ...(listIds.length > 0 ? [{ lists: { some: { listId: { in: listIds } } } }] : []),
+          ],
+        },
       });
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: { in: ['123'] } },
+        where: { userId, packId: { in: ['123'] } },
       });
 
       expect(result).toMatchObject({
@@ -282,7 +292,7 @@ describe('ItemService', () => {
       const result = await service.getItemDeleteImpact(itemId, userId);
 
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: { in: ['pack-1'] } },
+        where: { userId, packId: { in: ['pack-1'] } },
       });
       expect(result.trips).toEqual([]);
     });
@@ -301,7 +311,7 @@ describe('ItemService', () => {
       const result = await service.getItemDeleteImpact(itemId, userId);
 
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: { in: ['p1', 'p2'] } },
+        where: { userId, packId: { in: ['p1', 'p2'] } },
       });
       expect(result.packs).toHaveLength(2);
       expect(result.trips).toEqual([trip1]);
