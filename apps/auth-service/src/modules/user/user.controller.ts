@@ -59,7 +59,7 @@ export class UserController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.CANCEL_ACCOUNT_DELETION, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
   @AuditLog(AuditEventType.CANCEL_ACCOUNT_DELETION)
-  async cancelAccountDeletion(@Body() body: CancelDeletionDto): Promise<void> {
+  async cancelAccountDeletion(@Body() body: CancelDeletionDto): Promise<{ user: { id: string } }> {
     return this.userService.cancelAccountDeletion(body);
   }
 }

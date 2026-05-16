@@ -211,7 +211,7 @@ export class UserService {
     if (eventData) this.userEventProvider.emitAccountDeletionRequested(eventData);
   }
 
-  async cancelAccountDeletion(body: CancelDeletionDto): Promise<void> {
+  async cancelAccountDeletion(body: CancelDeletionDto): Promise<{ user: { id: string } }> {
     const { token, password } = body;
     const hash = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -243,6 +243,8 @@ export class UserService {
 
       await this.updateUser({ id: user.id }, { isDeleted: false, deletedAt: null }, tx);
       await this.verificationTokenService.markTokenAsUsed(resetRecord.id, tx);
+
+      return { user: { id: user.id } };
     });
   }
 
