@@ -1,3 +1,4 @@
+export { WelcomeCard } from './WelcomeCard';
 export { CategoryCard } from './CategoryCard';
 export { CenteredSurfaceCard } from './CenteredSurfaceCard';
 export { CollectionCard, type CollectionCardProps } from './CollectionCard';
