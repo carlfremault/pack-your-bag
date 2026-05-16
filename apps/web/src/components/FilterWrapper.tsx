@@ -60,6 +60,7 @@ export function FilterWrapper({
             <Input
               label="Search"
               type="search"
+              autoComplete="off"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by name or description"

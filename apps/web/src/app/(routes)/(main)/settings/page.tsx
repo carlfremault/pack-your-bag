@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="flex min-h-full w-full justify-center pb-32 lg:pb-0">
+    <div className="flex w-full justify-center pb-32 lg:pb-0">
       <h1 className="sr-only">Settings</h1>
       <ErrorBoundary
         fallback={<ErrorFallback message="Failed to load preferences. Please try again later." />}

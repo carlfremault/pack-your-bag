@@ -193,7 +193,7 @@ export class AuthService {
 
   async forgotPassword(body: AuthForgotPasswordDto): Promise<void> {
     const { email } = body;
-    const user = await this.userService.getUser({ email: email.toLowerCase(), isDeleted: false });
+    const user = await this.userService.getUser({ email: email.toLowerCase() });
 
     if (!user) {
       return;
@@ -233,7 +233,7 @@ export class AuthService {
     }
 
     const user = await this.userService.getUser({ id: resetRecord.userId });
-    if (!user || user.isDeleted) {
+    if (!user) {
       throw new InvalidTokenException();
     }
 
