@@ -49,6 +49,7 @@ export default function DeleteAccountForm(props: DeleteAccountFormProps) {
           label="Password"
           name="password"
           required
+          className="mx-1"
           errorMessage={state?.fieldErrors?.password}
         />
 

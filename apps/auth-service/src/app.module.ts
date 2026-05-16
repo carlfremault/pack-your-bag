@@ -36,6 +36,11 @@ const validationSchema = Joi.object({
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
   BFF_SHARED_SECRET: Joi.string().required(),
+  INTERNAL_SERVICE_SECRET: Joi.string().required(),
+
+  // Service URLs (for cross-service cleanup after user account deletion)
+  PRODUCT_SERVICE_URL: Joi.string().uri().required(),
+  USER_DATA_SERVICE_URL: Joi.string().uri().required(),
 
   // Application
   AUTH_PORT: Joi.number().default(8001),

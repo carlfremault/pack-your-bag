@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
@@ -42,6 +43,10 @@ describe('TasksService', () => {
   const mockAuditLogService = { deleteAuditLogs: vi.fn() };
   const mockAuditLogProvider = { auditRequest: vi.fn() };
   const mockUserService = { getUsers: vi.fn(), hardDeleteUsers: vi.fn() };
+  const mockServiceClientService = {
+    cleanupProductData: vi.fn(),
+    cleanupUserData: vi.fn(),
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -56,6 +61,7 @@ describe('TasksService', () => {
         { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: AuditLogProvider, useValue: mockAuditLogProvider },
         { provide: UserService, useValue: mockUserService },
+        { provide: ServiceClientService, useValue: mockServiceClientService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -203,7 +209,7 @@ describe('TasksService', () => {
       );
     });
 
-    it('should perform hard delete when users are found', async () => {
+    it('should perform hard delete and call downstream services when users are found', async () => {
       const mockUsers = [{ id: 'user-1' }, { id: 'user-2' }];
       mockUserService.getUsers.mockResolvedValue(mockUsers);
       mockUserService.hardDeleteUsers.mockResolvedValue({
@@ -211,18 +217,112 @@ describe('TasksService', () => {
         deletedTokens: 4,
         anonymizedAuditLogs: 10,
       });
+      mockServiceClientService.cleanupProductData.mockResolvedValue({
+        deletedItems: 5,
+        deletedCategories: 2,
+        deletedLists: 3,
+        deletedPacks: 1,
+        deletedTrips: 1,
+      });
+      mockServiceClientService.cleanupUserData.mockResolvedValue({
+        deletedPreferences: 2,
+      });
 
       await service.cleanupDeletedUsers();
 
       expect(mockUserService.hardDeleteUsers).toHaveBeenCalledWith(['user-1', 'user-2']);
+      expect(mockServiceClientService.cleanupProductData).toHaveBeenCalledWith([
+        'user-1',
+        'user-2',
+      ]);
+      expect(mockServiceClientService.cleanupUserData).toHaveBeenCalledWith(['user-1', 'user-2']);
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: AuditEventType.SCHEDULED_TASK,
           severity: AuditSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining('Cleaned up 2 deleted users') as string,
+          metadata: expect.objectContaining({
+            downstream: expect.objectContaining({
+              product: expect.objectContaining({ deletedItems: 5 }) as object,
+              userData: expect.objectContaining({ deletedPreferences: 2 }) as object,
+            }) as object,
+          }) as object,
         }),
       );
+    });
+
+    it('should succeed even when downstream product cleanup fails', async () => {
+      const mockUsers = [{ id: 'user-1' }];
+      mockUserService.getUsers.mockResolvedValue(mockUsers);
+      mockUserService.hardDeleteUsers.mockResolvedValue({
+        deletedUsers: 1,
+        deletedTokens: 1,
+        anonymizedAuditLogs: 2,
+      });
+      mockServiceClientService.cleanupProductData.mockRejectedValue(
+        new Error('Product service unavailable'),
+      );
+      mockServiceClientService.cleanupUserData.mockResolvedValue({
+        deletedPreferences: 1,
+      });
+
+      await service.cleanupDeletedUsers();
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: AuditSeverity.INFO,
+          metadata: expect.objectContaining({
+            downstream: expect.objectContaining({
+              product: { error: 'Product service unavailable' },
+              userData: expect.objectContaining({ deletedPreferences: 1 }) as object,
+            }) as object,
+          }) as object,
+        }),
+      );
+    });
+
+    it('should succeed even when downstream user-data cleanup fails', async () => {
+      const mockUsers = [{ id: 'user-1' }];
+      mockUserService.getUsers.mockResolvedValue(mockUsers);
+      mockUserService.hardDeleteUsers.mockResolvedValue({
+        deletedUsers: 1,
+        deletedTokens: 1,
+        anonymizedAuditLogs: 2,
+      });
+      mockServiceClientService.cleanupProductData.mockResolvedValue({
+        deletedItems: 3,
+        deletedCategories: 1,
+        deletedLists: 1,
+        deletedPacks: 0,
+        deletedTrips: 0,
+      });
+      mockServiceClientService.cleanupUserData.mockRejectedValue(
+        new Error('User data service unavailable'),
+      );
+
+      await service.cleanupDeletedUsers();
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: AuditSeverity.INFO,
+          metadata: expect.objectContaining({
+            downstream: expect.objectContaining({
+              product: expect.objectContaining({ deletedItems: 3 }) as object,
+              userData: { error: 'User data service unavailable' },
+            }) as object,
+          }) as object,
+        }),
+      );
+    });
+
+    it('should not call downstream services when no users are deleted', async () => {
+      mockUserService.getUsers.mockResolvedValue([]);
+
+      await service.cleanupDeletedUsers();
+
+      expect(mockServiceClientService.cleanupProductData).not.toHaveBeenCalled();
+      expect(mockServiceClientService.cleanupUserData).not.toHaveBeenCalled();
     });
 
     it('should handle errors during user cleanup', async () => {
