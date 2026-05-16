@@ -15,7 +15,7 @@ export interface InputPasswordProps
 }
 
 const inputPasswordContainerClassName =
-  'border-primary-ring bg-primary-foreground rounded-md border px-3 py-2 text-sm flex items-center justify-between ';
+  'border-primary-ring bg-primary-foreground rounded-md border px-3 py-2 text-sm flex items-center justify-between focus-within:ring-info-ring focus-within:ring-2 focus-within:outline-none';
 
 export function InputPassword(props: InputPasswordProps) {
   const {
@@ -30,13 +30,13 @@ export function InputPassword(props: InputPasswordProps) {
   const errorId = useId();
 
   return (
-    <label className={inputWrapperClassName}>
+    <label className={classNames(inputWrapperClassName)}>
       <span className="text-primary flex items-center gap-1 text-[10px] font-medium uppercase">
         {label} {required && <span className={inputRequiredClassName}>*</span>}
       </span>
       <div className={classNames(inputPasswordContainerClassName, className)}>
         <input
-          className="focus:ring-info-ring flex-1 border-0 bg-transparent outline-none focus:ring-2 focus:outline-none"
+          className={classNames('flex-1 border-0 bg-transparent outline-none')}
           type={isVisible ? 'text' : 'password'}
           required={required}
           aria-invalid={!!errorMessage}
