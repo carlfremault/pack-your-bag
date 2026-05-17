@@ -105,6 +105,7 @@ type TriggerProps = {
   size?: ButtonSize;
   ariaLabel?: string;
   className?: string;
+  disabled?: boolean;
   children: React.ReactNode;
 };
 
@@ -115,6 +116,7 @@ function ModalTrigger(props: TriggerProps) {
     size = 'medium',
     ariaLabel,
     className,
+    disabled = false,
     children,
   } = props;
 
@@ -127,6 +129,7 @@ function ModalTrigger(props: TriggerProps) {
       color={color}
       variant={variant}
       size={size}
+      disabled={disabled}
       aria-label={ariaLabel}
     >
       {children}

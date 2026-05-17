@@ -1,10 +1,8 @@
 import { BsBackpack } from 'react-icons/bs';
 import { IoShirtOutline } from 'react-icons/io5';
-import { MdHiking, MdOutlineExplore, MdOutlineFormatListBulleted } from 'react-icons/md';
+import { MdHiking, MdOutlineFormatListBulleted } from 'react-icons/md';
 
-import { Button } from '../button';
-
-export function WelcomeCard() {
+export function WelcomeCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex w-full flex-1 items-center justify-center md:min-w-md">
       <div className="bg-surface border-primary-ring flex w-full max-w-md flex-col gap-6 rounded-md border p-4 shadow-sm">
@@ -64,10 +62,8 @@ export function WelcomeCard() {
           <p className="text-primary text-sm">Check off items as you pack.</p>
           <p className="text-primary text-sm">Forget nothing. Enjoy your trip.</p>
         </div>
-        <Button variant="outline" className="w-full gap-2">
-          Explore a sample trip
-          <MdOutlineExplore size={24} className="text-primary shrink-0" aria-hidden="true" />
-        </Button>
+
+        {children}
       </div>
     </div>
   );

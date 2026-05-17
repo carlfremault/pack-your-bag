@@ -158,6 +158,7 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
     sessionToSave.isLoggedIn = true;
     sessionToSave.userId = session.userId;
     sessionToSave.role = session.role;
+    sessionToSave.isGuest = session.isGuest;
     sessionToSave.accessToken = refreshed.accessToken;
     sessionToSave.refreshToken = refreshed.refreshToken;
     sessionToSave.accessTokenExpiresAt = refreshed.accessTokenExpiresAt;
