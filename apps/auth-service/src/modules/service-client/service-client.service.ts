@@ -13,6 +13,14 @@ export interface UserDataCleanupResult {
   deletedPreferences: number;
 }
 
+export interface GuestSeedResult {
+  categories: number;
+  items: number;
+  lists: number;
+  packs: number;
+  trips: number;
+}
+
 const REQUEST_TIMEOUT_MS = 30_000;
 
 @Injectable()
@@ -31,29 +39,35 @@ export class ServiceClientService {
   async cleanupProductData(userIds: string[]): Promise<ProductCleanupResult> {
     const url = `${this.productServiceUrl}/internal/cleanup/users`;
     this.logger.log(`Calling product-service cleanup for ${userIds.length} user(s)`);
-    return this.postCleanup<ProductCleanupResult>(url, userIds);
+    return this.postInternal<ProductCleanupResult>(url, { userIds });
+  }
+
+  async seedGuestData(userId: string): Promise<GuestSeedResult> {
+    const url = `${this.productServiceUrl}/internal/guest-seed`;
+    this.logger.log(`Calling product-service guest-seed for user ${userId}`);
+    return this.postInternal<GuestSeedResult>(url, { userId });
   }
 
   async cleanupUserData(userIds: string[]): Promise<UserDataCleanupResult> {
     const url = `${this.userDataServiceUrl}/internal/cleanup/users`;
     this.logger.log(`Calling user-data-service cleanup for ${userIds.length} user(s)`);
-    return this.postCleanup<UserDataCleanupResult>(url, userIds);
+    return this.postInternal<UserDataCleanupResult>(url, { userIds });
   }
 
-  private async postCleanup<T>(url: string, userIds: string[]): Promise<T> {
+  private async postInternal<T>(url: string, body: Record<string, unknown>): Promise<T> {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-internal-secret': this.internalSecret,
       },
-      body: JSON.stringify({ userIds }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 
     if (!response.ok) {
       const body = await response.text().catch(() => 'unknown');
-      throw new Error(`Cleanup request to ${url} failed with status ${response.status}: ${body}`);
+      throw new Error(`Internal request to ${url} failed with status ${response.status}: ${body}`);
     }
 
     return response.json() as Promise<T>;

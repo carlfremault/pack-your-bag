@@ -80,7 +80,7 @@ describe('ServiceClientService', () => {
       } as Response);
 
       await expect(service.cleanupProductData(userIds)).rejects.toThrow(
-        'Cleanup request to http://localhost:8002/internal/cleanup/users failed with status 500',
+        'Internal request to http://localhost:8002/internal/cleanup/users failed with status 500',
       );
     });
   });
@@ -119,7 +119,7 @@ describe('ServiceClientService', () => {
       } as Response);
 
       await expect(service.cleanupUserData(userIds)).rejects.toThrow(
-        'Cleanup request to http://localhost:8003/internal/cleanup/users failed with status 503',
+        'Internal request to http://localhost:8003/internal/cleanup/users failed with status 503',
       );
     });
   });

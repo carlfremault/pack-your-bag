@@ -1,6 +1,39 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/auth/guest-session": {
+      "post": {
+        "operationId": "AuthController_createGuestSession",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Guest session created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid BFF secret."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": []
+          }
+        ],
+        "summary": "Create a guest session with pre-seeded sample data",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/register": {
       "post": {
         "operationId": "AuthController_register",
@@ -657,29 +690,6 @@
       }
     },
     "schemas": {
-      "AuthCredentialsDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": "john.doe@example.com",
-            "format": "email",
-            "maxLength": 254,
-            "minLength": 1
-          },
-          "password": {
-            "type": "string",
-            "example": "v4l1dPassw0rd",
-            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
-            "maxLength": 128,
-            "minLength": 8
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ]
-      },
       "AuthResponseDto": {
         "type": "object",
         "properties": {
@@ -711,6 +721,10 @@
               "role": {
                 "type": "number",
                 "description": "User role"
+              },
+              "isGuest": {
+                "type": "boolean",
+                "description": "User has guest status"
               }
             }
           }
@@ -721,6 +735,29 @@
           "token_type",
           "expires_in",
           "user"
+        ]
+      },
+      "AuthCredentialsDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "example": "v4l1dPassw0rd",
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+            "maxLength": 128,
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "password"
         ]
       },
       "UpdatePasswordDto": {

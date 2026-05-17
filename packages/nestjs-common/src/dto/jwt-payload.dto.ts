@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -40,6 +41,10 @@ export class JwtPayload {
   @Expose()
   @IsEnum(JwtTokenType)
   type: JwtTokenType;
+
+  @Expose()
+  @IsBoolean()
+  isGuest: boolean;
 
   @Expose()
   @ValidateIf((o: JwtPayload) => o.type === JwtTokenType.Refresh)
