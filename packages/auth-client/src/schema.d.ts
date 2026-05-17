@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+  '/auth/guest-session': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a guest session with pre-seeded sample data */
+    post: operations['AuthController_createGuestSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/auth/register': {
     parameters: {
       query?: never;
@@ -229,15 +246,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    AuthCredentialsDto: {
-      /**
-       * Format: email
-       * @example john.doe@example.com
-       */
-      email: string;
-      /** @example v4l1dPassw0rd */
-      password: string;
-    };
     AuthResponseDto: {
       /** @description JWT Access token */
       access_token: string;
@@ -256,7 +264,18 @@ export interface components {
         id?: string;
         /** @description User role */
         role?: number;
+        /** @description User has guest status */
+        isGuest?: boolean;
       };
+    };
+    AuthCredentialsDto: {
+      /**
+       * Format: email
+       * @example john.doe@example.com
+       */
+      email: string;
+      /** @example v4l1dPassw0rd */
+      password: string;
     };
     UpdatePasswordDto: {
       /** @example v4l1dPassw0rd */
@@ -317,6 +336,40 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  AuthController_createGuestSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Guest session created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthResponseDto'];
+        };
+      };
+      /** @description Missing or invalid BFF secret. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Rate limit exceeded. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AuthController_register: {
     parameters: {
       query?: never;

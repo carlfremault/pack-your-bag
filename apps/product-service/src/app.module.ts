@@ -19,6 +19,7 @@ import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filte
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { CategoryModule } from './modules/category/category.module';
 import { CleanupModule } from './modules/cleanup/cleanup.module';
+import { GuestSeedModule } from './modules/guest-seed/guest-seed.module';
 import { HealthModule } from './modules/health/health.module';
 import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
@@ -100,6 +101,7 @@ const validationSchema = Joi.object({
     CustomThrottlerModule,
     JwtAuthModule,
     CleanupModule,
+    GuestSeedModule,
     ItemModule,
     CategoryModule,
     ListModule,

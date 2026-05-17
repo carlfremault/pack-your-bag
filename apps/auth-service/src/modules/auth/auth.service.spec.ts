@@ -14,6 +14,7 @@ import { InvalidTokenException } from '@/common/exceptions/bad-request.exception
 import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
 import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -66,6 +67,10 @@ describe('AuthService', () => {
     markTokenAsUsed: vi.fn(),
   };
 
+  const mockServiceClientService = {
+    seedGuestData: vi.fn(),
+  };
+
   const mockAuthEventProvider = {
     emitPasswordResetRequested: vi.fn(),
     emitPasswordResetConfirmed: vi.fn(),
@@ -110,6 +115,7 @@ describe('AuthService', () => {
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: VerificationTokenService, useValue: mockVerificationTokenService },
         { provide: UserService, useValue: mockUserService },
+        { provide: ServiceClientService, useValue: mockServiceClientService },
         { provide: AuthEventProvider, useValue: mockAuthEventProvider },
       ],
     }).compile();
@@ -178,9 +184,77 @@ describe('AuthService', () => {
     });
   });
 
+  describe('createGuestSession', () => {
+    const expectedRawToken = Buffer.from('a'.repeat(64), 'hex').toString('hex');
+
+    beforeEach(() => {
+      mockedRandomBytes.mockImplementation(() => expectedRawToken);
+      mockUserService.createUser.mockResolvedValue({ id: 'guest-uuid', roleId: 1, isGuest: true });
+      mockServiceClientService.seedGuestData.mockResolvedValue({
+        categories: 4,
+        items: 14,
+        lists: 2,
+        packs: 1,
+        trips: 1,
+      });
+    });
+
+    it('should create a guest user with correct properties and return tokens with isGuest true', async () => {
+      const result = await service.createGuestSession();
+
+      expect(mockUserService.createUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: expect.stringMatching(/^guest-.+@guest\.local$/) as string,
+          password: expect.toSatisfy((hash: string) => hash.startsWith('$2')) as string,
+          role: { connect: { id: 1 } },
+          isGuest: true,
+          isEmailVerified: true,
+          emailVerifiedAt: expect.any(Date) as Date,
+          lastActiveAt: expect.any(Date) as Date,
+        }),
+      );
+      expect(mockServiceClientService.seedGuestData).toHaveBeenCalledWith('guest-uuid');
+      expect(result).toEqual({
+        access_token: 'mock-jwt-token',
+        refresh_token: 'mock-jwt-token',
+        token_type: 'Bearer',
+        expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
+        user: { id: 'guest-uuid', role: 1, isGuest: true },
+      });
+    });
+
+    it('should return valid tokens even when seedGuestData fails', async () => {
+      mockServiceClientService.seedGuestData.mockRejectedValue(new Error('Product service down'));
+
+      const result = await service.createGuestSession();
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          access_token: 'mock-jwt-token',
+          user: { id: 'guest-uuid', role: 1, isGuest: true },
+        }),
+      );
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Failed to seed guest data',
+        expect.objectContaining({ userId: 'guest-uuid', error: 'Product service down' }),
+      );
+    });
+
+    it('should log with String(error) when seedGuestData throws a non-Error value', async () => {
+      mockServiceClientService.seedGuestData.mockRejectedValue('raw string failure');
+
+      await service.createGuestSession();
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Failed to seed guest data',
+        expect.objectContaining({ error: 'raw string failure' }),
+      );
+    });
+  });
+
   describe('login', () => {
     const userDto = { email: 'TESTEMAIL@test.com', password: 'validPassword123' };
-    const mockUser = { id: 'uuid-123', roleId: 1 };
+    const mockUser = { id: 'uuid-123', roleId: 1, isGuest: false };
 
     it('should normalize input and return tokens for valid credentials', async () => {
       mockUserService.getUser.mockResolvedValue({
@@ -211,7 +285,7 @@ describe('AuthService', () => {
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
         expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        user: { id: mockUser.id, role: mockUser.roleId, isGuest: false },
       });
     });
 
@@ -269,7 +343,7 @@ describe('AuthService', () => {
         userId: refreshTokenUser.userId,
       };
 
-      const mockUser = { id: refreshTokenUser.userId, roleId: 1 };
+      const mockUser = { id: refreshTokenUser.userId, roleId: 1, isGuest: false };
       mockUserService.getUser.mockResolvedValue(mockUser);
       mockRefreshTokenService.getRefreshToken.mockResolvedValue(mockRefreshToken);
 
@@ -302,7 +376,7 @@ describe('AuthService', () => {
           refresh_token: 'mock-jwt-token',
           token_type: 'Bearer',
           expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-          user: { id: mockUser.id, role: mockUser.roleId },
+          user: { id: mockUser.id, role: mockUser.roleId, isGuest: false },
         },
       });
     });
@@ -408,7 +482,7 @@ describe('AuthService', () => {
         userId: refreshTokenUser.userId,
       };
 
-      const mockUser = { id: refreshTokenUser.userId, roleId: 1 };
+      const mockUser = { id: refreshTokenUser.userId, roleId: 1, isGuest: false };
       mockUserService.getUser.mockResolvedValue(mockUser);
 
       const mockRevokedToken = {
@@ -433,9 +507,63 @@ describe('AuthService', () => {
           refresh_token: 'mock-jwt-token',
           token_type: 'Bearer',
           expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-          user: { id: mockUser.id, role: mockUser.roleId },
+          user: { id: mockUser.id, role: mockUser.roleId, isGuest: false },
         },
         auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
+      });
+    });
+
+    describe('guest user', () => {
+      const inSevenDays = new Date(Date.now() + 7 * MS_PER_DAY);
+
+      const guestMockUser = { id: refreshTokenUser.userId, roleId: 1, isGuest: true };
+      const guestMockRefreshToken = {
+        id: 'token-uuid-456',
+        family: refreshTokenUser.tokenFamilyId,
+        isRevoked: false,
+        expiresAt: inSevenDays,
+        userId: refreshTokenUser.userId,
+      };
+
+      it('should update lastActiveAt for a guest user on successful refresh', async () => {
+        mockUserService.getUser.mockResolvedValue(guestMockUser);
+        mockRefreshTokenService.getRefreshToken.mockResolvedValue(guestMockRefreshToken);
+        mockUserService.updateUser.mockResolvedValue(undefined);
+
+        const result = await service.refreshToken(refreshTokenUser);
+
+        expect(mockUserService.updateUser).toHaveBeenCalledWith(
+          { id: refreshTokenUser.userId },
+          { lastActiveAt: expect.any(Date) as Date },
+        );
+        expect(result.data.user).toEqual(expect.objectContaining({ isGuest: true }));
+      });
+
+      it('should not throw when lastActiveAt update fails for a guest user', async () => {
+        mockUserService.getUser.mockResolvedValue(guestMockUser);
+        mockRefreshTokenService.getRefreshToken.mockResolvedValue(guestMockRefreshToken);
+        mockUserService.updateUser.mockRejectedValueOnce(new Error('DB write failed'));
+
+        const result = await service.refreshToken(refreshTokenUser);
+
+        expect(result.data).toEqual(expect.objectContaining({ access_token: 'mock-jwt-token' }));
+
+        await new Promise(process.nextTick);
+
+        expect(loggerWarnSpy).toHaveBeenCalledWith(
+          'Failed to update lastActiveAt for guest',
+          expect.objectContaining({ userId: refreshTokenUser.userId }),
+        );
+      });
+
+      it('should not update lastActiveAt for a non-guest user on refresh', async () => {
+        const nonGuestMockUser = { id: refreshTokenUser.userId, roleId: 1, isGuest: false };
+        mockUserService.getUser.mockResolvedValue(nonGuestMockUser);
+        mockRefreshTokenService.getRefreshToken.mockResolvedValue(guestMockRefreshToken);
+
+        await service.refreshToken(refreshTokenUser);
+
+        expect(mockUserService.updateUser).not.toHaveBeenCalled();
       });
     });
   });
@@ -444,7 +572,7 @@ describe('AuthService', () => {
     it('should call updatePassword and issue a new token pair', async () => {
       const userId = 'user-uuid-123';
       const body = { currentPassword: 'currentPassword123', newPassword: 'newPassword123' };
-      const mockUser = { id: userId, roleId: 1 };
+      const mockUser = { id: userId, roleId: 1, isGuest: false };
       mockUserService.updatePassword.mockResolvedValue(mockUser);
 
       const result = await service.updatePasswordAndReauthenticate(userId, body);
@@ -455,7 +583,7 @@ describe('AuthService', () => {
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
         expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        user: { id: mockUser.id, role: mockUser.roleId, isGuest: false },
       });
     });
   });
@@ -884,6 +1012,7 @@ describe('AuthService', () => {
       const mockUser = {
         id: 'uuid-123',
         roleId: 1,
+        isGuest: false,
         password: hashedPassword,
         isEmailVerified: true,
       };
@@ -924,7 +1053,7 @@ describe('AuthService', () => {
         refresh_token: 'mock-jwt-token',
         token_type: 'Bearer',
         expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
-        user: { id: mockUser.id, role: mockUser.roleId },
+        user: { id: mockUser.id, role: mockUser.roleId, isGuest: false },
       });
     });
   });

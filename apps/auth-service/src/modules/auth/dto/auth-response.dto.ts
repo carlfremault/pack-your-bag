@@ -25,8 +25,9 @@ export class AuthResponseDto {
     properties: {
       id: { type: 'string', description: 'User ID' },
       role: { type: 'number', description: 'User role' },
+      isGuest: { type: 'boolean', description: 'User has guest status' },
     },
   })
   @Expose()
-  readonly user: { id: string; role: number };
+  readonly user: { id: string; role: number; isGuest: boolean };
 }

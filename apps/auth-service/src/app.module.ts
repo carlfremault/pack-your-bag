@@ -84,12 +84,15 @@ const validationSchema = Joi.object({
   AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_MS: Joi.number().default(3600000),
 
   // Logging
-  AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
-  AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
-  AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
+  AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
+  AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
+  AUTH_AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
 
   // User
   AUTH_USER_DELETE_RETENTION_DAYS: Joi.number().min(1).default(30),
+
+  // Guest
+  AUTH_GUEST_SESSION_TTL_HOURS: Joi.number().min(1).default(24),
 
   // Sentry
   SENTRY_DSN: Joi.string()

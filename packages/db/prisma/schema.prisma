@@ -36,6 +36,8 @@ model User {
   deletedAt           DateTime?
   isEmailVerified     Boolean   @default(false)
   emailVerifiedAt     DateTime?
+  isGuest             Boolean   @default(false)
+  lastActiveAt        DateTime?
 
   @@schema("app_auth")
 }
@@ -152,6 +154,7 @@ enum AuditEventType {
   CANCEL_ACCOUNT_DELETION
   EMAIL_VERIFIED
   EMAIL_VERIFICATION_RESENT
+  GUEST_SESSION_CREATED
   @@schema("app_auth")
 }
 

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
-import { MS_PER_DAY } from '@repo/nestjs-common';
+import { MS_PER_DAY, MS_PER_HOUR } from '@repo/nestjs-common';
 
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
@@ -21,6 +21,7 @@ export class TasksService {
   private readonly criticalLogsRetentionDays: number;
   private readonly deletedUsersRetentionDays: number;
   private readonly verificationTokenRetentionDays: number;
+  private readonly guestSessionTtlHours: number;
 
   constructor(
     private readonly refreshTokenService: RefreshTokenService,
@@ -34,12 +35,14 @@ export class TasksService {
     this.refreshTokenRetentionDays = this.configService.getOrThrow(
       'AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS',
     );
-    this.infoLogsRetentionDays = this.configService.getOrThrow('AUDIT_LOG_INFO_RETENTION_DAYS');
+    this.infoLogsRetentionDays = this.configService.getOrThrow(
+      'AUTH_AUDIT_LOG_INFO_RETENTION_DAYS',
+    );
     this.errorWarnLogsRetentionDays = this.configService.getOrThrow(
-      'AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
+      'AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
     );
     this.criticalLogsRetentionDays = this.configService.getOrThrow(
-      'AUDIT_LOG_CRITICAL_RETENTION_DAYS',
+      'AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS',
     );
     this.deletedUsersRetentionDays = this.configService.getOrThrow(
       'AUTH_USER_DELETE_RETENTION_DAYS',
@@ -47,6 +50,7 @@ export class TasksService {
     this.verificationTokenRetentionDays = this.configService.getOrThrow(
       'AUTH_VERIFICATION_TOKEN_RETENTION_DAYS',
     );
+    this.guestSessionTtlHours = this.configService.getOrThrow('AUTH_GUEST_SESSION_TTL_HOURS');
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -242,6 +246,63 @@ export class TasksService {
         severity: AuditSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Verification token cleanup failed: ${errorMessage}`,
+      });
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async cleanupExpiredGuests() {
+    this.logger.log('Starting cleanup of expired guest sessions');
+
+    const guestCutoff = new Date(Date.now() - this.guestSessionTtlHours * MS_PER_HOUR);
+
+    try {
+      let auditMessage: string;
+      let metadata: Prisma.InputJsonValue;
+
+      const expiredGuests = await this.userService.getUsers({
+        isGuest: true,
+        lastActiveAt: { lt: guestCutoff },
+      });
+
+      if (!expiredGuests || expiredGuests.length === 0) {
+        auditMessage = 'No expired guest sessions to clean up';
+        metadata = { guestCutoff: guestCutoff.toISOString() };
+      } else {
+        const userIds = expiredGuests.map((u) => u.id);
+        const result = await this.userService.hardDeleteUsers(userIds);
+
+        auditMessage = `Cleaned up ${result.deletedUsers} expired guest${result.deletedUsers === 1 ? '' : 's'}, ${result.deletedTokens} token${result.deletedTokens === 1 ? '' : 's'}, and anonymized ${result.anonymizedAuditLogs} audit log${result.anonymizedAuditLogs === 1 ? '' : 's'}, last active before ${guestCutoff.toISOString()}`;
+
+        metadata = {
+          ...result,
+          guestCutoff: guestCutoff.toISOString(),
+        };
+
+        const downstreamResult = await this.cleanupDownstreamServices(userIds);
+        metadata = { ...metadata, downstream: downstreamResult };
+      }
+
+      this.logger.log(auditMessage);
+
+      this.auditLogProvider.auditRequest({
+        eventType: AuditEventType.SCHEDULED_TASK,
+        severity: AuditSeverity.INFO,
+        statusCode: HttpStatus.NO_CONTENT,
+        message: auditMessage,
+        metadata,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(`Failed to cleanup expired guest sessions: ${errorMessage}`, errorStack);
+
+      this.auditLogProvider.auditRequest({
+        eventType: AuditEventType.SCHEDULED_TASK,
+        severity: AuditSeverity.ERROR,
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Guest session cleanup failed: ${errorMessage}`,
       });
     }
   }

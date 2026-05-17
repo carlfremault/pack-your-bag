@@ -7,6 +7,7 @@ import { JwtRefreshStrategy } from '@/common/strategies/jwt-refresh.strategy';
 import { AuditLogModule } from '@/modules/audit-log/audit-log.module';
 import { EmailModule } from '@/modules/email/email.module';
 import { RefreshTokenModule } from '@/modules/refresh-token/refresh-token.module';
+import { ServiceClientModule } from '@/modules/service-client/service-client.module';
 import { UserModule } from '@/modules/user/user.module';
 import { VerificationTokenModule } from '@/modules/verification-token/verification-token.module';
 
@@ -21,6 +22,7 @@ import { AuthEventProvider } from './auth-event.provider';
     UserModule,
     EmailModule,
     RefreshTokenModule,
+    ServiceClientModule,
     VerificationTokenModule,
     PassportModule,
     JwtModule.registerAsync({
