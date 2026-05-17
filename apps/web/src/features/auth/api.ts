@@ -20,6 +20,25 @@ import {
   VerifyEmailBody,
 } from './types';
 
+export async function createGuestSession(): Promise<LoginResponse> {
+  const authClient = await getPublicAuthClient();
+
+  try {
+    const { data, error, response } = await authClient.POST('/auth/guest-session', {
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) {
+      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
+    }
+    if (!data) throw new ApiError('No data returned', 500);
+    return data as LoginResponse;
+  } catch (e) {
+    if (e instanceof ApiError) throw e;
+    throw new ApiError('Authentication service unavailable', 503);
+  }
+}
+
 export async function login(body: LoginBody): Promise<LoginResponse> {
   const authClient = await getPublicAuthClient();
 

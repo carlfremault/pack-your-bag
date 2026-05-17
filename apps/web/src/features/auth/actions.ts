@@ -7,6 +7,7 @@ import { getSession } from '@/lib/session';
 
 import {
   cancelDeletion,
+  createGuestSession,
   deleteAccount,
   login,
   logout,
@@ -39,11 +40,32 @@ export async function createSessionFromLoginResponse(response: LoginResponse): P
   session.isLoggedIn = true;
   session.userId = response.user.id;
   session.role = response.user.role;
+  session.isGuest =
+    (response.user as LoginResponse['user'] & { isGuest?: boolean }).isGuest ?? false;
   session.accessToken = response.access_token;
   session.refreshToken = response.refresh_token;
   session.accessTokenExpiresAt = Math.floor(Date.now() / 1000) + response.expires_in;
   session.pendingVerificationEmail = undefined;
   await session.save();
+}
+
+// ============================================
+// GUEST SESSION
+// ============================================
+
+export type GuestSessionState = {
+  formError?: string;
+} | null;
+
+export async function guestSessionAction(): Promise<GuestSessionState> {
+  try {
+    const data = await createGuestSession();
+    await createSessionFromLoginResponse(data);
+  } catch (e) {
+    return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
+  }
+
+  redirect('/items');
 }
 
 // ============================================
