@@ -2,6 +2,7 @@
 
 import toast from 'react-hot-toast';
 
+import * as Sentry from '@sentry/nextjs';
 import {
   type DehydratedState,
   environmentManager,
@@ -28,6 +29,7 @@ function onQueryError(error: Error) {
     window.location.replace('/login?reason=session_expired');
     return;
   }
+  Sentry.captureException(error);
   toast.error(extractErrorMessage(error));
 }
 
@@ -46,6 +48,7 @@ function onMutationError(error: Error) {
     return;
   }
   if (isFieldLevelError(error)) return;
+  Sentry.captureException(error);
   toast.error(extractErrorMessage(error));
 }
 

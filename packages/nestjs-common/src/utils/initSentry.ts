@@ -5,10 +5,10 @@ import * as Sentry from '@sentry/nestjs';
  *
  * @param serviceName - The name of the service to initialize Sentry for.
  */
-export function initSentry(serviceName: string): void {
-  if (process.env.SENTRY_DSN) {
+export function initSentry(serviceName: string, dsn: string | undefined): void {
+  if (dsn) {
     Sentry.init({
-      dsn: process.env.SENTRY_DSN,
+      dsn,
       environment: process.env.NODE_ENV,
 
       beforeSend(event) {

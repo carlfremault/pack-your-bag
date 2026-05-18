@@ -1,19 +1,27 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Inter } from 'next/font/google';
 
 import { Button } from '@repo/react-common/button';
 import { LinkButton } from '@repo/react-common/button';
 import { UnAuthenticatedHeader } from '@repo/react-common/header';
 
+import * as Sentry from '@sentry/nextjs';
+
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <html lang="en" className={inter.variable}>
       <body>

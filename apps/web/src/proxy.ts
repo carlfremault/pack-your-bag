@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
+import * as Sentry from '@sentry/nextjs';
 import { getIronSession } from 'iron-session';
 
 import { getAuthConfig } from '@/lib/clients/auth-config';
@@ -52,7 +53,8 @@ async function doRefresh(refreshToken: string): Promise<RefreshResult> {
       refreshToken: body.refresh_token as string,
       accessTokenExpiresAt: Math.floor(Date.now() / 1000) + (body.expires_in as number),
     };
-  } catch {
+  } catch (e) {
+    Sentry.captureException(e);
     return { kind: 'transient' };
   }
 }
@@ -89,7 +91,9 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean, expired = tru
   return response;
 }
 
-export default async function middleware(req: NextRequest): Promise<NextResponse> {
+export default Sentry.wrapMiddlewareWithSentry(async function middleware(
+  req: NextRequest,
+): Promise<NextResponse> {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const response = await handleRequest(req, nonce);
   const cspHeader =
@@ -98,7 +102,7 @@ export default async function middleware(req: NextRequest): Promise<NextResponse
       : 'Content-Security-Policy';
   response.headers.set(cspHeader, buildCsp(nonce));
   return response;
-}
+});
 
 async function handleRequest(req: NextRequest, nonce: string): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
@@ -173,14 +177,26 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
+function getSentryHost(): string | null {
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+  if (!dsn) return null;
+  try {
+    return new URL(dsn).host;
+  } catch {
+    return null;
+  }
+}
+
 function buildCsp(nonce: string): string {
+  const sentryHost = getSentryHost();
+  const connectSrc = ["'self'", ...(sentryHost ? [sentryHost] : [])].join(' ');
   return [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data: blob:`,
     `font-src 'self'`,
-    `connect-src 'self'`,
+    `connect-src ${connectSrc}`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

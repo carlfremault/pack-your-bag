@@ -2,6 +2,8 @@
 
 import { redirect } from 'next/navigation';
 
+import * as Sentry from '@sentry/nextjs';
+
 import { ApiError } from '@/lib/errors';
 import { getSession } from '@/lib/session';
 
@@ -35,6 +37,12 @@ import { LoginResponse } from './types';
 // HELPER FUNCTIONS
 // ============================================
 
+function captureActionError(e: unknown) {
+  if (!(e instanceof ApiError) || e.status >= 500) {
+    Sentry.captureException(e);
+  }
+}
+
 export async function createSessionFromLoginResponse(response: LoginResponse): Promise<void> {
   const session = await getSession();
   session.isLoggedIn = true;
@@ -62,6 +70,7 @@ export async function guestSessionAction(): Promise<GuestSessionState> {
     const data = await createGuestSession();
     await createSessionFromLoginResponse(data);
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
   }
 
@@ -113,6 +122,7 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
       await session.save();
       redirect('/email-not-verified');
     }
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
   }
 
@@ -198,6 +208,7 @@ export async function registerAction(
   try {
     await register({ email, password });
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
   }
 
@@ -246,6 +257,7 @@ export async function passwordForgottenAction(
   try {
     await passwordForgotten(parsed.data);
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
   }
 
@@ -290,6 +302,7 @@ export async function resendVerificationEmailAction(
   try {
     await resendVerificationEmail(parsed.data);
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong', values };
   }
 
@@ -343,6 +356,7 @@ export async function updatePasswordAction(
     const data = await updatePassword({ currentPassword, newPassword });
     await createSessionFromLoginResponse(data);
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
   }
 
@@ -392,6 +406,7 @@ export async function resetPasswordAction(
   try {
     await resetPassword({ token, password, locale });
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
   }
 
@@ -436,6 +451,7 @@ export async function deleteAccountAction(
   try {
     await deleteAccount(parsed.data);
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
   }
 
@@ -481,6 +497,7 @@ export async function cancelAccountDeletionAction(
   try {
     await cancelDeletion(parsed.data);
   } catch (e) {
+    captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
   }
 
