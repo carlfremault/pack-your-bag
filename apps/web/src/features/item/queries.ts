@@ -1,13 +1,15 @@
 import {
   useMutation,
+  useQuery,
   useQueryClient,
+  UseQueryResult,
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 
 import { toHttpError } from '@/utils/http-error';
 
-import { CreateItemBody, Item, UpdateItemBody } from './types';
+import { CreateItemBody, Item, ItemDeleteImpact, UpdateItemBody } from './types';
 
 // -------------------------------
 // Fetch all items
@@ -134,6 +136,40 @@ const useUpdateItem = () => {
   });
 };
 
+// -------------------------------------------
+// Get item delete impact
+// -------------------------------------------
+
+const fetchItemDeleteImpact = async (id: string): Promise<ItemDeleteImpact> => {
+  const res = await fetch(`/api/item/${id}/delete-impact`);
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useItemDeleteImpact = (id: string): UseQueryResult<ItemDeleteImpact> => {
+  return useQuery({
+    queryKey: ['deleteImpact', 'item', id],
+    queryFn: () => fetchItemDeleteImpact(id),
+    enabled: !!id,
+    select: (data) => {
+      const lists = data.lists ?? [];
+      const packs = data.packs ?? [];
+      const trips = data.trips ?? [];
+
+      return {
+        item: data.item,
+        lists: [...lists].sort((a, b) => a.name.localeCompare(b.name)),
+        packs: [...packs].sort((a, b) => a.name.localeCompare(b.name)),
+        trips: [...trips].sort((a, b) => a.name.localeCompare(b.name)),
+      };
+    },
+  });
+};
+
 // -------------------------------
 // Delete item
 // -------------------------------
@@ -174,4 +210,4 @@ const useDeleteItem = () => {
   });
 };
 
-export { useAllItems, useCreateItem, useUpdateItem, useDeleteItem };
+export { useAllItems, useCreateItem, useUpdateItem, useItemDeleteImpact, useDeleteItem };

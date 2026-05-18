@@ -248,7 +248,7 @@ describe('UserService', () => {
       'AUTH_USER_DELETE_RETENTION_DAYS',
     ) as number;
 
-    const mockUser = { isDeleted: true, deletedAt: new Date() } as User;
+    const mockUser = { id: 'user-123', isDeleted: true, deletedAt: new Date() } as User;
     const mockResetRecord = {
       id: 'token-123',
       userId: 'user-123',
@@ -262,7 +262,8 @@ describe('UserService', () => {
       mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
       mockedPrismaUser.findUnique.mockResolvedValue(mockUser);
 
-      await service.cancelAccountDeletion(dto);
+      const result = await service.cancelAccountDeletion(dto);
+      expect(result).toEqual({ user: { id: 'user-123' } });
 
       expect(mockPrismaService.$transaction).toHaveBeenCalled();
       expect(mockVerificationTokenService.getVerificationToken).toHaveBeenCalledWith(
@@ -311,7 +312,7 @@ describe('UserService', () => {
       await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
     });
 
-    it('should throw InvalidTokenException if the password does not match', async () => {
+    it('should throw UnauthorizedException if the password does not match', async () => {
       mockVerificationTokenService.getVerificationToken.mockResolvedValue(mockResetRecord);
       mockedPrismaUser.findUnique.mockResolvedValue({
         id: 'user-123',
@@ -320,7 +321,7 @@ describe('UserService', () => {
 
       mockedCompare.mockResolvedValueOnce(false as never);
 
-      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(InvalidTokenException);
+      await expect(service.cancelAccountDeletion(dto)).rejects.toThrow(UnauthorizedException);
     });
   });
 

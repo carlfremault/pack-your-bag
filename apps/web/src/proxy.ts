@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
+import * as Sentry from '@sentry/nextjs';
 import { getIronSession } from 'iron-session';
 
 import { getAuthConfig } from '@/lib/clients/auth-config';
@@ -52,7 +53,8 @@ async function doRefresh(refreshToken: string): Promise<RefreshResult> {
       refreshToken: body.refresh_token as string,
       accessTokenExpiresAt: Math.floor(Date.now() / 1000) + (body.expires_in as number),
     };
-  } catch {
+  } catch (e) {
+    Sentry.captureException(e);
     return { kind: 'transient' };
   }
 }
@@ -89,7 +91,20 @@ function handleAuthFailure(req: NextRequest, clearCookie: boolean, expired = tru
   return response;
 }
 
-export default async function middleware(req: NextRequest) {
+export default Sentry.wrapMiddlewareWithSentry(async function middleware(
+  req: NextRequest,
+): Promise<NextResponse> {
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const response = await handleRequest(req, nonce);
+  const cspHeader =
+    process.env.NODE_ENV === 'development'
+      ? 'Content-Security-Policy-Report-Only'
+      : 'Content-Security-Policy';
+  response.headers.set(cspHeader, buildCsp(nonce));
+  return response;
+});
+
+async function handleRequest(req: NextRequest, nonce: string): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
 
   // Internal auth API routes manage their own session — skip all checks.
@@ -105,9 +120,10 @@ export default async function middleware(req: NextRequest) {
 
   if (isPublic) {
     // Redirect already-authenticated users away from auth-related pages.
-    return session.isLoggedIn && shouldRedirectIfAuthed
-      ? NextResponse.redirect(new URL('/items', req.url))
-      : NextResponse.next();
+    if (session.isLoggedIn && shouldRedirectIfAuthed) {
+      return NextResponse.redirect(new URL('/items', req.url));
+    }
+    return NextResponse.next({ request: { headers: withNonce(req, nonce) } });
   }
 
   // ── Protected route ─────────────────────────────────────────────────────────
@@ -137,7 +153,7 @@ export default async function middleware(req: NextRequest) {
     // Build response with:
     //   1. Modified request headers so downstream handlers see the new token.
     //   2. The refreshed session cookie so the browser gets it too.
-    const requestHeaders = new Headers(req.headers);
+    const requestHeaders = withNonce(req, nonce);
     requestHeaders.set(INTERNAL_TOKEN_HEADER, refreshed.accessToken);
     const response = NextResponse.next({ request: { headers: requestHeaders } });
 
@@ -146,6 +162,7 @@ export default async function middleware(req: NextRequest) {
     sessionToSave.isLoggedIn = true;
     sessionToSave.userId = session.userId;
     sessionToSave.role = session.role;
+    sessionToSave.isGuest = session.isGuest;
     sessionToSave.accessToken = refreshed.accessToken;
     sessionToSave.refreshToken = refreshed.refreshToken;
     sessionToSave.accessTokenExpiresAt = refreshed.accessTokenExpiresAt;
@@ -155,9 +172,42 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Token is still fresh — inject it as a header for downstream use.
-  const requestHeaders = new Headers(req.headers);
+  const requestHeaders = withNonce(req, nonce);
   requestHeaders.set(INTERNAL_TOKEN_HEADER, session.accessToken);
   return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+function getSentryHost(): string | null {
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+  if (!dsn) return null;
+  try {
+    return new URL(dsn).host;
+  } catch {
+    return null;
+  }
+}
+
+function buildCsp(nonce: string): string {
+  const sentryHost = getSentryHost();
+  const connectSrc = ["'self'", ...(sentryHost ? [sentryHost] : [])].join(' ');
+  return [
+    `default-src 'self'`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    `style-src 'self' 'unsafe-inline'`,
+    `img-src 'self' data: blob:`,
+    `font-src 'self'`,
+    `connect-src ${connectSrc}`,
+    `object-src 'none'`,
+    `base-uri 'self'`,
+    `form-action 'self'`,
+    `frame-ancestors 'none'`,
+  ].join('; ');
+}
+
+function withNonce(req: NextRequest, nonce: string): Headers {
+  const headers = new Headers(req.headers);
+  headers.set('x-nonce', nonce);
+  return headers;
 }
 
 export const config = {

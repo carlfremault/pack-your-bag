@@ -43,7 +43,7 @@ export const getNextJsConfig = (appDir) => [
     plugins: {
       'react-hooks': pluginReactHooks,
     },
-    settings: { react: { version: 'detect' } },
+    settings: { react: { version: '19' } },
     rules: {
       ...pluginReactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',

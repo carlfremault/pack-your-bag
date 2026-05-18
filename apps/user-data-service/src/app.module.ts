@@ -7,6 +7,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import {
   BffGuardModule,
   CustomThrottlerModule,
+  InternalGuardModule,
   JwtAuthModule,
   RequestIdMiddleware,
 } from '@repo/nestjs-common';
@@ -15,6 +16,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
 import type { Request } from 'express';
 import Joi from 'joi';
 
+import { CleanupModule } from './cleanup/cleanup.module';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { MongooseExceptionFilter } from './common/filters/mongoose-exception.filter';
 import { HealthModule } from './health/health.module';
@@ -27,6 +29,7 @@ const validationSchema = Joi.object({
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
   BFF_SHARED_SECRET: Joi.string().required(),
+  INTERNAL_SERVICE_SECRET: Joi.string().required(),
 
   // Application
   UDS_PORT: Joi.number().default(8003),
@@ -46,10 +49,17 @@ const validationSchema = Joi.object({
   }),
 
   // Sentry
-  SENTRY_DSN: Joi.string()
+  DEV_SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
-      is: Joi.valid('production', 'development'),
+      is: Joi.valid('development'),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+  USER_DATA_SENTRY_DSN: Joi.string()
+    .uri()
+    .when('NODE_ENV', {
+      is: Joi.valid('production'),
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -85,8 +95,10 @@ const validationSchema = Joi.object({
       }),
     }),
     BffGuardModule,
+    InternalGuardModule,
     CustomThrottlerModule,
     JwtAuthModule,
+    CleanupModule,
     PreferencesModule,
     HealthModule,
   ],

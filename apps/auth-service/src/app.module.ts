@@ -36,6 +36,11 @@ const validationSchema = Joi.object({
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
   BFF_SHARED_SECRET: Joi.string().required(),
+  INTERNAL_SERVICE_SECRET: Joi.string().required(),
+
+  // Service URLs (for cross-service cleanup after user account deletion)
+  PRODUCT_SERVICE_URL: Joi.string().uri().required(),
+  USER_DATA_SERVICE_URL: Joi.string().uri().required(),
 
   // Application
   AUTH_PORT: Joi.number().default(8001),
@@ -79,18 +84,28 @@ const validationSchema = Joi.object({
   AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_MS: Joi.number().default(3600000),
 
   // Logging
-  AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
-  AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
-  AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
+  AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
+  AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
+  AUTH_AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
 
   // User
   AUTH_USER_DELETE_RETENTION_DAYS: Joi.number().min(1).default(30),
 
+  // Guest
+  AUTH_GUEST_SESSION_TTL_HOURS: Joi.number().min(1).default(24),
+
   // Sentry
-  SENTRY_DSN: Joi.string()
+  DEV_SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
-      is: Joi.valid('production', 'development'),
+      is: Joi.valid('development'),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+  AUTH_SENTRY_DSN: Joi.string()
+    .uri()
+    .when('NODE_ENV', {
+      is: Joi.valid('production'),
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),

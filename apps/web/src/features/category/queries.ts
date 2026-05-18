@@ -165,9 +165,16 @@ const fetchCategoryDeleteImpact = async (id: string): Promise<CategoryDeleteImpa
 
 const useCategoryDeleteImpact = (id: string): UseQueryResult<CategoryDeleteImpact> => {
   return useQuery({
-    queryKey: ['categoryDeleteImpact', id],
+    queryKey: ['deleteImpact', 'category', id],
     queryFn: () => fetchCategoryDeleteImpact(id),
     enabled: !!id,
+    select: (data) => {
+      const items = data.items ?? [];
+      return {
+        category: data.category,
+        items: [...items].sort((a, b) => a.name.localeCompare(b.name)),
+      };
+    },
   });
 };
 

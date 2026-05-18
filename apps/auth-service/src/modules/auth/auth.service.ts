@@ -23,6 +23,7 @@ import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
@@ -59,6 +60,7 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly verificationTokenService: VerificationTokenService,
     private readonly userService: UserService,
+    private readonly serviceClientService: ServiceClientService,
     private readonly authEventProvider: AuthEventProvider,
   ) {
     this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
@@ -84,6 +86,39 @@ export class AuthService {
   // ============================================
   // BASIC ROUTE HANDLERS
   // ============================================
+
+  async createGuestSession(): Promise<AuthResponseDto> {
+    const uuid = uuidv7();
+    const guestEmail = `guest-${uuid}@guest.local`;
+    const randomPassword = crypto.randomBytes(32).toString('hex');
+    const hashedPassword = await bcrypt.hash(randomPassword, this.bcryptSaltRounds);
+
+    const data: Prisma.UserCreateInput = {
+      id: uuid,
+      email: guestEmail,
+      password: hashedPassword,
+      role: {
+        connect: { id: this.defaultUserRoleId },
+      },
+      isEmailVerified: true,
+      emailVerifiedAt: new Date(),
+      isGuest: true,
+      lastActiveAt: new Date(),
+    };
+
+    const newUser = await this.userService.createUser(data);
+
+    try {
+      await this.serviceClientService.seedGuestData(newUser.id);
+    } catch (error) {
+      this.logger.error('Failed to seed guest data', {
+        userId: newUser.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return this.issueRefreshToken(newUser.id, newUser.roleId, true);
+  }
 
   async register(body: AuthCredentialsDto): Promise<void> {
     const { email, password } = body;
@@ -125,7 +160,7 @@ export class AuthService {
 
     DeletedUserHelper.checkDeletedUser(user, this.deletedUserRetentionDays);
 
-    return this.issueRefreshToken(user.id, user.roleId);
+    return this.issueRefreshToken(user.id, user.roleId, user.isGuest);
   }
 
   async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<RefreshTokenResult> {
@@ -133,6 +168,15 @@ export class AuthService {
     const user = await this.userService.getUser({ id: userId, isDeleted: false });
     if (!user) {
       throw new UnauthorizedException('Access Denied');
+    }
+
+    if (user.isGuest) {
+      this.userService.updateUser({ id: userId }, { lastActiveAt: new Date() }).catch((err) =>
+        this.logger.warn('Failed to update lastActiveAt for guest', {
+          userId,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
     }
 
     const storedToken = await this.refreshTokenService.getRefreshToken({ id: tokenId });
@@ -163,6 +207,7 @@ export class AuthService {
       const data = await this.generateJwtResponse(
         userId,
         user.roleId,
+        user.isGuest,
         newerValidToken.id,
         newerValidToken.family,
       );
@@ -170,7 +215,15 @@ export class AuthService {
       return { data, auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION };
     }
 
-    return { data: await this.issueRefreshToken(user.id, user.roleId, tokenId, tokenFamilyId) };
+    return {
+      data: await this.issueRefreshToken(
+        user.id,
+        user.roleId,
+        user.isGuest,
+        tokenId,
+        tokenFamilyId,
+      ),
+    };
   }
 
   async logout(user: RefreshTokenUser): Promise<void> {
@@ -193,7 +246,7 @@ export class AuthService {
 
   async forgotPassword(body: AuthForgotPasswordDto): Promise<void> {
     const { email } = body;
-    const user = await this.userService.getUser({ email: email.toLowerCase(), isDeleted: false });
+    const user = await this.userService.getUser({ email: email.toLowerCase() });
 
     if (!user) {
       return;
@@ -233,7 +286,7 @@ export class AuthService {
     }
 
     const user = await this.userService.getUser({ id: resetRecord.userId });
-    if (!user || user.isDeleted) {
+    if (!user) {
       throw new InvalidTokenException();
     }
 
@@ -251,7 +304,7 @@ export class AuthService {
     body: UpdatePasswordDto,
   ): Promise<AuthResponseDto> {
     const user = await this.userService.updatePassword(userId, body); // Revokes tokens as well
-    return this.issueRefreshToken(user.id, user.roleId);
+    return this.issueRefreshToken(user.id, user.roleId, user.isGuest);
   }
 
   // ============================================
@@ -310,6 +363,7 @@ export class AuthService {
   private async issueRefreshToken(
     userId: string,
     roleId: number,
+    isGuest: boolean,
     existingTokenId?: string,
     existingTokenFamilyId?: string,
   ): Promise<AuthResponseDto> {
@@ -348,18 +402,20 @@ export class AuthService {
       throw new InternalServerErrorException('Session creation failed');
     }
 
-    return this.generateJwtResponse(userId, roleId, newTokenId, tokenFamilyId);
+    return this.generateJwtResponse(userId, roleId, isGuest, newTokenId, tokenFamilyId);
   }
 
   private async generateJwtResponse(
     userId: string,
     roleId: number,
+    isGuest: boolean,
     tokenId: string,
     tokenFamilyId: string,
   ): Promise<AuthResponseDto> {
     const payload = {
       sub: userId,
       role: roleId,
+      isGuest,
       iat: Math.floor(Date.now() / 1000),
       jti: uuidv7(),
       type: 'access',
@@ -383,7 +439,7 @@ export class AuthService {
         refresh_token: refreshToken,
         token_type: 'Bearer',
         expires_in: this.accessTokenExpiresIn,
-        user: { id: userId, role: roleId },
+        user: { id: userId, role: roleId, isGuest },
       };
     } catch (error) {
       this.logger.error('JWT Signing Failed:', {

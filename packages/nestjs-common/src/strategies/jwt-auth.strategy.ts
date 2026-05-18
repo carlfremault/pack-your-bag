@@ -25,13 +25,13 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: unknown): { userId: string; roleId: number } {
+  validate(payload: unknown): { userId: string; roleId: number; isGuest: boolean } {
     const dto = plainToInstance(JwtPayload, payload, { excludeExtraneousValues: true });
     const errors = validateSync(dto);
 
     if (errors.length > 0 || dto.type !== JwtTokenType.Access) {
       throw new InvalidSessionException('Invalid access token payload');
     }
-    return { userId: dto.sub, roleId: dto.role };
+    return { userId: dto.sub, roleId: dto.role, isGuest: dto.isGuest };
   }
 }

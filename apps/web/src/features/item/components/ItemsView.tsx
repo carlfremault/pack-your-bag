@@ -84,7 +84,7 @@ export default function ItemsView() {
         <ItemsList items={filteredItems} itemsActions={itemsActions} />
       </div>
       {/* Desktop */}
-      <div className="hidden h-full w-full flex-col gap-4 overflow-hidden p-4 lg:flex">
+      <div className="hidden h-full w-full max-w-7xl flex-col gap-4 overflow-hidden p-4 lg:flex">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
           <ItemsTable items={filteredItems} itemsActions={itemsActions} />

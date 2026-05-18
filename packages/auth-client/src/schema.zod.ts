@@ -1,5 +1,17 @@
 import { z } from 'zod';
 
+export const AuthResponseDto = z
+  .object({
+    access_token: z.string(),
+    refresh_token: z.string(),
+    token_type: z.string(),
+    expires_in: z.number(),
+    user: z
+      .object({ id: z.string(), role: z.number(), isGuest: z.boolean() })
+      .partial()
+      .passthrough(),
+  })
+  .passthrough();
 export const AuthCredentialsDto = z
   .object({
     email: z.string().min(1).max(254).email(),
@@ -8,15 +20,6 @@ export const AuthCredentialsDto = z
       .min(8)
       .max(128)
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
-  })
-  .passthrough();
-export const AuthResponseDto = z
-  .object({
-    access_token: z.string(),
-    refresh_token: z.string(),
-    token_type: z.string(),
-    expires_in: z.number(),
-    user: z.object({ id: z.string(), role: z.number() }).partial().passthrough(),
   })
   .passthrough();
 export const UpdatePasswordDto = z

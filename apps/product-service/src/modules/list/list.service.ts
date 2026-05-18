@@ -5,6 +5,10 @@ import { Prisma, Trip } from '@repo/db';
 import { plainToInstance } from 'class-transformer';
 import { v7 as uuidv7 } from 'uuid';
 
+import {
+  computeListItemCount,
+  computeListTotalWeight,
+} from '@/common/helpers/list-summary.helpers';
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { PackResponseDto } from '../pack/dto/pack-response.dto';
@@ -28,14 +32,20 @@ export class ListService {
   // ============================================
 
   async getLists(where: Prisma.ListWhereInput): Promise<ListSummaryResponseDto[]> {
-    const result = await this.prisma.list.findMany({
+    const results = await this.prisma.list.findMany({
       where,
       include: {
         items: { include: { item: true } },
       },
     });
 
-    return plainToInstance(ListSummaryResponseDto, result);
+    const shaped = results.map((list) => ({
+      ...list,
+      itemCount: computeListItemCount(list),
+      totalWeight: computeListTotalWeight(list),
+    }));
+
+    return plainToInstance(ListSummaryResponseDto, shaped);
   }
 
   async getList(where: Prisma.ListWhereUniqueInput): Promise<ListResponseDto> {
@@ -106,6 +116,7 @@ export class ListService {
 
     const packs = await this.prisma.pack.findMany({
       where: {
+        userId,
         lists: {
           some: { listId: id },
         },
@@ -117,6 +128,7 @@ export class ListService {
     if (packIds.length > 0) {
       trips = await this.prisma.trip.findMany({
         where: {
+          userId,
           packId: { in: packIds },
         },
       });

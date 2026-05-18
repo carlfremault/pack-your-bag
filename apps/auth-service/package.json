@@ -26,7 +26,7 @@
     "@nestjs/swagger": "^11.2.6",
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.5.0",
-    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/adapter-pg": "^7.8.0",
     "@repo/constants": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/nestjs-common": "workspace:*",

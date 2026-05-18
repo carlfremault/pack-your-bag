@@ -6,6 +6,7 @@ export interface SessionData {
   isLoggedIn?: boolean;
   userId?: string;
   role?: number;
+  isGuest?: boolean;
   accessToken?: string;
   refreshToken?: string;
   /** Unix timestamp in seconds */

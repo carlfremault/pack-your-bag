@@ -6,6 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import {
   BffGuardModule,
   CustomThrottlerModule,
+  InternalGuardModule,
   JwtAuthModule,
   RequestIdMiddleware,
 } from '@repo/nestjs-common';
@@ -17,6 +18,8 @@ import Joi from 'joi';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { CategoryModule } from './modules/category/category.module';
+import { CleanupModule } from './modules/cleanup/cleanup.module';
+import { GuestSeedModule } from './modules/guest-seed/guest-seed.module';
 import { HealthModule } from './modules/health/health.module';
 import { ItemModule } from './modules/item/item.module';
 import { ItemListModule } from './modules/item-list/item-list.module';
@@ -34,6 +37,7 @@ const validationSchema = Joi.object({
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
   BFF_SHARED_SECRET: Joi.string().required(),
+  INTERNAL_SERVICE_SECRET: Joi.string().required(),
 
   // Application
   PRODUCT_PORT: Joi.number().default(8002),
@@ -60,10 +64,17 @@ const validationSchema = Joi.object({
   }),
 
   // Sentry
-  SENTRY_DSN: Joi.string()
+  DEV_SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
-      is: Joi.valid('production', 'development'),
+      is: Joi.valid('development'),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+  PRODUCT_SENTRY_DSN: Joi.string()
+    .uri()
+    .when('NODE_ENV', {
+      is: Joi.valid('production'),
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -93,8 +104,11 @@ const validationSchema = Joi.object({
     }),
     PrismaModule,
     BffGuardModule,
+    InternalGuardModule,
     CustomThrottlerModule,
     JwtAuthModule,
+    CleanupModule,
+    GuestSeedModule,
     ItemModule,
     CategoryModule,
     ListModule,

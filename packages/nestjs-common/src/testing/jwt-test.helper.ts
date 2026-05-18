@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from 'uuid';
 export interface TestTokenOptions {
   userId: string;
   roleId?: number;
+  isGuest?: boolean;
   expiresIn?: string;
 }
 
@@ -14,11 +15,12 @@ export class JwtTestHelper {
   }
 
   generateAccessToken(options: TestTokenOptions): string {
-    const { userId, roleId = 1, expiresIn = '15m' } = options;
+    const { userId, roleId = 1, isGuest = false, expiresIn = '15m' } = options;
 
     const payload = {
       sub: userId,
       role: roleId,
+      isGuest,
       iat: Math.floor(Date.now() / 1000),
       jti: uuidv7(),
       type: 'access',
@@ -31,12 +33,13 @@ export class JwtTestHelper {
   }
 
   generateExpiredToken(options: TestTokenOptions): string {
-    const { userId, roleId = 1 } = options;
+    const { userId, roleId = 1, isGuest = false } = options;
 
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       sub: userId,
       role: roleId,
+      isGuest,
       iat: now - 3600,
       exp: now - 1, // already expired
       jti: uuidv7(),

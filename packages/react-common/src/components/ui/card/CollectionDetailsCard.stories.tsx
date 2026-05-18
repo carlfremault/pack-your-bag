@@ -4,11 +4,11 @@ import { fn } from 'storybook/test';
 import { colorThemes } from '../../../lib/colorThemes';
 import { LONG_DESCRIPTION } from '../../../lib/constants';
 
-import { CollectionSummaryCard } from './CollectionSummaryCard';
+import { CollectionDetailsCard } from './CollectionDetailsCard';
 
-const meta: Meta<typeof CollectionSummaryCard> = {
-  title: 'Components/CollectionSummaryCard',
-  component: CollectionSummaryCard,
+const meta: Meta<typeof CollectionDetailsCard> = {
+  title: 'Components/CollectionDetailsCard',
+  component: CollectionDetailsCard,
   argTypes: {
     colorTheme: {
       control: 'select',

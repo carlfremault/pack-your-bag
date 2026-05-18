@@ -21,3 +21,14 @@ export class BffAuthenticationException extends UnauthorizedException {
     this.name = 'BffAuthenticationException';
   }
 }
+
+// Used when: request without x-internal-secret header is received
+export class InternalAuthenticationException extends UnauthorizedException {
+  constructor(internalDetails?: string) {
+    super(
+      { statusCode: 401, message: 'Unauthorized', error: 'UNAUTHORIZED' },
+      { cause: internalDetails || 'Unauthorized' },
+    );
+    this.name = 'InternalAuthenticationException';
+  }
+}

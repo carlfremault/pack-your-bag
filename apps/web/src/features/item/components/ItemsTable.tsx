@@ -41,11 +41,11 @@ export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTab
       }),
       columnHelper.display({
         id: 'weight',
-        header: 'Weight',
+        header: () => <div className="text-center">Weight</div>,
         cell: ({ row }) => {
           const { displayWeight, displayUnit } = row.original;
           return displayWeight !== null ? (
-            <div className="text-sm leading-normal">
+            <div className="flex items-center justify-center text-sm leading-normal">
               {displayWeight}
               {displayUnit ? ` ${displayUnit}` : ''}
             </div>
@@ -57,10 +57,12 @@ export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTab
       }),
       columnHelper.display({
         id: 'category',
-        header: 'Category',
+        header: () => <div className="text-center">Category</div>,
         cell: ({ row }) =>
           row.original.category ? (
-            <CategoryPill {...toCategoryPillProps(row.original.category)} />
+            <div className="flex items-center justify-center">
+              <CategoryPill {...toCategoryPillProps(row.original.category)} />
+            </div>
           ) : null,
       }),
       columnHelper.display({

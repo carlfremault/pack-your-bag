@@ -25,8 +25,9 @@ import {
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
 import { CreateTripDto } from './dto/create-trip.dto';
-import { TripResponseDto } from './dto/trip-response.dto';
+import { TripResponseDto, TripSummaryResponseDto } from './dto/trip-response.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
+import { UpdateTripItemStatusDto } from './dto/update-trip-item-status.dto';
 import { TripService } from './trip.service';
 
 @ApiTags('trip')
@@ -46,7 +47,7 @@ export class TripController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Trips retrieved successfully.',
-    type: [TripResponseDto],
+    type: [TripSummaryResponseDto],
   })
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.TRIPS.GET_ALL, ttl: THROTTLE_TTL_MS } })
@@ -115,6 +116,27 @@ export class TripController {
     @CurrentUser('userId') userId: string,
   ) {
     return this.tripService.updateTrip(id, trip, userId);
+  }
+
+  @Patch(':id/items/:itemId/packed')
+  @ApiBffAndAccessSecurity()
+  @ApiOperation({ summary: 'Set packed quantity for an item in a trip' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Item packing status updated.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (invalid UUID v7 format or invalid body).',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Trip not found.' })
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.TRIPS.SET_ITEM_STATUS, ttl: THROTTLE_TTL_MS } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async setTripItemStatus(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '7' })) itemId: string,
+    @Body() dto: UpdateTripItemStatusDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    await this.tripService.setTripItemStatus(id, itemId, userId, dto.packedQuantity);
   }
 
   @Delete(':id')

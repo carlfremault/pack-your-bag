@@ -2,16 +2,33 @@
 
 import { Button } from '@repo/react-common/button';
 
+import classNames from 'classnames';
+
 import { Modal } from '@/components/Modal';
 import { logoutAllAction } from '@/features/auth/actions';
 
-export default function LogoutAllDevicesCard() {
+export interface LogoutAllDevicesCardProps {
+  disabled?: boolean;
+}
+
+export default function LogoutAllDevicesCard({ disabled = false }: LogoutAllDevicesCardProps) {
   return (
-    <div className="bg-surface border-primary-ring text-primary flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm">
+    <div
+      className={classNames(
+        'bg-surface border-primary-ring text-primary flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm transition-opacity',
+        disabled && 'opacity-50',
+      )}
+      aria-disabled={disabled}
+    >
       End all active sessions across your devices, including this one.
+      {disabled && (
+        <p className="text-primary/70 text-sm italic">
+          Sign up for a full account to manage sessions.
+        </p>
+      )}
       <div className="flex justify-end">
         <Modal.Root>
-          <Modal.Trigger color="danger" variant="outline">
+          <Modal.Trigger color="danger" variant="outline" disabled={disabled}>
             Sign out all devices
           </Modal.Trigger>
           <Modal.Content

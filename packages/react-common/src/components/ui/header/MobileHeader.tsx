@@ -22,7 +22,7 @@ export function MobileHeader(props: MobileHeaderProps) {
       </LinkComponent>
       <div className="flex items-center gap-6">
         <SettingsButton link={settingsLink} linkAs={linkAs} />
-        <form action={logOut}>
+        <form action={logOut} className="flex items-center">
           <Button variant="unstyledIcon" type="submit" aria-label="Log out">
             <MdLogout className="h-5 w-5" />
           </Button>

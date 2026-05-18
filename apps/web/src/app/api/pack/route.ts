@@ -2,9 +2,17 @@ import { NextResponse } from 'next/server';
 
 import z from 'zod';
 
-import { createPack } from '@/features/collection/api';
+import { createPack, getAllPacks } from '@/features/collection/api';
 import { createPackSchema } from '@/features/collection/schema';
 import { withErrorHandling } from '@/lib/api-handlers';
+
+export async function GET() {
+  return withErrorHandling(async () => {
+    const data = await getAllPacks();
+
+    return NextResponse.json({ data });
+  });
+}
 
 export async function POST(request: Request) {
   return withErrorHandling(async () => {

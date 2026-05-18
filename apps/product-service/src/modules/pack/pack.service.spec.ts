@@ -281,7 +281,7 @@ describe('PackService', () => {
         where: { id, userId },
       });
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: id },
+        where: { userId, packId: id },
       });
 
       expect(result).toMatchObject({
@@ -307,7 +307,7 @@ describe('PackService', () => {
       const result = await service.getPackDeleteImpact(id, userId);
 
       expect(mockPrismaService.trip.findMany).toHaveBeenCalledWith({
-        where: { packId: id },
+        where: { userId, packId: id },
       });
 
       expect(result).toMatchObject({

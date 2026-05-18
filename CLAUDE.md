@@ -16,7 +16,7 @@ packages/  db, nestjs-common, react-common, auth-client, product-client, user-da
 Single workspace: yarn workspace @repo/<name> <script> for packages, yarn workspace <name> <script> for apps
 
 ```bash
-yarn dev / build / lint / format
+yarn dev / build / lint
 
 yarn test / test:watch / test:browser
 
@@ -31,7 +31,7 @@ yarn storybook
 ## Testing
 
 - Always run unit tests with the full env setup and a scoped path to avoid hitting the production database or triggering e2e specs:  
-  `cross-env NODE_ENV=test dotenv -e .env.test -o -- yarn workspace <name> test src/`
+  `npx cross-env NODE_ENV=test npx dotenv -e .env.test -o -- yarn workspace <name> test src/`
 - Never run e2e tests (`test/` directory) without explicit user instruction. E2e tests call `resetDb()` on every test and will wipe whichever database the environment points to.
 
 ## Architecture
@@ -56,3 +56,4 @@ Common infrastructure lives in `@repo/nestjs-common` (JWT strategies, BFF guard,
 - **Dependencies**: do not add or remove without asking first.
 - **Zod v4**: root `package.json` pins it via `resolutions` — use it for all validation schemas.
 - **No infrastructure changes**: do not modify `docker-compose.yml`, Turborepo pipeline, or database schemas without explicit instruction.
+- **Project Philosophy**: Code quality and best practices are paramount and should prime above 'fitting in with the current codebase'.

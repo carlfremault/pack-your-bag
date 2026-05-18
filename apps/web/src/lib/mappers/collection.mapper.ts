@@ -1,11 +1,11 @@
 import type {
   CollectionCardProps,
+  CollectionDetailsCardProps,
   CollectionListCardProps,
-  CollectionSummaryCardProps,
 } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
-import { CollectionForDisplay, CollectionForSummaryDisplay } from '@/features/collection/types';
+import { CollectionForDetailsCardDisplay, CollectionForDisplay } from '@/features/collection/types';
 
 export function toCollectionCardProps(
   collection: CollectionForDisplay,
@@ -25,10 +25,10 @@ export function toCollectionCardProps(
   };
 }
 
-export function toCollectionSummaryCardProps(
-  collection: CollectionForSummaryDisplay,
-  handlers: Pick<CollectionSummaryCardProps, 'onEditCollection' | 'onDeleteCollection'>,
-): CollectionSummaryCardProps {
+export function toCollectionDetailsCardProps(
+  collection: CollectionForDetailsCardDisplay,
+  handlers: Pick<CollectionDetailsCardProps, 'onEditCollection' | 'onDeleteCollection'>,
+): CollectionDetailsCardProps {
   return {
     id: collection.id,
     name: collection.name,

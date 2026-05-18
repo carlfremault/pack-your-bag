@@ -9,7 +9,11 @@ import classNames from 'classnames';
 
 import { updatePasswordAction, UpdatePasswordState } from '../actions';
 
-export default function PasswordUpdateForm() {
+export interface PasswordUpdateFormProps {
+  disabled?: boolean;
+}
+
+export default function PasswordUpdateForm({ disabled = false }: PasswordUpdateFormProps) {
   const [state, formAction, pending] = useActionState<UpdatePasswordState, FormData>(
     updatePasswordAction,
     null,
@@ -30,30 +34,40 @@ export default function PasswordUpdateForm() {
       action={formAction}
       className={classNames(
         'bg-surface border-primary-ring flex w-full flex-col gap-4 rounded-md border p-4 shadow-sm transition-opacity',
-        pending && 'opacity-50',
+        (pending || disabled) && 'opacity-50',
       )}
+      aria-disabled={disabled}
     >
-      <InputPassword
-        label="Current Password"
-        name="currentPassword"
-        required
-        errorMessage={state?.fieldErrors?.currentPassword}
-      />
-      <InputPassword
-        label="New Password"
-        name="newPassword"
-        required
-        errorMessage={state?.fieldErrors?.newPassword}
-      />
-      <InputPassword
-        label="Confirm New Password"
-        name="confirmPassword"
-        required
-        errorMessage={state?.fieldErrors?.confirmPassword}
-      />
-      <div className="flex justify-end">
-        <SubmitButton pending={pending}>Confirm</SubmitButton>
-      </div>
+      <fieldset disabled={disabled}>
+        <div className="flex flex-col gap-4">
+          {disabled && (
+            <p className="text-primary/70 text-sm italic">
+              Sign up for a full account to change your password.
+            </p>
+          )}
+          <InputPassword
+            label="Current Password"
+            name="currentPassword"
+            required
+            errorMessage={state?.fieldErrors?.currentPassword}
+          />
+          <InputPassword
+            label="New Password"
+            name="newPassword"
+            required
+            errorMessage={state?.fieldErrors?.newPassword}
+          />
+          <InputPassword
+            label="Confirm New Password"
+            name="confirmPassword"
+            required
+            errorMessage={state?.fieldErrors?.confirmPassword}
+          />
+          <div className="flex justify-end">
+            <SubmitButton pending={pending}>Confirm</SubmitButton>
+          </div>
+        </div>
+      </fieldset>
     </form>
   );
 }

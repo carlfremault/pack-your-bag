@@ -51,4 +51,8 @@ export class ItemWithQuantityResponseDto {
   @Expose()
   @Type(() => ItemResponseDto)
   item: ItemResponseDto;
+
+  @ApiProperty({ description: 'Packed quantity (trip context only)', example: 0, required: false })
+  @Expose()
+  packedQuantity?: number;
 }

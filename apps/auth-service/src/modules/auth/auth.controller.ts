@@ -49,6 +49,22 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('guest-session')
+  @ApiBffSecurity()
+  @ApiOperation({ summary: 'Create a guest session with pre-seeded sample data' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: AuthResponseDto,
+    description: 'Guest session created.',
+  })
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.GUEST_SESSION, ttl: THROTTLE_TTL_MS } })
+  @Serialize(AuthResponseDto)
+  @AuditLog(AuditEventType.GUEST_SESSION_CREATED)
+  async createGuestSession() {
+    return this.authService.createGuestSession();
+  }
+
   @Post('register')
   @ApiBffSecurity()
   @ApiOperation({ summary: 'Register a new user and send verification email' })

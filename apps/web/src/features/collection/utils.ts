@@ -1,4 +1,12 @@
-import { CollectionItemForDisplay, List, Pack } from '@/features/collection/types';
+import { ColorTheme } from '@repo/react-common/color-themes';
+import { CategoryPillProps } from '@repo/react-common/pill';
+
+import {
+  CollectionDetail,
+  CollectionItemForDisplay,
+  List,
+  Pack,
+} from '@/features/collection/types';
 import { Item } from '@/features/item/types';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
@@ -141,4 +149,33 @@ export const toCollectionItemForDisplay = (
       ? formatWeightForDisplay(Number(item.weight), units)
       : { value: null, unit: null };
   return { ...item, quantity, displayWeight: value, displayUnit: unit, type: 'item' as const };
+};
+
+/**
+ * Get all different categories present in a collection.
+ */
+export const getAllCategoriesInCollection = (collection: CollectionDetail): CategoryPillProps[] => {
+  const categoriesMap = new Map<string, CategoryPillProps>();
+
+  collection.items?.forEach(({ item }) => {
+    if (item.category) {
+      categoriesMap.set(item.category.id, {
+        name: item.category.name,
+        colorTheme: item.category.colorTheme as ColorTheme,
+      });
+    }
+  });
+  if (collection.type === 'pack') {
+    collection.lists?.forEach(({ list }) => {
+      list.items?.forEach(({ item }) => {
+        if (item.category) {
+          categoriesMap.set(item.category.id, {
+            name: item.category.name,
+            colorTheme: item.category.colorTheme as ColorTheme,
+          });
+        }
+      });
+    });
+  }
+  return Array.from(categoriesMap.values());
 };

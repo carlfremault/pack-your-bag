@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 
 import { ItemWithQuantityResponseDto } from '@/common/dto/item-response.dto';
 import { ListWithQuantityResponseDto } from '@/modules/list/dto/list-response.dto';
@@ -63,13 +63,6 @@ export class PackResponseDto extends PackBaseResponseDto {
   lists?: ListWithQuantityResponseDto[];
 }
 
-type ItemPackRaw = { quantity: number; item: { weight: number | null } };
-type ListPackRaw = {
-  quantity: number;
-  list: { items: Array<{ quantity: number; item: { weight: number | null } }> };
-};
-type PackSummaryRaw = { items?: ItemPackRaw[]; lists?: ListPackRaw[] };
-
 @Exclude()
 export class PackSummaryResponseDto extends PackBaseResponseDto {
   @ApiProperty({
@@ -77,35 +70,9 @@ export class PackSummaryResponseDto extends PackBaseResponseDto {
     example: 30,
   })
   @Expose()
-  @Transform(({ obj }: { obj: PackSummaryRaw }) => {
-    const directItems = (obj.items ?? []).reduce((sum, { quantity }) => sum + quantity, 0);
-    const listItems = (obj.lists ?? []).reduce(
-      (sum, { quantity: listQty, list }) =>
-        sum + listQty * list.items.reduce((s, { quantity: itemQty }) => s + itemQty, 0),
-      0,
-    );
-    return directItems + listItems;
-  })
   itemCount: number;
 
   @ApiProperty({ description: 'Total weight of all items in the pack in grams', example: 2500 })
   @Expose()
-  @Transform(({ obj }: { obj: PackSummaryRaw }) => {
-    const directWeight = (obj.items ?? []).reduce(
-      (sum, { quantity, item }) => sum + quantity * (item.weight ?? 0),
-      0,
-    );
-    const listWeight = (obj.lists ?? []).reduce(
-      (sum, { quantity: listQty, list }) =>
-        sum +
-        listQty *
-          list.items.reduce(
-            (s, { quantity: itemQty, item }) => s + itemQty * (item.weight ?? 0),
-            0,
-          ),
-      0,
-    );
-    return directWeight + listWeight;
-  })
   totalWeight: number;
 }

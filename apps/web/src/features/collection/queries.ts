@@ -23,6 +23,7 @@ import {
   ListPack,
   Pack,
   PackDeleteImpact,
+  PackSummary,
   UpdateListBody,
   UpdatePackBody,
   UpsertItemListBody,
@@ -94,6 +95,28 @@ const useAllLists = (listIds: string[]) => {
   });
 };
 
+// -------------------------------
+// Fetch all packs
+// -------------------------------
+
+const fetchAllPacks = async (): Promise<PackSummary[]> => {
+  const res = await fetch('/api/pack');
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useAllPacks = (): UseSuspenseQueryResult<PackSummary[]> => {
+  return useSuspenseQuery({
+    queryKey: ['pack'],
+    queryFn: fetchAllPacks,
+    select: (data) => [...data].sort((a, b) => a.name.localeCompare(b.name)),
+  });
+};
+
 // --------------------------------
 // Create Collection (List or Pack)
 // --------------------------------
@@ -160,6 +183,7 @@ const useCreateCollection = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
     },
   });
 };
@@ -218,6 +242,7 @@ const useUpdateCollection = () => {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
       queryClient.invalidateQueries({ queryKey: [variables.type, variables.id] });
     },
   });
@@ -290,7 +315,8 @@ const useDeleteCollection = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
+      queryClient.invalidateQueries({ queryKey: ['pack'], exact: true });
     },
   });
 };
@@ -347,12 +373,16 @@ const useUpsertItemInCollection = () => {
       const previousCollection = queryClient.getQueryData<CollectionDetail>([type, id]);
 
       if (body.quantity === 0) {
-        queryClient.setQueryData([type, id], (old: CollectionDetail) => ({
-          ...old,
-          items: (old.items ?? []).filter(({ item }) => item.id !== body.itemId),
-        }));
+        queryClient.setQueryData([type, id], (old: CollectionDetail | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            items: (old.items ?? []).filter(({ item }) => item.id !== body.itemId),
+          };
+        });
       } else {
-        queryClient.setQueryData([type, id], (old: CollectionDetail) => {
+        queryClient.setQueryData([type, id], (old: CollectionDetail | undefined) => {
+          if (!old) return old;
           const existingItems = old.items ?? [];
           const existingIndex = existingItems.findIndex(({ item }) => item.id === body.itemId);
           const existing = existingItems[existingIndex];
@@ -387,6 +417,8 @@ const useUpsertItemInCollection = () => {
     onSuccess: (_data, variables) => {
       const id = variables.type === 'list' ? variables.body.listId : variables.body.packId;
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
+      queryClient.invalidateQueries({ queryKey: ['deleteImpact'] });
       queryClient.invalidateQueries({ queryKey: [variables.type, id] });
     },
   });
@@ -476,9 +508,10 @@ const useUpsertListInPack = () => {
         queryClient.setQueryData(['pack', context.id], context.previousPack);
       }
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
-      queryClient.invalidateQueries({ queryKey: ['pack', variables.packId] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
+      queryClient.invalidateQueries({ queryKey: ['deleteImpact'] });
     },
   });
 };
@@ -486,6 +519,7 @@ const useUpsertListInPack = () => {
 export {
   useAllCollections,
   useAllLists,
+  useAllPacks,
   useCollection,
   useCreateCollection,
   useUpdateCollection,

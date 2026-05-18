@@ -12,6 +12,7 @@ import { FormNotReady } from '@repo/react-common/utils';
 
 import { FormWrapper } from '@/components/FormWrapper';
 import { useFormState } from '@/hooks/useFormState';
+import { capitalizeFirstLetter } from '@/utils/capitalizeFirstLetter';
 
 import { useCollection, useCreateCollection, useUpdateCollection } from '../queries';
 import { CollectionDetail, CollectionType } from '../types';
@@ -107,14 +108,18 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
     value: key,
   }));
 
-  const handleSuccess = () => {
+  const handleSuccess = (type: CollectionType) => {
     setFieldErrors({});
     if (editMode) {
       onClose();
     } else {
       handleReset();
     }
-    toast.success(editMode ? 'Collection updated successfully' : 'Collection created successfully');
+    toast.success(
+      editMode
+        ? `${capitalizeFirstLetter(type)} updated successfully`
+        : `${capitalizeFirstLetter(type)} created successfully`,
+    );
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -140,10 +145,13 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
     if (editMode) {
       updateCollection(
         { id: collection.id, type, body: payload },
-        { onSuccess: handleSuccess, onError: handleError },
+        { onSuccess: () => handleSuccess(type), onError: handleError },
       );
     } else {
-      createCollection({ type, body: payload }, { onSuccess: handleSuccess, onError: handleError });
+      createCollection(
+        { type, body: payload },
+        { onSuccess: () => handleSuccess(type), onError: handleError },
+      );
     }
   };
 
@@ -195,11 +203,11 @@ function CollectionFormInner({ collection, onClose }: CollectionFormInnerProps) 
   );
 }
 
-const getInitialFormValues = (collection?: CollectionDetail) => {
+function getInitialFormValues(collection?: CollectionDetail) {
   return {
     name: collection?.name ?? '',
     description: collection?.description ?? '',
     colorTheme: collection?.colorTheme ?? '',
     type: collection?.type ?? '',
   };
-};
+}

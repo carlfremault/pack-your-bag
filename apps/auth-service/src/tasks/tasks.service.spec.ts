@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
-import { MS_PER_DAY } from '@repo/nestjs-common';
+import { MS_PER_DAY, MS_PER_HOUR } from '@repo/nestjs-common';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
+import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
@@ -17,11 +18,12 @@ import { TasksService } from './tasks.service';
 
 const MOCK_CONFIG = {
   AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS: 14,
-  AUDIT_LOG_INFO_RETENTION_DAYS: 30,
-  AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: 60,
-  AUDIT_LOG_CRITICAL_RETENTION_DAYS: 90,
+  AUTH_AUDIT_LOG_INFO_RETENTION_DAYS: 30,
+  AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: 60,
+  AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS: 90,
   AUTH_USER_DELETE_RETENTION_DAYS: 30,
   AUTH_VERIFICATION_TOKEN_RETENTION_DAYS: 1,
+  AUTH_GUEST_SESSION_TTL_HOURS: 24,
 } as const;
 
 describe('TasksService', () => {
@@ -42,6 +44,10 @@ describe('TasksService', () => {
   const mockAuditLogService = { deleteAuditLogs: vi.fn() };
   const mockAuditLogProvider = { auditRequest: vi.fn() };
   const mockUserService = { getUsers: vi.fn(), hardDeleteUsers: vi.fn() };
+  const mockServiceClientService = {
+    cleanupProductData: vi.fn(),
+    cleanupUserData: vi.fn(),
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -56,6 +62,7 @@ describe('TasksService', () => {
         { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: AuditLogProvider, useValue: mockAuditLogProvider },
         { provide: UserService, useValue: mockUserService },
+        { provide: ServiceClientService, useValue: mockServiceClientService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -121,12 +128,14 @@ describe('TasksService', () => {
   describe('cleanupAuditLogs', () => {
     it('should call deleteAuditLogs with correct cutoffs', async () => {
       const now = new Date().getTime();
-      const infoCutoff = mockConfigService.getOrThrow('AUDIT_LOG_INFO_RETENTION_DAYS') as number;
+      const infoCutoff = mockConfigService.getOrThrow(
+        'AUTH_AUDIT_LOG_INFO_RETENTION_DAYS',
+      ) as number;
       const errorCutoff = mockConfigService.getOrThrow(
-        'AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
+        'AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
       ) as number;
       const criticalCutoff = mockConfigService.getOrThrow(
-        'AUDIT_LOG_CRITICAL_RETENTION_DAYS',
+        'AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS',
       ) as number;
 
       mockAuditLogService.deleteAuditLogs.mockResolvedValue({ count: 10 });
@@ -203,7 +212,7 @@ describe('TasksService', () => {
       );
     });
 
-    it('should perform hard delete when users are found', async () => {
+    it('should perform hard delete and call downstream services when users are found', async () => {
       const mockUsers = [{ id: 'user-1' }, { id: 'user-2' }];
       mockUserService.getUsers.mockResolvedValue(mockUsers);
       mockUserService.hardDeleteUsers.mockResolvedValue({
@@ -211,18 +220,112 @@ describe('TasksService', () => {
         deletedTokens: 4,
         anonymizedAuditLogs: 10,
       });
+      mockServiceClientService.cleanupProductData.mockResolvedValue({
+        deletedItems: 5,
+        deletedCategories: 2,
+        deletedLists: 3,
+        deletedPacks: 1,
+        deletedTrips: 1,
+      });
+      mockServiceClientService.cleanupUserData.mockResolvedValue({
+        deletedPreferences: 2,
+      });
 
       await service.cleanupDeletedUsers();
 
       expect(mockUserService.hardDeleteUsers).toHaveBeenCalledWith(['user-1', 'user-2']);
+      expect(mockServiceClientService.cleanupProductData).toHaveBeenCalledWith([
+        'user-1',
+        'user-2',
+      ]);
+      expect(mockServiceClientService.cleanupUserData).toHaveBeenCalledWith(['user-1', 'user-2']);
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: AuditEventType.SCHEDULED_TASK,
           severity: AuditSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining('Cleaned up 2 deleted users') as string,
+          metadata: expect.objectContaining({
+            downstream: expect.objectContaining({
+              product: expect.objectContaining({ deletedItems: 5 }) as object,
+              userData: expect.objectContaining({ deletedPreferences: 2 }) as object,
+            }) as object,
+          }) as object,
         }),
       );
+    });
+
+    it('should succeed even when downstream product cleanup fails', async () => {
+      const mockUsers = [{ id: 'user-1' }];
+      mockUserService.getUsers.mockResolvedValue(mockUsers);
+      mockUserService.hardDeleteUsers.mockResolvedValue({
+        deletedUsers: 1,
+        deletedTokens: 1,
+        anonymizedAuditLogs: 2,
+      });
+      mockServiceClientService.cleanupProductData.mockRejectedValue(
+        new Error('Product service unavailable'),
+      );
+      mockServiceClientService.cleanupUserData.mockResolvedValue({
+        deletedPreferences: 1,
+      });
+
+      await service.cleanupDeletedUsers();
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: AuditSeverity.INFO,
+          metadata: expect.objectContaining({
+            downstream: expect.objectContaining({
+              product: { error: 'Product service unavailable' },
+              userData: expect.objectContaining({ deletedPreferences: 1 }) as object,
+            }) as object,
+          }) as object,
+        }),
+      );
+    });
+
+    it('should succeed even when downstream user-data cleanup fails', async () => {
+      const mockUsers = [{ id: 'user-1' }];
+      mockUserService.getUsers.mockResolvedValue(mockUsers);
+      mockUserService.hardDeleteUsers.mockResolvedValue({
+        deletedUsers: 1,
+        deletedTokens: 1,
+        anonymizedAuditLogs: 2,
+      });
+      mockServiceClientService.cleanupProductData.mockResolvedValue({
+        deletedItems: 3,
+        deletedCategories: 1,
+        deletedLists: 1,
+        deletedPacks: 0,
+        deletedTrips: 0,
+      });
+      mockServiceClientService.cleanupUserData.mockRejectedValue(
+        new Error('User data service unavailable'),
+      );
+
+      await service.cleanupDeletedUsers();
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: AuditSeverity.INFO,
+          metadata: expect.objectContaining({
+            downstream: expect.objectContaining({
+              product: expect.objectContaining({ deletedItems: 3 }) as object,
+              userData: { error: 'User data service unavailable' },
+            }) as object,
+          }) as object,
+        }),
+      );
+    });
+
+    it('should not call downstream services when no users are deleted', async () => {
+      mockUserService.getUsers.mockResolvedValue([]);
+
+      await service.cleanupDeletedUsers();
+
+      expect(mockServiceClientService.cleanupProductData).not.toHaveBeenCalled();
+      expect(mockServiceClientService.cleanupUserData).not.toHaveBeenCalled();
     });
 
     it('should handle errors during user cleanup', async () => {
@@ -311,6 +414,87 @@ describe('TasksService', () => {
         expect.objectContaining({
           severity: AuditSeverity.ERROR,
           message: 'Verification token cleanup failed: null',
+        }),
+      );
+    });
+  });
+
+  describe('cleanupExpiredGuests', () => {
+    const expectedCutoff = new Date(new Date('2026-02-17T12:00:00Z').getTime() - 24 * MS_PER_HOUR);
+
+    it('should do nothing if no expired guest sessions are found', async () => {
+      mockUserService.getUsers.mockResolvedValue([]);
+
+      await service.cleanupExpiredGuests();
+
+      expect(mockUserService.getUsers).toHaveBeenCalledWith({
+        isGuest: true,
+        lastActiveAt: { lt: expectedCutoff },
+      });
+      expect(mockUserService.hardDeleteUsers).not.toHaveBeenCalled();
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'No expired guest sessions to clean up',
+        }),
+      );
+    });
+
+    it('should hard delete expired guests and clean up downstream services', async () => {
+      mockUserService.getUsers.mockResolvedValue([{ id: 'guest-1' }, { id: 'guest-2' }]);
+      mockUserService.hardDeleteUsers.mockResolvedValue({
+        deletedUsers: 2,
+        deletedTokens: 3,
+        anonymizedAuditLogs: 1,
+      });
+      mockServiceClientService.cleanupProductData.mockResolvedValue({
+        deletedItems: 5,
+        deletedCategories: 2,
+        deletedLists: 3,
+        deletedPacks: 1,
+        deletedTrips: 1,
+      });
+      mockServiceClientService.cleanupUserData.mockResolvedValue({
+        deletedPreferences: 2,
+      });
+
+      await service.cleanupExpiredGuests();
+
+      expect(mockUserService.hardDeleteUsers).toHaveBeenCalledWith(['guest-1', 'guest-2']);
+      expect(mockServiceClientService.cleanupProductData).toHaveBeenCalledWith([
+        'guest-1',
+        'guest-2',
+      ]);
+      expect(mockServiceClientService.cleanupUserData).toHaveBeenCalledWith(['guest-1', 'guest-2']);
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditEventType.SCHEDULED_TASK,
+          severity: AuditSeverity.INFO,
+          statusCode: HttpStatus.NO_CONTENT,
+          message: expect.stringContaining('Cleaned up 2 expired guests') as string,
+          metadata: expect.objectContaining({
+            guestCutoff: expectedCutoff.toISOString(),
+            downstream: expect.objectContaining({
+              product: expect.objectContaining({ deletedItems: 5 }) as object,
+              userData: expect.objectContaining({ deletedPreferences: 2 }) as object,
+            }) as object,
+          }) as object,
+        }),
+      );
+    });
+
+    it('should catch errors and audit them with ERROR severity', async () => {
+      mockUserService.getUsers.mockRejectedValue(new Error('Guest Fetch Failed'));
+
+      await service.cleanupExpiredGuests();
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditEventType.SCHEDULED_TASK,
+          severity: AuditSeverity.ERROR,
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: expect.stringContaining(
+            'Guest session cleanup failed: Guest Fetch Failed',
+          ) as string,
         }),
       );
     });

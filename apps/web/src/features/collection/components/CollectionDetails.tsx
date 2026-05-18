@@ -5,16 +5,16 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { LinkButton } from '@repo/react-common/button';
-import { CollectionSummaryCard } from '@repo/react-common/card';
+import { CollectionDetailsCard } from '@repo/react-common/card';
 import { type ColorTheme } from '@repo/react-common/color-themes';
 
 import { SidebarPortal } from '@/components/Sidebar';
 import { usePreferences } from '@/features/settings/queries';
-import { toCollectionSummaryCardProps } from '@/lib/mappers/collection.mapper';
+import { toCollectionDetailsCardProps } from '@/lib/mappers/collection.mapper';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useCollection } from '../queries';
-import { CollectionForSummaryDisplay, CollectionType } from '../types';
+import { CollectionForDetailsCardDisplay, CollectionType } from '../types';
 import {
   getCategoryWeightsInList,
   getCategoryWeightsInPack,
@@ -47,19 +47,17 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const { data: collection } = useCollection(id, type);
   const { data: preferences } = usePreferences();
 
-  const collectionForSummaryDisplay = useMemo((): CollectionForSummaryDisplay => {
-    const totalWeight =
-      collection.type === 'list'
-        ? getTotalWeightInList(collection)
-        : getTotalWeightInPack(collection);
-    const itemCount =
-      collection.type === 'list'
-        ? getTotalItemQuantityInList(collection)
-        : getTotalItemQuantityInPack(collection);
-    const categoryWeightsRaw =
-      collection.type === 'list'
-        ? getCategoryWeightsInList(collection)
-        : getCategoryWeightsInPack(collection);
+  const collectionForDetailsCardDisplay = useMemo((): CollectionForDetailsCardDisplay => {
+    const isListType = collection.type === 'list';
+    const totalWeight = isListType
+      ? getTotalWeightInList(collection)
+      : getTotalWeightInPack(collection);
+    const itemCount = isListType
+      ? getTotalItemQuantityInList(collection)
+      : getTotalItemQuantityInPack(collection);
+    const categoryWeightsRaw = isListType
+      ? getCategoryWeightsInList(collection)
+      : getCategoryWeightsInPack(collection);
     const categoryWeights = categoryWeightsRaw.map((cw) => {
       const { value, unit } = formatWeightForDisplay(cw.weight, preferences?.units);
       return {
@@ -78,16 +76,13 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     };
   }, [collection, preferences?.units]);
 
-  const handleEditCollection = useCallback(
-    (id: string, type: CollectionType) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('action', 'edit-collection');
-      params.set('id', id);
-      params.set('edit-type', type);
-      router.replace(`${pathname}?${params.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
+  const handleEditCollection = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('action', 'edit-collection');
+    params.set('id', id);
+    params.set('edit-type', type);
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [id, type, pathname, router, searchParams]);
 
   const handleDeleteCollection = (id: string) => {
     setDeleteCollectionId(id);
@@ -105,14 +100,14 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     />
   );
 
-  const headerCardProps = toCollectionSummaryCardProps(collectionForSummaryDisplay, {
+  const detailsCardProps = toCollectionDetailsCardProps(collectionForDetailsCardDisplay, {
     onEditCollection: handleEditCollection,
     onDeleteCollection: handleDeleteCollection,
   });
 
-  const collectionSummaryContent = (
+  const collectionDetailsContent = (
     <>
-      <CollectionSummaryCard {...headerCardProps} />
+      <CollectionDetailsCard {...detailsCardProps} />
       <div className="flex w-full items-center justify-between gap-4">
         <AddItemsModal collection={collection} />
         {collection.type === 'pack' && <AddListsModal pack={collection} />}
@@ -121,14 +116,14 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   );
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col gap-4 p-4">
+    <div className="flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 p-4">
       {/* Mobile */}
-      <div className="flex flex-col gap-4 lg:hidden">{collectionSummaryContent}</div>
+      <div className="flex flex-col gap-4 lg:hidden">{collectionDetailsContent}</div>
       {/* Desktop */}
       {!action && (
         <SidebarPortal>
           <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
-            {collectionSummaryContent}
+            {collectionDetailsContent}
             <LinkButton href="/collections" variant="outline" linkAs={Link} className="w-full">
               Back
             </LinkButton>
