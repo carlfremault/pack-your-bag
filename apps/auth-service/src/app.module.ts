@@ -95,10 +95,17 @@ const validationSchema = Joi.object({
   AUTH_GUEST_SESSION_TTL_HOURS: Joi.number().min(1).default(24),
 
   // Sentry
-  SENTRY_DSN: Joi.string()
+  DEV_SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
-      is: Joi.valid('production', 'development'),
+      is: Joi.valid('development'),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+  AUTH_SENTRY_DSN: Joi.string()
+    .uri()
+    .when('NODE_ENV', {
+      is: Joi.valid('production'),
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),

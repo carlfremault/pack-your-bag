@@ -64,10 +64,17 @@ const validationSchema = Joi.object({
   }),
 
   // Sentry
-  SENTRY_DSN: Joi.string()
+  DEV_SENTRY_DSN: Joi.string()
     .uri()
     .when('NODE_ENV', {
-      is: Joi.valid('production', 'development'),
+      is: Joi.valid('development'),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+  PRODUCT_SENTRY_DSN: Joi.string()
+    .uri()
+    .when('NODE_ENV', {
+      is: Joi.valid('production'),
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),

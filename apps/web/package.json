@@ -17,6 +17,7 @@
     "@repo/product-client": "workspace:*",
     "@repo/react-common": "workspace:*",
     "@repo/user-data-client": "workspace:*",
+    "@sentry/nextjs": "^10",
     "@tanstack/react-query": "^5.97.0",
     "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
