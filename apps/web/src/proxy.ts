@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/nextjs';
 import { getIronSession } from 'iron-session';
 
 import { getAuthConfig } from '@/lib/clients/auth-config';
-import { SESSION_COOKIE_NAME, type SessionData, sessionOptions } from '@/lib/session';
+import { getSessionOptions, SESSION_COOKIE_NAME, type SessionData } from '@/lib/session';
 
 import { AUTH_REDIRECT_PATHS, PUBLIC_PATHS } from './lib/constants';
 
@@ -116,7 +116,7 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
   const shouldRedirectIfAuthed = AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
 
   // Read the session from the request cookie (temp response — we won't save to it).
-  const session = await getIronSession<SessionData>(req, new NextResponse(), sessionOptions);
+  const session = await getIronSession<SessionData>(req, new NextResponse(), getSessionOptions());
 
   if (isPublic) {
     // Redirect already-authenticated users away from auth-related pages.
@@ -158,7 +158,7 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
     const response = NextResponse.next({ request: { headers: requestHeaders } });
 
     // Write refreshed tokens to the session cookie on the response.
-    const sessionToSave = await getIronSession<SessionData>(req, response, sessionOptions);
+    const sessionToSave = await getIronSession<SessionData>(req, response, getSessionOptions());
     sessionToSave.isLoggedIn = true;
     sessionToSave.userId = session.userId;
     sessionToSave.role = session.role;
