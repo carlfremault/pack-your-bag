@@ -24,9 +24,9 @@
     "openapi:auth": "turbo run openapi --filter=auth-service",
     "openapi:product": "turbo run openapi --filter=product-service",
     "openapi:user-data": "turbo run openapi --filter=user-data-service",
-    "generate:auth-client": "yarn workspace @repo/auth-client generate",
-    "generate:product-client": "yarn workspace @repo/product-client generate",
-    "generate:user-data-client": "yarn workspace @repo/user-data-client generate",
+    "generate:auth-client": "yarn workspace @repo/auth-client generate:client",
+    "generate:product-client": "yarn workspace @repo/product-client generate:client",
+    "generate:user-data-client": "yarn workspace @repo/user-data-client generate:client",
     "storybook": "turbo run storybook"
   },
   "devDependencies": {

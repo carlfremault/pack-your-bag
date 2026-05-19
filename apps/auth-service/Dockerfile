@@ -17,6 +17,7 @@ RUN yarn install --immutable
 # --- Build ---
 FROM installer AS builder
 COPY --from=pruner /app/out/full/ .
+ENV POSTGRES_ADMIN_URL=postgresql://build:build@localhost:5432/build
 RUN yarn turbo run build --filter=auth-service
 
 # --- Production runner ---
