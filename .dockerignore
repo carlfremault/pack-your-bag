@@ -1,0 +1,14 @@
+node_modules
+.git
+.env*
+!.env.example
+**/dist
+**/.next
+**/coverage
+**/test
+**/*.spec.ts
+**/*.e2e-spec.ts
+.devcontainer
+storybook-static
+docs
+**/.turbo

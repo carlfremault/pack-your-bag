@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   /** One Node resolution for `zod` so `z.config({ customError })` applies to workspace schemas. */
   serverExternalPackages: ['zod'],
   experimental: {
