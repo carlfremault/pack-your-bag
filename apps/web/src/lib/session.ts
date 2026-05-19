@@ -16,29 +16,30 @@ export interface SessionData {
 
 export const SESSION_COOKIE_NAME = 'pyb-session';
 
-/**
- * AUTH_SECRET doubles as the iron-session encryption password.
- * Must be at least 32 characters.
- */
-const authSecret = process.env.AUTH_SECRET;
-if (!authSecret || authSecret.length < 32) {
-  throw new Error('AUTH_SECRET must be set and at least 32 characters');
+function getAuthSecret(): string {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error('AUTH_SECRET must be set and at least 32 characters');
+  }
+  return secret;
 }
 
-export const sessionOptions: SessionOptions = {
-  password: authSecret,
-  cookieName: SESSION_COOKIE_NAME,
-  cookieOptions: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-  },
-};
+export function getSessionOptions(): SessionOptions {
+  return {
+    password: getAuthSecret(),
+    cookieName: SESSION_COOKIE_NAME,
+    cookieOptions: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    },
+  };
+}
 
 /**
  * For use in Route Handlers and Server Actions only.
  * Middleware must use getIronSession(req, res, sessionOptions) directly.
  */
 export async function getSession() {
-  return getIronSession<SessionData>(await cookies(), sessionOptions);
+  return getIronSession<SessionData>(await cookies(), getSessionOptions());
 }
