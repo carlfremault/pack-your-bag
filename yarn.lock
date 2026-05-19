@@ -3692,6 +3692,7 @@ __metadata:
     passport-jwt: "npm:^4.0.1"
     reflect-metadata: "npm:^0.2.2"
     typescript: "npm:^6.0.2"
+    uuid: "npm:^13.0.0"
     vitest: "npm:^4.1.1"
   peerDependencies:
     "@nestjs/common": ^11.0.1
