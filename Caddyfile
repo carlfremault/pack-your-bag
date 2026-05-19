@@ -1,4 +1,4 @@
-yourdomain.com {
+packyourbag.me {
 	reverse_proxy web:3000
 
 	header {
