@@ -5,9 +5,8 @@ RUN apk add --no-cache libc6-compat
 # --- Prune the monorepo for this app ---
 FROM base AS pruner
 WORKDIR /app
-RUN yarn global add turbo@2.6.2
 COPY . .
-RUN turbo prune web --docker
+RUN npx turbo@2.6.2 prune web --docker
 
 # --- Install dependencies (cached layer) ---
 FROM base AS installer
