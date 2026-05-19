@@ -26,6 +26,8 @@ const usePreferences = (): UseSuspenseQueryResult<Preferences | null> => {
   return useSuspenseQuery({
     queryKey: ['preferences'],
     queryFn: fetchPreferences,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 };
 
