@@ -123,8 +123,10 @@ export async function cancelDeletion(body: CancelDeletionBody): Promise<void> {
 // Helpers
 // ------------------------------------------------------------
 
-function throwServiceUnavailable(): never {
-  throw new ApiError('Authentication service unavailable', 503);
+function throwServiceUnavailable(e: unknown): never {
+  const detail = e instanceof Error ? `${e.constructor.name}: ${e.message}` : String(e);
+  console.error('[auth-api] fetch rejected:', detail);
+  throw new ApiError(`Authentication service unavailable [${detail}]`, 503);
 }
 
 type PublicAuthRequestEndpoints =
