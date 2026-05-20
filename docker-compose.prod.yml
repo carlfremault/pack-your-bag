@@ -33,6 +33,20 @@ services:
       retries: 5
       start_period: 30s
 
+  db-migrate:
+    build:
+      context: .
+      dockerfile: packages/db/Dockerfile
+    env_file: .env.db-migrate
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate
+    restart: 'no'
+
   auth-service:
     build:
       context: .
