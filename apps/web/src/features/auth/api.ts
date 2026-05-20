@@ -125,8 +125,10 @@ export async function cancelDeletion(body: CancelDeletionBody): Promise<void> {
 
 function throwServiceUnavailable(e: unknown): never {
   const detail = e instanceof Error ? `${e.constructor.name}: ${e.message}` : String(e);
-  console.error('[auth-api] fetch rejected:', detail);
-  throw new ApiError(`Authentication service unavailable [${detail}]`, 503);
+  const cause =
+    e instanceof Error && 'cause' in e ? String((e as Error & { cause: unknown }).cause) : 'none';
+  console.error('[auth-api] fetch rejected:', detail, '| cause:', cause);
+  throw new ApiError(`Authentication service unavailable [${detail}] [cause: ${cause}]`, 503);
 }
 
 type PublicAuthRequestEndpoints =
