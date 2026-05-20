@@ -11,7 +11,7 @@ export function PreferencesInitializer() {
 
   useEffect(() => {
     if (isPending || data !== null) return;
-    create(deriveDefaultPreferences(navigator.language));
+    create(deriveDefaultPreferences(navigator.languages));
   }, [isPending, data, create]);
 
   return null;
