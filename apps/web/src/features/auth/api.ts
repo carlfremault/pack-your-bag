@@ -23,40 +23,34 @@ import {
 export async function createGuestSession(): Promise<LoginResponse> {
   const authClient = await getPublicAuthClient();
 
-  try {
-    const { data, error, response } = await authClient.POST('/auth/guest-session', {
+  const { data, error, response } = await authClient
+    .POST('/auth/guest-session', {
       signal: AbortSignal.timeout(15000),
-    });
+    })
+    .catch(throwServiceUnavailable);
 
-    if (!response.ok) {
-      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
-    }
-    if (!data) throw new ApiError('No data returned', 500);
-    return data as LoginResponse;
-  } catch (e) {
-    if (e instanceof ApiError) throw e;
-    throw new ApiError('Authentication service unavailable', 503);
+  if (!response.ok) {
+    throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
   }
+  if (!data) throw new ApiError('No data returned', 500);
+  return data as LoginResponse;
 }
 
 export async function login(body: LoginBody): Promise<LoginResponse> {
   const authClient = await getPublicAuthClient();
 
-  try {
-    const { data, error, response } = await authClient.POST('/auth/login', {
+  const { data, error, response } = await authClient
+    .POST('/auth/login', {
       body,
       signal: AbortSignal.timeout(10000),
-    });
+    })
+    .catch(throwServiceUnavailable);
 
-    if (!response.ok) {
-      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
-    }
-    if (!data) throw new ApiError('No data returned', 500);
-    return data;
-  } catch (e) {
-    if (e instanceof ApiError) throw e;
-    throw new ApiError('Authentication service unavailable', 503);
+  if (!response.ok) {
+    throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
   }
+  if (!data) throw new ApiError('No data returned', 500);
+  return data;
 }
 
 export async function logout(): Promise<void> {
@@ -92,37 +86,32 @@ export async function resetPassword(body: ResetPasswordBody): Promise<void> {
 export async function updatePassword(body: UpdatePasswordBody): Promise<LoginResponse> {
   const authClient = await getAccessTokenAuthClient();
 
-  try {
-    const { data, error, response } = await authClient.PATCH('/auth/update-password', {
+  const { data, error, response } = await authClient
+    .PATCH('/auth/update-password', {
       body,
       signal: AbortSignal.timeout(10000),
-    });
+    })
+    .catch(throwServiceUnavailable);
 
-    if (!response.ok) {
-      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
-    }
-    if (!data) throw new ApiError('No data returned', 500);
-    return data as LoginResponse;
-  } catch (e) {
-    if (e instanceof ApiError) throw e;
-    throw new ApiError('Authentication service unavailable', 503);
+  if (!response.ok) {
+    throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
   }
+  if (!data) throw new ApiError('No data returned', 500);
+  return data as LoginResponse;
 }
 
 export async function deleteAccount(body: DeleteAccountBody): Promise<void> {
   const authClient = await getAccessTokenAuthClient();
 
-  try {
-    const { error, response } = await authClient.POST('/user/delete', {
+  const { error, response } = await authClient
+    .POST('/user/delete', {
       body,
       signal: AbortSignal.timeout(10000),
-    });
-    if (!response.ok) {
-      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
-    }
-  } catch (e) {
-    if (e instanceof ApiError) throw e;
-    throw new ApiError('Authentication service unavailable', 503);
+    })
+    .catch(throwServiceUnavailable);
+
+  if (!response.ok) {
+    throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
   }
 }
 
@@ -131,8 +120,12 @@ export async function cancelDeletion(body: CancelDeletionBody): Promise<void> {
 }
 
 // ------------------------------------------------------------
-// Helper functions
+// Helpers
 // ------------------------------------------------------------
+
+function throwServiceUnavailable(): never {
+  throw new ApiError('Authentication service unavailable', 503);
+}
 
 type PublicAuthRequestEndpoints =
   | '/auth/register'
@@ -156,16 +149,14 @@ async function postPublicAuthRequest(
 ): Promise<void> {
   const authClient = await getPublicAuthClient();
 
-  try {
-    const { error, response } = await authClient.POST(endpoint, {
+  const { error, response } = await authClient
+    .POST(endpoint, {
       body,
       signal: AbortSignal.timeout(10000),
-    });
-    if (!response.ok) {
-      throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
-    }
-  } catch (e) {
-    if (e instanceof ApiError) throw e;
-    throw new ApiError('Authentication service unavailable', 503);
+    })
+    .catch(throwServiceUnavailable);
+
+  if (!response.ok) {
+    throw new AuthApiError(extractErrorMessage(error), response.status, extractErrorType(error));
   }
 }
