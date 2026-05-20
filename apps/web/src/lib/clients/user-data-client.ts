@@ -23,6 +23,7 @@ export async function getUserDataClient() {
 
   const client = createClient<paths>({
     baseUrl: userDataServiceUrl,
+    credentials: 'omit',
     fetch: (input: Request) => fetch(input, { cache: 'no-store' }),
   });
   client.use({

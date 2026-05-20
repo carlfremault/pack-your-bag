@@ -17,7 +17,7 @@ import 'server-only';
 export async function getPublicAuthClient() {
   const { authServiceUrl, bffSecret } = getAuthConfig();
 
-  const client = createClient<paths>({ baseUrl: authServiceUrl });
+  const client = createClient<paths>({ baseUrl: authServiceUrl, credentials: 'omit' });
   client.use({
     async onRequest({ request }) {
       request.headers.set('Content-Type', 'application/json');
@@ -33,7 +33,7 @@ export async function getRefreshTokenAuthClient() {
 
   if (session.isLoggedIn && session.refreshToken) {
     const { authServiceUrl, bffSecret } = getAuthConfig();
-    const client = createClient<paths>({ baseUrl: authServiceUrl });
+    const client = createClient<paths>({ baseUrl: authServiceUrl, credentials: 'omit' });
     client.use({
       async onRequest({ request }) {
         request.headers.set('Authorization', `Bearer ${session.refreshToken}`);
@@ -55,7 +55,7 @@ export async function getAccessTokenAuthClient() {
 
   if (!accessToken) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
 
-  const client = createClient<paths>({ baseUrl: authServiceUrl });
+  const client = createClient<paths>({ baseUrl: authServiceUrl, credentials: 'omit' });
   client.use({
     async onRequest({ request }) {
       request.headers.set('Authorization', `Bearer ${accessToken}`);
