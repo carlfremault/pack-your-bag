@@ -23,6 +23,7 @@ export async function getProductClient() {
 
   const client = createClient<paths>({
     baseUrl: productServiceUrl,
+    credentials: 'omit',
     fetch: (input: Request) => fetch(input, { cache: 'no-store' }),
   });
   client.use({
