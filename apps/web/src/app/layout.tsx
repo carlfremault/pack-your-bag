@@ -20,7 +20,21 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'PackYourBag!',
-  description: 'Luggage management app',
+  description:
+    'Your modular packing list companion. Organize items, build reusable lists, assemble packs, and never forget a thing.',
+  openGraph: {
+    title: 'PackYourBag!',
+    description:
+      'Your modular packing list companion. Organize items, build reusable lists, assemble packs, and never forget a thing.',
+    type: 'website',
+    siteName: 'PackYourBag!',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PackYourBag!',
+    description:
+      'Your modular packing list companion. Organize items, build reusable lists, assemble packs, and never forget a thing.',
+  },
 };
 
 export default async function RootLayout({
