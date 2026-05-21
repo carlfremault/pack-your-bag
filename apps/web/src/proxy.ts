@@ -213,5 +213,5 @@ function withNonce(req: NextRequest, nonce: string): Headers {
 export const config = {
   // Run on all routes except static assets.
   // This intentionally includes /api/* so route handlers also get the token header.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg).*)'],
 };
