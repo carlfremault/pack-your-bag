@@ -34,7 +34,10 @@ jobs:
           node-version: '24'
 
       - name: Install and enable Corepack
-        run: npm install -g corepack@latest && corepack enable
+        run: |
+          npm install -g corepack@latest
+          corepack enable
+          corepack install
 
       - name: Install dependencies
         run: yarn install --immutable
