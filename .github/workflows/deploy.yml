@@ -311,6 +311,9 @@ jobs:
 
             cat > .env <<ENVEOF
             SENTRY_RELEASE=${SHA}
+            SENTRY_AUTH_TOKEN=
+            NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
+            NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=${NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE}
             ENVEOF
 
             # ── Pull and restart ─────────────────────────────────────
