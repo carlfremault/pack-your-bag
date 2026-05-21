@@ -18,6 +18,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
     },
     environment: 'node',
+    passWithNoTests: true,
     include: ['**/*.test.ts'],
     setupFiles: ['tsconfig-paths/register'],
   },
