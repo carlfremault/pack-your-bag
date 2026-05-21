@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: packyourbag
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Fix Postgres host for CI
+        run: sed -i 's/POSTGRES_HOST=postgres_db/POSTGRES_HOST=localhost/' .env.test
+
+      - name: Initialize test database
+        run: yarn db:init:test
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Type check
+        run: yarn check-types
+
+      - name: Test
+        run: npx cross-env NODE_ENV=test npx dotenv -e .env.test -o -- npx turbo run test -- src/

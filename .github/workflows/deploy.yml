@@ -1,0 +1,337 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_all:
+        description: 'Build and deploy all services'
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # -----------------------------------------------------------
+  # Job 1: Detect which services changed
+  # -----------------------------------------------------------
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      auth-service: ${{ steps.set.outputs.auth-service }}
+      product-service: ${{ steps.set.outputs.product-service }}
+      user-data-service: ${{ steps.set.outputs.user-data-service }}
+      web: ${{ steps.set.outputs.web }}
+      db-migrate: ${{ steps.set.outputs.db-migrate }}
+      any-service: ${{ steps.set.outputs.any-service }}
+      any-change: ${{ steps.set.outputs.any-change }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'push'
+        with:
+          filters: |
+            auth-service:
+              - 'apps/auth-service/**'
+              - 'packages/**'
+            product-service:
+              - 'apps/product-service/**'
+              - 'packages/**'
+            user-data-service:
+              - 'apps/user-data-service/**'
+              - 'packages/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/**'
+            db-migrate:
+              - 'packages/db/**'
+            infra:
+              - 'docker-compose.prod.yml'
+              - 'Caddyfile'
+
+      - name: Resolve outputs
+        id: set
+        run: |
+          FORCE="${{ github.event.inputs.force_all }}"
+
+          resolve() {
+            local filter_val="$1"
+            if [ "$FORCE" = "true" ] || [ "$filter_val" = "true" ]; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          }
+
+          AUTH=$(resolve "${{ steps.filter.outputs.auth-service }}")
+          PRODUCT=$(resolve "${{ steps.filter.outputs.product-service }}")
+          UDS=$(resolve "${{ steps.filter.outputs.user-data-service }}")
+          WEB=$(resolve "${{ steps.filter.outputs.web }}")
+          DB=$(resolve "${{ steps.filter.outputs.db-migrate }}")
+          INFRA=$(resolve "${{ steps.filter.outputs.infra }}")
+
+          echo "auth-service=$AUTH" >> "$GITHUB_OUTPUT"
+          echo "product-service=$PRODUCT" >> "$GITHUB_OUTPUT"
+          echo "user-data-service=$UDS" >> "$GITHUB_OUTPUT"
+          echo "web=$WEB" >> "$GITHUB_OUTPUT"
+          echo "db-migrate=$DB" >> "$GITHUB_OUTPUT"
+
+          if [ "$AUTH" = "true" ] || [ "$PRODUCT" = "true" ] || [ "$UDS" = "true" ] || [ "$WEB" = "true" ] || [ "$DB" = "true" ]; then
+            echo "any-service=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "any-service=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ "$AUTH" = "true" ] || [ "$PRODUCT" = "true" ] || [ "$UDS" = "true" ] || [ "$WEB" = "true" ] || [ "$DB" = "true" ] || [ "$INFRA" = "true" ]; then
+            echo "any-change=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "any-change=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # -----------------------------------------------------------
+  # Job 2: Build changed images and push to GHCR
+  # -----------------------------------------------------------
+  build-and-push:
+    needs: changes
+    if: needs.changes.outputs.any-service == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - service: auth-service
+            dockerfile: apps/auth-service/Dockerfile
+          - service: product-service
+            dockerfile: apps/product-service/Dockerfile
+          - service: user-data-service
+            dockerfile: apps/user-data-service/Dockerfile
+          - service: web
+            dockerfile: apps/web/Dockerfile
+          - service: db-migrate
+            dockerfile: packages/db/Dockerfile
+    steps:
+      - name: Checkout
+        if: needs.changes.outputs[matrix.service] == 'true'
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        if: needs.changes.outputs[matrix.service] == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        if: needs.changes.outputs[matrix.service] == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.service }}:latest
+            ghcr.io/${{ github.repository }}/${{ matrix.service }}:sha-${{ github.sha }}
+          build-args: |
+            SENTRY_RELEASE=${{ github.sha }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=${{ secrets.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+  # -----------------------------------------------------------
+  # Job 3: Deploy to VPS
+  # -----------------------------------------------------------
+  deploy:
+    needs: [changes, build-and-push]
+    if: always() && !failure() && !cancelled() && needs.changes.outputs.any-change == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        env:
+          SHA: ${{ github.sha }}
+          # Shared secrets
+          BFF_SHARED_SECRET: ${{ secrets.BFF_SHARED_SECRET }}
+          INTERNAL_SERVICE_SECRET: ${{ secrets.INTERNAL_SERVICE_SECRET }}
+          RSA_PUBLIC_KEY_B64: ${{ secrets.RSA_PUBLIC_KEY_B64 }}
+          RSA_PRIVATE_KEY_B64: ${{ secrets.RSA_PRIVATE_KEY_B64 }}
+          # Database secrets
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_AUTH_USER: ${{ secrets.POSTGRES_AUTH_USER }}
+          POSTGRES_AUTH_PASSWORD: ${{ secrets.POSTGRES_AUTH_PASSWORD }}
+          POSTGRES_PRODUCT_USER: ${{ secrets.POSTGRES_PRODUCT_USER }}
+          POSTGRES_PRODUCT_PASSWORD: ${{ secrets.POSTGRES_PRODUCT_PASSWORD }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+          # Auth service secrets
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          AUTH_SENTRY_DSN: ${{ secrets.AUTH_SENTRY_DSN }}
+          AUTH_MAIL_HOST: ${{ secrets.AUTH_MAIL_HOST }}
+          AUTH_MAIL_USER: ${{ secrets.AUTH_MAIL_USER }}
+          AUTH_MAIL_PASS: ${{ secrets.AUTH_MAIL_PASS }}
+          AUTH_MAIL_FROM: ${{ secrets.AUTH_MAIL_FROM }}
+          # Other service secrets
+          PRODUCT_SENTRY_DSN: ${{ secrets.PRODUCT_SENTRY_DSN }}
+          USER_DATA_SENTRY_DSN: ${{ secrets.USER_DATA_SENTRY_DSN }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE }}
+          # Change flags
+          DB_MIGRATE_CHANGED: ${{ needs.changes.outputs.db-migrate }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SHA,BFF_SHARED_SECRET,INTERNAL_SERVICE_SECRET,RSA_PUBLIC_KEY_B64,RSA_PRIVATE_KEY_B64,POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,POSTGRES_AUTH_USER,POSTGRES_AUTH_PASSWORD,POSTGRES_PRODUCT_USER,POSTGRES_PRODUCT_PASSWORD,MONGO_INITDB_ROOT_USERNAME,MONGO_INITDB_ROOT_PASSWORD,AUTH_SECRET,AUTH_SENTRY_DSN,AUTH_MAIL_HOST,AUTH_MAIL_USER,AUTH_MAIL_PASS,AUTH_MAIL_FROM,PRODUCT_SENTRY_DSN,USER_DATA_SENTRY_DSN,NEXT_PUBLIC_SENTRY_DSN,NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,DB_MIGRATE_CHANGED
+          script_stop: true
+          script: |
+            set -e
+            cd ~/pack-your-bag
+
+            echo "==> Pulling latest code..."
+            git pull origin main
+
+            # ── Write env files ──────────────────────────────────────
+
+            echo "==> Writing env files..."
+
+            cat > .env.postgres <<ENVEOF
+            POSTGRES_USER=${POSTGRES_USER}
+            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            POSTGRES_DB=${POSTGRES_DB}
+            ENVEOF
+
+            cat > .env.mongo <<ENVEOF
+            MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+            ENVEOF
+
+            cat > .env.auth-service <<ENVEOF
+            NODE_ENV=production
+            FRONTEND_URL=https://packyourbag.me
+            TRUST_PROXY=true
+            BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
+            INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+            AUTH_PORT=8001
+            POSTGRES_AUTH_USER=${POSTGRES_AUTH_USER}
+            POSTGRES_AUTH_PASSWORD=${POSTGRES_AUTH_PASSWORD}
+            POSTGRES_AUTH_SCHEMA=app_auth
+            POSTGRES_AUTH_URL=postgresql://${POSTGRES_AUTH_USER}:${POSTGRES_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=app_auth
+            AUTH_DB_POOL_MAX=20
+            AUTH_DB_IDLE_TIMEOUT=30000
+            AUTH_DB_CONN_TIMEOUT=5000
+            AUTH_BCRYPT_SALT_ROUNDS=10
+            AUTH_THROTTLE_TTL=60000
+            AUTH_THROTTLE_LIMIT=100
+            RSA_PRIVATE_KEY_B64=${RSA_PRIVATE_KEY_B64}
+            RSA_PUBLIC_KEY_B64=${RSA_PUBLIC_KEY_B64}
+            AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS=3600
+            AUTH_REFRESH_TOKEN_EXPIRATION_IN_SECONDS=604800
+            AUTH_REFRESH_TOKEN_GRACE_PERIOD_MS=15000
+            AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS=14
+            AUTH_VERIFICATION_TOKEN_RETENTION_DAYS=1
+            AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS=900000
+            AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS=90
+            AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS=60
+            AUTH_AUDIT_LOG_INFO_RETENTION_DAYS=30
+            AUTH_USER_DELETE_RETENTION_DAYS=30
+            AUTH_GUEST_SESSION_TTL_HOURS=24
+            AUTH_HEALTH_DISK_PATH=/
+            AUTH_SENTRY_DSN=${AUTH_SENTRY_DSN}
+            AUTH_MAIL_HOST=${AUTH_MAIL_HOST}
+            AUTH_MAIL_PORT=587
+            AUTH_MAIL_SECURE=true
+            AUTH_MAIL_IGNORE_TLS=false
+            AUTH_MAIL_USER=${AUTH_MAIL_USER}
+            AUTH_MAIL_PASS=${AUTH_MAIL_PASS}
+            AUTH_MAIL_FROM=${AUTH_MAIL_FROM}
+            AUTH_MAIL_MAX_RETRIES=3
+            AUTH_MAIL_RETRY_DELAY_MS=1000
+            PRODUCT_SERVICE_URL=http://product-service:8002
+            USER_DATA_SERVICE_URL=http://user-data-service:8003
+            ENVEOF
+
+            cat > .env.product-service <<ENVEOF
+            NODE_ENV=production
+            TRUST_PROXY=true
+            BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
+            INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+            PRODUCT_PORT=8002
+            POSTGRES_PRODUCT_USER=${POSTGRES_PRODUCT_USER}
+            POSTGRES_PRODUCT_PASSWORD=${POSTGRES_PRODUCT_PASSWORD}
+            POSTGRES_PRODUCT_SCHEMA=app_product
+            POSTGRES_PRODUCT_URL=postgresql://${POSTGRES_PRODUCT_USER}:${POSTGRES_PRODUCT_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=app_product
+            PRODUCT_DB_POOL_MAX=20
+            PRODUCT_DB_IDLE_TIMEOUT=30000
+            PRODUCT_DB_CONN_TIMEOUT=5000
+            PRODUCT_THROTTLE_TTL=60000
+            PRODUCT_THROTTLE_LIMIT=100
+            PRODUCT_HEALTH_DISK_PATH=/
+            RSA_PUBLIC_KEY_B64=${RSA_PUBLIC_KEY_B64}
+            PRODUCT_SENTRY_DSN=${PRODUCT_SENTRY_DSN}
+            ENVEOF
+
+            cat > .env.user-data-service <<ENVEOF
+            NODE_ENV=production
+            TRUST_PROXY=true
+            BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
+            INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+            UDS_PORT=8003
+            MONGO_DB_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/userDataService?authSource=admin
+            MONGO_DB_NAME=userDataService
+            USER_DATA_THROTTLE_TTL=60000
+            USER_DATA_THROTTLE_LIMIT=100
+            RSA_PUBLIC_KEY_B64=${RSA_PUBLIC_KEY_B64}
+            USER_DATA_SENTRY_DSN=${USER_DATA_SENTRY_DSN}
+            ENVEOF
+
+            cat > .env.web <<ENVEOF
+            NODE_ENV=production
+            AUTH_SECRET=${AUTH_SECRET}
+            BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
+            AUTH_SERVICE_URL=http://auth-service:8001
+            PRODUCT_SERVICE_URL=http://product-service:8002
+            USER_DATA_SERVICE_URL=http://user-data-service:8003
+            NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
+            NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=${NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE}
+            ENVEOF
+
+            cat > .env.db-migrate <<ENVEOF
+            POSTGRES_ADMIN_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+            POSTGRES_AUTH_URL=postgresql://${POSTGRES_AUTH_USER}:${POSTGRES_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=app_auth
+            ENVEOF
+
+            cat > .env <<ENVEOF
+            SENTRY_RELEASE=${SHA}
+            ENVEOF
+
+            # ── Pull and restart ─────────────────────────────────────
+
+            echo "==> Pulling images..."
+            docker compose -f docker-compose.prod.yml pull
+
+            echo "==> Restarting services..."
+            docker compose -f docker-compose.prod.yml up -d
+
+            # ── Run migrations if DB changed ─────────────────────────
+
+            if [ "${DB_MIGRATE_CHANGED}" = "true" ]; then
+              echo "==> Running database migrations..."
+              docker compose -f docker-compose.prod.yml --profile migrate pull db-migrate
+              docker compose -f docker-compose.prod.yml --profile migrate run --rm db-migrate
+            fi
+
+            # ── Cleanup ──────────────────────────────────────────────
+
+            echo "==> Cleaning up old images..."
+            docker image prune -f
+
+            echo "==> Deploy complete!"

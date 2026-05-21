@@ -10,6 +10,7 @@
     "lint": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest --watch --no-coverage",
+    "check-types": "tsc --noEmit",
     "openapi": "ts-node --files -r tsconfig-paths/register scripts/generate-spec.ts"
   },
   "dependencies": {
