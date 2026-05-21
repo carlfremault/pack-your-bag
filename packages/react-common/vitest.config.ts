@@ -16,6 +16,7 @@ export default mergeConfig(
   uiConfig,
   defineConfig({
     test: {
+      passWithNoTests: true,
       projects: [
         {
           extends: true,

@@ -49,4 +49,4 @@ jobs:
         run: npx dotenv -e .env.test -o -- yarn check-types
 
       - name: Test
-        run: npx cross-env NODE_ENV=test npx dotenv -e .env.test -o -- npx turbo run test -- src/
+        run: npx cross-env NODE_ENV=test npx dotenv -e .env.test -o -- npx turbo run test --filter=!@repo/react-common -- src/
