@@ -43,10 +43,10 @@ jobs:
         run: yarn db:init:test
 
       - name: Lint
-        run: yarn lint
+        run: npx dotenv -e .env.test -o -- yarn lint
 
       - name: Type check
-        run: yarn check-types
+        run: npx dotenv -e .env.test -o -- yarn check-types
 
       - name: Test
         run: npx cross-env NODE_ENV=test npx dotenv -e .env.test -o -- npx turbo run test -- src/
