@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "check-types": "tsc --noEmit",
     "dev": "tsc",
     "collect-json-reports": "node dist/scripts/collect-json-outputs.js",
     "merge-json-reports": "nyc merge coverage/raw coverage/merged/merged-coverage.json",
