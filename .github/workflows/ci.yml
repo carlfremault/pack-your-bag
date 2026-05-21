@@ -35,6 +35,7 @@ jobs:
 
       - name: Install and enable Corepack
         run: |
+          npm uninstall -g yarn || true
           npm install -g corepack@latest
           corepack enable
           corepack install
