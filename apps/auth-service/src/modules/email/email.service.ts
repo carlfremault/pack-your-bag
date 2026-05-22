@@ -7,10 +7,18 @@ import { safeCaptureSentryException } from '@repo/nestjs-common';
 
 import { AuditLogProvider } from '../audit-log/audit-log.provider';
 
+import { BrevoService } from './brevo.service';
+
 interface EmailErrorContext {
   userId: string;
   emailType: string;
   metadata?: Prisma.InputJsonValue;
+}
+
+interface TemplateMailOptions {
+  templateId: number;
+  to: string;
+  params: Record<string, unknown>;
 }
 
 @Injectable()
@@ -23,9 +31,14 @@ export class EmailService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditLogProvider: AuditLogProvider,
+    private readonly brevoService: BrevoService,
   ) {
     this.maxRetries = this.configService.getOrThrow<number>('AUTH_MAIL_MAX_RETRIES');
     this.retryDelayMs = this.configService.getOrThrow<number>('AUTH_MAIL_RETRY_DELAY_MS');
+  }
+
+  get isBrevoEnabled(): boolean {
+    return this.brevoService.isEnabled;
   }
 
   async sendEmailWithRetry(
@@ -63,6 +76,47 @@ export class EmailService {
         }
         this.logger.warn(
           `Failed to send ${errorContext.emailType} email (attempt ${attempt}/${this.maxRetries}): ${errorMessage}`,
+        );
+
+        if (attempt < this.maxRetries) {
+          await this.delay(this.retryDelayMs * Math.pow(2, attempt - 1));
+        }
+      }
+    }
+
+    this.processError(lastError, errorContext, actualAttempts);
+  }
+
+  async sendTemplateWithRetry(
+    templateOptions: TemplateMailOptions,
+    errorContext: EmailErrorContext,
+  ): Promise<void> {
+    let lastError: unknown;
+    let actualAttempts = 0;
+
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      actualAttempts = attempt;
+      try {
+        await this.brevoService.sendTemplate(templateOptions);
+
+        if (attempt > 1) {
+          this.logger.log(
+            `Successfully sent ${errorContext.emailType} template email to user ${errorContext.userId} on attempt ${attempt}`,
+          );
+        }
+        return;
+      } catch (error) {
+        lastError = error;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (this.brevoService.isFatalBrevoError(error)) {
+          this.logger.warn(
+            `Fatal Brevo error detected for ${errorContext.emailType}, aborting retries: ${errorMessage}`,
+          );
+          break;
+        }
+        this.logger.warn(
+          `Failed to send ${errorContext.emailType} template email (attempt ${attempt}/${this.maxRetries}): ${errorMessage}`,
         );
 
         if (attempt < this.maxRetries) {
