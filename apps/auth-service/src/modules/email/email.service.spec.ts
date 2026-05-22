@@ -8,6 +8,7 @@ import { safeCaptureSentryException } from '@repo/nestjs-common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
+import { BrevoService } from '@/modules/email/brevo.service';
 import { EmailService } from '@/modules/email/email.service';
 
 vi.mock('@repo/nestjs-common', async (importOriginal) => {
@@ -44,6 +45,12 @@ describe('EmailService', () => {
     auditRequest: vi.fn(),
   };
 
+  const mockBrevoService = {
+    isEnabled: true,
+    sendTemplate: vi.fn(),
+    isFatalBrevoError: vi.fn().mockReturnValue(false),
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -53,6 +60,7 @@ describe('EmailService', () => {
         { provide: MailerService, useValue: mockMailerService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: AuditLogProvider, useValue: mockAuditLogProvider },
+        { provide: BrevoService, useValue: mockBrevoService },
       ],
     }).compile();
 
@@ -197,6 +205,124 @@ describe('EmailService', () => {
         expect.objectContaining({
           eventType: AuditEventType.EMAIL_SEND_FAILED,
           severity: AuditSeverity.ERROR,
+        }),
+      );
+    });
+  });
+
+  describe('isBrevoEnabled', () => {
+    it('should return true when brevo service is enabled', () => {
+      mockBrevoService.isEnabled = true;
+      expect(service.isBrevoEnabled).toBe(true);
+    });
+
+    it('should return false when brevo service is disabled', () => {
+      mockBrevoService.isEnabled = false;
+      expect(service.isBrevoEnabled).toBe(false);
+    });
+  });
+
+  describe('sendTemplateWithRetry', () => {
+    const mockTemplateOptions = {
+      templateId: 1,
+      to: 'test@example.com',
+      params: { resetLink: 'https://test.com/reset' },
+    };
+
+    const mockErrorContext = {
+      userId: 'user-123',
+      emailType: 'PASSWORD_RESET_REQUEST' as const,
+    };
+
+    it('should send template successfully on first attempt', async () => {
+      mockBrevoService.sendTemplate.mockResolvedValue(undefined);
+
+      await service.sendTemplateWithRetry(mockTemplateOptions, mockErrorContext);
+
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledWith(mockTemplateOptions);
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(1);
+      expect(safeCaptureSentryException).not.toHaveBeenCalled();
+      expect(mockAuditLogProvider.auditRequest).not.toHaveBeenCalled();
+    });
+
+    it('should retry on transient failures', async () => {
+      const maxRetries = mockConfigService.getOrThrow('AUTH_MAIL_MAX_RETRIES') as number;
+      mockBrevoService.sendTemplate
+        .mockRejectedValueOnce(new Error('Network timeout'))
+        .mockRejectedValueOnce(new Error('Connection refused'))
+        .mockResolvedValueOnce(undefined);
+
+      await service.sendTemplateWithRetry(mockTemplateOptions, mockErrorContext);
+
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(maxRetries);
+      expect(safeCaptureSentryException).not.toHaveBeenCalled();
+      expect(mockAuditLogProvider.auditRequest).not.toHaveBeenCalled();
+    });
+
+    it('should use exponential backoff for retries', async () => {
+      const retryDelayMs = mockConfigService.getOrThrow('AUTH_MAIL_RETRY_DELAY_MS') as number;
+      vi.useFakeTimers();
+
+      mockBrevoService.sendTemplate
+        .mockRejectedValueOnce(new Error('Retry 1'))
+        .mockRejectedValueOnce(new Error('Retry 2'))
+        .mockResolvedValueOnce(undefined);
+
+      const promise = service.sendTemplateWithRetry(mockTemplateOptions, mockErrorContext);
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(retryDelayMs * 1);
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(retryDelayMs * 2);
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(3);
+
+      await promise;
+
+      vi.useRealTimers();
+    });
+
+    it('should not retry on fatal Brevo errors', async () => {
+      mockBrevoService.sendTemplate.mockRejectedValue(new Error('Unauthorized'));
+      mockBrevoService.isFatalBrevoError.mockReturnValue(true);
+
+      await service.sendTemplateWithRetry(mockTemplateOptions, mockErrorContext);
+
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(1);
+      expect(safeCaptureSentryException).toHaveBeenCalled();
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalled();
+    });
+
+    it('should report to Sentry and audit log after max retries', async () => {
+      const maxRetries = mockConfigService.getOrThrow('AUTH_MAIL_MAX_RETRIES') as number;
+      mockBrevoService.sendTemplate.mockRejectedValue(new Error('API timeout'));
+      mockBrevoService.isFatalBrevoError.mockReturnValue(false);
+
+      await service.sendTemplateWithRetry(mockTemplateOptions, mockErrorContext);
+
+      expect(mockBrevoService.sendTemplate).toHaveBeenCalledTimes(maxRetries);
+      expect(safeCaptureSentryException).toHaveBeenCalledWith(
+        expect.objectContaining({
+          exception: expect.any(Error) as Error,
+          errorCode: AuditEventType.EMAIL_SEND_FAILED,
+          eventType: AuditEventType.EMAIL_SEND_FAILED,
+          fingerprint: ['PASSWORD_RESET_REQUEST', 'EMAIL_SEND_FAILED'],
+          level: 'error',
+        }),
+        expect.anything(),
+      );
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditEventType.EMAIL_SEND_FAILED,
+          severity: AuditSeverity.ERROR,
+          userId: mockErrorContext.userId,
+          message: expect.stringContaining('Failed to send PASSWORD_RESET_REQUEST') as string,
+          metadata: expect.objectContaining({
+            emailType: 'PASSWORD_RESET_REQUEST',
+            attempts: maxRetries,
+          }) as Record<string, unknown>,
         }),
       );
     });

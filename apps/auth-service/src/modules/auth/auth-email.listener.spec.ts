@@ -12,16 +12,16 @@ vi.mock('@/common/utils/captureSentryException', () => ({
   safeCaptureSentryException: vi.fn(),
 }));
 
-const MOCK_CONFIG = {
+const MOCK_CONFIG: Record<string, unknown> = {
   FRONTEND_URL: 'https://test.com',
-} as const;
+};
 
 describe('AuthEmailListener', () => {
   let authEmailListener: AuthEmailListener;
 
   const mockConfigService = {
     getOrThrow: vi.fn(<T>(key: string, defaultValue?: T): T => {
-      const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
+      const value = MOCK_CONFIG[key];
       if (value === undefined && defaultValue === undefined) {
         throw new Error(`Configuration key "${key}" does not exist`);
       }
@@ -31,10 +31,13 @@ describe('AuthEmailListener', () => {
 
   const mockEmailService = {
     sendEmailWithRetry: vi.fn(),
+    sendTemplateWithRetry: vi.fn(),
+    isBrevoEnabled: false,
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockEmailService.isBrevoEnabled = false;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -102,6 +105,37 @@ describe('AuthEmailListener', () => {
         },
       );
     });
+
+    it('should use Brevo template when enabled', async () => {
+      mockEmailService.isBrevoEnabled = true;
+      mockEmailService.sendTemplateWithRetry.mockResolvedValue(undefined);
+      MOCK_CONFIG['BREVO_TEMPLATE_PASSWORD_RESET_REQUEST'] = 10;
+
+      const event = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        resetToken: 'abc123resettoken456',
+      };
+
+      await authEmailListener.handlePasswordResetRequested(event);
+
+      expect(mockEmailService.sendTemplateWithRetry).toHaveBeenCalledWith(
+        {
+          templateId: 10,
+          to: 'testemail@test.com',
+          params: {
+            resetLink: expect.stringContaining('https://test.com/reset-password?token=') as string,
+          },
+        },
+        {
+          userId: 'user-123',
+          emailType: 'PASSWORD_RESET_REQUEST',
+        },
+      );
+      expect(mockEmailService.sendEmailWithRetry).not.toHaveBeenCalled();
+
+      delete MOCK_CONFIG['BREVO_TEMPLATE_PASSWORD_RESET_REQUEST'];
+    });
   });
 
   describe('handlePasswordResetConfirmed', () => {
@@ -129,6 +163,35 @@ describe('AuthEmailListener', () => {
         },
       );
       expect(mockEmailService.sendEmailWithRetry).toHaveBeenCalledTimes(1);
+    });
+
+    it('should use Brevo template when enabled', async () => {
+      mockEmailService.isBrevoEnabled = true;
+      mockEmailService.sendTemplateWithRetry.mockResolvedValue(undefined);
+      MOCK_CONFIG['BREVO_TEMPLATE_PASSWORD_RESET_CONFIRMATION'] = 20;
+
+      const event = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        resetTimestamp: formatLocaleDate(new Date('2024-01-15T10:30:00Z')),
+      };
+
+      await authEmailListener.handlePasswordResetConfirmed(event);
+
+      expect(mockEmailService.sendTemplateWithRetry).toHaveBeenCalledWith(
+        {
+          templateId: 20,
+          to: 'testemail@test.com',
+          params: { resetTimestamp: event.resetTimestamp },
+        },
+        {
+          userId: 'user-123',
+          emailType: 'PASSWORD_RESET_CONFIRMATION',
+        },
+      );
+      expect(mockEmailService.sendEmailWithRetry).not.toHaveBeenCalled();
+
+      delete MOCK_CONFIG['BREVO_TEMPLATE_PASSWORD_RESET_CONFIRMATION'];
     });
   });
 
@@ -182,6 +245,39 @@ describe('AuthEmailListener', () => {
           emailType: 'ACCOUNT_VERIFICATION_REQUEST',
         },
       );
+    });
+
+    it('should use Brevo template when enabled', async () => {
+      mockEmailService.isBrevoEnabled = true;
+      mockEmailService.sendTemplateWithRetry.mockResolvedValue(undefined);
+      MOCK_CONFIG['BREVO_TEMPLATE_ACCOUNT_VERIFICATION_REQUEST'] = 30;
+
+      const event = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        verificationToken: 'abc123verificationtoken456',
+      };
+
+      await authEmailListener.handleAccountVerificationRequested(event);
+
+      expect(mockEmailService.sendTemplateWithRetry).toHaveBeenCalledWith(
+        {
+          templateId: 30,
+          to: 'testemail@test.com',
+          params: {
+            verificationLink: expect.stringContaining(
+              'https://test.com/verify-email?token=',
+            ) as string,
+          },
+        },
+        {
+          userId: 'user-123',
+          emailType: 'ACCOUNT_VERIFICATION_REQUEST',
+        },
+      );
+      expect(mockEmailService.sendEmailWithRetry).not.toHaveBeenCalled();
+
+      delete MOCK_CONFIG['BREVO_TEMPLATE_ACCOUNT_VERIFICATION_REQUEST'];
     });
   });
 });

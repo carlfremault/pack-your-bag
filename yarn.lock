@@ -1121,6 +1121,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@getbrevo/brevo@npm:^5.0.4":
+  version: 5.0.4
+  resolution: "@getbrevo/brevo@npm:5.0.4"
+  checksum: 10c0/dd1bcf8f7f463907445843c27e2034cb4819b6b6075c299da7b056fcb3c8653c6d51770ab08391a8e671eb588c0497909ad238ea20064e3257bab22129c39c40
+  languageName: node
+  linkType: hard
+
 "@hapi/address@npm:^5.1.1":
   version: 5.1.1
   resolution: "@hapi/address@npm:5.1.1"
@@ -7471,6 +7478,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "auth-service@workspace:apps/auth-service"
   dependencies:
+    "@getbrevo/brevo": "npm:^5.0.4"
     "@nestjs-modules/mailer": "npm:^2.0.2"
     "@nestjs/axios": "npm:^4.0.1"
     "@nestjs/cli": "npm:^11.0.0"

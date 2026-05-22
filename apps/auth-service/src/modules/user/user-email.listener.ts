@@ -23,6 +23,18 @@ export class UserEmailListener {
   async handleAccountDeletionRequested(event: AccountDeletionRequestedEvent): Promise<void> {
     const { userId, email, cancellationToken, cancellationDate } = event;
     const cancellationLink = `${this.frontendUrl}/cancel-deletion?token=${encodeURIComponent(cancellationToken)}`;
+    const errorContext = { userId, emailType: 'ACCOUNT_DELETION_REQUEST' };
+
+    if (this.emailService.isBrevoEnabled) {
+      const templateId = this.configService.getOrThrow<number>(
+        'BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST',
+      );
+      await this.emailService.sendTemplateWithRetry(
+        { templateId, to: email, params: { cancellationLink, cancellationDate } },
+        errorContext,
+      );
+      return;
+    }
 
     await this.emailService.sendEmailWithRetry(
       {
@@ -35,10 +47,7 @@ export class UserEmailListener {
           <p>After ${cancellationDate}, your account and all data will be permanently deleted.</p>
         `,
       },
-      {
-        userId,
-        emailType: 'ACCOUNT_DELETION_REQUEST',
-      },
+      errorContext,
     );
   }
 }

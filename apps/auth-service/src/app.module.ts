@@ -120,6 +120,29 @@ const validationSchema = Joi.object({
   AUTH_MAIL_FROM: Joi.string().required(),
   AUTH_MAIL_MAX_RETRIES: Joi.number().min(0).max(10).default(3),
   AUTH_MAIL_RETRY_DELAY_MS: Joi.number().min(100).max(60000).default(1000),
+
+  // Brevo API (optional — when set, emails use Brevo templates instead of SMTP)
+  BREVO_API_KEY: Joi.string().optional().allow(''),
+  BREVO_TEMPLATE_PASSWORD_RESET_REQUEST: Joi.number().when('BREVO_API_KEY', {
+    is: Joi.exist().not(''),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  BREVO_TEMPLATE_PASSWORD_RESET_CONFIRMATION: Joi.number().when('BREVO_API_KEY', {
+    is: Joi.exist().not(''),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  BREVO_TEMPLATE_ACCOUNT_VERIFICATION_REQUEST: Joi.number().when('BREVO_API_KEY', {
+    is: Joi.exist().not(''),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST: Joi.number().when('BREVO_API_KEY', {
+    is: Joi.exist().not(''),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
 });
 
 @Module({
