@@ -9,6 +9,10 @@ import { UnAuthenticatedHeader } from '@repo/react-common/header';
 
 import * as Sentry from '@sentry/nextjs';
 
+function isStaleActionError(error: Error): boolean {
+  return error.name === 'UnrecognizedActionError' || error.message.includes('Server Action');
+}
+
 export default function Error({
   error,
   reset,
@@ -16,9 +20,23 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const stale = isStaleActionError(error);
+
   useEffect(() => {
+    if (stale) {
+      window.location.reload();
+      return;
+    }
     Sentry.captureException(error);
-  }, [error]);
+  }, [error, stale]);
+
+  if (stale) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-muted-foreground text-sm">Updating to latest version...</p>
+      </div>
+    );
+  }
 
   return (
     <>
