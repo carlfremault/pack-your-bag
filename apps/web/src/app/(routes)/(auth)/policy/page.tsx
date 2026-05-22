@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { BackLink } from '@/components/Navigation/BackLink';
+import { ObfuscatedEmail } from '@/components/ObfuscatedEmail';
 
 export const metadata: Metadata = {
   title: 'Terms & Privacy Notice',
@@ -83,8 +84,9 @@ export default function Page() {
           <section className="flex flex-col gap-2">
             <h3 className="text-primary font-medium">Data controller</h3>
             <p className="text-foreground text-sm">
-              The data controller for PackYourBag is &lt;your name&gt;. You can contact us about
-              privacy matters at &lt;privacy contact email&gt;.
+              The data controller for PackYourBag is Carl Fremault. You can contact us about privacy
+              matters at{' '}
+              <ObfuscatedEmail user="privacy" domain="packyourbag.me" className="underline" />.
             </p>
           </section>
 
@@ -169,8 +171,9 @@ export default function Page() {
               Under the GDPR you have the right to access the personal data we hold about you, have
               inaccurate data corrected, request erasure of your data, restrict or object to how we
               process it, and receive a copy of your data in a portable format. To exercise any of
-              these rights, contact us at &lt;privacy contact email&gt;. We will respond within 30
-              days.
+              these rights, contact us at{' '}
+              <ObfuscatedEmail user="privacy" domain="packyourbag.me" className="underline" />. We
+              will respond within 30 days.
             </p>
           </section>
 
