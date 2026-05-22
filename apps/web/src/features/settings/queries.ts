@@ -55,8 +55,8 @@ const useCreatePreferences = () => {
 
   return useMutation({
     mutationFn: createPreferences,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['preferences'] });
+    onSuccess: (data) => {
+      queryClient.setQueryData(['preferences'], data);
     },
   });
 };
