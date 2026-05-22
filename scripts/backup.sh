@@ -65,7 +65,7 @@ echo "[$(date)] Pruning old backups..."
 find "$DAILY_DIR" -type f -mtime +7 -delete
 for pattern in "postgres_*.sql.gz" "mongo_*.archive.gz"; do
   # shellcheck disable=SC2086
-  ls -t "$WEEKLY_DIR"/$pattern 2>/dev/null | tail -n +5 | xargs -r rm -f
+  ls -t "$WEEKLY_DIR"/$pattern 2>/dev/null | tail -n +5 | xargs -r rm -f || true
 done
 
 # ── Sync to Hetzner Object Storage ────────────────────────────
