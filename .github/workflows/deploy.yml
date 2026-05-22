@@ -309,6 +309,10 @@ jobs:
             POSTGRES_AUTH_URL=postgresql://${POSTGRES_AUTH_USER}:${POSTGRES_AUTH_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=app_auth
             ENVEOF
 
+            cat > .env.postgres-exporter <<ENVEOF
+            DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+            ENVEOF
+
             cat > .env <<ENVEOF
             SENTRY_RELEASE=${SHA}
             SENTRY_AUTH_TOKEN=
