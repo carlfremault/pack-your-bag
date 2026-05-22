@@ -10,3 +10,11 @@ packyourbag.me {
 		-Server
 	}
 }
+
+grafana.packyourbag.me {
+	reverse_proxy grafana:3000
+}
+
+status.packyourbag.me {
+	reverse_proxy uptime-kuma:3001
+}
