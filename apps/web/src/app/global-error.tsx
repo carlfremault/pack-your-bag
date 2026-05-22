@@ -11,6 +11,10 @@ import * as Sentry from '@sentry/nextjs';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
+function isStaleActionError(error: Error): boolean {
+  return error.name === 'UnrecognizedActionError' || error.message.includes('Server Action');
+}
+
 export default function GlobalError({
   error,
   reset,
@@ -18,9 +22,27 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const stale = isStaleActionError(error);
+
   useEffect(() => {
+    if (stale) {
+      window.location.reload();
+      return;
+    }
     Sentry.captureException(error);
-  }, [error]);
+  }, [error, stale]);
+
+  if (stale) {
+    return (
+      <html lang="en" className={inter.variable}>
+        <body>
+          <div className="flex h-screen flex-col items-center justify-center">
+            <p className="text-muted-foreground text-sm">Updating to latest version...</p>
+          </div>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en" className={inter.variable}>
