@@ -16,16 +16,16 @@ vi.mock('@repo/nestjs-common', async (importOriginal) => {
   };
 });
 
-const MOCK_CONFIG = {
+const MOCK_CONFIG: Record<string, unknown> = {
   FRONTEND_URL: 'https://test.com',
-} as const;
+};
 
 describe('UserEmailListener', () => {
   let userEmailListener: UserEmailListener;
 
   const mockConfigService = {
     getOrThrow: vi.fn(<T = string>(key: string, defaultValue?: T): T => {
-      const value = MOCK_CONFIG[key as keyof typeof MOCK_CONFIG];
+      const value = MOCK_CONFIG[key];
       if (value === undefined && defaultValue === undefined) {
         throw new Error(`Configuration key "${key}" does not exist`);
       }
@@ -35,10 +35,13 @@ describe('UserEmailListener', () => {
 
   const mockEmailService = {
     sendEmailWithRetry: vi.fn(),
+    sendTemplateWithRetry: vi.fn(),
+    isBrevoEnabled: false,
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockEmailService.isBrevoEnabled = false;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -106,6 +109,42 @@ describe('UserEmailListener', () => {
           emailType: 'ACCOUNT_DELETION_REQUEST',
         },
       );
+    });
+
+    it('should use Brevo template when enabled', async () => {
+      mockEmailService.isBrevoEnabled = true;
+      mockEmailService.sendTemplateWithRetry.mockResolvedValue(undefined);
+      MOCK_CONFIG['BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST'] = 40;
+
+      const cancellationDate = formatLocaleDate(new Date(), 'en-GB');
+      const event = {
+        userId: 'user-123',
+        email: 'testemail@test.com',
+        cancellationToken: 'abc123resettoken456',
+        cancellationDate,
+      };
+
+      await userEmailListener.handleAccountDeletionRequested(event);
+
+      expect(mockEmailService.sendTemplateWithRetry).toHaveBeenCalledWith(
+        {
+          templateId: 40,
+          to: 'testemail@test.com',
+          params: {
+            cancellationLink: expect.stringContaining(
+              'https://test.com/cancel-deletion?token=',
+            ) as string,
+            cancellationDate,
+          },
+        },
+        {
+          userId: 'user-123',
+          emailType: 'ACCOUNT_DELETION_REQUEST',
+        },
+      );
+      expect(mockEmailService.sendEmailWithRetry).not.toHaveBeenCalled();
+
+      delete MOCK_CONFIG['BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST'];
     });
   });
 });

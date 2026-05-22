@@ -26,6 +26,18 @@ export class AuthEmailListener {
   async handlePasswordResetRequested(event: PasswordResetRequestedEvent): Promise<void> {
     const { userId, email, resetToken } = event;
     const resetLink = `${this.frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
+    const errorContext = { userId, emailType: 'PASSWORD_RESET_REQUEST' };
+
+    if (this.emailService.isBrevoEnabled) {
+      const templateId = this.configService.getOrThrow<number>(
+        'BREVO_TEMPLATE_PASSWORD_RESET_REQUEST',
+      );
+      await this.emailService.sendTemplateWithRetry(
+        { templateId, to: email, params: { resetLink } },
+        errorContext,
+      );
+      return;
+    }
 
     await this.emailService.sendEmailWithRetry(
       {
@@ -34,16 +46,25 @@ export class AuthEmailListener {
         text: `Reset your password here: ${resetLink}`,
         html: `<p>Click here to reset your password: <a href="${resetLink}">Reset Password</a></p>`,
       },
-      {
-        userId,
-        emailType: 'PASSWORD_RESET_REQUEST',
-      },
+      errorContext,
     );
   }
 
   @OnEvent(AUTH_EVENTS.PASSWORD_RESET_CONFIRMED, { async: true })
   async handlePasswordResetConfirmed(event: PasswordResetConfirmedEvent): Promise<void> {
     const { userId, email, resetTimestamp } = event;
+    const errorContext = { userId, emailType: 'PASSWORD_RESET_CONFIRMATION' };
+
+    if (this.emailService.isBrevoEnabled) {
+      const templateId = this.configService.getOrThrow<number>(
+        'BREVO_TEMPLATE_PASSWORD_RESET_CONFIRMATION',
+      );
+      await this.emailService.sendTemplateWithRetry(
+        { templateId, to: email, params: { resetTimestamp } },
+        errorContext,
+      );
+      return;
+    }
 
     await this.emailService.sendEmailWithRetry(
       {
@@ -55,10 +76,7 @@ export class AuthEmailListener {
           <p><strong>If you did not make this change, please contact support immediately.</strong></p>
         `,
       },
-      {
-        userId,
-        emailType: 'PASSWORD_RESET_CONFIRMATION',
-      },
+      errorContext,
     );
   }
 
@@ -68,6 +86,18 @@ export class AuthEmailListener {
   ): Promise<void> {
     const { userId, email, verificationToken } = event;
     const verificationLink = `${this.frontendUrl}/verify-email?token=${encodeURIComponent(verificationToken)}`;
+    const errorContext = { userId, emailType: 'ACCOUNT_VERIFICATION_REQUEST' };
+
+    if (this.emailService.isBrevoEnabled) {
+      const templateId = this.configService.getOrThrow<number>(
+        'BREVO_TEMPLATE_ACCOUNT_VERIFICATION_REQUEST',
+      );
+      await this.emailService.sendTemplateWithRetry(
+        { templateId, to: email, params: { verificationLink } },
+        errorContext,
+      );
+      return;
+    }
 
     await this.emailService.sendEmailWithRetry(
       {
@@ -76,10 +106,7 @@ export class AuthEmailListener {
         text: `Complete your registration here: ${verificationLink}`,
         html: `<p>Click here to confirm your email address and complete your registration: <a href="${verificationLink}">Confirm Email</a></p>`,
       },
-      {
-        userId,
-        emailType: 'ACCOUNT_VERIFICATION_REQUEST',
-      },
+      errorContext,
     );
   }
 }
