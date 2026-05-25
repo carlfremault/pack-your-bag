@@ -36,7 +36,7 @@ export function InputPassword(props: InputPasswordProps) {
       </span>
       <div className={classNames(inputPasswordContainerClassName, className)}>
         <input
-          className={classNames('flex-1 border-0 bg-transparent outline-none')}
+          className={classNames('min-w-0 flex-1 border-0 bg-transparent outline-none')}
           type={isVisible ? 'text' : 'password'}
           required={required}
           aria-invalid={!!errorMessage}
