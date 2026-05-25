@@ -5,7 +5,7 @@ import { UnAuthenticatedHeader } from '@repo/react-common/header';
 
 export default function NotFound() {
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-dvh flex-col">
       <UnAuthenticatedHeader />
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 p-8">
         <h1 className="text-xl font-semibold">Page not found :(</h1>
