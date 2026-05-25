@@ -10,7 +10,10 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import {
+  EmailAlreadyVerifiedException,
+  InvalidTokenException,
+} from '@/common/exceptions/bad-request.exceptions';
 import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
 import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
@@ -877,7 +880,6 @@ describe('AuthService', () => {
           where: {
             token: 'hashed_token',
             type: TokenType.EMAIL_VERIFICATION,
-            used: false,
           },
         },
         mockPrismaService,
@@ -934,6 +936,70 @@ describe('AuthService', () => {
         roleId: 1,
         isDeleted: true,
       });
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw EmailAlreadyVerifiedException if token is used and email is verified', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue({
+        ...mockVerificationRecord,
+        used: true,
+      });
+      mockUserService.getUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isEmailVerified: true,
+        isDeleted: false,
+      });
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(EmailAlreadyVerifiedException);
+    });
+
+    it('should throw InvalidTokenException if token is used but email is not verified', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue({
+        ...mockVerificationRecord,
+        used: true,
+      });
+      mockUserService.getUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isEmailVerified: false,
+        isDeleted: false,
+      });
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if token is used and user is deleted', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue({
+        ...mockVerificationRecord,
+        used: true,
+      });
+      mockUserService.getUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'testemail@test.com',
+        password: 'hashed_password',
+        roleId: 1,
+        isDeleted: true,
+      });
+
+      await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
+    });
+
+    it('should throw InvalidTokenException if token is used and user does not exist', async () => {
+      const dto = { token: 'valid_token' };
+      mockVerificationTokenService.getVerificationToken.mockResolvedValue({
+        ...mockVerificationRecord,
+        used: true,
+      });
+      mockUserService.getUser.mockResolvedValue(null);
 
       await expect(service.verifyEmail(dto)).rejects.toThrow(InvalidTokenException);
     });

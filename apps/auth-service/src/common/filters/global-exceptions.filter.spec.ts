@@ -15,7 +15,10 @@ import { AccountDeletedException } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import {
+  EmailAlreadyVerifiedException,
+  InvalidTokenException,
+} from '@/common/exceptions/bad-request.exceptions';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 import { GlobalExceptionsFilter } from './global-exceptions.filter';
@@ -225,6 +228,24 @@ describe('GlobalExceptionsFilter', () => {
           severity: AuditSeverity.WARN,
           statusCode: HttpStatus.FORBIDDEN,
           message: 'No access',
+        }),
+        expect.anything(),
+      );
+    });
+  });
+
+  describe('400 - EmailAlreadyVerifiedException', () => {
+    it('should audit INVALID_TOKEN with INFO severity', () => {
+      const { host } = createMockHost();
+
+      filter.catch(new EmailAlreadyVerifiedException(), host as never);
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditEventType.INVALID_TOKEN,
+          severity: AuditSeverity.INFO,
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Email address has already been verified',
         }),
         expect.anything(),
       );
