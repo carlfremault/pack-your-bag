@@ -36,7 +36,7 @@ export default function GlobalError({
     return (
       <html lang="en" className={inter.variable}>
         <body>
-          <div className="flex h-screen flex-col items-center justify-center">
+          <div className="flex h-dvh flex-col items-center justify-center">
             <p className="text-muted-foreground text-sm">Updating to latest version...</p>
           </div>
         </body>
@@ -47,7 +47,7 @@ export default function GlobalError({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <div className="flex h-screen flex-col">
+        <div className="flex h-dvh flex-col">
           <UnAuthenticatedHeader />
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 p-8">
             <h1 className="text-xl font-semibold">Something went wrong :(</h1>

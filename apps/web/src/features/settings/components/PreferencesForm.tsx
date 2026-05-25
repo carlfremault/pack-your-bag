@@ -71,7 +71,7 @@ export function PreferencesForm() {
     <fieldset
       disabled={isPending}
       aria-busy={isPending}
-      className="bg-surface border-primary-ring flex w-full flex-col gap-6 rounded-md border p-4 shadow-sm transition-opacity disabled:opacity-50"
+      className="bg-surface border-primary-ring flex w-full min-w-0 flex-col gap-6 rounded-md border p-4 shadow-sm transition-opacity disabled:opacity-50"
     >
       <legend className="sr-only">Preferences</legend>
       <InputIconToggle
