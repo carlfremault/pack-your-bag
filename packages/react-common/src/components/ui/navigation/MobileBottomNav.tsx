@@ -19,7 +19,7 @@ export function MobileBottomNav(props: MobileBottomNavProps) {
   return (
     <nav
       aria-label="Main navigation"
-      className="border-primary-ring bg-surface absolute bottom-0 z-10 flex w-full justify-around border-t p-2"
+      className="border-primary-ring bg-surface fixed bottom-0 z-10 flex w-full justify-around border-t p-2"
     >
       {tabs.map(({ id, label, icon: Icon, href }) => (
         <LinkComponent
