@@ -1,10 +1,11 @@
 import { ApiError } from '@/lib/errors';
 
 import { verifyEmail } from './api';
+import { AuthApiError } from './errors';
 
 export async function verifyEmailToken(
   token: string,
-): Promise<{ success: boolean; formError?: string }> {
+): Promise<{ success: boolean; formError?: string; errorCode?: string }> {
   if (!token || token.trim().length === 0) {
     return { success: false, formError: 'Invalid verification token' };
   }
@@ -12,6 +13,9 @@ export async function verifyEmailToken(
   try {
     await verifyEmail({ token });
   } catch (e) {
+    if (e instanceof AuthApiError) {
+      return { success: false, formError: e.message, errorCode: e.errorCode };
+    }
     return { success: false, formError: e instanceof ApiError ? e.message : 'Verification failed' };
   }
 

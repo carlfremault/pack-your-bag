@@ -10,3 +10,14 @@ export class InvalidTokenException extends BadRequestException {
     this.name = 'InvalidTokenException';
   }
 }
+
+// Used when: A verify-email token has already been used and the email is already verified
+export class EmailAlreadyVerifiedException extends BadRequestException {
+  constructor() {
+    super(
+      { message: 'Email address has already been verified', error: 'EMAIL_ALREADY_VERIFIED' },
+      { cause: 'Email address has already been verified' },
+    );
+    this.name = 'EmailAlreadyVerifiedException';
+  }
+}
