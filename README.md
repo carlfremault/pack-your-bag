@@ -23,6 +23,11 @@ Work in Progress - `dev` branch is where the amazing stuff is happening right no
   - [6.3 Phase 2: Resource Server (Product Service)](#63-phase-2-resource-server-product-service)
   - [6.4 Phase 3: Resource Server (User Data Service)](#64-phase-3-resource-server-user-data-service)
   - [6.5 Phase 4: Frontend](#65-phase-4-frontend)
+- [7. Deployment](#7-deployment)
+  - [7.1 Containerization](#71-containerization)
+  - [7.2 Infrastructure](#72-infrastructure)
+  - [7.3 CI/CD Pipeline](#73-cicd-pipeline)
+  - [7.4 Observability & Operations](#74-observability--operations)
 
 ## 1. Idea & motivation
 
@@ -398,6 +403,45 @@ Components in `@repo/react-common` have a colocated Storybook story file. Storie
 With the component library stable, integration into the Next.js app leaned into the async React paradigm: Server Components prefetch data before rendering, with Suspense boundaries and skeleton fallbacks handling the async client layer. This keeps the data-fetching waterfall on the server and eliminates loading spinners on initial navigation.
 
 Accessibility was treated as a first-class concern throughout — ARIA attributes, keyboard navigation, screen reader support, and semantic markup applied consistently across all routes.
+
+## 7. Deployment
+
+The application runs on a Hetzner VPS (CPX32) with all services containerized behind Caddy as a reverse proxy.
+
+### 7.1 Containerization
+
+Each service has a multi-stage Dockerfile that builds from the monorepo root context, producing minimal Alpine-based production images. A dedicated `db-migrate` container handles Prisma migrations and seeding in isolation — it holds admin-level database credentials and runs on-demand via a Docker Compose profile, keeping DDL access out of application containers entirely.
+
+The production Compose file enforces least-privilege at every layer:
+
+- **Network isolation:** All containers communicate on an internal Docker network. Only Caddy exposes ports to the internet (80, 443, 443/udp for HTTP/3). Database ports are bound to loopback only, accessible via SSH tunnel for maintenance.
+- **Per-service env files:** Each container receives only its own secrets. The Auth Service never sees Product database credentials, and vice versa.
+- **Health checks:** Every service reports health status, enabling automatic restarts on failure.
+
+### 7.2 Infrastructure
+
+Caddy handles TLS termination with automatic certificate provisioning via Let's Encrypt. The VPS is hardened with SSH key-only authentication, `ufw` firewall (ports 22/80/443), and `fail2ban` for brute-force protection.
+
+Transactional email (password reset, account verification, deletion confirmation) is delivered through Brevo SMTP, replacing the development Mailpit instance. DNS records include SPF, DKIM, and DMARC for deliverability.
+
+### 7.3 CI/CD Pipeline
+
+Two GitHub Actions workflows automate the path from pull request to production:
+
+- **CI** runs on every PR to `main`: lint, type-check, and test against a real PostgreSQL service container.
+- **Deploy** triggers on merge to `main`. It uses path-based change detection so only affected services are rebuilt — a change to `apps/auth-service/` won't rebuild the web frontend. Images are pushed to GitHub Container Registry (GHCR), then the workflow SSHs into the VPS, writes per-service env files from GitHub Secrets, pulls the updated images, and restarts. Database migrations run conditionally, only when the `packages/db` path has changes.
+
+GitHub Secrets serve as the single source of truth for all production configuration. No secrets are stored on the VPS filesystem outside of the deploy process.
+
+### 7.4 Observability & Operations
+
+**Error tracking:** Sentry is integrated across all four services with per-environment tagging and release tracking tied to git SHAs. Next.js source maps are uploaded at build time via `@sentry/nextjs`; NestJS compiled output is close enough to source for readable stack traces.
+
+**Metrics & dashboards:** Prometheus scrapes system metrics (via Node Exporter) and PostgreSQL statistics (via Postgres Exporter), with Grafana dashboards on a dedicated subdomain.
+
+**Uptime monitoring:** Uptime Kuma monitors all service health endpoints internally, complemented by an external monitor to catch full VPS outages.
+
+**Backups:** A scheduled script dumps PostgreSQL and MongoDB, manages retention, and syncs to Hetzner Object Storage.
 
 ## License
 
