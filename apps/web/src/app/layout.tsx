@@ -19,6 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'),
   title: 'PackYourBag!',
   description:
     'Your modular packing list companion. Organize items, build reusable lists, assemble packs, and never forget a thing.',
