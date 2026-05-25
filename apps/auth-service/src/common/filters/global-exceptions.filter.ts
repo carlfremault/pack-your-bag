@@ -12,7 +12,10 @@ import {
 
 import { Request } from 'express';
 
-import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import {
+  EmailAlreadyVerifiedException,
+  InvalidTokenException,
+} from '@/common/exceptions/bad-request.exceptions';
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 @Catch()
@@ -54,6 +57,12 @@ export class GlobalExceptionsFilter extends BaseGlobalExceptionsFilter {
     // 403 Other forbidden access
     if (status === HttpStatus.FORBIDDEN) {
       this.auditForbiddenAccess(exception, request, errorCode);
+      return;
+    }
+
+    // 400 Email already verified (benign repeat click)
+    if (exception instanceof EmailAlreadyVerifiedException) {
+      this.auditEmailAlreadyVerified(request, errorCode);
       return;
     }
 
@@ -178,6 +187,19 @@ export class GlobalExceptionsFilter extends BaseGlobalExceptionsFilter {
         statusCode: HttpStatus.FORBIDDEN,
         errorCode,
         message,
+      },
+      request,
+    );
+  }
+
+  private auditEmailAlreadyVerified(request: Request, errorCode: string): void {
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: AuditEventType.INVALID_TOKEN,
+        severity: AuditSeverity.INFO,
+        statusCode: HttpStatus.BAD_REQUEST,
+        errorCode,
+        message: 'Email address has already been verified',
       },
       request,
     );

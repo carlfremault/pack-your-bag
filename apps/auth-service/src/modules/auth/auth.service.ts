@@ -15,7 +15,10 @@ import crypto from 'crypto';
 import { v7 as uuidv7 } from 'uuid';
 
 import { AUTH_DEFAULT_USER_ROLE_ID, DEFAULT_LOCALE } from '@/common/constants/auth.constants';
-import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
+import {
+  EmailAlreadyVerifiedException,
+  InvalidTokenException,
+} from '@/common/exceptions/bad-request.exceptions';
 import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
 import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
@@ -321,13 +324,20 @@ export class AuthService {
           where: {
             token: hash,
             type: TokenType.EMAIL_VERIFICATION,
-            used: false,
           },
         },
         tx,
       );
 
       if (!verificationRecord || verificationRecord.expiresAt < new Date()) {
+        throw new InvalidTokenException();
+      }
+
+      if (verificationRecord.used) {
+        const user = await this.userService.getUser({ id: verificationRecord.userId }, tx);
+        if (user && !user.isDeleted && user.isEmailVerified) {
+          throw new EmailAlreadyVerifiedException();
+        }
         throw new InvalidTokenException();
       }
 

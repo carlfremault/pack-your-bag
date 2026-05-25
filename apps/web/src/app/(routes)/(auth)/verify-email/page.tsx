@@ -33,6 +33,17 @@ export default async function Page({
   const result = await verifyEmailToken(token);
 
   if (!result.success) {
+    if (result.errorCode === 'EMAIL_ALREADY_VERIFIED') {
+      return (
+        <CenteredSurfaceCard title="Already verified">
+          <Alert type="success" message="This email address has already been verified." />
+          <LinkButton href="/login" variant="outline" linkAs={Link}>
+            Back to login
+          </LinkButton>
+        </CenteredSurfaceCard>
+      );
+    }
+
     const session = await getSession();
     const prefillEmail = session.pendingVerificationEmail ?? undefined;
 
