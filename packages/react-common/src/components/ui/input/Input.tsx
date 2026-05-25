@@ -11,7 +11,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   errorMessage?: string;
 }
 
-export const inputWrapperClassName = 'flex flex-col gap-1';
+export const inputWrapperClassName = 'flex w-full flex-col gap-1';
 export const inputLabelClassName =
   'text-primary flex items-center gap-1 text-[10px] font-medium uppercase justify-between';
 export const inputRequiredClassName = 'text-danger text-[10px] font-medium';
