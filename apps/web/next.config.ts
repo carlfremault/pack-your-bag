@@ -20,6 +20,8 @@ export default withSentryConfig(nextConfig, {
   project: 'pyb-web',
 
   // Only print logs for uploading source maps in CI
+  // CI is set by CI platforms (GitHub Actions, etc.), not declared in turbo.json
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
   silent: !process.env.CI,
 
   // For all available options, see:
