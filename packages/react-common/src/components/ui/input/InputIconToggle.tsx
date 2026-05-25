@@ -38,7 +38,7 @@ export function InputIconToggle<T extends string | null = string | null>({
       <div
         role="group"
         aria-labelledby={labelId}
-        className="bg-surface-overlay flex w-fit rounded-md p-1"
+        className="bg-surface-overlay flex w-fit flex-wrap rounded-md p-1"
       >
         {options.map((option) => {
           const isActive = option.value === (value ?? null);
