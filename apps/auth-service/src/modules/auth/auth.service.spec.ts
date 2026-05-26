@@ -15,7 +15,10 @@ import {
   InvalidTokenException,
 } from '@/common/exceptions/bad-request.exceptions';
 import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
-import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
+import {
+  DeletedGuestAccessException,
+  SessionExpiredException,
+} from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
@@ -334,6 +337,7 @@ describe('AuthService', () => {
       userId: 'user-uuid-123',
       tokenId: 'token-uuid-123',
       tokenFamilyId: 'family-uuid-123',
+      isGuest: false,
     };
 
     it('should return new tokens for valid refresh token', async () => {
@@ -384,10 +388,19 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw UnauthorizedException if user is not found', async () => {
+    it('should throw UnauthorizedException if non-guest user is not found', async () => {
       mockUserService.getUser.mockResolvedValue(null);
 
       await expect(service.refreshToken(refreshTokenUser)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw DeletedGuestAccessException if guest user is not found', async () => {
+      mockUserService.getUser.mockResolvedValue(null);
+      const guestRefreshTokenUser = { ...refreshTokenUser, isGuest: true };
+
+      await expect(service.refreshToken(guestRefreshTokenUser)).rejects.toThrow(
+        DeletedGuestAccessException,
+      );
     });
 
     it('should throw InvalidSessionException if refresh token is not found', async () => {

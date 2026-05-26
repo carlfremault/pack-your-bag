@@ -18,6 +18,7 @@ import {
 import { Request, Response } from 'express';
 
 import {
+  DeletedGuestAccessException,
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';
@@ -79,6 +80,9 @@ export class AuthExceptionFilter implements ExceptionFilter {
       severity = AuditSeverity.INFO;
     } else if (exception instanceof InvalidSessionException) {
       eventType = AuditEventType.INVALID_SESSION;
+    } else if (exception instanceof DeletedGuestAccessException) {
+      eventType = AuditEventType.DELETED_GUEST_ACCESS;
+      severity = AuditSeverity.INFO;
     } else if (errorCode === 'INVALID_TOKEN') {
       eventType = AuditEventType.SUSPICIOUS_ACTIVITY;
       severity = AuditSeverity.CRITICAL;
