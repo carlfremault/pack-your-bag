@@ -117,6 +117,17 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
     return NextResponse.next();
   }
 
+  // CSRF: reject cross-origin requests to API routes.
+  // If the Origin header is present and doesn't match, it's a cross-origin
+  // browser request. Absent Origin is allowed (non-browser clients, same-origin
+  // requests where the browser omits it).
+  if (pathname.startsWith('/api/')) {
+    const origin = req.headers.get('origin');
+    if (origin && origin !== req.nextUrl.origin) {
+      return NextResponse.json({ error: { message: 'Forbidden', status: 403 } }, { status: 403 });
+    }
+  }
+
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   const shouldRedirectIfAuthed = AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
 
