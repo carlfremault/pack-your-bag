@@ -35,6 +35,7 @@
   --color-success-ring: var(--success-ring);
 
   --color-shadow-fab: var(--shadow-fab);
+  --color-backdrop: var(--backdrop);
 
   --color-nav-inactive: var(--nav-inactive);
   --color-nav-inactive-hover: var(--nav-inactive-hover);
