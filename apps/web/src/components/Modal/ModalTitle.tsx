@@ -1,4 +1,5 @@
 import { MdOutlineAdd, MdOutlineEdit } from 'react-icons/md';
+import { MdOutlineExplore } from 'react-icons/md';
 import { TbTrash } from 'react-icons/tb';
 
 import classNames from 'classnames';
@@ -33,7 +34,17 @@ export function DeleteModalTitle({ label }: { label: string }) {
   );
 }
 
-type ModalTitleType = 'add' | 'edit' | 'delete';
+export function ExploreModalTitle({ label }: { label: string }) {
+  return (
+    <ModalTitleWrapper
+      icon={<MdOutlineExplore size={16} className="text-primary" aria-hidden="true" />}
+      label={label}
+      type="explore"
+    />
+  );
+}
+
+type ModalTitleType = 'add' | 'edit' | 'delete' | 'explore';
 interface ModalTitleWrapperProps {
   icon: React.ReactNode;
   label: string;

@@ -224,7 +224,7 @@ function ModalContent(props: ContentProps) {
 
   return createPortal(
     <div
-      className="bg-primary-ring/50 dark:bg-surface/90 fixed inset-0 z-50 flex items-center justify-center px-4 py-16"
+      className="bg-primary-ring/50 fixed inset-0 z-50 flex items-center justify-center px-4 py-16 dark:bg-black/70!"
       onClick={(e) => {
         if (e.target === e.currentTarget) closeModal();
       }}
