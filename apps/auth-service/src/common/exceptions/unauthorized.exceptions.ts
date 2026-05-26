@@ -8,6 +8,17 @@ export class TokenReusedException extends UnauthorizedException {
   }
 }
 
+// Used when: Deleted guest attempts access with stale session cookie
+export class DeletedGuestAccessException extends UnauthorizedException {
+  constructor(internalDetails?: string) {
+    super(
+      { message: 'Access Denied', error: 'DELETED_GUEST_ACCESS' },
+      { cause: internalDetails || 'Access Denied' },
+    );
+    this.name = 'DeletedGuestAccessException';
+  }
+}
+
 // Used when: Manual logouts, expired tokens
 export class SessionExpiredException extends UnauthorizedException {
   constructor(internalDetails?: string) {
