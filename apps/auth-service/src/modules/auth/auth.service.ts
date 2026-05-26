@@ -20,7 +20,10 @@ import {
   InvalidTokenException,
 } from '@/common/exceptions/bad-request.exceptions';
 import { EmailNotVerifiedException } from '@/common/exceptions/forbidden.exceptions';
-import { SessionExpiredException } from '@/common/exceptions/unauthorized.exceptions';
+import {
+  DeletedGuestAccessException,
+  SessionExpiredException,
+} from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenUser } from '@/common/interfaces/refresh-token-user.interface';
 import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';
@@ -167,9 +170,12 @@ export class AuthService {
   }
 
   async refreshToken(refreshTokenUser: RefreshTokenUser): Promise<RefreshTokenResult> {
-    const { userId, tokenId, tokenFamilyId } = refreshTokenUser;
+    const { userId, tokenId, tokenFamilyId, isGuest } = refreshTokenUser;
     const user = await this.userService.getUser({ id: userId, isDeleted: false });
     if (!user) {
+      if (isGuest) {
+        throw new DeletedGuestAccessException(`Guest user ${userId} no longer exists`);
+      }
       throw new UnauthorizedException('Access Denied');
     }
 

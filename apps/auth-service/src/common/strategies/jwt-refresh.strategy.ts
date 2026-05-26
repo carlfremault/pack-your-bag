@@ -29,7 +29,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
   validate(
     _req: Request,
     payload: unknown,
-  ): { userId: string; tokenId: string; tokenFamilyId: string } {
+  ): { userId: string; tokenId: string; tokenFamilyId: string; isGuest: boolean } {
     const dto = plainToInstance(JwtPayload, payload, { excludeExtraneousValues: true });
     const errors = validateSync(dto);
 
@@ -41,6 +41,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       userId: dto.sub,
       tokenId: dto.jti,
       tokenFamilyId: dto.family,
+      isGuest: dto.isGuest,
     };
   }
 }
