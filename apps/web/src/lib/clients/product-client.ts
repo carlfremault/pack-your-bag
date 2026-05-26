@@ -18,6 +18,7 @@ export async function getProductClient() {
 
   const headersList = await headers();
   const accessToken = headersList.get(INTERNAL_TOKEN_HEADER);
+  const forwardedFor = headersList.get('x-forwarded-for');
 
   if (!accessToken) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
 
@@ -30,6 +31,7 @@ export async function getProductClient() {
     async onRequest({ request }) {
       request.headers.set('Authorization', `Bearer ${accessToken}`);
       request.headers.set('x-bff-secret', bffSecret);
+      if (forwardedFor) request.headers.set('x-forwarded-for', forwardedFor);
       return request;
     },
   });

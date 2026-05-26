@@ -28,15 +28,20 @@ type RefreshResult =
   | { kind: 'invalid' }
   | { kind: 'transient' };
 
-async function doRefresh(refreshToken: string): Promise<RefreshResult> {
+async function doRefresh(
+  refreshToken: string,
+  forwardedFor: string | null,
+): Promise<RefreshResult> {
   try {
     const { authServiceUrl, bffSecret } = getAuthConfig();
+    const fetchHeaders: Record<string, string> = {
+      Authorization: `Bearer ${refreshToken}`,
+      'x-bff-secret': bffSecret,
+    };
+    if (forwardedFor) fetchHeaders['x-forwarded-for'] = forwardedFor;
     const res = await fetch(`${authServiceUrl}/auth/refresh-token`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-        'x-bff-secret': bffSecret,
-      },
+      headers: fetchHeaders,
     });
 
     if (!res.ok) {
@@ -140,7 +145,7 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
   const needsRefresh = now >= session.accessTokenExpiresAt - REFRESH_BUFFER_SECONDS;
 
   if (needsRefresh) {
-    const refreshed = await doRefresh(session.refreshToken);
+    const refreshed = await doRefresh(session.refreshToken, req.headers.get('x-forwarded-for'));
 
     if (refreshed.kind !== 'success') {
       // Clear the session only for definitive auth failures.

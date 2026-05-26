@@ -225,7 +225,7 @@ jobs:
             cat > .env.auth-service <<ENVEOF
             NODE_ENV=production
             FRONTEND_URL=https://packyourbag.me
-            TRUST_PROXY=true
+            TRUST_PROXY=1
             BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
             INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
             AUTH_PORT=8001
@@ -274,7 +274,7 @@ jobs:
 
             cat > .env.product-service <<ENVEOF
             NODE_ENV=production
-            TRUST_PROXY=true
+            TRUST_PROXY=1
             BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
             INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
             PRODUCT_PORT=8002
@@ -294,7 +294,7 @@ jobs:
 
             cat > .env.user-data-service <<ENVEOF
             NODE_ENV=production
-            TRUST_PROXY=true
+            TRUST_PROXY=1
             BFF_SHARED_SECRET=${BFF_SHARED_SECRET}
             INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
             UDS_PORT=8003
