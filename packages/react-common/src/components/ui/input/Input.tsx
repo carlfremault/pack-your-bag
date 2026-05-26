@@ -16,7 +16,7 @@ export const inputLabelClassName =
   'text-primary flex items-center gap-1 text-[10px] font-medium uppercase justify-between';
 export const inputRequiredClassName = 'text-danger text-[10px] font-medium';
 export const inputFieldClassName =
-  'w-full border-primary-ring bg-primary-foreground text-primary focus:ring-info-ring rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none';
+  'border-primary-ring bg-primary-foreground text-primary focus:ring-info-ring rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none';
 
 export function Input(props: InputProps) {
   const { className, label, required = false, maxLength, min, max, errorMessage, ...rest } = props;
