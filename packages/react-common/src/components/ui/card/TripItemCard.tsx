@@ -31,18 +31,40 @@ export function TripItemCard(props: TripItemCardProps) {
           <MdOutlineCircle className="h-5 w-5 shrink-0" aria-hidden />
         )}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {category && <CategoryPill {...category} />}
-        <h3 className="text-sm font-bold wrap-break-word">{name}</h3>
-        <div className="flex items-center gap-1 text-xs">
-          <HiOutlineScale className="h-3 w-3" />
-          {displayWeight !== undefined && displayWeight !== null
-            ? `${displayWeight}${displayUnit ? ` ${displayUnit}` : ''}`
-            : '--'}
+      {/* Desktop */}
+      <div className="hidden min-w-0 flex-1 items-center gap-2 sm:flex">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {category && <CategoryPill {...category} />}
+          <h3 className="text-sm font-bold wrap-break-word">{name}</h3>
+          <div className="flex items-center gap-1 text-xs">
+            <HiOutlineScale className="h-3 w-3" />
+            {displayWeight !== undefined && displayWeight !== null
+              ? `${displayWeight}${displayUnit ? ` ${displayUnit}` : ''}`
+              : '--'}
+          </div>
+        </div>
+        <div className="text-xs font-bold">{`${packedQuantity} / ${quantity}`}</div>
+        {actions}
+      </div>
+      {/* Mobile */}
+      <div className="flex min-w-0 flex-1 flex-col items-center gap-4 sm:hidden">
+        <div className="flex w-full min-w-0 flex-1 items-center justify-between">
+          <h3 className="text-sm font-bold wrap-break-word">{name}</h3>
+          {category && <CategoryPill {...category} />}
+        </div>
+        <div className="flex w-full items-center justify-between text-xs">
+          <div className="flex items-center gap-1 text-xs">
+            <HiOutlineScale className="h-3 w-3" />
+            {displayWeight !== undefined && displayWeight !== null
+              ? `${displayWeight}${displayUnit ? ` ${displayUnit}` : ''}`
+              : '--'}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-bold">{`${packedQuantity} / ${quantity}`}</div>
+            {actions}
+          </div>
         </div>
       </div>
-      <div className="text-xs font-bold">{`${packedQuantity} / ${quantity}`}</div>
-      {actions}
     </div>
   );
 }
