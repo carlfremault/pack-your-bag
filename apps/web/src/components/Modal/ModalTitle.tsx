@@ -58,7 +58,7 @@ function ModalTitleWrapper(props: ModalTitleWrapperProps) {
   const iconClassNames = classNames('flex h-8 w-8 items-center justify-center rounded-md', color);
 
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="me-4 flex items-center gap-2.5">
       <div className={iconClassNames}>{icon}</div>
       <span>{label}</span>
     </div>
