@@ -15,7 +15,8 @@ export interface DeleteAccountFormProps {
 
 export default function DeleteAccountForm(props: DeleteAccountFormProps) {
   const { locale, closeModal } = props;
-  const boundAction = deleteAccountAction.bind(null, locale);
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const boundAction = deleteAccountAction.bind(null, locale, timezone);
   const [state, formAction, pending] = useActionState<DeleteAccountState, FormData>(
     boundAction,
     null,

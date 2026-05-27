@@ -13,6 +13,7 @@ export {
 export const AUTH_DEFAULT_USER_ROLE_ID = 1; // "user"
 export const LOCALE_REGEX = /^[a-z]{2}(-[A-Z]{2})?$/;
 export const LOCALE_MESSAGE = 'Locale must be a valid format (e.g., en, en-GB)';
+export const TIMEZONE_REGEX = /^[A-Za-z_]+\/[A-Za-z_]+(\/[A-Za-z_]+)?$/;
 
 // Events
 export const AUTH_EVENTS = {

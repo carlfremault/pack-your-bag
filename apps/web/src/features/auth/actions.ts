@@ -379,6 +379,7 @@ export type ResetPasswordState = {
 export async function resetPasswordAction(
   token: string,
   locale: string | undefined,
+  timezone: string | undefined,
   _prevState: ResetPasswordState,
   formData: FormData,
 ): Promise<ResetPasswordState> {
@@ -387,6 +388,7 @@ export async function resetPasswordAction(
     password: formData.get('password') as string | null,
     confirmPassword: formData.get('confirmPassword') as string | null,
     locale,
+    timezone,
   };
 
   const parsed = resetPasswordSchema.safeParse(raw);
@@ -404,7 +406,7 @@ export async function resetPasswordAction(
 
   const { password } = parsed.data;
   try {
-    await resetPassword({ token, password, locale });
+    await resetPassword({ token, password, locale, timezone });
   } catch (e) {
     captureActionError(e);
     return { formError: e instanceof ApiError ? e.message : 'Something went wrong' };
@@ -425,12 +427,14 @@ export type DeleteAccountState = {
 } | null;
 export async function deleteAccountAction(
   locale: string | undefined,
+  timezone: string | undefined,
   _prevState: DeleteAccountState,
   formData: FormData,
 ): Promise<DeleteAccountState> {
   const raw = {
     password: formData.get('password') as string | null,
     locale,
+    timezone,
   };
 
   const parsed = deleteAccountSchema.safeParse(raw);

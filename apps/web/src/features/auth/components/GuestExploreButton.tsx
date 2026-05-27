@@ -24,7 +24,13 @@ export default function GuestExploreButton() {
 
   return (
     <Modal.Root>
-      <Modal.Trigger color="primary" variant="outline" disabled={isPending} className="w-full">
+      <Modal.Trigger
+        color="primary"
+        variant="outline"
+        disabled={isPending}
+        className="w-full"
+        ariaLabel="Explore a sample trip"
+      >
         <div className="flex w-full items-center justify-center gap-2">
           Explore a sample trip
           <MdOutlineExplore size={24} className="text-primary shrink-0" aria-hidden="true" />

@@ -44,6 +44,7 @@ export const AuthResetPasswordDto = z
       .max(128)
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
     locale: z.string().max(10).optional(),
+    timezone: z.string().max(50).optional(),
   })
   .passthrough();
 export const AuthVerifyEmailDto = z.object({ token: z.string().min(1) }).passthrough();
@@ -51,7 +52,11 @@ export const AuthResendVerificationEmailDto = z
   .object({ email: z.string().min(1).max(254).email() })
   .passthrough();
 export const DeleteUserDto = z
-  .object({ password: z.string().min(1), locale: z.string().max(10).optional() })
+  .object({
+    password: z.string().min(1),
+    locale: z.string().max(10).optional(),
+    timezone: z.string().max(50).optional(),
+  })
   .passthrough();
 export const CancelDeletionDto = z
   .object({ token: z.string().min(1), password: z.string().min(1) })

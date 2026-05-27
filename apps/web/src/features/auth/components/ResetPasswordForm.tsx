@@ -16,7 +16,8 @@ interface ResetPasswordFormProps {
 
 export default function ResetPasswordForm(props: ResetPasswordFormProps) {
   const { token, locale } = props;
-  const boundAction = resetPasswordAction.bind(null, token, locale);
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const boundAction = resetPasswordAction.bind(null, token, locale, timezone);
   const [state, formAction, pending] = useActionState<ResetPasswordState, FormData>(
     boundAction,
     null,
