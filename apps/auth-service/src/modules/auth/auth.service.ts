@@ -279,7 +279,7 @@ export class AuthService {
   }
 
   async resetPassword(body: AuthResetPasswordDto): Promise<void> {
-    const { token, password, locale = DEFAULT_LOCALE } = body;
+    const { token, password, locale = DEFAULT_LOCALE, timezone } = body;
     const hash = crypto.createHash('sha256').update(token).digest('hex');
 
     const resetRecord = await this.verificationTokenService.getVerificationToken({
@@ -304,7 +304,7 @@ export class AuthService {
     this.authEventProvider.emitPasswordResetConfirmed({
       userId: user.id,
       email: user.email,
-      resetTimestamp: formatLocaleDate(new Date(), locale),
+      resetTimestamp: formatLocaleDate(new Date(), locale, timezone),
     });
   }
 

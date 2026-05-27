@@ -11,6 +11,7 @@ import {
   PASSWORD_MIN_LENGTH,
   PASSWORD_MIN_LENGTH_MESSAGE,
   PASSWORD_REGEX,
+  TIMEZONE_REGEX,
 } from '@/common/constants/auth.constants';
 
 export class AuthResetPasswordDto {
@@ -48,4 +49,16 @@ export class AuthResetPasswordDto {
   @MaxLength(10)
   @Matches(LOCALE_REGEX, { message: LOCALE_MESSAGE })
   readonly locale?: string;
+
+  @ApiProperty({
+    example: 'Europe/Brussels',
+    description: 'User IANA timezone for date localization in email templates',
+    maxLength: 50,
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  @Matches(TIMEZONE_REGEX)
+  readonly timezone?: string;
 }

@@ -8,7 +8,11 @@ import { DEFAULT_LOCALE } from '@repo/constants';
  *
  * @returns {string} The formatted date
  */
-export const formatLocaleDate = (date: Date, locale: string = DEFAULT_LOCALE as string): string => {
+export const formatLocaleDate = (
+  date: Date,
+  locale: string = DEFAULT_LOCALE as string,
+  timeZone?: string,
+): string => {
   const dateObj = new Date(date);
   if (isNaN(dateObj.getTime())) {
     throw new Error('Invalid date provided');
@@ -17,5 +21,6 @@ export const formatLocaleDate = (date: Date, locale: string = DEFAULT_LOCALE as 
   return new Intl.DateTimeFormat(locale, {
     dateStyle: 'full',
     timeStyle: 'short',
+    ...(timeZone && { timeZone }),
   }).format(dateObj);
 };

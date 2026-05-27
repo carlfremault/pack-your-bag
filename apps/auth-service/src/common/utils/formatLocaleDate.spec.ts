@@ -18,6 +18,23 @@ describe('formatLocaleDate', () => {
     expect(result.toLowerCase()).toContain('février');
   });
 
+  it('should format a date in a specific timezone', () => {
+    const date = new Date('2026-02-18T23:00:00Z');
+    const result = formatLocaleDate(date, 'en-GB', 'America/New_York');
+
+    expect(result).toContain('18');
+    expect(result).toContain('February');
+    expect(result).toContain('2026');
+  });
+
+  it('should format a date in a different timezone where the date shifts', () => {
+    const date = new Date('2026-02-18T02:00:00Z');
+    const result = formatLocaleDate(date, 'en-GB', 'Pacific/Auckland');
+
+    expect(result).toContain('18');
+    expect(result).toContain('February');
+  });
+
   it('should throw an "Invalid date" error if an invalid Date object is provided', () => {
     const invalidDate = new Date('not-a-date');
 
