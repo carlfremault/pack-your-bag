@@ -18636,6 +18636,7 @@ __metadata:
     eslint-config-next: "npm:^16.2.5"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react: "npm:^7.37.5"
+    eslint-plugin-react-hooks: "npm:^7.1.1"
     iron-session: "npm:^8.0.4"
     next: "npm:^16.2.5"
     playwright: "npm:^1.58.2"
