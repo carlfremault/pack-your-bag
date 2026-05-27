@@ -816,6 +816,12 @@
             "example": "fr-FR",
             "description": "User locale, to enable date localization in email templates",
             "maxLength": 10
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Brussels",
+            "description": "User IANA timezone for date localization in email templates",
+            "maxLength": 50
           }
         },
         "required": [
@@ -864,6 +870,12 @@
             "example": "fr-FR",
             "description": "User locale, to enable date localization in email templates",
             "maxLength": 10
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Brussels",
+            "description": "User IANA timezone for date localization in email templates",
+            "maxLength": 50
           }
         },
         "required": [

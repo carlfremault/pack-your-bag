@@ -564,7 +564,7 @@ describe('AuthService', () => {
 
         expect(result.data).toEqual(expect.objectContaining({ access_token: 'mock-jwt-token' }));
 
-        await new Promise(process.nextTick);
+        await new Promise((resolve) => process.nextTick(resolve));
 
         expect(loggerWarnSpy).toHaveBeenCalledWith(
           'Failed to update lastActiveAt for guest',

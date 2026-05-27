@@ -165,7 +165,7 @@ export class UserService {
   // ============================================
 
   async softDeleteUser(userId: string, body: DeleteUserDto): Promise<void> {
-    const { password, locale = DEFAULT_LOCALE } = body;
+    const { password, locale = DEFAULT_LOCALE, timezone } = body;
 
     const user = await this.getUser({ id: userId });
     if (!user) {
@@ -204,7 +204,7 @@ export class UserService {
         userId,
         cancellationToken: cxlToken,
         email: user.email,
-        cancellationDate: formatLocaleDate(expiresAt, locale),
+        cancellationDate: formatLocaleDate(expiresAt, locale, timezone),
       };
     });
 
