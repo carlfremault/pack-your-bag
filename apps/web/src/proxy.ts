@@ -123,7 +123,7 @@ async function handleRequest(req: NextRequest, nonce: string): Promise<NextRespo
   // requests where the browser omits it).
   if (pathname.startsWith('/api/')) {
     const origin = req.headers.get('origin');
-    if (origin && origin !== req.nextUrl.origin) {
+    if (origin && origin !== getExpectedOrigin(req)) {
       return NextResponse.json({ error: { message: 'Forbidden', status: 403 } }, { status: 403 });
     }
   }
@@ -218,6 +218,17 @@ function buildCsp(nonce: string): string {
     `form-action 'self'`,
     `frame-ancestors 'none'`,
   ].join('; ');
+}
+
+/**
+ * req.nextUrl.origin reflects the internal listener (e.g. http://localhost:3000),
+ * not the public URL seen by the browser when behind a reverse proxy.
+ */
+function getExpectedOrigin(req: NextRequest): string {
+  const proto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '');
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host');
+  if (host) return `${proto}://${host}`;
+  return req.nextUrl.origin;
 }
 
 function withNonce(req: NextRequest, nonce: string): Headers {
