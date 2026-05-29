@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { headers } from 'next/headers';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 
 import { Providers } from '@/components/Providers';
 import { ActionPanel } from '@/components/Sidebar/ActionPanel';
 import { ToastNotifications } from '@/components/ToastNotifications';
-import { getPreferences } from '@/features/settings/api';
-import { PreferencesInitializer } from '@/features/settings/components/PreferencesInitializer';
+import { createPreferences, getPreferences } from '@/features/settings/api';
 import { ThemeSynchronizer } from '@/features/settings/components/ThemeSynchronizer';
+import { deriveDefaultPreferences, parseAcceptLanguage } from '@/features/settings/defaults';
 import { getSession } from '@/lib/session';
 
 import './globals.css';
@@ -46,7 +47,13 @@ export default async function RootLayout({
   const session = await getSession();
   const isLoggedIn = session.isLoggedIn ?? false;
 
-  const preferences = isLoggedIn ? await getPreferences().catch(() => null) : null;
+  let preferences = isLoggedIn ? await getPreferences().catch(() => null) : null;
+  if (isLoggedIn && !preferences) {
+    const headersList = await headers();
+    const acceptLanguage = headersList.get('accept-language');
+    const defaults = deriveDefaultPreferences(parseAcceptLanguage(acceptLanguage));
+    preferences = await createPreferences(defaults).catch(() => null);
+  }
   const theme = preferences?.theme;
 
   const queryClient = new QueryClient();
@@ -61,7 +68,6 @@ export default async function RootLayout({
         <Providers dehydratedState={dehydratedState}>
           {children}
           {isLoggedIn && <ActionPanel />}
-          {isLoggedIn && <PreferencesInitializer />}
           {isLoggedIn && <ThemeSynchronizer />}
           <ToastNotifications />
         </Providers>
