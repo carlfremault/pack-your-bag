@@ -7,7 +7,7 @@ import {
 
 import { toHttpError } from '@/utils/http-error';
 
-import { CreatePreferencesBody, Preferences, UpdatePreferencesBody } from './types';
+import { Preferences, UpdatePreferencesBody } from './types';
 
 // -------------------------------
 // Fetch preferences
@@ -28,36 +28,6 @@ const usePreferences = (): UseSuspenseQueryResult<Preferences | null> => {
     queryFn: fetchPreferences,
     staleTime: Infinity,
     gcTime: Infinity,
-  });
-};
-
-// -------------------------------
-// Create preferences
-// -------------------------------
-const createPreferences = async (body: CreatePreferencesBody): Promise<Preferences> => {
-  const res = await fetch('/api/preferences', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw await toHttpError(res);
-  }
-  const { data } = await res.json();
-  return data;
-};
-
-const useCreatePreferences = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: createPreferences,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['preferences'], data);
-    },
   });
 };
 
@@ -106,4 +76,4 @@ const useUpdatePreferences = () => {
   });
 };
 
-export { usePreferences, useCreatePreferences, useUpdatePreferences };
+export { usePreferences, useUpdatePreferences };
