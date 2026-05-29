@@ -1,5 +1,21 @@
 import { DateFormat, DEFAULT_LOCALE, TimeFormat, Units } from '@repo/constants';
 
+export function parseAcceptLanguage(header: string | null): string[] {
+  if (!header) return [DEFAULT_LOCALE];
+  const languages = header
+    .split(',')
+    .map((entry) => {
+      const [tag, ...params] = entry.trim().split(';');
+      const qParam = params.find((p) => p.trim().startsWith('q='));
+      const q = qParam ? parseFloat(qParam.trim().slice(2)) : 1;
+      return { tag: tag!.trim(), q: Number.isFinite(q) ? q : 0 };
+    })
+    .filter(({ tag }) => tag.length > 0)
+    .sort((a, b) => b.q - a.q)
+    .map(({ tag }) => tag);
+  return languages.length > 0 ? languages : [DEFAULT_LOCALE];
+}
+
 function parseLocale(tag: string): Intl.Locale | null {
   try {
     return new Intl.Locale(tag.split(';')[0]!.trim());
