@@ -10,6 +10,8 @@ import { toCategoryPillProps } from '@/lib/mappers/category.mapper';
 
 import { Category } from '../types';
 
+import { EmptyCategoryState } from './EmptyCategoryState';
+
 export interface CategoryTableProps {
   categories: Category[];
   onEditCategory: (id: string) => void;
@@ -53,11 +55,6 @@ export default function CategoryTable(props: CategoryTableProps) {
   );
 
   return (
-    <DataTable
-      data={categories}
-      columns={columns}
-      emptyStateLabel="No categories found"
-      scrollable
-    />
+    <DataTable data={categories} columns={columns} noResults={<EmptyCategoryState />} scrollable />
   );
 }

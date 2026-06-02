@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { LinkButton } from '@repo/react-common/button';
 import { TripDetailsCard } from '@repo/react-common/card';
 
+import { EmptyState } from '@/components/EmptyState';
 import { SidebarPortal } from '@/components/Sidebar';
 import { getTotalItemQuantityInPack, getTotalWeightInPack } from '@/features/collection/utils';
 import { usePreferences } from '@/features/settings/queries';
@@ -86,7 +87,11 @@ export default function TripDetails(props: TripDetailsProps) {
     <TripContent tripId={trip.id} pack={trip.pack} />
   ) : (
     <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
-      <p>No pack selected yet for this trip</p>
+      <EmptyState
+        message="No pack found."
+        suggestion="Select a pack and plan your trip!"
+        hasActiveFilters={false}
+      />
     </div>
   );
 

@@ -17,10 +17,11 @@ export interface ItemsTableProps<TData extends ItemForDisplay> {
   actionsTitle?: string;
   actionSize?: number;
   itemsActions: (row: TData) => React.ReactNode;
+  noResults: React.ReactNode;
 }
 
 export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTableProps<TData>) {
-  const { items, actionsTitle = 'Actions', actionSize = 80, itemsActions } = props;
+  const { items, actionsTitle = 'Actions', actionSize = 80, itemsActions, noResults } = props;
 
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<TData>();
@@ -82,7 +83,7 @@ export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTab
 
   return (
     <div className="bg-background h-full w-full">
-      <DataTable data={items} columns={columns} emptyStateLabel="No items found" scrollable />
+      <DataTable data={items} columns={columns} noResults={noResults} scrollable />
     </div>
   );
 }

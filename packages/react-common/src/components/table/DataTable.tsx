@@ -14,8 +14,8 @@ export type DataTableProps<T> = {
   columns: ColumnDef<T, any>[];
   getSubRows?: (originalRow: T, index: number) => T[] | undefined;
   getRowId?: (originalRow: T, index: number, parent?: Row<T>) => string;
-  emptyStateLabel?: string;
   scrollable?: boolean;
+  noResults?: React.ReactNode | string;
 };
 
 export function DataTable<T>(props: DataTableProps<T>) {
@@ -23,14 +23,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // TODO: upgrade to TanStack Table v9 when it's released
   'use no memo';
 
-  const {
-    data,
-    columns,
-    getSubRows,
-    getRowId,
-    emptyStateLabel = 'No data',
-    scrollable = false,
-  } = props;
+  const { data, columns, getSubRows, getRowId, scrollable = false, noResults = 'No data' } = props;
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -45,7 +38,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
   if (!data.length) {
     return (
       <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
-        {emptyStateLabel}
+        {noResults}
       </div>
     );
   }

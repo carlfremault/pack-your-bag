@@ -17,10 +17,11 @@ interface PackContentCardsProps {
     entry: CollectionItemForDisplay | CollectionListForDisplayWithItems,
   ) => React.ReactNode;
   renderListItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
+  noResults: React.ReactNode;
 }
 
 export default function PackContentCards(props: PackContentCardsProps) {
-  const { entries, renderUpsertActions, renderListItemUpsertActions } = props;
+  const { entries, renderUpsertActions, renderListItemUpsertActions, noResults } = props;
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const toggleExpandedList = (id: string) => {
@@ -31,6 +32,14 @@ export default function PackContentCards(props: PackContentCardsProps) {
       return next;
     });
   };
+
+  if (!entries.length) {
+    return (
+      <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
+        {noResults}
+      </div>
+    );
+  }
 
   return (
     <div className="mb-32 flex w-full flex-col gap-2">

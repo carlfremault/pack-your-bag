@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { EditDeleteActions } from '@repo/react-common/dialog';
 
+import { EmptyState } from '@/components/EmptyState';
 import { usePreferences } from '@/features/settings/queries';
 import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
@@ -13,7 +14,7 @@ import { useAllItems } from '../queries';
 import { ItemForDisplay } from '../types';
 
 import ItemDeleteModal from './ItemDeleteModal';
-import { ItemFilter } from './ItemFilter';
+import ItemFilter from './ItemFilter';
 import ItemsList from './ItemsList';
 import ItemsTable from './ItemsTable';
 
@@ -76,18 +77,26 @@ export default function ItemsView() {
     <ItemDeleteModal itemId={deleteItemId} onClose={handleCloseDeleteModal} />
   );
 
+  const noResults = (
+    <EmptyState
+      message="No items found."
+      suggestion="Create some items to start packing!"
+      hasActiveFilters={!!displayFilterState.search || !!displayFilterState.category}
+    />
+  );
+
   return (
     <>
       {/* Mobile */}
       <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4 lg:hidden">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
-        <ItemsList items={filteredItems} itemsActions={itemsActions} />
+        <ItemsList items={filteredItems} itemsActions={itemsActions} noResults={noResults} />
       </div>
       {/* Desktop */}
       <div className="hidden h-full w-full max-w-7xl flex-col gap-4 overflow-hidden p-4 lg:flex">
         <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1">
-          <ItemsTable items={filteredItems} itemsActions={itemsActions} />
+          <ItemsTable items={filteredItems} itemsActions={itemsActions} noResults={noResults} />
         </div>
       </div>
       {itemDeleteModal}
