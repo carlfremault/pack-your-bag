@@ -6,6 +6,7 @@ import { MdOutlineFormatListBulleted } from 'react-icons/md';
 import { useBreakpoint } from '@repo/react-common/hooks';
 import { QuantityStepper } from '@repo/react-common/input';
 
+import { EmptyState } from '@/components/EmptyState';
 import { Modal } from '@/components/Modal';
 import { AddModalTitle } from '@/components/Modal/ModalTitle';
 import { usePreferences } from '@/features/settings/queries';
@@ -126,6 +127,14 @@ function AddListsModalContent(props: AddListsModalContentProps) {
     />
   );
 
+  const noResults = (
+    <EmptyState
+      message="No lists found."
+      suggestion="Create some lists to organize your items!"
+      hasActiveFilters={!!displayFilterState.search}
+    />
+  );
+
   return (
     <div className="flex h-full flex-col gap-4">
       <ListFilter filterState={displayFilterState} onChange={handleFilterChange} />
@@ -134,6 +143,7 @@ function AddListsModalContent(props: AddListsModalContentProps) {
           lists={filteredLists}
           upsertActions={renderListUpsertActions}
           listItemUpsertActions={renderListItemUpsertActions}
+          noResults={noResults}
         />
       </div>
     </div>

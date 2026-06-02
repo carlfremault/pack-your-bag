@@ -5,10 +5,11 @@ import { IoShirtOutline } from 'react-icons/io5';
 
 import { QuantityStepper } from '@repo/react-common/input';
 
+import { EmptyState } from '@/components/EmptyState';
 import { Modal } from '@/components/Modal';
 import { AddModalTitle } from '@/components/Modal/ModalTitle';
 import { useUpsert } from '@/features/collection/hooks/useUpsert';
-import { ItemFilter } from '@/features/item/components/ItemFilter';
+import ItemFilter from '@/features/item/components/ItemFilter';
 import ItemsList from '@/features/item/components/ItemsList';
 import ItemsTable from '@/features/item/components/ItemsTable';
 import { useAllItems } from '@/features/item/queries';
@@ -102,12 +103,24 @@ function AddItemsModalContent(props: AddItemsModalContentProps) {
     [handleUpsertItemInList, handleUpsertItemInPack, collection.id, collection.type],
   );
 
+  const noResults = (
+    <EmptyState
+      message="No items found."
+      suggestion="Create some items to start packing!"
+      hasActiveFilters={!!displayFilterState.search || !!displayFilterState.category}
+    />
+  );
+
   return (
     <div className="flex h-full flex-col gap-4">
       <ItemFilter filterState={displayFilterState} onChange={handleFilterChange} />
       {/* Mobile */}
       <div className="lg:hidden">
-        <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
+        <ItemsList
+          items={filteredItems}
+          itemsActions={renderItemsUpsertActions}
+          noResults={noResults}
+        />
       </div>
       {/* Desktop */}
       <div className="hidden min-h-0 flex-1 lg:block">
@@ -116,6 +129,7 @@ function AddItemsModalContent(props: AddItemsModalContentProps) {
           actionsTitle="Quantity"
           actionSize={120}
           itemsActions={renderItemsUpsertActions}
+          noResults={noResults}
         />
       </div>
     </div>

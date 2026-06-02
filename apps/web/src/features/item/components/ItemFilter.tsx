@@ -28,7 +28,7 @@ export interface ItemFilterProps {
   collectionCategories?: CategoryPillProps[];
 }
 
-export function ItemFilter(props: ItemFilterProps) {
+export default function ItemFilter(props: ItemFilterProps) {
   const { filterState, onChange, collectionCategories } = props;
   const { data: categories } = useAllCategories();
 
@@ -50,6 +50,13 @@ export function ItemFilter(props: ItemFilterProps) {
       }));
   }, [categories, collectionCategories]);
 
+  const placeholder =
+    categories.length === 0
+      ? 'No categories yet'
+      : categoryOptions.length === 0
+        ? 'No categories'
+        : 'All categories';
+
   return (
     <FilterWrapper
       search={filterState.search}
@@ -68,8 +75,8 @@ export function ItemFilter(props: ItemFilterProps) {
           options={categoryOptions}
           value={filterState.category}
           onChange={(v) => onChange({ category: v })}
-          placeholder={categories.length === 0 ? 'No categories yet' : 'All categories'}
-          disabled={categories.length === 0}
+          placeholder={placeholder}
+          disabled={categoryOptions.length === 0}
         />
       </div>
     </FilterWrapper>

@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 
 import { QuantityStepper } from '@repo/react-common/input';
 
+import { EmptyState } from '@/components/EmptyState';
 import {
   getTotalItemQuantityInList,
   getTotalWeightInList,
@@ -90,6 +91,14 @@ export default function PackContent(props: PackContentProps) {
     [handleUpsertItemInList],
   );
 
+  const noResults = (
+    <EmptyState
+      message="No content found."
+      suggestion="Fill up your pack to prepare your trip!"
+      hasActiveFilters={!!displayFilterState.search || displayFilterState.contentType !== 'all'}
+    />
+  );
+
   return (
     <>
       <PackContentFilter filterState={displayFilterState} onChange={handleFilterChange} />
@@ -99,6 +108,7 @@ export default function PackContent(props: PackContentProps) {
           entries={filteredContent}
           renderUpsertActions={renderUpsertActions}
           renderListItemUpsertActions={renderListItemUpsertActions}
+          noResults={noResults}
         />
       </div>
       {/* Desktop */}
@@ -107,6 +117,7 @@ export default function PackContent(props: PackContentProps) {
           entries={filteredContent}
           upsertActions={renderUpsertActions}
           listItemUpsertActions={renderListItemUpsertActions}
+          noResults={noResults}
         />
       </div>
     </>

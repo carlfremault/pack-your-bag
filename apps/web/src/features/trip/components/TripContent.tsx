@@ -1,19 +1,19 @@
 import { useCallback, useMemo } from 'react';
 
-import { TripItemCard } from '@repo/react-common/card';
 import { QuantityStepper } from '@repo/react-common/input';
 
+import { EmptyState } from '@/components/EmptyState';
 import { Pack } from '@/features/collection/types';
 import { getAllCategoriesInCollection } from '@/features/collection/utils';
-import { ItemFilter } from '@/features/item/components/ItemFilter';
+import ItemFilter from '@/features/item/components/ItemFilter';
 import { usePreferences } from '@/features/settings/queries';
 import { getItemQuantitiesInPack } from '@/features/trip/utils';
 import { useUrlFilterItems } from '@/hooks/useUrlFilterItems';
-import { toTripItemCardProps } from '@/lib/mappers/trip.mappers';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
 import { useUpdateTrip } from '../hooks/useUpdateTrip';
 
+import TripItemsList from './TripItemsList';
 import TripItemsTable from './TripItemsTable';
 
 export interface TripContentProps {
@@ -70,6 +70,14 @@ export default function TripContent(props: TripContentProps) {
     [handleUpdateTripItemStatus, tripId],
   );
 
+  const noResults = (
+    <EmptyState
+      message="No items found."
+      suggestion="Add some items to start packing!"
+      hasActiveFilters={!!displayFilterState.search || !!displayFilterState.category}
+    />
+  );
+
   return (
     <>
       <ItemFilter
@@ -79,12 +87,11 @@ export default function TripContent(props: TripContentProps) {
       />
       {/* Mobile */}
       <div className="mb-32 flex w-full flex-col gap-2 lg:hidden">
-        {filteredItems.map((item) => (
-          <TripItemCard
-            key={item.id}
-            {...toTripItemCardProps(item, renderItemsUpsertActions(item))}
-          />
-        ))}
+        <TripItemsList
+          items={filteredItems}
+          itemsActions={renderItemsUpsertActions}
+          noResults={noResults}
+        />
       </div>
       {/* Desktop */}
       <div className="hidden min-h-0 flex-1 lg:block">
@@ -92,6 +99,7 @@ export default function TripContent(props: TripContentProps) {
           items={filteredItems}
           actionsTitle="Packed"
           itemsActions={renderItemsUpsertActions}
+          noResults={noResults}
         />
       </div>
     </>

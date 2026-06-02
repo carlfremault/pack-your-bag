@@ -4,8 +4,9 @@ import { useCallback, useMemo } from 'react';
 
 import { QuantityStepper } from '@repo/react-common/input';
 
+import { EmptyState } from '@/components/EmptyState';
 import { getAllCategoriesInCollection } from '@/features/collection/utils';
-import { ItemFilter } from '@/features/item/components/ItemFilter';
+import ItemFilter from '@/features/item/components/ItemFilter';
 import ItemsList from '@/features/item/components/ItemsList';
 import ItemsTable from '@/features/item/components/ItemsTable';
 import { usePreferences } from '@/features/settings/queries';
@@ -56,6 +57,14 @@ export default function ListContent(props: ListContentProps) {
     [handleUpsertItemInList, collection.id],
   );
 
+  const noResults = (
+    <EmptyState
+      message="No items found."
+      suggestion="Add some items to start packing!"
+      hasActiveFilters={!!displayFilterState.search || !!displayFilterState.category}
+    />
+  );
+
   return (
     <>
       <ItemFilter
@@ -65,7 +74,11 @@ export default function ListContent(props: ListContentProps) {
       />
       {/* Mobile */}
       <div className="mb-32 lg:hidden">
-        <ItemsList items={filteredItems} itemsActions={renderItemsUpsertActions} />
+        <ItemsList
+          items={filteredItems}
+          itemsActions={renderItemsUpsertActions}
+          noResults={noResults}
+        />
       </div>
       {/* Desktop */}
       <div className="hidden min-h-0 flex-1 lg:block">
@@ -74,6 +87,7 @@ export default function ListContent(props: ListContentProps) {
           actionsTitle="Quantity"
           actionSize={120}
           itemsActions={renderItemsUpsertActions}
+          noResults={noResults}
         />
       </div>
     </>
