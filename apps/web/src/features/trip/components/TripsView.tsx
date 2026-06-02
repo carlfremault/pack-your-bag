@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import { EmptyState } from '@/components/EmptyState';
 import { usePreferences } from '@/features/settings/queries';
 
 import { useFilterTrips } from '../hooks/useFilterTrips';
@@ -18,10 +19,26 @@ export default function TripsView() {
     trips,
   });
 
+  const hasActiveFilters =
+    !!displayFilterState.search || !!displayFilterState.dateFrom || !!displayFilterState.dateUntil;
+
+  const noResults = (
+    <EmptyState
+      message="No trips found."
+      suggestion="Start planning for your next trip!"
+      hasActiveFilters={hasActiveFilters}
+    />
+  );
+
   return (
     <div className="flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 p-4">
       <TripFilter filterState={displayFilterState} onChange={handleFilterChange} />
-      <TripsList trips={filteredTrips} linkAs={Link} dateFormat={preferences?.dateFormat} />
+      <TripsList
+        trips={filteredTrips}
+        linkAs={Link}
+        dateFormat={preferences?.dateFormat}
+        noResults={noResults}
+      />
     </div>
   );
 }

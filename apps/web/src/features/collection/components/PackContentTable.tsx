@@ -23,10 +23,11 @@ export interface PackContentTableProps {
     row: CollectionItemForDisplay | CollectionListForDisplayWithItems,
   ) => React.ReactNode;
   listItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
+  noResults: React.ReactNode;
 }
 
 export default function PackContentTable(props: PackContentTableProps) {
-  const { entries, upsertActions, listItemUpsertActions } = props;
+  const { entries, upsertActions, listItemUpsertActions, noResults } = props;
 
   const columns = useMemo(() => {
     const columnHelper = createColumnHelper<PackContentRow>();
@@ -153,7 +154,7 @@ export default function PackContentTable(props: PackContentTableProps) {
         getRowId={(row, _index, parent) =>
           parent ? `${parent.id}_${row.entryType}-${row.id}` : `${row.entryType}-${row.id}`
         }
-        emptyStateLabel="No content found"
+        noResults={noResults}
         scrollable
       />
     </div>

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 
+import { EmptyState } from '@/components/EmptyState';
 import { usePreferences } from '@/features/settings/queries';
 import { formatWeightForDisplay } from '@/utils/weightUtils';
 
@@ -28,18 +29,26 @@ export default function CollectionsView() {
     collections: collectionsForDisplay,
   });
 
+  const noResults = (
+    <EmptyState
+      message="No collections found."
+      suggestion="Create a collection and organize your items!"
+      hasActiveFilters={!!displayFilterState.search || displayFilterState.type !== 'all'}
+    />
+  );
+
   return (
     <>
       {/* Mobile */}
       <div className="mb-32 flex w-full max-w-3xl flex-col gap-4 p-4 lg:hidden lg:p-8">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
-        <CollectionsList collections={filteredCollections} linkAs={Link} />
+        <CollectionsList collections={filteredCollections} linkAs={Link} noResults={noResults} />
       </div>
       {/* Desktop */}
       <div className="hidden h-full w-full max-w-7xl flex-col gap-4 p-4 lg:flex">
         <CollectionFilter filterState={displayFilterState} onChange={handleFilterChange} />
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <CollectionsList collections={filteredCollections} linkAs={Link} />
+          <CollectionsList collections={filteredCollections} linkAs={Link} noResults={noResults} />
         </div>
       </div>
     </>

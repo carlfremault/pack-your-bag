@@ -11,10 +11,11 @@ interface ListCardsListProps {
   lists: CollectionListForDisplayWithItems[];
   upsertActions: (upsertItem: CollectionListForDisplayWithItems) => React.ReactNode;
   listItemUpsertActions: (item: CollectionItemForDisplay, listId: string) => React.ReactNode;
+  noResults: React.ReactNode;
 }
 
 export default function ListCardsList(props: ListCardsListProps) {
-  const { lists, upsertActions, listItemUpsertActions } = props;
+  const { lists, upsertActions, listItemUpsertActions, noResults } = props;
 
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const toggleExpandedList = (id: string) => {
@@ -32,7 +33,7 @@ export default function ListCardsList(props: ListCardsListProps) {
     return (
       <div className={containerClassName}>
         <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
-          No lists found
+          {noResults}
         </div>
       </div>
     );

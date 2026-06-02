@@ -8,16 +8,17 @@ export interface TripsListProps {
   trips: TripSummary[];
   linkAs: React.ElementType;
   dateFormat?: string;
+  noResults?: React.ReactNode;
 }
 
 export default function TripsList(props: TripsListProps) {
-  const { trips, linkAs, dateFormat } = props;
+  const { trips, linkAs, dateFormat, noResults } = props;
 
   if (!trips.length) {
     return (
       <div className="flex w-full flex-col gap-2">
         <div className="bg-surface border-primary-ring text-primary col-span-full rounded-md border p-6 text-center text-sm">
-          No trips found
+          {noResults}
         </div>
       </div>
     );
