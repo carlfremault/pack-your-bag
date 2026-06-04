@@ -82,7 +82,11 @@ async function setup() {
     const prodPass = process.env.POSTGRES_PRODUCT_PASSWORD;
     const prodSchema = process.env.POSTGRES_PRODUCT_SCHEMA || 'app_product';
 
-    if (!authPass || !prodPass) {
+    const auditUser = process.env.POSTGRES_AUDIT_USER || 'audit_user';
+    const auditPass = process.env.POSTGRES_AUDIT_PASSWORD;
+    const auditSchema = process.env.POSTGRES_AUDIT_SCHEMA || 'app_audit';
+
+    if (!authPass || !prodPass || !auditPass) {
       throw new Error('User passwords are missing in .env');
     }
 
@@ -100,17 +104,29 @@ async function setup() {
       ELSE
         ALTER ROLE ${prodUser} WITH LOGIN ${createDbFlag} PASSWORD '${prodPass}';
       END IF;
+
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${auditUser}') THEN
+        CREATE ROLE ${auditUser} WITH LOGIN ${createDbFlag} PASSWORD '${auditPass}';
+      ELSE
+        ALTER ROLE ${auditUser} WITH LOGIN ${createDbFlag} PASSWORD '${auditPass}';
+      END IF;
     END $$;
     `);
 
     await client.query(`GRANT CREATE ON DATABASE ${targetDbName} TO ${authUser};`);
     await client.query(`GRANT CREATE ON DATABASE ${targetDbName} TO ${prodUser};`);
+    await client.query(`GRANT CREATE ON DATABASE ${targetDbName} TO ${auditUser};`);
 
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${authSchema} AUTHORIZATION ${authUser};`);
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${prodSchema} AUTHORIZATION ${prodUser};`);
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${auditSchema} AUTHORIZATION ${auditUser};`);
 
     await client.query(`REVOKE ALL ON SCHEMA ${prodSchema} FROM ${authUser};`);
+    await client.query(`REVOKE ALL ON SCHEMA ${auditSchema} FROM ${authUser};`);
     await client.query(`REVOKE ALL ON SCHEMA ${authSchema} FROM ${prodUser};`);
+    await client.query(`REVOKE ALL ON SCHEMA ${auditSchema} FROM ${prodUser};`);
+    await client.query(`REVOKE ALL ON SCHEMA ${authSchema} FROM ${auditUser};`);
+    await client.query(`REVOKE ALL ON SCHEMA ${prodSchema} FROM ${auditUser};`);
 
     // Allow the migration user (POSTGRES_ADMIN_URL / current connection) to run Prisma migrations
     // in both schemas. Requires superuser or schema owner; works when POSTGRES_ADMIN_URL is postgres.
@@ -119,6 +135,7 @@ async function setup() {
     } = await client.query<{ current_user: string }>('SELECT current_user');
     await client.query(`GRANT USAGE, CREATE ON SCHEMA ${authSchema} TO "${migrationUser}"`);
     await client.query(`GRANT USAGE, CREATE ON SCHEMA ${prodSchema} TO "${migrationUser}"`);
+    await client.query(`GRANT USAGE, CREATE ON SCHEMA ${auditSchema} TO "${migrationUser}"`);
 
     // Grant app users access to existing tables/sequences in their schemas (tables are created
     // by the migration user, so app users need explicit grants). Idempotent — safe to run every time.
@@ -138,6 +155,14 @@ async function setup() {
       `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ${prodSchema} TO ${prodUser}`,
     );
 
+    await client.query(`GRANT USAGE ON SCHEMA ${auditSchema} TO ${auditUser}`);
+    await client.query(
+      `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${auditSchema} TO ${auditUser}`,
+    );
+    await client.query(
+      `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ${auditSchema} TO ${auditUser}`,
+    );
+
     // Default privileges: future tables/sequences created by the migration user in these schemas
     // will automatically grant the app users the same rights (e.g. after running new migrations).
     await client.query(
@@ -151,6 +176,12 @@ async function setup() {
     );
     await client.query(
       `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${prodSchema} GRANT USAGE, SELECT ON SEQUENCES TO ${prodUser}`,
+    );
+    await client.query(
+      `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${auditSchema} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${auditUser}`,
+    );
+    await client.query(
+      `ALTER DEFAULT PRIVILEGES FOR ROLE "${migrationUser}" IN SCHEMA ${auditSchema} GRANT USAGE, SELECT ON SEQUENCES TO ${auditUser}`,
     );
 
     console.log('✅ Schemas and Users configured successfully');
