@@ -15,6 +15,7 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "storybook-static/**"],
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
@@ -36,6 +37,7 @@
       "persistent": true,
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
@@ -56,6 +58,7 @@
       "dependsOn": ["test:setup", "^build"],
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
@@ -71,6 +74,7 @@
       "persistent": true,
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
