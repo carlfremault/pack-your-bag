@@ -30,7 +30,7 @@ async function bootstrap() {
   // Graceful shutdown
   app.enableShutdownHooks();
 
-  await app.listen(process.env.AUDIT_PORT ?? 8001);
+  await app.listen(process.env.AUDIT_PORT ?? 8004);
 }
 
 bootstrap().catch((err) => {
