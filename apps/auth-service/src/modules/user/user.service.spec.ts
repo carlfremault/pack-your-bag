@@ -10,7 +10,6 @@ import crypto from 'crypto';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
-import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -64,10 +63,6 @@ describe('UserService', () => {
     deleteRefreshTokens: vi.fn(),
   };
 
-  const mockAuditLogService = {
-    anonymizeAuditLogs: vi.fn(),
-  };
-
   const mockVerificationTokenService = {
     upsertVerificationToken: vi.fn(),
     getVerificationToken: vi.fn(),
@@ -86,7 +81,6 @@ describe('UserService', () => {
         UserService,
         { provide: ConfigService, useValue: mockConfigService },
         { provide: PrismaService, useValue: mockPrismaService },
-        { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: VerificationTokenService, useValue: mockVerificationTokenService },
         { provide: UserEventProvider, useValue: mockUserEventProvider },
@@ -326,20 +320,15 @@ describe('UserService', () => {
   });
 
   describe('hardDeleteUsers', () => {
-    it("should delete users' refresh tokens, anonymize their audit logs and delete the users", async () => {
+    it("should delete users' refresh tokens and delete the users", async () => {
       const userIds = ['uuid-123', 'uuid-456'];
       const mockResult = { count: 2 };
       mockRefreshTokenService.deleteRefreshTokens.mockResolvedValue(mockResult);
-      mockAuditLogService.anonymizeAuditLogs.mockResolvedValue(mockResult);
       mockPrismaService.user.deleteMany.mockResolvedValue(mockResult);
 
       const result = await service.hardDeleteUsers(userIds);
 
       expect(mockRefreshTokenService.deleteRefreshTokens).toHaveBeenCalledWith(
-        { userId: { in: userIds } },
-        mockPrismaService,
-      );
-      expect(mockAuditLogService.anonymizeAuditLogs).toHaveBeenCalledWith(
         { userId: { in: userIds } },
         mockPrismaService,
       );
@@ -349,7 +338,6 @@ describe('UserService', () => {
       expect(result).toEqual({
         deletedUsers: 2,
         deletedTokens: 2,
-        anonymizedAuditLogs: 2,
       });
     });
 
@@ -357,7 +345,6 @@ describe('UserService', () => {
       await service.hardDeleteUsers([]);
 
       expect(mockRefreshTokenService.deleteRefreshTokens).not.toHaveBeenCalled();
-      expect(mockAuditLogService.anonymizeAuditLogs).not.toHaveBeenCalled();
       expect(mockPrismaService.user.deleteMany).not.toHaveBeenCalled();
     });
   });

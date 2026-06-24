@@ -25,3 +25,6 @@ export * from './bff-guard.module';
 export * from './custom-throttler.module';
 export * from './internal-guard.module';
 export * from './jwt-auth.module';
+export * from './rmq/rmq.constants';
+export * from './rmq/rmq.helpers';
+export * from './rmq/rmq-publisher.module';

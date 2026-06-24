@@ -2,11 +2,16 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
+import { type ClientProxy } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerStorage } from '@nestjs/throttler';
 import { MailerService } from '@nestjs-modules/mailer';
 
+import { RMQ_PUBLISHERS } from '@repo/nestjs-common';
+
+import { of } from 'rxjs';
 import { App } from 'supertest/types';
+import { MockInstance, vi } from 'vitest';
 
 import { AppModule } from '@/app.module';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
@@ -25,6 +30,7 @@ export interface IntegrationTestContext {
   eventEmitter: EventEmitter2;
   mailerService: MailerService;
   authHelpers: AuthHelpers;
+  auditEmitSpy: MockInstance;
   storage: ThrottlerStorage;
   bffSecret: string;
   userDeleteRetentionPeriod: number;
@@ -36,8 +42,6 @@ export interface IntegrationTestContext {
   resetDb: () => Promise<void>;
   close: () => Promise<void>;
 }
-
-const AUDIT_LOG_FLUSH_TIMEOUT_MS = 500;
 
 export const createIntegrationContext = async (): Promise<IntegrationTestContext> => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -67,11 +71,20 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     'AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS',
   );
   const mailpitUrl = configService.getOrThrow<string>('AUTH_MAILPIT_API_URL');
-  const authHelpers = new AuthHelpers(app, prisma, jwtService, bffSecret);
+
+  // Mock the RMQ client BEFORE app.init() to prevent actual RabbitMQ connection
+  // attempts during the onApplicationBootstrap lifecycle hook
+  const auditClient = app.get<ClientProxy>(RMQ_PUBLISHERS.AUDIT);
+  vi.spyOn(auditClient, 'connect').mockResolvedValue(undefined);
+  vi.spyOn(auditClient, 'close').mockResolvedValue(undefined);
+  const auditEmitSpy = vi.spyOn(auditClient, 'emit').mockReturnValue(of(undefined));
 
   await app.init();
 
+  const authHelpers = new AuthHelpers(app, prisma, jwtService, bffSecret, auditEmitSpy);
+
   const resetDb = async () => {
+    auditEmitSpy.mockClear();
     await prisma.auditLog.deleteMany();
     await prisma.refreshToken.deleteMany();
     await prisma.verificationToken.deleteMany();
@@ -86,8 +99,6 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
   };
 
   const close = async () => {
-    // Audit logging is asynchronous. Wait for any pending logs to finish processing
-    await new Promise((resolve) => setTimeout(resolve, AUDIT_LOG_FLUSH_TIMEOUT_MS));
     await app.close();
     await prisma.$disconnect();
   };
@@ -102,6 +113,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     tasksService,
     verificationTokenService,
     authHelpers,
+    auditEmitSpy,
     storage,
     bffSecret,
     userDeleteRetentionPeriod,
