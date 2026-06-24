@@ -1,13 +1,17 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { RequestIdMiddleware } from '@repo/nestjs-common';
 
 import { SentryModule } from '@sentry/nestjs/setup';
 import Joi from 'joi';
 
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { TasksModule } from './tasks/tasks.module';
+
 const validationSchema = Joi.object({
   // Environment
   NODE_ENV: Joi.string().valid('development', 'test', 'production').required(),
@@ -15,6 +19,9 @@ const validationSchema = Joi.object({
   // Application
   AUDIT_PORT: Joi.number().default(8004),
   AUDIT_HEALTH_DISK_PATH: Joi.string().default('/'),
+
+  // RabbitMQ
+  RABBITMQ_URL: Joi.string().required(),
 
   // Database
   POSTGRES_AUDIT_USER: Joi.string().required(),
@@ -56,17 +63,16 @@ const validationSchema = Joi.object({
       isGlobal: true,
       validationSchema,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     HealthModule,
+    AuditLogModule,
+    TasksModule,
   ],
   // providers: [
   //   {
   //     provide: APP_FILTER,
   //     useClass: GlobalExceptionsFilter,
-  //   },
-  //   {
-  //     provide: APP_FILTER,
-  //     useClass: AuthExceptionFilter,
   //   },
   //   {
   //     provide: APP_FILTER,

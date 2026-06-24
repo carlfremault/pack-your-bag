@@ -22,7 +22,8 @@
         "RSA_*",
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "lint": {
@@ -45,7 +46,8 @@
         "NEXT_PUBLIC_*",
         "DEV_SENTRY_DSN",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "test:setup": {
@@ -65,7 +67,8 @@
         "RSA_*",
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "test:watch": {
@@ -81,7 +84,8 @@
         "RSA_*",
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "test:browser": {

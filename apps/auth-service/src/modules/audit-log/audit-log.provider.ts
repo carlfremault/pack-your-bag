@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
-import { anonymizeIp } from '@repo/nestjs-common';
+import {
+  anonymizeIp,
+  type AuditLogMessage,
+  type AuditLogsAnonymizeMessage,
+  RMQ_PATTERNS,
+  RMQ_PUBLISHERS,
+} from '@repo/nestjs-common';
 
 import { Request } from 'express';
 
-import { AUTH_EVENTS } from '@/common/constants/auth.constants';
-import { BaseEventProvider } from '@/common/providers/base-event.provider';
 import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
 
 interface AuditRequestInput {
@@ -21,14 +25,40 @@ interface AuditRequestInput {
 }
 
 @Injectable()
-export class AuditLogProvider extends BaseEventProvider {
-  constructor(eventEmitter: EventEmitter2) {
-    super(eventEmitter, AuditLogProvider.name);
-  }
+export class AuditLogProvider {
+  private readonly logger = new Logger(AuditLogProvider.name, { timestamp: true });
+
+  constructor(@Inject(RMQ_PUBLISHERS.AUDIT) private readonly client: ClientProxy) {}
 
   auditRequest(data: AuditRequestInput, request?: Request): void {
+    const message = this.buildMessage(data, request);
+
+    setImmediate(() => {
+      this.client.emit<string, AuditLogMessage>(RMQ_PATTERNS.AUDIT_LOG_CREATED, message).subscribe({
+        error: (err: unknown) => {
+          this.logger.error('Failed to publish audit log', err);
+        },
+      });
+    });
+  }
+
+  requestAnonymization(userIds: string[]): void {
+    if (userIds.length === 0) return;
+
+    const message: AuditLogsAnonymizeMessage = { userIds };
+
+    this.client
+      .emit<string, AuditLogsAnonymizeMessage>(RMQ_PATTERNS.AUDIT_LOGS_ANONYMIZE, message)
+      .subscribe({
+        error: (err: unknown) => {
+          this.logger.error('Failed to publish audit log anonymization request', err);
+        },
+      });
+  }
+
+  private buildMessage(data: AuditRequestInput, request?: Request): AuditLogMessage {
     if (!request) {
-      this.safeEmit(AUTH_EVENTS.AUDIT_LOG, {
+      return {
         ...data,
         userId: data.userId ?? null,
         requestId: null,
@@ -36,14 +66,13 @@ export class AuditLogProvider extends BaseEventProvider {
         userAgent: null,
         path: null,
         method: null,
-      });
-      return;
+      };
     }
 
     const { id, headers, user, path = 'N/A', method = 'N/A', ip } = request;
     const userAgent = headers ? getUserAgentFromHeaders(headers) : null;
 
-    this.safeEmit(AUTH_EVENTS.AUDIT_LOG, {
+    return {
       ...data,
       userId: data.userId ?? user?.userId ?? null,
       requestId: id ?? null,
@@ -51,6 +80,6 @@ export class AuditLogProvider extends BaseEventProvider {
       userAgent,
       path,
       method,
-    });
+    };
   }
 }

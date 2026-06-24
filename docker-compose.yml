@@ -17,7 +17,18 @@ services:
     image: axllent/mailpit
     ports:
       - '1025:1025'
-      - '8025:8025'
+      - '8025:8025' # management UI at localhost:8025
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - '5672:5672'
+      - '15672:15672' # management UI at localhost:15672
     networks:
       - app-network
 
@@ -37,6 +48,7 @@ services:
     depends_on:
       - postgres_db
       - mailpit
+      - rabbitmq
 
 networks:
   app-network:

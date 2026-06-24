@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Yarn 4 + Turborepo monorepo. Node >=22.6.0.
 
 ```
-apps/    web (Next.js 16), auth-service, product-service, user-data-service (NestJS)
+apps/    web (Next.js 16), auth-service, product-service, user-data-service, audit-service (NestJS)
 packages/  db, nestjs-common, react-common, auth-client, product-client, user-data-client, configs
 ```
 
@@ -38,7 +38,7 @@ yarn storybook
 
 ### BFF Pattern
 
-`apps/web` is the sole browser-facing surface. Its `app/api/` route handlers call the three NestJS services via generated typed clients and attach the `x-bff-secret` header. All three services reject requests missing that header (`BffGuardModule`). **Never use raw `fetch` against microservices** — always use the generated clients from `@repo/auth-client`, `@repo/product-client`, `@repo/user-data-client`.
+`apps/web` is the sole browser-facing surface. Its `app/api/` route handlers call the auth, product and user-data NestJS services via generated typed clients and attach the `x-bff-secret` header. All three services reject requests missing that header (`BffGuardModule`). **Never use raw `fetch` against microservices** — always use the generated clients from `@repo/auth-client`, `@repo/product-client`, `@repo/user-data-client`.
 
 ### Auth Flow
 
@@ -46,7 +46,11 @@ Auth Service issues RS256 JWT access + refresh pairs stored in iron-session HTTP
 
 ### NestJS Services
 
-Common infrastructure lives in `@repo/nestjs-common` (JWT strategies, BFF guard, throttler, exception filters, `RequestIdMiddleware`, `@AuditLog`). Auth and Product use PostgreSQL (`app_auth` / `app_product` schemas, scoped DB roles). User Data uses MongoDB.
+Common infrastructure lives in `@repo/nestjs-common` (JWT strategies, BFF guard, throttler, exception filters, `RequestIdMiddleware`, `@AuditLog`). Auth, Audit and Product use PostgreSQL (`app_auth` / `app_audit` / `app_product` schemas, scoped DB roles). User Data uses MongoDB.
+
+### RabbitMQ
+
+RabbitMQ is used for auditing. Events are published to the `audit_events` queue and consumed by the `audit-service`.
 
 ## Conventions
 
@@ -57,3 +61,4 @@ Common infrastructure lives in `@repo/nestjs-common` (JWT strategies, BFF guard,
 - **Zod v4**: root `package.json` pins it via `resolutions` — use it for all validation schemas.
 - **No infrastructure changes**: do not modify `docker-compose.yml`, Turborepo pipeline, or database schemas without explicit instruction.
 - **Project Philosophy**: Code quality and best practices are paramount and should prime above 'fitting in with the current codebase'.
+- **Comments**: Do not remove any existing comments.

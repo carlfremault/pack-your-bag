@@ -1,28 +1,12 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { Prisma } from '@repo/db';
+import type { AuditLogMessage } from '@repo/nestjs-common';
 
 import { UAParser } from 'ua-parser-js';
 import { v7 as uuidv7 } from 'uuid';
 
-import { AUTH_EVENTS } from '@/common/constants/auth.constants';
 import { PrismaService } from '@/prisma/prisma.service';
-
-interface AuditLogData {
-  readonly requestId: string | null;
-  readonly eventType: AuditEventType;
-  readonly severity: AuditSeverity;
-  readonly userId: string | null;
-  readonly ipAddress: string | null;
-  readonly userAgent: string | null;
-  readonly path: string | null;
-  readonly method: string | null;
-  readonly statusCode: number | null;
-  readonly errorCode?: string;
-  readonly message: Prisma.InputJsonValue;
-  readonly metadata?: Prisma.InputJsonValue;
-}
 
 @Injectable()
 export class AuditLogService {
@@ -30,31 +14,23 @@ export class AuditLogService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  @OnEvent(AUTH_EVENTS.AUDIT_LOG, { async: true })
-  async handleAuditLog(data: AuditLogData) {
-    try {
-      const uuid = uuidv7();
-      const { userAgent, ...rest } = data;
-      const deviceInfo = this.parseDeviceInfo(userAgent);
+  async handleAuditLog(data: AuditLogMessage): Promise<void> {
+    const uuid = uuidv7();
+    const { userAgent, ...rest } = data;
+    const deviceInfo = this.parseDeviceInfo(userAgent);
 
-      await this.prisma.auditLog.create({
-        data: {
-          ...rest,
-          id: uuid,
-          deviceInfo: deviceInfo as Prisma.JsonObject,
-          metadata: (rest.metadata as Prisma.JsonObject) ?? {},
-        },
-      });
-    } catch (error) {
-      this.logger.error('Audit logging failed internally:', error);
-    }
+    await this.prisma.auditLogEntry.create({
+      data: {
+        ...rest,
+        id: uuid,
+        deviceInfo: deviceInfo as Prisma.JsonObject,
+        metadata: (rest.metadata as Prisma.JsonObject) ?? {},
+      },
+    });
   }
 
-  async anonymizeAuditLogs(
-    where: Prisma.AuditLogWhereInput,
-    tx?: Prisma.TransactionClient,
-  ): Promise<Prisma.BatchPayload> {
-    const validateUserIdFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
+  async anonymizeAuditLogs(where: Prisma.AuditLogEntryWhereInput): Promise<Prisma.BatchPayload> {
+    const validateUserIdFilter = (filter: Prisma.AuditLogEntryWhereInput): boolean => {
       if (!filter || typeof filter !== 'object') return false;
 
       if ('NOT' in filter || 'AND' in filter || 'OR' in filter) {
@@ -72,21 +48,18 @@ export class AuditLogService {
       );
     }
 
-    const prisma = tx || this.prisma;
-
-    const result = await prisma.auditLog.updateMany({
+    return this.prisma.auditLogEntry.updateMany({
       where,
       data: {
         userId: null,
         metadata: Prisma.DbNull,
       },
     });
-    return result;
   }
 
-  async deleteAuditLogs(where: Prisma.AuditLogWhereInput): Promise<Prisma.BatchPayload> {
+  async deleteAuditLogs(where: Prisma.AuditLogEntryWhereInput): Promise<Prisma.BatchPayload> {
     // Ensure there's a meaningful time-based filter to prevent accidental mass deletion
-    const validateCreatedAtFilter = (filter: Prisma.AuditLogWhereInput): boolean => {
+    const validateCreatedAtFilter = (filter: Prisma.AuditLogEntryWhereInput): boolean => {
       if (!filter || typeof filter !== 'object') return false;
 
       if ('NOT' in filter) {
@@ -110,12 +83,8 @@ export class AuditLogService {
       throw new Error('A createdAt filter must be provided for bulk audit log deletion.');
     }
 
-    return this.prisma.auditLog.deleteMany({ where });
+    return this.prisma.auditLogEntry.deleteMany({ where });
   }
-
-  // ============================================
-  // HELPER FUNCTIONS
-  // ============================================
 
   private parseDeviceInfo(userAgent: string | null): {
     browser: string;
