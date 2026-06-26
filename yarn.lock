@@ -2153,6 +2153,49 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nestjs/microservices@npm:^11.1.24":
+  version: 11.1.24
+  resolution: "@nestjs/microservices@npm:11.1.24"
+  dependencies:
+    iterare: "npm:1.2.1"
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    "@grpc/grpc-js": "*"
+    "@nestjs/common": ^11.0.0
+    "@nestjs/core": ^11.0.0
+    "@nestjs/websockets": ^11.0.0
+    amqp-connection-manager: "*"
+    amqplib: "*"
+    cache-manager: "*"
+    ioredis: "*"
+    kafkajs: "*"
+    mqtt: "*"
+    nats: "*"
+    reflect-metadata: ^0.1.12 || ^0.2.0
+    rxjs: ^7.1.0
+  peerDependenciesMeta:
+    "@grpc/grpc-js":
+      optional: true
+    "@nestjs/websockets":
+      optional: true
+    amqp-connection-manager:
+      optional: true
+    amqplib:
+      optional: true
+    cache-manager:
+      optional: true
+    ioredis:
+      optional: true
+    kafkajs:
+      optional: true
+    mqtt:
+      optional: true
+    nats:
+      optional: true
+  checksum: 10c0/6e63e75a068335d70f2d42e6492056faf9b80786ac25b985dcc3e9ac04c68a25bdb7522e8f6077000b8656063d713edef5314aa00ec363bb5646ef4820638afd
+  languageName: node
+  linkType: hard
+
 "@nestjs/mongoose@npm:^11.0.4":
   version: 11.0.4
   resolution: "@nestjs/mongoose@npm:11.0.4"
@@ -3682,6 +3725,7 @@ __metadata:
   dependencies:
     "@nestjs/common": "npm:^11.0.1"
     "@nestjs/config": "npm:^4.0.2"
+    "@nestjs/microservices": "npm:^11.1.24"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/swagger": "npm:^11.2.6"
     "@nestjs/testing": "npm:^11.0.1"
@@ -3705,6 +3749,7 @@ __metadata:
   peerDependencies:
     "@nestjs/common": ^11.0.1
     "@nestjs/config": ^4.0.2
+    "@nestjs/microservices": ^11.1.24
     "@nestjs/passport": ^11.0.5
     "@nestjs/swagger": ^11.2.6
     "@nestjs/throttler": ^6.5.0
@@ -7166,6 +7211,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"amqp-connection-manager@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "amqp-connection-manager@npm:5.0.0"
+  dependencies:
+    promise-breaker: "npm:^6.0.0"
+  peerDependencies:
+    amqplib: "*"
+  checksum: 10c0/5dfbbe07c5f58dad96bbeb4a8cbf8d6736672d5e2d82630dee0fecd9d1e437fea8a07f893ed71b88ef1777f833d63d26dc4daf4ac4604367bcc6167fac971f77
+  languageName: node
+  linkType: hard
+
+"amqplib@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "amqplib@npm:2.0.1"
+  checksum: 10c0/4de6dd3ac92bf59c5d7f00c4948a44288fca1a0abeae8f038c037dfc94bc485fc8c16c6d43759b7e50319b43aa0aff18b8b7566b2b3fbf25b3bf7039b80b3537
+  languageName: node
+  linkType: hard
+
 "ansi-align@npm:^3.0.0":
   version: 3.0.1
   resolution: "ansi-align@npm:3.0.1"
@@ -7474,6 +7537,46 @@ __metadata:
   languageName: node
   linkType: hard
 
+"audit-service@workspace:apps/audit-service":
+  version: 0.0.0-use.local
+  resolution: "audit-service@workspace:apps/audit-service"
+  dependencies:
+    "@nestjs/cli": "npm:^11.0.0"
+    "@nestjs/common": "npm:^11.0.1"
+    "@nestjs/config": "npm:^4.0.2"
+    "@nestjs/core": "npm:^11.0.1"
+    "@nestjs/microservices": "npm:^11.1.24"
+    "@nestjs/platform-express": "npm:^11.0.1"
+    "@nestjs/schedule": "npm:^6.1.0"
+    "@nestjs/schematics": "npm:^11.0.0"
+    "@nestjs/terminus": "npm:^11.0.0"
+    "@nestjs/testing": "npm:^11.0.1"
+    "@prisma/adapter-pg": "npm:^7.8.0"
+    "@repo/db": "workspace:*"
+    "@repo/eslint-config": "workspace:*"
+    "@repo/nestjs-common": "workspace:*"
+    "@repo/typescript-config": "workspace:*"
+    "@repo/vitest-config": "workspace:*"
+    "@sentry/nestjs": "npm:^10.37.0"
+    "@types/express": "npm:^5.0.0"
+    "@types/node": "npm:^22.10.7"
+    "@types/supertest": "npm:^6.0.2"
+    amqp-connection-manager: "npm:^5.0.0"
+    amqplib: "npm:^2.0.1"
+    eslint: "npm:^10.3.0"
+    joi: "npm:^18.0.2"
+    reflect-metadata: "npm:^0.2.2"
+    rxjs: "npm:^7.8.1"
+    supertest: "npm:^7.0.0"
+    ts-node: "npm:^10.9.2"
+    tsconfig-paths: "npm:^4.2.0"
+    typescript: "npm:^6.0.2"
+    ua-parser-js: "npm:^2.0.8"
+    uuid: "npm:^13.0.0"
+    vitest: "npm:^4.1.1"
+  languageName: unknown
+  linkType: soft
+
 "auth-service@workspace:apps/auth-service":
   version: 0.0.0-use.local
   resolution: "auth-service@workspace:apps/auth-service"
@@ -7487,6 +7590,7 @@ __metadata:
     "@nestjs/core": "npm:^11.0.1"
     "@nestjs/event-emitter": "npm:^3.0.1"
     "@nestjs/jwt": "npm:^11.0.2"
+    "@nestjs/microservices": "npm:^11.1.24"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.0.1"
     "@nestjs/schedule": "npm:^6.1.0"
@@ -7509,6 +7613,8 @@ __metadata:
     "@types/nodemailer": "npm:^7.0.9"
     "@types/passport-jwt": "npm:^4.0.1"
     "@types/supertest": "npm:^6.0.2"
+    amqp-connection-manager: "npm:^5.0.0"
+    amqplib: "npm:^2.0.1"
     axios: "npm:^1.13.3"
     bcrypt: "npm:^6.0.0"
     class-transformer: "npm:^0.5.1"
@@ -7526,7 +7632,6 @@ __metadata:
     ts-node: "npm:^10.9.2"
     tsconfig-paths: "npm:^4.2.0"
     typescript: "npm:^6.0.2"
-    ua-parser-js: "npm:^2.0.8"
     uuid: "npm:^13.0.0"
     vitest: "npm:^4.1.1"
   languageName: unknown
@@ -15306,6 +15411,13 @@ __metadata:
   version: 2.0.3
   resolution: "progress@npm:2.0.3"
   checksum: 10c0/1697e07cb1068055dbe9fe858d242368ff5d2073639e652b75a7eb1f2a1a8d4afd404d719de23c7b48481a6aa0040686310e2dac2f53d776daa2176d3f96369c
+  languageName: node
+  linkType: hard
+
+"promise-breaker@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "promise-breaker@npm:6.0.0"
+  checksum: 10c0/fcd00836dd96d34d3376964bc3a9482251248cef00f0dcf1f2485e7d9af44f9c48b0431cf4dc780fd5a7137b8e0861e3c6557667811522e93978f6bffab66cfe
   languageName: node
   linkType: hard
 

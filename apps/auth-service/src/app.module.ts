@@ -42,6 +42,9 @@ const validationSchema = Joi.object({
   PRODUCT_SERVICE_URL: Joi.string().uri().required(),
   USER_DATA_SERVICE_URL: Joi.string().uri().required(),
 
+  // RabbitMQ
+  RABBITMQ_URL: Joi.string().required(),
+
   // Application
   AUTH_PORT: Joi.number().default(8001),
   AUTH_HEALTH_DISK_PATH: Joi.string().default('/'),
@@ -82,11 +85,6 @@ const validationSchema = Joi.object({
   AUTH_VERIFICATION_TOKEN_RETENTION_DAYS: Joi.number().min(1).default(1),
   AUTH_PASSWORD_RESET_TOKEN_EXPIRATION_IN_MS: Joi.number().default(900000),
   AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_MS: Joi.number().default(3600000),
-
-  // Logging
-  AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS: Joi.number().min(1).default(90),
-  AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: Joi.number().min(1).default(60),
-  AUTH_AUDIT_LOG_INFO_RETENTION_DAYS: Joi.number().min(1).default(30),
 
   // User
   AUTH_USER_DELETE_RETENTION_DAYS: Joi.number().min(1).default(30),

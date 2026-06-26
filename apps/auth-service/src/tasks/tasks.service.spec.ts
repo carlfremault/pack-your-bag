@@ -8,7 +8,6 @@ import { MS_PER_DAY, MS_PER_HOUR } from '@repo/nestjs-common';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
-import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
@@ -18,9 +17,6 @@ import { TasksService } from './tasks.service';
 
 const MOCK_CONFIG = {
   AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS: 14,
-  AUTH_AUDIT_LOG_INFO_RETENTION_DAYS: 30,
-  AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS: 60,
-  AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS: 90,
   AUTH_USER_DELETE_RETENTION_DAYS: 30,
   AUTH_VERIFICATION_TOKEN_RETENTION_DAYS: 1,
   AUTH_GUEST_SESSION_TTL_HOURS: 24,
@@ -41,8 +37,7 @@ describe('TasksService', () => {
 
   const mockRefreshTokenService = { deleteRefreshTokens: vi.fn() };
   const mockVerificationTokenService = { deleteVerificationTokens: vi.fn() };
-  const mockAuditLogService = { deleteAuditLogs: vi.fn() };
-  const mockAuditLogProvider = { auditRequest: vi.fn() };
+  const mockAuditLogProvider = { auditRequest: vi.fn(), requestAnonymization: vi.fn() };
   const mockUserService = { getUsers: vi.fn(), hardDeleteUsers: vi.fn() };
   const mockServiceClientService = {
     cleanupProductData: vi.fn(),
@@ -59,7 +54,6 @@ describe('TasksService', () => {
         TasksService,
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: VerificationTokenService, useValue: mockVerificationTokenService },
-        { provide: AuditLogService, useValue: mockAuditLogService },
         { provide: AuditLogProvider, useValue: mockAuditLogProvider },
         { provide: UserService, useValue: mockUserService },
         { provide: ServiceClientService, useValue: mockServiceClientService },
@@ -125,79 +119,6 @@ describe('TasksService', () => {
     });
   });
 
-  describe('cleanupAuditLogs', () => {
-    it('should call deleteAuditLogs with correct cutoffs', async () => {
-      const now = new Date().getTime();
-      const infoCutoff = mockConfigService.getOrThrow(
-        'AUTH_AUDIT_LOG_INFO_RETENTION_DAYS',
-      ) as number;
-      const errorCutoff = mockConfigService.getOrThrow(
-        'AUTH_AUDIT_LOG_ERROR_WARN_RETENTION_DAYS',
-      ) as number;
-      const criticalCutoff = mockConfigService.getOrThrow(
-        'AUTH_AUDIT_LOG_CRITICAL_RETENTION_DAYS',
-      ) as number;
-
-      mockAuditLogService.deleteAuditLogs.mockResolvedValue({ count: 10 });
-
-      await service.cleanupAuditLogs();
-
-      expect(mockAuditLogService.deleteAuditLogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          OR: expect.arrayContaining([
-            {
-              severity: AuditSeverity.INFO,
-              createdAt: { lt: new Date(now - infoCutoff * MS_PER_DAY) },
-            },
-            {
-              severity: { in: [AuditSeverity.WARN, AuditSeverity.ERROR] },
-              createdAt: { lt: new Date(now - errorCutoff * MS_PER_DAY) },
-            },
-            {
-              severity: AuditSeverity.CRITICAL,
-              createdAt: { lt: new Date(now - criticalCutoff * MS_PER_DAY) },
-            },
-          ]) as object[],
-        }),
-      );
-      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          metadata: expect.objectContaining({
-            infoCutoff: new Date(now - infoCutoff * MS_PER_DAY).toISOString(),
-            errorWarnCutoff: new Date(now - errorCutoff * MS_PER_DAY).toISOString(),
-            criticalCutoff: new Date(now - criticalCutoff * MS_PER_DAY).toISOString(),
-          }) as object,
-        }),
-      );
-    });
-
-    it('should catch and log errors when audit log deletion fails', async () => {
-      mockAuditLogService.deleteAuditLogs.mockRejectedValue(new Error('Audit DB Fail'));
-
-      await service.cleanupAuditLogs();
-
-      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          severity: AuditSeverity.ERROR,
-          message: expect.stringContaining('Audit log cleanup failed: Audit DB Fail') as string,
-        }),
-      );
-    });
-
-    it('should fall back to String(error) when a non-Error value is thrown', async () => {
-      mockAuditLogService.deleteAuditLogs.mockRejectedValue({ code: 'CUSTOM_ERR' });
-
-      await service.cleanupAuditLogs();
-
-      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          severity: AuditSeverity.ERROR,
-          message: expect.stringContaining('Audit log cleanup failed:') as string,
-        }),
-      );
-    });
-  });
-
   describe('cleanupDeletedUsers', () => {
     it('should do nothing if no users are pending deletion', async () => {
       mockUserService.getUsers.mockResolvedValue([]);
@@ -218,7 +139,6 @@ describe('TasksService', () => {
       mockUserService.hardDeleteUsers.mockResolvedValue({
         deletedUsers: 2,
         deletedTokens: 4,
-        anonymizedAuditLogs: 10,
       });
       mockServiceClientService.cleanupProductData.mockResolvedValue({
         deletedItems: 5,
@@ -234,6 +154,7 @@ describe('TasksService', () => {
       await service.cleanupDeletedUsers();
 
       expect(mockUserService.hardDeleteUsers).toHaveBeenCalledWith(['user-1', 'user-2']);
+      expect(mockAuditLogProvider.requestAnonymization).toHaveBeenCalledWith(['user-1', 'user-2']);
       expect(mockServiceClientService.cleanupProductData).toHaveBeenCalledWith([
         'user-1',
         'user-2',
@@ -261,7 +182,6 @@ describe('TasksService', () => {
       mockUserService.hardDeleteUsers.mockResolvedValue({
         deletedUsers: 1,
         deletedTokens: 1,
-        anonymizedAuditLogs: 2,
       });
       mockServiceClientService.cleanupProductData.mockRejectedValue(
         new Error('Product service unavailable'),
@@ -291,7 +211,6 @@ describe('TasksService', () => {
       mockUserService.hardDeleteUsers.mockResolvedValue({
         deletedUsers: 1,
         deletedTokens: 1,
-        anonymizedAuditLogs: 2,
       });
       mockServiceClientService.cleanupProductData.mockResolvedValue({
         deletedItems: 3,
@@ -444,7 +363,6 @@ describe('TasksService', () => {
       mockUserService.hardDeleteUsers.mockResolvedValue({
         deletedUsers: 2,
         deletedTokens: 3,
-        anonymizedAuditLogs: 1,
       });
       mockServiceClientService.cleanupProductData.mockResolvedValue({
         deletedItems: 5,
@@ -460,6 +378,10 @@ describe('TasksService', () => {
       await service.cleanupExpiredGuests();
 
       expect(mockUserService.hardDeleteUsers).toHaveBeenCalledWith(['guest-1', 'guest-2']);
+      expect(mockAuditLogProvider.requestAnonymization).toHaveBeenCalledWith([
+        'guest-1',
+        'guest-2',
+      ]);
       expect(mockServiceClientService.cleanupProductData).toHaveBeenCalledWith([
         'guest-1',
         'guest-2',

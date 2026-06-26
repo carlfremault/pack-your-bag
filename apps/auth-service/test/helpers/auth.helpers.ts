@@ -1,10 +1,12 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { Prisma, TokenType } from '@repo/db';
+import { TokenType } from '@repo/db';
+import { type AuditLogMessage, RMQ_PATTERNS } from '@repo/nestjs-common';
 
 import request, { Response } from 'supertest';
 import { App } from 'supertest/types';
+import { MockInstance } from 'vitest';
 
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { AuthForgotPasswordDto } from '@/modules/auth/dto/auth-forgot-password.dto';
@@ -21,6 +23,7 @@ export class AuthHelpers {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly bffSecret: string,
+    private readonly auditEmitSpy: MockInstance,
   ) {}
 
   get defaultUser() {
@@ -171,20 +174,34 @@ export class AuthHelpers {
       .expect(expectedStatus);
   }
 
-  async waitForLogs(where: Prisma.AuditLogWhereInput, maxAttempts = 20) {
+  private getEmittedAuditLogs(): AuditLogMessage[] {
+    const calls = this.auditEmitSpy.mock.calls as [string, AuditLogMessage][];
+    return calls
+      .filter(([pattern]) => pattern === RMQ_PATTERNS.AUDIT_LOG_CREATED)
+      .map(([, data]) => data);
+  }
+
+  private matchesWhere(msg: AuditLogMessage, where: Record<string, unknown>): boolean {
+    return Object.entries(where).every(
+      ([key, value]) => msg[key as keyof AuditLogMessage] === value,
+    );
+  }
+
+  async waitForLogs(where: Record<string, unknown>, maxAttempts = 20) {
     for (let i = 0; i < maxAttempts; i++) {
-      const logs = await this.prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' } });
-      if (logs.length > 0) return logs;
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      const matches = this.getEmittedAuditLogs().filter((msg) => this.matchesWhere(msg, where));
+      if (matches.length > 0) return matches;
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
     throw new Error(`Audit log not found for conditions: ${JSON.stringify(where)}`);
   }
 
-  async waitForMostRecentLog(where: Prisma.AuditLogWhereInput, maxAttempts = 20) {
+  async waitForMostRecentLog(where: Record<string, unknown>, maxAttempts = 20) {
     for (let i = 0; i < maxAttempts; i++) {
-      const log = await this.prisma.auditLog.findFirst({ where, orderBy: { createdAt: 'desc' } });
-      if (log) return log;
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      const logs = this.getEmittedAuditLogs();
+      const match = logs.reverse().find((msg) => this.matchesWhere(msg, where));
+      if (match) return match;
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
     throw new Error(`Audit log not found for conditions: ${JSON.stringify(where)}`);
   }

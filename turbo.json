@@ -15,13 +15,15 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "storybook-static/**"],
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
         "RSA_*",
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "lint": {
@@ -36,6 +38,7 @@
       "persistent": true,
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
@@ -43,7 +46,8 @@
         "NEXT_PUBLIC_*",
         "DEV_SENTRY_DSN",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "test:setup": {
@@ -56,13 +60,15 @@
       "dependsOn": ["test:setup", "^build"],
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
         "RSA_*",
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "test:watch": {
@@ -71,13 +77,15 @@
       "persistent": true,
       "env": [
         "AUTH_*",
+        "AUDIT_*",
         "PRODUCT_*",
         "USER_DATA_*",
         "UDS_*",
         "RSA_*",
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
-        "MONGO_*"
+        "MONGO_*",
+        "RABBITMQ_*"
       ]
     },
     "test:browser": {

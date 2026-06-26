@@ -14,10 +14,10 @@ RUN apt-get update && apt-get install -y zsh iputils-ping netcat-openbsd && \
     chsh -s /usr/bin/zsh node && \
     corepack enable && corepack prepare yarn@4.11.0 --activate && \
     mkdir -p /home/node/.vscode-server/extensions \
-             /home/node/.cursor-server/bin \
              /home/node/.cache/yarn \
-             /workspaces/pack-your-bag/node_modules && \
-    chown -R node:node /home/node /workspaces/pack-your-bag && \
+             /workspaces/pack-your-bag/node_modules \
+             /home/node/.claude && \
+    chown -R node:node /home/node /workspaces/pack-your-bag /home/node/.claude && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 

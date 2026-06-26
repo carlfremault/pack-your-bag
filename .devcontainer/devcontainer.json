@@ -15,7 +15,7 @@
     "YARN_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_AUTO_CONNECT_IDE": "true"
   },
-  "forwardPorts": [3000, 3001, 3002, 3003, 8001, 8002, 8003],
+  "forwardPorts": [3000, 3001, 3002, 3003, 8001, 8002, 8003, 8004],
   "customizations": {
     "vscode": {
       "extensions": [

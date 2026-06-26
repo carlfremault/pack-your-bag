@@ -16,7 +16,6 @@ import { DEFAULT_LOCALE } from '@/common/constants/auth.constants';
 import { InvalidTokenException } from '@/common/exceptions/bad-request.exceptions';
 import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';
-import { AuditLogService } from '@/modules/audit-log/audit-log.service';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -29,7 +28,6 @@ import { UserEventProvider } from './user-event.provider';
 interface UserDeletionResult {
   deletedUsers: number;
   deletedTokens: number;
-  anonymizedAuditLogs: number;
 }
 
 @Injectable()
@@ -40,7 +38,6 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly auditLogService: AuditLogService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly verificationTokenService: VerificationTokenService,
     private readonly userEventProvider: UserEventProvider,
@@ -251,7 +248,7 @@ export class UserService {
   // For cron job only
   async hardDeleteUsers(userIds: string[]): Promise<UserDeletionResult> {
     if (userIds.length === 0) {
-      return { deletedUsers: 0, deletedTokens: 0, anonymizedAuditLogs: 0 };
+      return { deletedUsers: 0, deletedTokens: 0 };
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -259,19 +256,11 @@ export class UserService {
         { userId: { in: userIds } },
         tx,
       );
-      const { count: anonymizedAuditLogs } = await this.auditLogService.anonymizeAuditLogs(
-        { userId: { in: userIds } },
-        tx,
-      );
       const { count: deletedUsers } = await tx.user.deleteMany({
         where: { id: { in: userIds } },
       });
 
-      return {
-        deletedUsers,
-        deletedTokens,
-        anonymizedAuditLogs,
-      };
+      return { deletedUsers, deletedTokens };
     });
   }
 }
