@@ -24,6 +24,7 @@ jobs:
       auth-service: ${{ steps.set.outputs.auth-service }}
       product-service: ${{ steps.set.outputs.product-service }}
       user-data-service: ${{ steps.set.outputs.user-data-service }}
+      audit-service: ${{ steps.set.outputs.audit-service }}
       web: ${{ steps.set.outputs.web }}
       db-migrate: ${{ steps.set.outputs.db-migrate }}
       any-service: ${{ steps.set.outputs.any-service }}
@@ -44,6 +45,9 @@ jobs:
               - 'packages/**'
             user-data-service:
               - 'apps/user-data-service/**'
+              - 'packages/**'
+            audit-service:
+              - 'apps/audit-service/**'
               - 'packages/**'
             web:
               - 'apps/web/**'
@@ -71,6 +75,7 @@ jobs:
           AUTH=$(resolve "${{ steps.filter.outputs.auth-service }}")
           PRODUCT=$(resolve "${{ steps.filter.outputs.product-service }}")
           UDS=$(resolve "${{ steps.filter.outputs.user-data-service }}")
+          AUDIT=$(resolve "${{ steps.filter.outputs.audit-service }}")
           WEB=$(resolve "${{ steps.filter.outputs.web }}")
           DB=$(resolve "${{ steps.filter.outputs.db-migrate }}")
           INFRA=$(resolve "${{ steps.filter.outputs.infra }}")
@@ -78,16 +83,17 @@ jobs:
           echo "auth-service=$AUTH" >> "$GITHUB_OUTPUT"
           echo "product-service=$PRODUCT" >> "$GITHUB_OUTPUT"
           echo "user-data-service=$UDS" >> "$GITHUB_OUTPUT"
+          echo "audit-service=$AUDIT" >> "$GITHUB_OUTPUT"
           echo "web=$WEB" >> "$GITHUB_OUTPUT"
           echo "db-migrate=$DB" >> "$GITHUB_OUTPUT"
 
-          if [ "$AUTH" = "true" ] || [ "$PRODUCT" = "true" ] || [ "$UDS" = "true" ] || [ "$WEB" = "true" ] || [ "$DB" = "true" ]; then
+          if [ "$AUTH" = "true" ] || [ "$PRODUCT" = "true" ] || [ "$UDS" = "true" ] || [ "$AUDIT" = "true" ] || [ "$WEB" = "true" ] || [ "$DB" = "true" ]; then
             echo "any-service=true" >> "$GITHUB_OUTPUT"
           else
             echo "any-service=false" >> "$GITHUB_OUTPUT"
           fi
 
-          if [ "$AUTH" = "true" ] || [ "$PRODUCT" = "true" ] || [ "$UDS" = "true" ] || [ "$WEB" = "true" ] || [ "$DB" = "true" ] || [ "$INFRA" = "true" ]; then
+          if [ "$AUTH" = "true" ] || [ "$PRODUCT" = "true" ] || [ "$UDS" = "true" ] || [ "$AUDIT" = "true" ] || [ "$WEB" = "true" ] || [ "$DB" = "true" ] || [ "$INFRA" = "true" ]; then
             echo "any-change=true" >> "$GITHUB_OUTPUT"
           else
             echo "any-change=false" >> "$GITHUB_OUTPUT"
@@ -112,6 +118,8 @@ jobs:
             dockerfile: apps/product-service/Dockerfile
           - service: user-data-service
             dockerfile: apps/user-data-service/Dockerfile
+          - service: audit-service
+            dockerfile: apps/audit-service/Dockerfile
           - service: web
             dockerfile: apps/web/Dockerfile
           - service: db-migrate
@@ -172,6 +180,8 @@ jobs:
           POSTGRES_AUTH_PASSWORD: ${{ secrets.POSTGRES_AUTH_PASSWORD }}
           POSTGRES_PRODUCT_USER: ${{ secrets.POSTGRES_PRODUCT_USER }}
           POSTGRES_PRODUCT_PASSWORD: ${{ secrets.POSTGRES_PRODUCT_PASSWORD }}
+          POSTGRES_AUDIT_USER: ${{ secrets.POSTGRES_AUDIT_USER }}
+          POSTGRES_AUDIT_PASSWORD: ${{ secrets.POSTGRES_AUDIT_PASSWORD }}
           MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
           # Auth service secrets
@@ -181,6 +191,9 @@ jobs:
           AUTH_MAIL_USER: ${{ secrets.AUTH_MAIL_USER }}
           AUTH_MAIL_PASS: ${{ secrets.AUTH_MAIL_PASS }}
           AUTH_MAIL_FROM: ${{ secrets.AUTH_MAIL_FROM }}
+          # RabbitMQ secrets
+          RABBITMQ_USER: ${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_PASS: ${{ secrets.RABBITMQ_PASS }}
           # Brevo API secrets
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_TEMPLATE_PASSWORD_RESET_REQUEST: ${{ secrets.BREVO_TEMPLATE_PASSWORD_RESET_REQUEST }}
@@ -190,6 +203,7 @@ jobs:
           # Other service secrets
           PRODUCT_SENTRY_DSN: ${{ secrets.PRODUCT_SENTRY_DSN }}
           USER_DATA_SENTRY_DSN: ${{ secrets.USER_DATA_SENTRY_DSN }}
+          AUDIT_SENTRY_DSN: ${{ secrets.AUDIT_SENTRY_DSN }}
           NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
           NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE }}
@@ -199,7 +213,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: SHA,BFF_SHARED_SECRET,INTERNAL_SERVICE_SECRET,RSA_PUBLIC_KEY_B64,RSA_PRIVATE_KEY_B64,POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,POSTGRES_AUTH_USER,POSTGRES_AUTH_PASSWORD,POSTGRES_PRODUCT_USER,POSTGRES_PRODUCT_PASSWORD,MONGO_INITDB_ROOT_USERNAME,MONGO_INITDB_ROOT_PASSWORD,AUTH_SECRET,AUTH_SENTRY_DSN,AUTH_MAIL_HOST,AUTH_MAIL_USER,AUTH_MAIL_PASS,AUTH_MAIL_FROM,BREVO_API_KEY,BREVO_TEMPLATE_PASSWORD_RESET_REQUEST,BREVO_TEMPLATE_PASSWORD_RESET_CONFIRMATION,BREVO_TEMPLATE_ACCOUNT_VERIFICATION_REQUEST,BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST,PRODUCT_SENTRY_DSN,USER_DATA_SENTRY_DSN,NEXT_PUBLIC_BASE_URL,NEXT_PUBLIC_SENTRY_DSN,NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,DB_MIGRATE_CHANGED
+          envs: SHA,BFF_SHARED_SECRET,INTERNAL_SERVICE_SECRET,RSA_PUBLIC_KEY_B64,RSA_PRIVATE_KEY_B64,POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,POSTGRES_AUTH_USER,POSTGRES_AUTH_PASSWORD,POSTGRES_PRODUCT_USER,POSTGRES_PRODUCT_PASSWORD,MONGO_INITDB_ROOT_USERNAME,MONGO_INITDB_ROOT_PASSWORD,AUTH_SECRET,AUTH_SENTRY_DSN,AUTH_MAIL_HOST,AUTH_MAIL_USER,AUTH_MAIL_PASS,AUTH_MAIL_FROM,BREVO_API_KEY,BREVO_TEMPLATE_PASSWORD_RESET_REQUEST,BREVO_TEMPLATE_PASSWORD_RESET_CONFIRMATION,BREVO_TEMPLATE_ACCOUNT_VERIFICATION_REQUEST,BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST,PRODUCT_SENTRY_DSN,USER_DATA_SENTRY_DSN,NEXT_PUBLIC_BASE_URL,NEXT_PUBLIC_SENTRY_DSN,NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,DB_MIGRATE_CHANGED, POSTGRES_AUDIT_USER, POSTGRES_AUDIT_PASSWORD, RABBITMQ_USER, RABBITMQ_PASS, AUDIT_SENTRY_DSN
           script: |
             set -e
             cd ~/pack-your-bag
@@ -220,6 +234,11 @@ jobs:
             cat > .env.mongo <<ENVEOF
             MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
             MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+            ENVEOF
+
+            cat > .env.rabbitmq <<ENVEOF
+            RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+            RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
             ENVEOF
 
             cat > .env.auth-service <<ENVEOF
@@ -270,6 +289,7 @@ jobs:
             BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST=${BREVO_TEMPLATE_ACCOUNT_DELETION_REQUEST}
             PRODUCT_SERVICE_URL=http://product-service:8002
             USER_DATA_SERVICE_URL=http://user-data-service:8003
+            RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
             ENVEOF
 
             cat > .env.product-service <<ENVEOF
@@ -304,6 +324,25 @@ jobs:
             USER_DATA_THROTTLE_LIMIT=100
             RSA_PUBLIC_KEY_B64=${RSA_PUBLIC_KEY_B64}
             USER_DATA_SENTRY_DSN=${USER_DATA_SENTRY_DSN}
+            ENVEOF
+
+            cat > .env.audit-service <<ENVEOF
+            NODE_ENV=production
+            TRUST_PROXY=1
+            AUDIT_PORT=8004
+            RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+            POSTGRES_AUDIT_USER=${POSTGRES_AUDIT_USER}
+            POSTGRES_AUDIT_PASSWORD=${POSTGRES_AUDIT_PASSWORD}
+            POSTGRES_AUDIT_SCHEMA=app_audit
+            POSTGRES_AUDIT_URL=postgresql://${POSTGRES_AUDIT_USER}:${POSTGRES_AUDIT_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=app_audit
+            AUDIT_DB_POOL_MAX=20
+            AUDIT_DB_IDLE_TIMEOUT=30000
+            AUDIT_DB_CONN_TIMEOUT=5000
+            AUDIT_LOG_CRITICAL_RETENTION_DAYS=90
+            AUDIT_LOG_ERROR_WARN_RETENTION_DAYS=60
+            AUDIT_LOG_INFO_RETENTION_DAYS=30
+            AUDIT_HEALTH_DISK_PATH=/
+            AUDIT_SENTRY_DSN=${AUDIT_SENTRY_DSN}
             ENVEOF
 
             cat > .env.web <<ENVEOF
