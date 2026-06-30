@@ -68,12 +68,14 @@ describe('AuditLogController', () => {
       expect(mockChannel.nack).not.toHaveBeenCalled();
     });
 
-    it('should nack the message when processing fails', async () => {
-      mockAuditLogService.handleAuditLog.mockRejectedValue(new Error('DB failure'));
+    it('should propagate errors to exception filters', async () => {
+      const error = new Error('DB failure');
+      mockAuditLogService.handleAuditLog.mockRejectedValue(error);
 
-      await controller.handleLogCreated(mockData, createMockContext());
+      await expect(controller.handleLogCreated(mockData, createMockContext())).rejects.toThrow(
+        'DB failure',
+      );
 
-      expect(mockChannel.nack).toHaveBeenCalledWith(mockOriginalMsg, false, false);
       expect(mockChannel.ack).not.toHaveBeenCalled();
     });
   });
@@ -95,12 +97,14 @@ describe('AuditLogController', () => {
       expect(mockChannel.nack).not.toHaveBeenCalled();
     });
 
-    it('should nack the message when anonymization fails', async () => {
-      mockAuditLogService.anonymizeAuditLogs.mockRejectedValue(new Error('DB failure'));
+    it('should propagate errors to exception filters', async () => {
+      const error = new Error('DB failure');
+      mockAuditLogService.anonymizeAuditLogs.mockRejectedValue(error);
 
-      await controller.handleAnonymize(mockData, createMockContext());
+      await expect(controller.handleAnonymize(mockData, createMockContext())).rejects.toThrow(
+        'DB failure',
+      );
 
-      expect(mockChannel.nack).toHaveBeenCalledWith(mockOriginalMsg, false, false);
       expect(mockChannel.ack).not.toHaveBeenCalled();
     });
   });

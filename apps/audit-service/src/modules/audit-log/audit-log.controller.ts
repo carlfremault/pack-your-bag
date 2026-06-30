@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, UseFilters } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 
 import {
@@ -9,8 +9,11 @@ import {
 
 import type { Channel, ConsumeMessage } from 'amqplib';
 
+import { RpcExceptionFilter } from '@/common/filters/rpc-exception.filter';
+
 import { AuditLogService } from './audit-log.service';
 
+@UseFilters(RpcExceptionFilter)
 @Controller()
 export class AuditLogController {
   private readonly logger = new Logger(AuditLogController.name, { timestamp: true });
@@ -25,13 +28,8 @@ export class AuditLogController {
     const channel = context.getChannelRef() as Channel;
     const originalMsg = context.getMessage() as ConsumeMessage;
 
-    try {
-      await this.auditLogService.handleAuditLog(data);
-      channel.ack(originalMsg);
-    } catch (error) {
-      this.logger.error('Failed to process audit log', error);
-      channel.nack(originalMsg, false, false);
-    }
+    await this.auditLogService.handleAuditLog(data);
+    channel.ack(originalMsg);
   }
 
   @EventPattern(RMQ_PATTERNS.AUDIT_LOGS_ANONYMIZE)
@@ -42,15 +40,10 @@ export class AuditLogController {
     const channel = context.getChannelRef() as Channel;
     const originalMsg = context.getMessage() as ConsumeMessage;
 
-    try {
-      const result = await this.auditLogService.anonymizeAuditLogs({
-        userId: { in: data.userIds },
-      });
-      this.logger.log(`Anonymized ${result.count} audit log(s) for ${data.userIds.length} user(s)`);
-      channel.ack(originalMsg);
-    } catch (error) {
-      this.logger.error('Failed to anonymize audit logs', error);
-      channel.nack(originalMsg, false, false);
-    }
+    const result = await this.auditLogService.anonymizeAuditLogs({
+      userId: { in: data.userIds },
+    });
+    this.logger.log(`Anonymized ${result.count} audit log(s) for ${data.userIds.length} user(s)`);
+    channel.ack(originalMsg);
   }
 }

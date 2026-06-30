@@ -69,16 +69,6 @@ const validationSchema = Joi.object({
     AuditLogModule,
     TasksModule,
   ],
-  // providers: [
-  //   {
-  //     provide: APP_FILTER,
-  //     useClass: GlobalExceptionsFilter,
-  //   },
-  //   {
-  //     provide: APP_FILTER,
-  //     useClass: PrismaExceptionFilter,
-  //   },
-  // ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
