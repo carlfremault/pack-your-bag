@@ -7,6 +7,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 
 import {
+  AuditLogModule,
   BffGuardModule,
   CustomThrottlerModule,
   JwtAuthModule,
@@ -21,7 +22,6 @@ import { AuthExceptionFilter } from './common/filters/auth-exception.filter';
 import { GlobalExceptionsFilter } from './common/filters/global-exceptions.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { UserModule } from './modules/user/user.module';
@@ -191,7 +191,7 @@ const validationSchema = Joi.object({
         },
       }),
     }),
-    AuditLogModule,
+    AuditLogModule.forRoot({ source: 'auth-service' }),
     AuthModule,
     UserModule,
     HealthModule,

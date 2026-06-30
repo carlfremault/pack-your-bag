@@ -1,22 +1,20 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
-import {
-  anonymizeIp,
-  type AuditLogMessage,
-  type AuditLogsAnonymizeMessage,
-  RMQ_PATTERNS,
-  RMQ_PUBLISHERS,
-} from '@repo/nestjs-common';
+import { AuditLogEventType, AuditLogSeverity, Prisma } from '@repo/db';
 
 import { Request } from 'express';
 
-import { getUserAgentFromHeaders } from '@/common/utils/getUserAgentFromHeaders';
+import { RMQ_PATTERNS, RMQ_PUBLISHERS } from '../rmq/rmq.constants';
+import type { AuditLogMessage, AuditLogsAnonymizeMessage } from '../rmq/rmq.helpers';
+import { anonymizeIp } from '../utils/anonymizeIp';
+import { getUserAgentFromHeaders } from '../utils/getUserAgentFromHeaders';
 
-interface AuditRequestInput {
-  readonly eventType: AuditEventType;
-  readonly severity: AuditSeverity;
+export const AUDIT_SOURCE = 'AUDIT_SOURCE';
+
+export interface AuditRequestInput {
+  readonly eventType: AuditLogEventType;
+  readonly severity: AuditLogSeverity;
   readonly userId?: string | null;
   readonly statusCode: number | null;
   readonly errorCode?: string;
@@ -28,7 +26,10 @@ interface AuditRequestInput {
 export class AuditLogProvider {
   private readonly logger = new Logger(AuditLogProvider.name, { timestamp: true });
 
-  constructor(@Inject(RMQ_PUBLISHERS.AUDIT) private readonly client: ClientProxy) {}
+  constructor(
+    @Inject(RMQ_PUBLISHERS.AUDIT) private readonly client: ClientProxy,
+    @Inject(AUDIT_SOURCE) private readonly source: string,
+  ) {}
 
   auditRequest(data: AuditRequestInput, request?: Request): void {
     const message = this.buildMessage(data, request);
@@ -66,6 +67,7 @@ export class AuditLogProvider {
         userAgent: null,
         path: null,
         method: null,
+        source: this.source,
       };
     }
 
@@ -80,6 +82,7 @@ export class AuditLogProvider {
       userAgent,
       path,
       method,
+      source: this.source,
     };
   }
 }

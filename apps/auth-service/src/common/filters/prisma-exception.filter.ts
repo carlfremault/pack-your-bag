@@ -2,10 +2,9 @@ import { Catch } from '@nestjs/common';
 
 import { Prisma } from '@repo/db';
 import { BasePrismaExceptionsFilter, ErrorContext } from '@repo/nestjs-common';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { Request } from 'express';
-
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter extends BasePrismaExceptionsFilter {

@@ -4,8 +4,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
 import { MS_PER_DAY, MS_PER_HOUR } from '@repo/nestjs-common';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
 import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';

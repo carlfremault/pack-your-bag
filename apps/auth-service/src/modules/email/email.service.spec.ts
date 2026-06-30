@@ -4,10 +4,10 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
 import { safeCaptureSentryException } from '@repo/nestjs-common';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { BrevoService } from '@/modules/email/brevo.service';
 import { EmailService } from '@/modules/email/email.service';
 

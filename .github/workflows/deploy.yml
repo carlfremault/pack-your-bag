@@ -310,6 +310,7 @@ jobs:
             PRODUCT_HEALTH_DISK_PATH=/
             RSA_PUBLIC_KEY_B64=${RSA_PUBLIC_KEY_B64}
             PRODUCT_SENTRY_DSN=${PRODUCT_SENTRY_DSN}
+            RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
             ENVEOF
 
             cat > .env.user-data-service <<ENVEOF

@@ -2,10 +2,9 @@ import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 import { PrismaExceptionFilter } from './prisma-exception.filter';
 
