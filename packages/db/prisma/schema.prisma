@@ -184,6 +184,7 @@ model AuditLogEntry {
   createdAt     DateTime    @default(now())
   message       Json
   metadata      Json?
+  source        String      @default("auth-service")
 
   // HTTP Request Context (null for non-HTTP events, e.g. cron jobs)
   requestId     String?      @db.Uuid
@@ -204,6 +205,7 @@ model AuditLogEntry {
   @@index([severity])
   @@index([createdAt])
   @@index([requestId])
+  @@index([source])
   @@schema("app_audit")
 }
 

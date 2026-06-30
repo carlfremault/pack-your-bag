@@ -9,6 +9,7 @@ import {
   safeCaptureSentryException,
   safeStringify,
 } from '@repo/nestjs-common';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { Request } from 'express';
 
@@ -16,7 +17,6 @@ import {
   EmailAlreadyVerifiedException,
   InvalidTokenException,
 } from '@/common/exceptions/bad-request.exceptions';
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 @Catch()
 export class GlobalExceptionsFilter extends BaseGlobalExceptionsFilter {

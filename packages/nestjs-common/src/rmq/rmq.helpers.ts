@@ -32,6 +32,7 @@ export interface AuditLogMessage {
   readonly method: string | null;
   readonly statusCode: number | null;
   readonly errorCode?: string;
+  readonly source?: string;
   readonly message: Prisma.InputJsonValue;
   readonly metadata?: Prisma.InputJsonValue;
 }
