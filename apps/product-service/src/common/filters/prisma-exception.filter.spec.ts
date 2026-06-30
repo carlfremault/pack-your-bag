@@ -1,6 +1,7 @@
 import { HttpStatus, InternalServerErrorException } from '@nestjs/common';
 
-import { Prisma } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity, Prisma } from '@repo/db';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -36,11 +37,12 @@ function createMockHost() {
 describe('PrismaExceptionFilter', () => {
   let filter: PrismaExceptionFilter;
   let errorLogSpy: ReturnType<typeof vi.spyOn>;
+  const mockAuditLogProvider = { auditRequest: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    filter = new PrismaExceptionFilter();
+    filter = new PrismaExceptionFilter(mockAuditLogProvider as unknown as AuditLogProvider);
 
     // Suppress console output from the filter's logger during tests
     errorLogSpy = vi.spyOn(filter['logger'], 'error').mockImplementation(() => {});
@@ -85,6 +87,48 @@ describe('PrismaExceptionFilter', () => {
         expect.stringContaining('email') as string,
         exception.stack,
       );
+    });
+  });
+
+  describe('audit logging', () => {
+    it('should emit an audit event for a P2002 conflict', () => {
+      const { host, mockRequest } = createMockHost();
+      const exception = createPrismaError('P2002', { target: ['email'] });
+
+      filter.catch(exception, host as never);
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditLogEventType.CONFLICT_ERROR,
+          severity: AuditLogSeverity.WARN,
+          statusCode: HttpStatus.CONFLICT,
+        }),
+        mockRequest,
+      );
+    });
+
+    it('should emit an audit event for a P2025 not found', () => {
+      const { host, mockRequest } = createMockHost();
+      const exception = createPrismaError('P2025', { modelName: 'User', operation: 'findUnique' });
+
+      filter.catch(exception, host as never);
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditLogEventType.RESOURCE_NOT_FOUND,
+          severity: AuditLogSeverity.WARN,
+          statusCode: HttpStatus.NOT_FOUND,
+        }),
+        mockRequest,
+      );
+    });
+
+    it('should NOT emit an audit event for unknown Prisma error codes', () => {
+      const { host } = createMockHost();
+      const exception = createPrismaError('P1001');
+
+      expect(() => filter.catch(exception, host as never)).toThrow(InternalServerErrorException);
+      expect(mockAuditLogProvider.auditRequest).not.toHaveBeenCalled();
     });
   });
 

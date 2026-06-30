@@ -4,6 +4,7 @@ import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import {
+  AuditLogModule,
   BffGuardModule,
   CustomThrottlerModule,
   InternalGuardModule,
@@ -54,6 +55,9 @@ const validationSchema = Joi.object({
   PRODUCT_DB_IDLE_TIMEOUT: Joi.number().min(1000).max(30000).default(30000),
   PRODUCT_DB_CONN_TIMEOUT: Joi.number().min(1000).max(10000).default(5000),
 
+  // RabbitMQ
+  RABBITMQ_URL: Joi.string().required(),
+
   // Throttling
   PRODUCT_THROTTLE_TTL: Joi.number().default(60000),
   PRODUCT_THROTTLE_LIMIT: Joi.number().default(100),
@@ -102,6 +106,7 @@ const validationSchema = Joi.object({
         },
       ],
     }),
+    AuditLogModule.forRoot({ source: 'product-service' }),
     PrismaModule,
     BffGuardModule,
     InternalGuardModule,

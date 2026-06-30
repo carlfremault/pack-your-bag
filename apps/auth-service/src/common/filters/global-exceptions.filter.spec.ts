@@ -12,6 +12,7 @@ import { ThrottlerException } from '@nestjs/throttler';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
 import { AccountDeletedException } from '@repo/nestjs-common';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,7 +20,6 @@ import {
   EmailAlreadyVerifiedException,
   InvalidTokenException,
 } from '@/common/exceptions/bad-request.exceptions';
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 import { GlobalExceptionsFilter } from './global-exceptions.filter';
 

@@ -2,13 +2,13 @@ import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } fr
 import { Reflector } from '@nestjs/core';
 
 import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { AUDIT_EVENT_KEY } from '@/common/decorators/audit-log.decorator';
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 
 interface AuditableResponse {
   user?: {

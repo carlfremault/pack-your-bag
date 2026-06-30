@@ -14,6 +14,7 @@ import {
   InvalidSessionException,
   safeCaptureSentryException,
 } from '@repo/nestjs-common';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
 
@@ -22,7 +23,6 @@ import {
   SessionExpiredException,
   TokenReusedException,
 } from '@/common/exceptions/unauthorized.exceptions';
-import { AuditLogProvider } from '@/modules/audit-log/audit-log.provider';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 
 interface UnauthorizedExceptionResponse {
