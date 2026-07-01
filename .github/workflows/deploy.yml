@@ -325,6 +325,7 @@ jobs:
             USER_DATA_THROTTLE_LIMIT=100
             RSA_PUBLIC_KEY_B64=${RSA_PUBLIC_KEY_B64}
             USER_DATA_SENTRY_DSN=${USER_DATA_SENTRY_DSN}
+            RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
             ENVEOF
 
             cat > .env.audit-service <<ENVEOF
