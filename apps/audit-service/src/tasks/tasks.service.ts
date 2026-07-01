@@ -96,6 +96,7 @@ export class TasksService {
         userAgent: null,
         path: null,
         method: null,
+        source: 'audit-service',
         message: data.message,
         metadata: data.metadata,
       });
