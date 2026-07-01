@@ -1,5 +1,8 @@
 import { HttpStatus, InternalServerErrorException } from '@nestjs/common';
 
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
+import { AuditLogProvider } from '@repo/nestjs-common';
+
 import { MongoServerError } from 'mongodb';
 import { Error as MongooseError } from 'mongoose';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -47,10 +50,11 @@ function createMockHost() {
 describe('MongooseExceptionFilter', () => {
   let filter: MongooseExceptionFilter;
   let errorLogSpy: ReturnType<typeof vi.spyOn>;
+  const mockAuditLogProvider = { auditRequest: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    filter = new MongooseExceptionFilter();
+    filter = new MongooseExceptionFilter(mockAuditLogProvider as unknown as AuditLogProvider);
     errorLogSpy = vi.spyOn(filter['logger'], 'error').mockImplementation(() => {});
   });
 
@@ -193,6 +197,65 @@ describe('MongooseExceptionFilter', () => {
         expect.stringContaining('DocumentNotFoundError') as string,
         exception.stack,
       );
+    });
+  });
+
+  describe('audit logging', () => {
+    it('should emit an audit event for a duplicate key error', () => {
+      const { host, mockRequest } = createMockHost();
+      const exception = createDuplicateKeyError(['userId']);
+
+      filter.catch(exception, host as never);
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditLogEventType.CONFLICT_ERROR,
+          severity: AuditLogSeverity.WARN,
+          statusCode: HttpStatus.CONFLICT,
+        }),
+        mockRequest,
+      );
+    });
+
+    it('should emit an audit event for a CastError', () => {
+      const { host, mockRequest } = createMockHost();
+      const exception = createCastError('userId', 'ObjectId', 'not-a-valid-id');
+
+      filter.catch(exception, host as never);
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditLogEventType.VALIDATION_ERROR,
+          severity: AuditLogSeverity.INFO,
+          statusCode: HttpStatus.BAD_REQUEST,
+        }),
+        mockRequest,
+      );
+    });
+
+    it('should emit an audit event for a DocumentNotFoundError', () => {
+      const { host, mockRequest } = createMockHost();
+      const exception = createDocumentNotFoundError();
+
+      filter.catch(exception, host as never);
+
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditLogEventType.RESOURCE_NOT_FOUND,
+          severity: AuditLogSeverity.WARN,
+          statusCode: HttpStatus.NOT_FOUND,
+        }),
+        mockRequest,
+      );
+    });
+
+    it('should NOT emit an audit event for unknown MongoServerError codes', () => {
+      const { host } = createMockHost();
+      const exception = new MongoServerError({ message: 'Some other server error' });
+      Object.assign(exception, { code: 99999 });
+
+      expect(() => filter.catch(exception, host as never)).toThrow(InternalServerErrorException);
+      expect(mockAuditLogProvider.auditRequest).not.toHaveBeenCalled();
     });
   });
 

@@ -7,7 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 
-import { capitalizeFirstLetter } from '@repo/nestjs-common';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
+import { AuditLogProvider, capitalizeFirstLetter } from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
 import { MongoServerError } from 'mongodb';
@@ -23,11 +24,15 @@ interface MongoErrorContext {
   error: string;
   clientMessage: string;
   auditMessage: string;
+  eventType: AuditLogEventType;
+  severity: AuditLogSeverity;
 }
 
 @Catch(MongoServerError, MongooseError.CastError, MongooseError.DocumentNotFoundError)
 export class MongooseExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(MongooseExceptionFilter.name);
+
+  constructor(private readonly auditLogProvider: AuditLogProvider) {}
 
   catch(exception: MongooseException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -44,6 +49,17 @@ export class MongooseExceptionFilter implements ExceptionFilter {
     this.logger.error(
       `MongoDB Error at ${request.method} ${request.path}: ${errorContext.auditMessage}`,
       exception.stack,
+    );
+
+    this.auditLogProvider.auditRequest(
+      {
+        eventType: errorContext.eventType,
+        severity: errorContext.severity,
+        statusCode: errorContext.statusCode,
+        errorCode: errorContext.error,
+        message: errorContext.auditMessage,
+      },
+      request,
     );
 
     response.status(errorContext.statusCode).json({
@@ -93,6 +109,8 @@ export class MongooseExceptionFilter implements ExceptionFilter {
       error: 'Conflict',
       clientMessage,
       auditMessage,
+      eventType: AuditLogEventType.CONFLICT_ERROR,
+      severity: AuditLogSeverity.WARN,
     };
   }
 
@@ -103,6 +121,8 @@ export class MongooseExceptionFilter implements ExceptionFilter {
       error: 'Bad Request',
       clientMessage: `Invalid value provided for field '${exception.path}'.`,
       auditMessage: `CastError: invalid ${exception.kind} for path '${exception.path}'`,
+      eventType: AuditLogEventType.VALIDATION_ERROR,
+      severity: AuditLogSeverity.INFO,
     };
   }
 
@@ -114,6 +134,8 @@ export class MongooseExceptionFilter implements ExceptionFilter {
       error: 'Not Found',
       clientMessage: 'The requested resource was not found.',
       auditMessage: 'DocumentNotFoundError: query matched no documents',
+      eventType: AuditLogEventType.RESOURCE_NOT_FOUND,
+      severity: AuditLogSeverity.WARN,
     };
   }
 

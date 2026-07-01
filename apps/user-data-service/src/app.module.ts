@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import {
+  AuditLogModule,
   BffGuardModule,
   CustomThrottlerModule,
   InternalGuardModule,
@@ -38,6 +39,9 @@ const validationSchema = Joi.object({
   // Database
   MONGO_DB_URL: Joi.string().uri().required(),
   MONGO_DB_NAME: Joi.string().required(),
+
+  // RabbitMQ
+  RABBITMQ_URL: Joi.string().required(),
 
   // Throttling
   USER_DATA_THROTTLE_TTL: Joi.number().default(60000),
@@ -94,6 +98,7 @@ const validationSchema = Joi.object({
         dbName: config.getOrThrow('MONGO_DB_NAME'),
       }),
     }),
+    AuditLogModule.forRoot({ source: 'user-data-service' }),
     BffGuardModule,
     InternalGuardModule,
     CustomThrottlerModule,
