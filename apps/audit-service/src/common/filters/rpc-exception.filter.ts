@@ -93,6 +93,7 @@ export class RpcExceptionFilter implements ExceptionFilter {
         method: null,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         errorCode: 'AUDIT_PROCESSING_ERROR',
+        source: 'audit-service',
         message,
         metadata: {
           pattern,

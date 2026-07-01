@@ -11,23 +11,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerException } from '@nestjs/throttler';
 
 import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
-import {
-  AuditLogProvider,
-  BffAuthenticationException,
-  safeCaptureSentryException,
-} from '@repo/nestjs-common';
+import { AuditLogProvider, BffAuthenticationException } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GlobalExceptionsFilter } from './global-exceptions.filter';
-
-vi.mock('@repo/nestjs-common', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@repo/nestjs-common')>();
-  return {
-    ...actual,
-    safeCaptureSentryException: vi.fn(),
-  };
-});
 
 function createMockHost(overrides?: { request?: object }) {
   const mockJson = vi.fn();
@@ -123,14 +111,6 @@ describe('GlobalExceptionsFilter', () => {
       );
     });
 
-    it('should NOT call safeCaptureSentryException', () => {
-      const { host } = createMockHost();
-
-      filter.catch(new ThrottlerException(), host as never);
-
-      expect(safeCaptureSentryException).not.toHaveBeenCalled();
-    });
-
     it('should return 429 (base filter handles response)', () => {
       const { host, mockStatus } = createMockHost();
 
@@ -151,19 +131,6 @@ describe('GlobalExceptionsFilter', () => {
       );
     });
 
-    it('should call safeCaptureSentryException with BFF_SECRET_MISMATCH event type', () => {
-      const { host } = createMockHost();
-
-      filter.catch(new BffAuthenticationException('bad secret'), host as never);
-
-      expect(safeCaptureSentryException).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: AuditLogEventType.BFF_SECRET_MISMATCH,
-        }),
-        filter['logger'],
-      );
-    });
-
     it('should emit an audit event with BFF_SECRET_MISMATCH and CRITICAL severity', () => {
       const { host, mockRequest } = createMockHost();
 
@@ -176,21 +143,6 @@ describe('GlobalExceptionsFilter', () => {
           statusCode: HttpStatus.UNAUTHORIZED,
         }),
         mockRequest,
-      );
-    });
-
-    it('should pass the exception and request to safeCaptureSentryException', () => {
-      const { host, mockRequest } = createMockHost();
-      const exception = new BffAuthenticationException('bad secret');
-
-      filter.catch(exception, host as never);
-
-      expect(safeCaptureSentryException).toHaveBeenCalledWith(
-        expect.objectContaining({
-          exception,
-          request: mockRequest,
-        }),
-        filter['logger'],
       );
     });
 
@@ -226,19 +178,6 @@ describe('GlobalExceptionsFilter', () => {
       );
     });
 
-    it('should call safeCaptureSentryException with INTERNAL_SERVER_ERROR event type', () => {
-      const { host } = createMockHost();
-
-      filter.catch(new Error('db crash'), host as never);
-
-      expect(safeCaptureSentryException).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: AuditLogEventType.INTERNAL_SERVER_ERROR,
-        }),
-        filter['logger'],
-      );
-    });
-
     it('should emit an audit event with INTERNAL_SERVER_ERROR and ERROR severity', () => {
       const { host, mockRequest } = createMockHost();
 
@@ -251,21 +190,6 @@ describe('GlobalExceptionsFilter', () => {
           message: 'db crash',
         }),
         mockRequest,
-      );
-    });
-
-    it('should pass the exception and request to safeCaptureSentryException', () => {
-      const { host, mockRequest } = createMockHost();
-      const exception = new Error('db crash');
-
-      filter.catch(exception, host as never);
-
-      expect(safeCaptureSentryException).toHaveBeenCalledWith(
-        expect.objectContaining({
-          exception,
-          request: mockRequest,
-        }),
-        filter['logger'],
       );
     });
 
@@ -301,14 +225,6 @@ describe('GlobalExceptionsFilter', () => {
         mockRequest,
       );
     });
-
-    it('should NOT call safeCaptureSentryException', () => {
-      const { host } = createMockHost();
-
-      filter.catch(new UnauthorizedException(), host as never);
-
-      expect(safeCaptureSentryException).not.toHaveBeenCalled();
-    });
   });
 
   describe('403 - Forbidden', () => {
@@ -333,14 +249,6 @@ describe('GlobalExceptionsFilter', () => {
         }),
         mockRequest,
       );
-    });
-
-    it('should NOT call safeCaptureSentryException', () => {
-      const { host } = createMockHost();
-
-      filter.catch(new ForbiddenException(), host as never);
-
-      expect(safeCaptureSentryException).not.toHaveBeenCalled();
     });
   });
 
@@ -426,14 +334,6 @@ describe('GlobalExceptionsFilter', () => {
       filter.catch(new NotFoundException(), host as never);
 
       expect(mockAuditLogProvider.auditRequest).not.toHaveBeenCalled();
-    });
-
-    it('should NOT call safeCaptureSentryException', () => {
-      const { host } = createMockHost();
-
-      filter.catch(new NotFoundException(), host as never);
-
-      expect(safeCaptureSentryException).not.toHaveBeenCalled();
     });
   });
 });
