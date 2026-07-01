@@ -93,6 +93,7 @@ describe('TasksService', () => {
           eventType: AuditLogEventType.SCHEDULED_TASK,
           severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
+          source: 'audit-service',
           message: expect.stringContaining('Cleaned up 10 audit log(s)') as string,
           metadata: expect.objectContaining({
             count: 10,
@@ -115,6 +116,7 @@ describe('TasksService', () => {
           eventType: AuditLogEventType.SCHEDULED_TASK,
           severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          source: 'audit-service',
           message: 'Audit log cleanup failed: DB failure',
         }) as object,
       );

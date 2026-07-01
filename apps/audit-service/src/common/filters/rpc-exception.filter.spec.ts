@@ -130,6 +130,7 @@ describe('RpcExceptionFilter', () => {
           eventType: 'INTERNAL_SERVER_ERROR',
           severity: 'ERROR',
           errorCode: 'AUDIT_PROCESSING_ERROR',
+          source: 'audit-service',
           message: 'Validation failed',
         }),
       );
