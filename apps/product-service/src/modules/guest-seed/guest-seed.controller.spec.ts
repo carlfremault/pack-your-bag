@@ -54,19 +54,23 @@ describe('GuestSeedController', () => {
       expect(mockChannel.nack).not.toHaveBeenCalled();
     });
 
-    it('should nack without requeue when service throws an Error', async () => {
+    it('should nack without requeue and re-throw when service throws an Error', async () => {
       mockGuestSeedService.seedGuestData.mockRejectedValue(new Error('DB failure'));
 
-      await controller.seedGuestData(guestId, createMockContext());
+      await expect(controller.seedGuestData(guestId, createMockContext())).rejects.toThrow(
+        'DB failure',
+      );
 
       expect(mockChannel.nack).toHaveBeenCalledWith(mockOriginalMsg, false, false);
       expect(mockChannel.ack).not.toHaveBeenCalled();
     });
 
-    it('should nack without requeue when service throws a non-Error value', async () => {
+    it('should nack without requeue and re-throw when service throws a non-Error value', async () => {
       mockGuestSeedService.seedGuestData.mockRejectedValue('raw string failure');
 
-      await controller.seedGuestData(guestId, createMockContext());
+      await expect(controller.seedGuestData(guestId, createMockContext())).rejects.toBe(
+        'raw string failure',
+      );
 
       expect(mockChannel.nack).toHaveBeenCalledWith(mockOriginalMsg, false, false);
       expect(mockChannel.ack).not.toHaveBeenCalled();

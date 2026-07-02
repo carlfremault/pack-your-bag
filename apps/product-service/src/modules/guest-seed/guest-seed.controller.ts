@@ -1,5 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
-import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 
 import { RMQ_PATTERNS } from '@repo/nestjs-common';
 
@@ -13,20 +13,22 @@ export class GuestSeedController {
 
   constructor(private readonly guestSeedService: GuestSeedService) {}
 
-  @EventPattern(RMQ_PATTERNS.SEED_GUEST_DATA)
-  async seedGuestData(@Payload() guestId: string, @Ctx() context: RmqContext): Promise<void> {
+  @MessagePattern(RMQ_PATTERNS.SEED_GUEST_DATA)
+  async seedGuestData(@Payload() guestId: string, @Ctx() context: RmqContext): Promise<boolean> {
     const channel = context.getChannelRef() as Channel;
     const originalMsg = context.getMessage() as ConsumeMessage;
 
     try {
       await this.guestSeedService.seedGuestData(guestId);
       channel.ack(originalMsg);
+      return true;
     } catch (error) {
       this.logger.error('Failed to seed guest data, sending to DLQ', {
         guestId,
         error: error instanceof Error ? error.message : String(error),
       });
       channel.nack(originalMsg, false, false);
+      throw error;
     }
   }
 }
