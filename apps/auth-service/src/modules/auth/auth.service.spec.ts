@@ -74,7 +74,7 @@ describe('AuthService', () => {
   };
 
   const mockSeedClient = {
-    emit: vi.fn().mockReturnValue(of(undefined)),
+    send: vi.fn().mockReturnValue(of(undefined)),
   };
 
   const mockAuthEventProvider = {
@@ -201,8 +201,6 @@ describe('AuthService', () => {
     it('should create a guest user with correct properties and return tokens with isGuest true', async () => {
       const result = await service.createGuestSession();
 
-      await new Promise((resolve) => setImmediate(resolve));
-
       expect(mockUserService.createUser).toHaveBeenCalledWith(
         expect.objectContaining({
           email: expect.stringMatching(/^guest-.+@guest\.local$/) as string,
@@ -214,7 +212,7 @@ describe('AuthService', () => {
           lastActiveAt: expect.any(Date) as Date,
         }),
       );
-      expect(mockSeedClient.emit).toHaveBeenCalledWith('seed.guest_data', 'guest-uuid');
+      expect(mockSeedClient.send).toHaveBeenCalledWith('seed.guest_data', 'guest-uuid');
       expect(result).toEqual({
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
@@ -224,31 +222,21 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return valid tokens even when seed emit fails', async () => {
-      mockSeedClient.emit.mockReturnValue(throwError(() => new Error('RMQ connection failed')));
+    it('should throw InternalServerErrorException when seed send fails', async () => {
+      mockSeedClient.send.mockReturnValue(throwError(() => new Error('RMQ connection failed')));
 
-      const result = await service.createGuestSession();
+      await expect(service.createGuestSession()).rejects.toThrow('Failed to initialize guest data');
 
-      await new Promise((resolve) => setImmediate(resolve));
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          access_token: 'mock-jwt-token',
-          user: { id: 'guest-uuid', role: 1, isGuest: true },
-        }),
-      );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
         'Failed to seed guest data',
         expect.objectContaining({ userId: 'guest-uuid', error: 'RMQ connection failed' }),
       );
     });
 
-    it('should log with String(error) when seed emit throws a non-Error value', async () => {
-      mockSeedClient.emit.mockReturnValue(throwError(() => 'raw string failure'));
+    it('should log with String(error) when seed send throws a non-Error value', async () => {
+      mockSeedClient.send.mockReturnValue(throwError(() => 'raw string failure'));
 
-      await service.createGuestSession();
-
-      await new Promise((resolve) => setImmediate(resolve));
+      await expect(service.createGuestSession()).rejects.toThrow('Failed to initialize guest data');
 
       expect(loggerErrorSpy).toHaveBeenCalledWith(
         'Failed to seed guest data',

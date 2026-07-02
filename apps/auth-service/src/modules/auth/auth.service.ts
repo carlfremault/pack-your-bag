@@ -19,6 +19,7 @@ import {
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { firstValueFrom } from 'rxjs';
 import { v7 as uuidv7 } from 'uuid';
 
 import { AUTH_DEFAULT_USER_ROLE_ID, DEFAULT_LOCALE } from '@/common/constants/auth.constants';
@@ -120,16 +121,17 @@ export class AuthService {
 
     const newUser = await this.userService.createUser(data);
 
-    setImmediate(() => {
-      this.seedClient.emit<string, string>(RMQ_PATTERNS.SEED_GUEST_DATA, newUser.id).subscribe({
-        error: (error: unknown) => {
-          this.logger.error('Failed to seed guest data', {
-            userId: newUser.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        },
+    try {
+      await firstValueFrom(
+        this.seedClient.send<void, string>(RMQ_PATTERNS.SEED_GUEST_DATA, newUser.id),
+      );
+    } catch (error) {
+      this.logger.error('Failed to seed guest data', {
+        userId: newUser.id,
+        error: error instanceof Error ? error.message : String(error),
       });
-    });
+      throw new InternalServerErrorException('Failed to initialize guest data');
+    }
 
     return this.issueRefreshToken(newUser.id, newUser.roleId, true);
   }
