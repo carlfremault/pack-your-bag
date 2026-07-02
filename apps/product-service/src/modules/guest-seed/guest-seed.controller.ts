@@ -1,28 +1,32 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { Controller, Logger } from '@nestjs/common';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 
-import { InternalGuard } from '@repo/nestjs-common';
+import { RMQ_PATTERNS } from '@repo/nestjs-common';
 
-import { SeedGuestDataDto, SeedGuestDataResultDto } from './dto/seed-guest-data.dto';
+import type { Channel, ConsumeMessage } from 'amqplib';
+
 import { GuestSeedService } from './guest-seed.service';
 
-@ApiTags('internal')
-@ApiSecurity('internal-secret')
-@Controller('internal/guest-seed')
-@UseGuards(InternalGuard)
+@Controller()
 export class GuestSeedController {
+  private readonly logger = new Logger(GuestSeedController.name, { timestamp: true });
+
   constructor(private readonly guestSeedService: GuestSeedService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Seed sample product data for a guest user' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Guest data seeded successfully.',
-    type: SeedGuestDataResultDto,
-  })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
-  @HttpCode(HttpStatus.OK)
-  async seedGuestData(@Body() body: SeedGuestDataDto): Promise<SeedGuestDataResultDto> {
-    return this.guestSeedService.seedGuestData(body.userId);
+  @EventPattern(RMQ_PATTERNS.SEED_GUEST_DATA)
+  async seedGuestData(@Payload() guestId: string, @Ctx() context: RmqContext): Promise<void> {
+    const channel = context.getChannelRef() as Channel;
+    const originalMsg = context.getMessage() as ConsumeMessage;
+
+    try {
+      await this.guestSeedService.seedGuestData(guestId);
+      channel.ack(originalMsg);
+    } catch (error) {
+      this.logger.error('Failed to seed guest data, sending to DLQ', {
+        guestId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      channel.nack(originalMsg, false, false);
+    }
   }
 }

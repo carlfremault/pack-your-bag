@@ -4,16 +4,14 @@ import { v7 as uuidv7 } from 'uuid';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
-import { SeedGuestDataResultDto } from './dto/seed-guest-data.dto';
-
 @Injectable()
 export class GuestSeedService {
   private readonly logger = new Logger(GuestSeedService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async seedGuestData(userId: string): Promise<SeedGuestDataResultDto> {
-    return this.prisma.$transaction(async (tx) => {
+  async seedGuestData(userId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
       const clothingCat = { id: uuidv7(), name: 'Clothing', colorTheme: 'sand' };
       const shelterCat = { id: uuidv7(), name: 'Shelter', colorTheme: 'jungle' };
       const gearCat = { id: uuidv7(), name: 'Gear', colorTheme: 'ocean' };
@@ -107,14 +105,6 @@ export class GuestSeedService {
       await tx.trip.create({ data: { ...trip, userId, packId: pack.id } });
 
       this.logger.log(`Seeded guest data for user ${userId}`);
-
-      return {
-        categories: categories.length,
-        items: items.length,
-        lists: lists.length,
-        packs: 1,
-        trips: 1,
-      };
     });
   }
 }
