@@ -31,6 +31,7 @@ export interface IntegrationTestContext {
   mailerService: MailerService;
   authHelpers: AuthHelpers;
   auditEmitSpy: MockInstance;
+  seedEmitSpy: MockInstance;
   storage: ThrottlerStorage;
   bffSecret: string;
   userDeleteRetentionPeriod: number;
@@ -72,12 +73,17 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
   );
   const mailpitUrl = configService.getOrThrow<string>('AUTH_MAILPIT_API_URL');
 
-  // Mock the RMQ client BEFORE app.init() to prevent actual RabbitMQ connection
+  // Mock the RMQ clients BEFORE app.init() to prevent actual RabbitMQ connection
   // attempts during the onApplicationBootstrap lifecycle hook
   const auditClient = app.get<ClientProxy>(RMQ_PUBLISHERS.AUDIT);
   vi.spyOn(auditClient, 'connect').mockResolvedValue(undefined);
   vi.spyOn(auditClient, 'close').mockResolvedValue(undefined);
   const auditEmitSpy = vi.spyOn(auditClient, 'emit').mockReturnValue(of(undefined));
+
+  const seedClient = app.get<ClientProxy>(RMQ_PUBLISHERS.SEED);
+  vi.spyOn(seedClient, 'connect').mockResolvedValue(undefined);
+  vi.spyOn(seedClient, 'close').mockResolvedValue(undefined);
+  const seedEmitSpy = vi.spyOn(seedClient, 'emit').mockReturnValue(of(undefined));
 
   await app.init();
 
@@ -85,6 +91,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
 
   const resetDb = async () => {
     auditEmitSpy.mockClear();
+    seedEmitSpy.mockClear();
     await prisma.auditLog.deleteMany();
     await prisma.refreshToken.deleteMany();
     await prisma.verificationToken.deleteMany();
@@ -114,6 +121,7 @@ export const createIntegrationContext = async (): Promise<IntegrationTestContext
     verificationTokenService,
     authHelpers,
     auditEmitSpy,
+    seedEmitSpy,
     storage,
     bffSecret,
     userDeleteRetentionPeriod,

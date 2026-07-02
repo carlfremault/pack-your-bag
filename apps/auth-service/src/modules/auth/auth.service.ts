@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -6,9 +7,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ClientProxy } from '@nestjs/microservices';
 
 import { AuditEventType, Prisma, TokenType, User } from '@repo/db';
-import { DeletedUserHelper, InvalidSessionException } from '@repo/nestjs-common';
+import {
+  DeletedUserHelper,
+  InvalidSessionException,
+  RMQ_PATTERNS,
+  RMQ_PUBLISHERS,
+} from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -29,7 +36,6 @@ import { formatLocaleDate } from '@/common/utils/formatLocaleDate';
 import { generateToken } from '@/common/utils/generateToken';
 import { AuthCredentialsDto } from '@/modules/auth/dto/auth-credentials.dto';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
-import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UpdatePasswordDto } from '@/modules/user/dto/update-password.dto';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
@@ -66,8 +72,8 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly verificationTokenService: VerificationTokenService,
     private readonly userService: UserService,
-    private readonly serviceClientService: ServiceClientService,
     private readonly authEventProvider: AuthEventProvider,
+    @Inject(RMQ_PUBLISHERS.SEED) private readonly seedClient: ClientProxy,
   ) {
     this.bcryptSaltRounds = this.configService.getOrThrow<number>('AUTH_BCRYPT_SALT_ROUNDS');
     this.defaultUserRoleId = AUTH_DEFAULT_USER_ROLE_ID;
@@ -114,14 +120,16 @@ export class AuthService {
 
     const newUser = await this.userService.createUser(data);
 
-    try {
-      await this.serviceClientService.seedGuestData(newUser.id);
-    } catch (error) {
-      this.logger.error('Failed to seed guest data', {
-        userId: newUser.id,
-        error: error instanceof Error ? error.message : String(error),
+    setImmediate(() => {
+      this.seedClient.emit<string, string>(RMQ_PATTERNS.SEED_GUEST_DATA, newUser.id).subscribe({
+        error: (error: unknown) => {
+          this.logger.error('Failed to seed guest data', {
+            userId: newUser.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        },
       });
-    }
+    });
 
     return this.issueRefreshToken(newUser.id, newUser.roleId, true);
   }

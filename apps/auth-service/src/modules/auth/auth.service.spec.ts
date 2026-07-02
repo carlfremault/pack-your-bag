@@ -4,10 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuditEventType, TokenType } from '@repo/db';
-import { InvalidSessionException, MS_PER_DAY } from '@repo/nestjs-common';
+import { InvalidSessionException, MS_PER_DAY, RMQ_PUBLISHERS } from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { of, throwError } from 'rxjs';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -20,7 +21,6 @@ import {
   SessionExpiredException,
 } from '@/common/exceptions/unauthorized.exceptions';
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
-import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -73,8 +73,8 @@ describe('AuthService', () => {
     markTokenAsUsed: vi.fn(),
   };
 
-  const mockServiceClientService = {
-    seedGuestData: vi.fn(),
+  const mockSeedClient = {
+    emit: vi.fn().mockReturnValue(of(undefined)),
   };
 
   const mockAuthEventProvider = {
@@ -121,8 +121,8 @@ describe('AuthService', () => {
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: VerificationTokenService, useValue: mockVerificationTokenService },
         { provide: UserService, useValue: mockUserService },
-        { provide: ServiceClientService, useValue: mockServiceClientService },
         { provide: AuthEventProvider, useValue: mockAuthEventProvider },
+        { provide: RMQ_PUBLISHERS.SEED, useValue: mockSeedClient },
       ],
     }).compile();
 
@@ -196,17 +196,12 @@ describe('AuthService', () => {
     beforeEach(() => {
       mockedRandomBytes.mockImplementation(() => expectedRawToken);
       mockUserService.createUser.mockResolvedValue({ id: 'guest-uuid', roleId: 1, isGuest: true });
-      mockServiceClientService.seedGuestData.mockResolvedValue({
-        categories: 4,
-        items: 14,
-        lists: 2,
-        packs: 1,
-        trips: 1,
-      });
     });
 
     it('should create a guest user with correct properties and return tokens with isGuest true', async () => {
       const result = await service.createGuestSession();
+
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(mockUserService.createUser).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -219,7 +214,7 @@ describe('AuthService', () => {
           lastActiveAt: expect.any(Date) as Date,
         }),
       );
-      expect(mockServiceClientService.seedGuestData).toHaveBeenCalledWith('guest-uuid');
+      expect(mockSeedClient.emit).toHaveBeenCalledWith('seed.guest_data', 'guest-uuid');
       expect(result).toEqual({
         access_token: 'mock-jwt-token',
         refresh_token: 'mock-jwt-token',
@@ -229,10 +224,12 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return valid tokens even when seedGuestData fails', async () => {
-      mockServiceClientService.seedGuestData.mockRejectedValue(new Error('Product service down'));
+    it('should return valid tokens even when seed emit fails', async () => {
+      mockSeedClient.emit.mockReturnValue(throwError(() => new Error('RMQ connection failed')));
 
       const result = await service.createGuestSession();
+
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -242,14 +239,16 @@ describe('AuthService', () => {
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
         'Failed to seed guest data',
-        expect.objectContaining({ userId: 'guest-uuid', error: 'Product service down' }),
+        expect.objectContaining({ userId: 'guest-uuid', error: 'RMQ connection failed' }),
       );
     });
 
-    it('should log with String(error) when seedGuestData throws a non-Error value', async () => {
-      mockServiceClientService.seedGuestData.mockRejectedValue('raw string failure');
+    it('should log with String(error) when seed emit throws a non-Error value', async () => {
+      mockSeedClient.emit.mockReturnValue(throwError(() => 'raw string failure'));
 
       await service.createGuestSession();
+
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(loggerErrorSpy).toHaveBeenCalledWith(
         'Failed to seed guest data',

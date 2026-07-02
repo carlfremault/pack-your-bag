@@ -13,14 +13,6 @@ export interface UserDataCleanupResult {
   deletedPreferences: number;
 }
 
-export interface GuestSeedResult {
-  categories: number;
-  items: number;
-  lists: number;
-  packs: number;
-  trips: number;
-}
-
 const REQUEST_TIMEOUT_MS = 30_000;
 
 @Injectable()
@@ -40,12 +32,6 @@ export class ServiceClientService {
     const url = `${this.productServiceUrl}/internal/cleanup/users`;
     this.logger.log(`Calling product-service cleanup for ${userIds.length} user(s)`);
     return this.postInternal<ProductCleanupResult>(url, { userIds });
-  }
-
-  async seedGuestData(userId: string): Promise<GuestSeedResult> {
-    const url = `${this.productServiceUrl}/internal/guest-seed`;
-    this.logger.log(`Calling product-service guest-seed for user ${userId}`);
-    return this.postInternal<GuestSeedResult>(url, { userId });
   }
 
   async cleanupUserData(userIds: string[]): Promise<UserDataCleanupResult> {
