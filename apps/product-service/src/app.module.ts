@@ -7,7 +7,6 @@ import {
   AuditLogModule,
   BffGuardModule,
   CustomThrottlerModule,
-  InternalGuardModule,
   JwtAuthModule,
   RequestIdMiddleware,
 } from '@repo/nestjs-common';
@@ -38,7 +37,6 @@ const validationSchema = Joi.object({
   // Security
   TRUST_PROXY: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()).required(),
   BFF_SHARED_SECRET: Joi.string().required(),
-  INTERNAL_SERVICE_SECRET: Joi.string().required(),
 
   // Application
   PRODUCT_PORT: Joi.number().default(8002),
@@ -109,7 +107,6 @@ const validationSchema = Joi.object({
     AuditLogModule.forRoot({ source: 'product-service' }),
     PrismaModule,
     BffGuardModule,
-    InternalGuardModule,
     CustomThrottlerModule,
     JwtAuthModule,
     CleanupModule,

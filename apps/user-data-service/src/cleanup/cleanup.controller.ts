@@ -1,28 +1,32 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { Controller, Logger } from '@nestjs/common';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 
-import { InternalGuard } from '@repo/nestjs-common';
+import { RMQ_PATTERNS } from '@repo/nestjs-common';
 
-import { CleanupResultDto, CleanupUsersDto } from './dto/cleanup-users.dto';
+import type { Channel, ConsumeMessage } from 'amqplib';
+
 import { CleanupService } from './cleanup.service';
 
-@ApiTags('internal')
-@ApiSecurity('internal-secret')
-@Controller('internal/cleanup')
-@UseGuards(InternalGuard)
+@Controller()
 export class CleanupController {
+  private readonly logger = new Logger(CleanupController.name, { timestamp: true });
   constructor(private readonly cleanupService: CleanupService) {}
 
-  @Post('users')
-  @ApiOperation({ summary: 'Delete all user data (preferences) for the given user IDs' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'User data cleaned up successfully.',
-    type: CleanupResultDto,
-  })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
-  @HttpCode(HttpStatus.OK)
-  async cleanupUsers(@Body() body: CleanupUsersDto): Promise<CleanupResultDto> {
-    return this.cleanupService.deleteUserData(body.userIds);
+  @EventPattern(RMQ_PATTERNS.USER_CLEANUP_USER_DATA_REQUESTED)
+  async cleanupUsers(@Payload() userIds: string[], @Ctx() context: RmqContext): Promise<void> {
+    const channel = context.getChannelRef() as Channel;
+    const originalMsg = context.getMessage() as ConsumeMessage;
+
+    try {
+      await this.cleanupService.deleteUserData(userIds);
+      channel.ack(originalMsg);
+    } catch (error) {
+      this.logger.error(`User data cleanup failed for user IDs [${userIds.join(', ')}]`, {
+        userIds,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      channel.nack(originalMsg, false, false);
+      throw error;
+    }
   }
 }

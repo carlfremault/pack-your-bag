@@ -1,5 +1,9 @@
+import { HttpStatus } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,6 +18,8 @@ describe('CleanupService', () => {
     deleteMany: vi.fn(),
   };
 
+  const mockAuditLogProvider = { auditRequest: vi.fn() };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -24,6 +30,7 @@ describe('CleanupService', () => {
           provide: getModelToken(Preference.name),
           useValue: mockPreferenceModel,
         },
+        { provide: AuditLogProvider, useValue: mockAuditLogProvider },
       ],
     }).compile();
 
@@ -37,23 +44,34 @@ describe('CleanupService', () => {
   describe('deleteUserData', () => {
     const userIds = ['user-1', 'user-2'];
 
-    it('should delete preferences for the given user IDs and return count', async () => {
+    it('should delete preferences for the given user IDs and audit the result', async () => {
       mockPreferenceModel.deleteMany.mockResolvedValue({ deletedCount: 2 });
 
-      const result = await service.deleteUserData(userIds);
+      await service.deleteUserData(userIds);
 
-      expect(result).toEqual({ deletedPreferences: 2 });
       expect(mockPreferenceModel.deleteMany).toHaveBeenCalledWith({
         userId: { $in: userIds },
       });
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditEventType.SCHEDULED_TASK,
+          severity: AuditSeverity.INFO,
+          statusCode: HttpStatus.NO_CONTENT,
+          message: expect.stringContaining('Deleted 2 preferences') as string,
+        }),
+      );
     });
 
-    it('should return zero when no preferences exist for the given user IDs', async () => {
+    it('should audit zero count when no preferences exist for the given user IDs', async () => {
       mockPreferenceModel.deleteMany.mockResolvedValue({ deletedCount: 0 });
 
-      const result = await service.deleteUserData(userIds);
+      await service.deleteUserData(userIds);
 
-      expect(result).toEqual({ deletedPreferences: 0 });
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('Deleted 0 preferences') as string,
+        }),
+      );
     });
   });
 });
