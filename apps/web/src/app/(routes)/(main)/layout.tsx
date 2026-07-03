@@ -25,7 +25,7 @@ export default async function Layout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex h-dvh flex-col lg:flex-row">
+      <div className="mx-auto flex h-dvh max-w-[1800px] flex-col lg:flex-row">
         <div className="hidden w-1/4 max-w-xl min-w-80 lg:block">
           <Sidebar linkAs={Link}>
             <SidebarSlot />
