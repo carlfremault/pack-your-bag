@@ -1,13 +1,13 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
-import { MS_PER_DAY, MS_PER_HOUR } from '@repo/nestjs-common';
+import { MS_PER_DAY, MS_PER_HOUR, RMQ_PATTERNS, RMQ_PUBLISHERS } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { RefreshTokenService } from '@/modules/refresh-token/refresh-token.service';
-import { ServiceClientService } from '@/modules/service-client/service-client.service';
 import { UserService } from '@/modules/user/user.service';
 import { VerificationTokenService } from '@/modules/verification-token/verification-token.service';
 
@@ -24,8 +24,10 @@ export class TasksService {
     private readonly verificationTokenService: VerificationTokenService,
     private readonly auditLogProvider: AuditLogProvider,
     private readonly userService: UserService,
-    private readonly serviceClientService: ServiceClientService,
     private readonly configService: ConfigService,
+    @Inject(RMQ_PUBLISHERS.USER_CLEANUP_PRODUCT) private readonly cleanupProductClient: ClientProxy,
+    @Inject(RMQ_PUBLISHERS.USER_CLEANUP_USER_DATA)
+    private readonly cleanupUserDataClient: ClientProxy,
   ) {
     this.refreshTokenRetentionDays = this.configService.getOrThrow(
       'AUTH_REFRESH_TOKEN_DB_RETENTION_DAYS',
@@ -104,6 +106,7 @@ export class TasksService {
         const result = await this.userService.hardDeleteUsers(userIds);
 
         this.auditLogProvider.requestAnonymization(userIds);
+        this.cleanupDownstreamServices(userIds);
 
         auditMessage = `Cleaned up ${result.deletedUsers} deleted user${result.deletedUsers === 1 ? '' : 's'} and ${result.deletedTokens} token${result.deletedTokens === 1 ? '' : 's'}, deleted before ${deletedUsersCutoff.toISOString()}`;
 
@@ -111,9 +114,6 @@ export class TasksService {
           ...result,
           deletedUsersCutoff: deletedUsersCutoff.toISOString(),
         };
-
-        const downstreamResult = await this.cleanupDownstreamServices(userIds);
-        metadata = { ...metadata, downstream: downstreamResult };
       }
 
       this.logger.log(auditMessage);
@@ -204,6 +204,7 @@ export class TasksService {
         const result = await this.userService.hardDeleteUsers(userIds);
 
         this.auditLogProvider.requestAnonymization(userIds);
+        this.cleanupDownstreamServices(userIds);
 
         auditMessage = `Cleaned up ${result.deletedUsers} expired guest${result.deletedUsers === 1 ? '' : 's'} and ${result.deletedTokens} token${result.deletedTokens === 1 ? '' : 's'}, last active before ${guestCutoff.toISOString()}`;
 
@@ -211,9 +212,6 @@ export class TasksService {
           ...result,
           guestCutoff: guestCutoff.toISOString(),
         };
-
-        const downstreamResult = await this.cleanupDownstreamServices(userIds);
-        metadata = { ...metadata, downstream: downstreamResult };
       }
 
       this.logger.log(auditMessage);
@@ -240,42 +238,28 @@ export class TasksService {
     }
   }
 
-  private async cleanupDownstreamServices(userIds: string[]): Promise<Prisma.InputJsonValue> {
-    const [productResult, userDataResult] = await Promise.allSettled([
-      this.serviceClientService.cleanupProductData(userIds),
-      this.serviceClientService.cleanupUserData(userIds),
-    ]);
-
-    const downstream: Record<string, Prisma.InputJsonValue> = {};
-
-    if (productResult.status === 'fulfilled') {
-      downstream.product = productResult.value as unknown as Prisma.InputJsonValue;
-      this.logger.log(`Product cleanup succeeded: ${JSON.stringify(productResult.value)}`);
-    } else {
-      const errorMessage =
-        productResult.reason instanceof Error
-          ? productResult.reason.message
-          : String(productResult.reason);
-      downstream.product = { error: errorMessage };
-      this.logger.warn(
-        `Product cleanup failed for user IDs [${userIds.join(', ')}]: ${errorMessage}`,
-      );
-    }
-
-    if (userDataResult.status === 'fulfilled') {
-      downstream.userData = userDataResult.value as unknown as Prisma.InputJsonValue;
-      this.logger.log(`User data cleanup succeeded: ${JSON.stringify(userDataResult.value)}`);
-    } else {
-      const errorMessage =
-        userDataResult.reason instanceof Error
-          ? userDataResult.reason.message
-          : String(userDataResult.reason);
-      downstream.userData = { error: errorMessage };
-      this.logger.warn(
-        `User data cleanup failed for user IDs [${userIds.join(', ')}]: ${errorMessage}`,
-      );
-    }
-
-    return downstream as Prisma.InputJsonValue;
+  private cleanupDownstreamServices(userIds: string[]): void {
+    setImmediate(() => {
+      this.cleanupProductClient
+        .emit<string, string[]>(RMQ_PATTERNS.USER_CLEANUP_PRODUCT_REQUESTED, userIds)
+        .subscribe({
+          error: (err: unknown) => {
+            this.logger.error(
+              `Product cleanup failed for user IDs [${userIds.join(', ')}]: ${err}`,
+            );
+          },
+        });
+    });
+    setImmediate(() => {
+      this.cleanupUserDataClient
+        .emit<string, string[]>(RMQ_PATTERNS.USER_CLEANUP_USER_DATA_REQUESTED, userIds)
+        .subscribe({
+          error: (err: unknown) => {
+            this.logger.error(
+              `User data cleanup failed for user IDs [${userIds.join(', ')}]: ${err}`,
+            );
+          },
+        });
+    });
   }
 }
