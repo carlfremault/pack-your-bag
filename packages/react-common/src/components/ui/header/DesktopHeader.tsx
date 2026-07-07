@@ -21,7 +21,7 @@ export function DesktopHeader({
   logOut,
 }: DesktopHeaderProps) {
   return (
-    <div className="border-primary-ring bg-surface z-10 flex items-center justify-between border-b px-4 py-3 shadow-sm">
+    <div className="border-primary-ring bg-surface z-10 flex items-center justify-between border-r border-b px-4 py-3 shadow-sm">
       <DesktopNavButtons tabs={tabs} activeTabId={activeTabId} linkAs={linkAs} />
       <div className="flex items-center gap-4">
         <SettingsButton link={settingsLink} linkAs={linkAs} />

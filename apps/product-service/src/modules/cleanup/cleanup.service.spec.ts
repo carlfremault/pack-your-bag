@@ -1,4 +1,8 @@
+import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -23,11 +27,17 @@ describe('CleanupService', () => {
     }),
   };
 
+  const mockAuditLogProvider = { auditRequest: vi.fn() };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CleanupService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        CleanupService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: AuditLogProvider, useValue: mockAuditLogProvider },
+      ],
     }).compile();
 
     service = module.get<CleanupService>(CleanupService);
@@ -40,18 +50,18 @@ describe('CleanupService', () => {
   describe('deleteUserData', () => {
     const userIds = ['user-1', 'user-2'];
 
-    it('should delete all user data in correct order and return counts', async () => {
-      const result = await service.deleteUserData(userIds);
-
-      expect(result).toEqual({
-        deletedItems: 5,
-        deletedCategories: 3,
-        deletedLists: 2,
-        deletedPacks: 2,
-        deletedTrips: 1,
-      });
+    it('should delete all user data in correct order and audit the result', async () => {
+      await service.deleteUserData(userIds);
 
       expect(mockPrismaService.$transaction).toHaveBeenCalledOnce();
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: AuditEventType.SCHEDULED_TASK,
+          severity: AuditSeverity.INFO,
+          statusCode: HttpStatus.NO_CONTENT,
+          message: expect.stringContaining('5 item(s)') as string,
+        }),
+      );
     });
 
     it('should delete join tables with correct user filter', async () => {
@@ -88,7 +98,7 @@ describe('CleanupService', () => {
       });
     });
 
-    it('should return zero counts when no data exists for users', async () => {
+    it('should audit zero counts when no data exists for users', async () => {
       mockPrismaService.itemList.deleteMany.mockResolvedValue({ count: 0 });
       mockPrismaService.itemPack.deleteMany.mockResolvedValue({ count: 0 });
       mockPrismaService.listPack.deleteMany.mockResolvedValue({ count: 0 });
@@ -98,15 +108,15 @@ describe('CleanupService', () => {
       mockPrismaService.item.deleteMany.mockResolvedValue({ count: 0 });
       mockPrismaService.category.deleteMany.mockResolvedValue({ count: 0 });
 
-      const result = await service.deleteUserData(userIds);
+      await service.deleteUserData(userIds);
 
-      expect(result).toEqual({
-        deletedItems: 0,
-        deletedCategories: 0,
-        deletedLists: 0,
-        deletedPacks: 0,
-        deletedTrips: 0,
-      });
+      expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining(
+            '0 item(s), 0 category(s), 0 list(s), 0 pack(s), and 0 trip(s)',
+          ) as string,
+        }),
+      );
     });
   });
 });

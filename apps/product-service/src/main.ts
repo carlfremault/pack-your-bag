@@ -130,7 +130,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const rabbitMQUrl = configService.getOrThrow<string>('RABBITMQ_URL');
   await assertDlqQueue(rabbitMQUrl, RMQ_QUEUES.SEED);
+  await assertDlqQueue(rabbitMQUrl, RMQ_QUEUES.USER_CLEANUP_PRODUCT);
   app.connectMicroservice(getRmqConsumerOptions(rabbitMQUrl, RMQ_QUEUES.SEED));
+  app.connectMicroservice(getRmqConsumerOptions(rabbitMQUrl, RMQ_QUEUES.USER_CLEANUP_PRODUCT));
 
   // Graceful shutdown
   app.enableShutdownHooks();

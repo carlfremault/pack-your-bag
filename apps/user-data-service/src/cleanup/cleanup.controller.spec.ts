@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { InternalGuard } from '@repo/nestjs-common';
-
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { CleanupController } from './cleanup.controller';
@@ -19,10 +17,7 @@ describe('CleanupController', () => {
           useValue: {},
         },
       ],
-    })
-      .overrideGuard(InternalGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
+    }).compile();
 
     controller = module.get<CleanupController>(CleanupController);
   });
