@@ -2,7 +2,7 @@ import type { ForbiddenException } from '@nestjs/common';
 import { Catch, HttpStatus } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import {
   AccountDeletedException,
   AuditLogProvider,
@@ -107,8 +107,8 @@ export class GlobalExceptionsFilter extends BaseGlobalExceptionsFilter {
 
     this.auditLogProvider.auditRequest(
       {
-        eventType: AuditEventType.ACCOUNT_DELETION_ACCESS_ATTEMPT,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.ACCOUNT_DELETION_ACCESS_ATTEMPT,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.FORBIDDEN,
         errorCode,
         message: auditMessage,
@@ -120,8 +120,8 @@ export class GlobalExceptionsFilter extends BaseGlobalExceptionsFilter {
   private auditEmailAlreadyVerified(request: Request, errorCode: string): void {
     this.auditLogProvider.auditRequest(
       {
-        eventType: AuditEventType.INVALID_TOKEN,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.INVALID_TOKEN,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.BAD_REQUEST,
         errorCode,
         message: 'Email address has already been verified',
@@ -142,8 +142,8 @@ export class GlobalExceptionsFilter extends BaseGlobalExceptionsFilter {
 
     this.auditLogProvider.auditRequest(
       {
-        eventType: AuditEventType.INVALID_TOKEN,
-        severity: AuditSeverity.WARN,
+        eventType: AuditLogEventType.INVALID_TOKEN,
+        severity: AuditLogSeverity.WARN,
         statusCode: HttpStatus.BAD_REQUEST,
         errorCode,
         message,

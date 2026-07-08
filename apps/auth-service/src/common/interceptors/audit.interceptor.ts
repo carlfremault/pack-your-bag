@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { Request, Response } from 'express';
@@ -19,12 +19,12 @@ interface AuditableResponse {
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
   private readonly logger = new Logger(AuditInterceptor.name, { timestamp: true });
-  private static readonly UNAUTHENTICATED_EVENTS: AuditEventType[] = [
-    AuditEventType.PASSWORD_FORGOTTEN,
-    AuditEventType.PASSWORD_RESET,
-    AuditEventType.USER_REGISTERED,
-    AuditEventType.EMAIL_VERIFIED,
-    AuditEventType.EMAIL_VERIFICATION_RESENT,
+  private static readonly UNAUTHENTICATED_EVENTS: AuditLogEventType[] = [
+    AuditLogEventType.PASSWORD_FORGOTTEN,
+    AuditLogEventType.PASSWORD_RESET,
+    AuditLogEventType.USER_REGISTERED,
+    AuditLogEventType.EMAIL_VERIFIED,
+    AuditLogEventType.EMAIL_VERIFICATION_RESENT,
   ];
 
   constructor(
@@ -33,7 +33,10 @@ export class AuditInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const defaultEvent = this.reflector.get<AuditEventType>(AUDIT_EVENT_KEY, context.getHandler());
+    const defaultEvent = this.reflector.get<AuditLogEventType>(
+      AUDIT_EVENT_KEY,
+      context.getHandler(),
+    );
     if (!defaultEvent) return next.handle();
 
     const request = context.switchToHttp().getRequest<Request>();
@@ -47,7 +50,7 @@ export class AuditInterceptor implements NestInterceptor {
         // 1. Look in the request (for authenticated actions like password change)
         // 2. Look in the returned response (for login/register)
         const userId = user?.userId || data?.user?.id || null;
-        const eventType: AuditEventType = auditOverride || defaultEvent;
+        const eventType: AuditLogEventType = auditOverride || defaultEvent;
 
         if (!userId && !AuditInterceptor.UNAUTHENTICATED_EVENTS.includes(eventType)) {
           this.logger.warn(`Could not resolve userId for audit event: ${eventType}`);
@@ -56,7 +59,7 @@ export class AuditInterceptor implements NestInterceptor {
         this.auditProvider.auditRequest(
           {
             eventType,
-            severity: AuditSeverity.INFO,
+            severity: AuditLogSeverity.INFO,
             statusCode: response.statusCode,
             message: 'Success',
             userId,

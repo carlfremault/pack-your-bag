@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import {
   anonymizeEmail,
   BffAuthenticationException,
@@ -35,8 +35,8 @@ interface AuthErrorContext {
   errorCode: string;
   clientMessage: string;
   auditMessage: string;
-  eventType: AuditEventType;
-  severity: AuditSeverity;
+  eventType: AuditLogEventType;
+  severity: AuditLogSeverity;
   fingerprint?: string[];
 }
 
@@ -63,29 +63,29 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const auditMessage = typeof exception.cause === 'string' ? exception.cause : exception.message;
     const { user } = request;
 
-    let eventType: AuditEventType = AuditEventType.USER_LOGIN_FAILED;
-    let severity: AuditSeverity = AuditSeverity.WARN;
+    let eventType: AuditLogEventType = AuditLogEventType.USER_LOGIN_FAILED;
+    let severity: AuditLogSeverity = AuditLogSeverity.WARN;
     let fingerprint: string[] | undefined;
 
     if (exception instanceof TokenReusedException) {
-      eventType = AuditEventType.TOKEN_REUSE_DETECTED;
-      severity = AuditSeverity.CRITICAL;
+      eventType = AuditLogEventType.TOKEN_REUSE_DETECTED;
+      severity = AuditLogSeverity.CRITICAL;
       fingerprint = ['token-reuse', user?.userId ?? 'unknown'];
     } else if (exception instanceof BffAuthenticationException) {
-      eventType = AuditEventType.BFF_SECRET_MISMATCH;
-      severity = AuditSeverity.CRITICAL;
+      eventType = AuditLogEventType.BFF_SECRET_MISMATCH;
+      severity = AuditLogSeverity.CRITICAL;
       fingerprint = ['bff-secret-mismatch'];
     } else if (exception instanceof SessionExpiredException) {
-      eventType = AuditEventType.SESSION_EXPIRED;
-      severity = AuditSeverity.INFO;
+      eventType = AuditLogEventType.SESSION_EXPIRED;
+      severity = AuditLogSeverity.INFO;
     } else if (exception instanceof InvalidSessionException) {
-      eventType = AuditEventType.INVALID_SESSION;
+      eventType = AuditLogEventType.INVALID_SESSION;
     } else if (exception instanceof DeletedGuestAccessException) {
-      eventType = AuditEventType.DELETED_GUEST_ACCESS;
-      severity = AuditSeverity.INFO;
+      eventType = AuditLogEventType.DELETED_GUEST_ACCESS;
+      severity = AuditLogSeverity.INFO;
     } else if (errorCode === 'INVALID_TOKEN') {
-      eventType = AuditEventType.SUSPICIOUS_ACTIVITY;
-      severity = AuditSeverity.CRITICAL;
+      eventType = AuditLogEventType.SUSPICIOUS_ACTIVITY;
+      severity = AuditLogSeverity.CRITICAL;
       fingerprint = ['suspicious-activity', 'invalid-token', user?.userId ?? 'unknown'];
     }
 
@@ -108,7 +108,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const { user } = request;
     const body = request.body as AuthCredentialsDto;
 
-    if (ctx.severity === AuditSeverity.CRITICAL) {
+    if (ctx.severity === AuditLogSeverity.CRITICAL) {
       safeCaptureSentryException(
         {
           exception,

@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-import { AuditEventType, TokenType } from '@repo/db';
+import { AuditLogEventType, TokenType } from '@repo/db';
 import { MS_PER_DAY } from '@repo/nestjs-common';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -166,7 +166,7 @@ describe('User Deletion (e2e)', () => {
       });
       const auditLogs = await ctx.authHelpers.waitForLogs({
         userId: user.id,
-        eventType: AuditEventType.USER_DELETED,
+        eventType: AuditLogEventType.USER_DELETED,
       });
 
       expect(auditLogs.length).toBeGreaterThan(0);

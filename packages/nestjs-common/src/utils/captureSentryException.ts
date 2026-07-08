@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 
-import { AuditEventType, AuditLogEventType } from '@repo/db';
+import { AuditLogEventType } from '@repo/db';
 
 import * as Sentry from '@sentry/nestjs';
 import { Request } from 'express';
@@ -10,7 +10,7 @@ export interface SentryReportContext {
   request: Request | null;
   errorCode: string;
   level?: Sentry.SeverityLevel;
-  eventType: AuditEventType | AuditLogEventType;
+  eventType: AuditLogEventType;
   fingerprint?: string[];
 }
 

@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -30,11 +30,11 @@ describe('Audit Log (e2e)', () => {
       const { user } = await createAuthenticatedUser(ctx);
       const log = await ctx.authHelpers.waitForMostRecentLog({
         userId: user.id,
-        eventType: AuditEventType.USER_LOGIN_SUCCESS,
+        eventType: AuditLogEventType.USER_LOGIN_SUCCESS,
       });
 
       expect(log).toMatchObject({
-        severity: AuditSeverity.INFO,
+        severity: AuditLogSeverity.INFO,
         userId: user.id,
         path: '/auth/login',
         method: 'POST',
@@ -56,11 +56,11 @@ describe('Audit Log (e2e)', () => {
 
       const log = await ctx.authHelpers.waitForMostRecentLog({
         userId: user.id,
-        eventType: AuditEventType.TOKEN_REUSE_DETECTED,
+        eventType: AuditLogEventType.TOKEN_REUSE_DETECTED,
       });
 
       expect(log).toMatchObject({
-        severity: AuditSeverity.CRITICAL,
+        severity: AuditLogSeverity.CRITICAL,
         userId: user.id,
         path: '/auth/refresh-token',
         method: 'POST',

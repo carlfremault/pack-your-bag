@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 
-import { AuditEventType, Prisma, TokenType, User } from '@repo/db';
+import { AuditLogEventType, Prisma, TokenType, User } from '@repo/db';
 import {
   DeletedUserHelper,
   InvalidSessionException,
@@ -51,7 +51,7 @@ import { AuthEventProvider } from './auth-event.provider';
 
 interface RefreshTokenResult {
   data: AuthResponseDto;
-  auditOverride?: AuditEventType;
+  auditOverride?: AuditLogEventType;
 }
 
 @Injectable()
@@ -231,7 +231,7 @@ export class AuthService {
         newerValidToken.family,
       );
 
-      return { data, auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION };
+      return { data, auditOverride: AuditLogEventType.TOKEN_REFRESHED_RACE_CONDITION };
     }
 
     return {

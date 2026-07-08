@@ -10,7 +10,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerException } from '@nestjs/throttler';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import { AccountDeletedException } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
@@ -94,8 +94,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.SECURITY_RATE_LIMIT_EXCEEDED,
+          severity: AuditLogSeverity.WARN,
           statusCode: HttpStatus.TOO_MANY_REQUESTS,
         }),
         expect.anything(),
@@ -139,8 +139,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.INTERNAL_SERVER_ERROR,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.INTERNAL_SERVER_ERROR,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'db crash',
         }),
@@ -155,7 +155,7 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.INTERNAL_SERVER_ERROR,
+          eventType: AuditLogEventType.INTERNAL_SERVER_ERROR,
           message: 'Unknown error',
         }),
         expect.anything(),
@@ -181,8 +181,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.ACCOUNT_DELETION_ACCESS_ATTEMPT,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.ACCOUNT_DELETION_ACCESS_ATTEMPT,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.FORBIDDEN,
         }),
         expect.anything(),
@@ -224,8 +224,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.AUTHORIZATION_FAILED,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.AUTHORIZATION_FAILED,
+          severity: AuditLogSeverity.WARN,
           statusCode: HttpStatus.FORBIDDEN,
           message: 'No access',
         }),
@@ -242,8 +242,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.INVALID_TOKEN,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.INVALID_TOKEN,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Email address has already been verified',
         }),
@@ -260,8 +260,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.INVALID_TOKEN,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.INVALID_TOKEN,
+          severity: AuditLogSeverity.WARN,
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Token expired',
         }),
@@ -296,8 +296,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.VALIDATION_ERROR,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.VALIDATION_ERROR,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.BAD_REQUEST,
         }),
         expect.anything(),
@@ -331,7 +331,7 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.HTTP_ERROR,
+          eventType: AuditLogEventType.HTTP_ERROR,
         }),
         expect.anything(),
       );
@@ -346,8 +346,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.CONFLICT_ERROR,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.CONFLICT_ERROR,
+          severity: AuditLogSeverity.WARN,
           statusCode: HttpStatus.CONFLICT,
         }),
         expect.anything(),
@@ -373,8 +373,8 @@ describe('GlobalExceptionsFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.HTTP_ERROR,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.HTTP_ERROR,
+          severity: AuditLogSeverity.WARN,
         }),
         expect.anything(),
       );

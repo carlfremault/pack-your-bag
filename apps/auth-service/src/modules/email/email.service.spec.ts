@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import { safeCaptureSentryException } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
@@ -158,8 +158,8 @@ describe('EmailService', () => {
       expect(safeCaptureSentryException).toHaveBeenCalledWith(
         expect.objectContaining({
           exception: expect.any(Error) as Error,
-          errorCode: AuditEventType.EMAIL_SEND_FAILED,
-          eventType: AuditEventType.EMAIL_SEND_FAILED,
+          errorCode: AuditLogEventType.EMAIL_SEND_FAILED,
+          eventType: AuditLogEventType.EMAIL_SEND_FAILED,
           fingerprint: ['PASSWORD_RESET_REQUEST', 'EMAIL_SEND_FAILED'],
           level: 'error',
         }),
@@ -176,8 +176,8 @@ describe('EmailService', () => {
       expect(mockMailerService.sendMail).toHaveBeenCalledTimes(maxRetries);
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.EMAIL_SEND_FAILED,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.EMAIL_SEND_FAILED,
+          severity: AuditLogSeverity.ERROR,
           userId: mockErrorContext.userId,
           message: expect.stringContaining('Failed to send PASSWORD_RESET_REQUEST') as string,
           metadata: expect.objectContaining({
@@ -197,14 +197,14 @@ describe('EmailService', () => {
       expect(safeCaptureSentryException).toHaveBeenCalledWith(
         expect.objectContaining({
           exception: expect.any(Error) as Error,
-          errorCode: AuditEventType.EMAIL_SEND_FAILED,
+          errorCode: AuditLogEventType.EMAIL_SEND_FAILED,
         }),
         expect.anything(),
       );
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.EMAIL_SEND_FAILED,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.EMAIL_SEND_FAILED,
+          severity: AuditLogSeverity.ERROR,
         }),
       );
     });
@@ -306,8 +306,8 @@ describe('EmailService', () => {
       expect(safeCaptureSentryException).toHaveBeenCalledWith(
         expect.objectContaining({
           exception: expect.any(Error) as Error,
-          errorCode: AuditEventType.EMAIL_SEND_FAILED,
-          eventType: AuditEventType.EMAIL_SEND_FAILED,
+          errorCode: AuditLogEventType.EMAIL_SEND_FAILED,
+          eventType: AuditLogEventType.EMAIL_SEND_FAILED,
           fingerprint: ['PASSWORD_RESET_REQUEST', 'EMAIL_SEND_FAILED'],
           level: 'error',
         }),
@@ -315,8 +315,8 @@ describe('EmailService', () => {
       );
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.EMAIL_SEND_FAILED,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.EMAIL_SEND_FAILED,
+          severity: AuditLogSeverity.ERROR,
           userId: mockErrorContext.userId,
           message: expect.stringContaining('Failed to send PASSWORD_RESET_REQUEST') as string,
           metadata: expect.objectContaining({

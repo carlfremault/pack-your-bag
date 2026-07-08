@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, TokenType } from '@repo/db';
+import { AuditLogEventType, TokenType } from '@repo/db';
 import { InvalidSessionException, MS_PER_DAY, RMQ_PUBLISHERS } from '@repo/nestjs-common';
 
 import bcrypt from 'bcrypt';
@@ -512,7 +512,7 @@ describe('AuthService', () => {
           expires_in: mockConfigService.getOrThrow('AUTH_ACCESS_TOKEN_EXPIRATION_IN_SECONDS'),
           user: { id: mockUser.id, role: mockUser.roleId, isGuest: false },
         },
-        auditOverride: AuditEventType.TOKEN_REFRESHED_RACE_CONDITION,
+        auditOverride: AuditLogEventType.TOKEN_REFRESHED_RACE_CONDITION,
       });
     });
 
