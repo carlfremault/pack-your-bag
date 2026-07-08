@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity, Prisma } from '@repo/db';
 import { MS_PER_DAY, MS_PER_HOUR, RMQ_PATTERNS, RMQ_PUBLISHERS } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
@@ -62,8 +62,8 @@ export class TasksService {
       this.logger.log(auditMessage);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata: { count: result.count, cutoff: refreshTokenCutoff.toISOString() },
@@ -75,8 +75,8 @@ export class TasksService {
       this.logger.error(`Failed to cleanup expired refresh tokens: ${errorMessage}`, errorStack);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.ERROR,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Refresh token cleanup failed: ${errorMessage}`,
       });
@@ -119,8 +119,8 @@ export class TasksService {
       this.logger.log(auditMessage);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata,
@@ -132,8 +132,8 @@ export class TasksService {
       this.logger.error(`Failed to cleanup deleted users: ${errorMessage}`, errorStack);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.ERROR,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Deleted users cleanup failed: ${errorMessage}`,
       });
@@ -157,8 +157,8 @@ export class TasksService {
       this.logger.log(auditMessage);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata: { count: result.count, cutoff: verificationTokenCutoff.toISOString() },
@@ -173,8 +173,8 @@ export class TasksService {
       );
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.ERROR,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Verification token cleanup failed: ${errorMessage}`,
       });
@@ -217,8 +217,8 @@ export class TasksService {
       this.logger.log(auditMessage);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
         metadata,
@@ -230,8 +230,8 @@ export class TasksService {
       this.logger.error(`Failed to cleanup expired guest sessions: ${errorMessage}`, errorStack);
 
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.ERROR,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Guest session cleanup failed: ${errorMessage}`,
       });

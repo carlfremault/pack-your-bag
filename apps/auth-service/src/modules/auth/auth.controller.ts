@@ -12,7 +12,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
-import { AuditEventType } from '@repo/db';
+import { AuditLogEventType } from '@repo/db';
 import {
   ApiBffAndAccessSecurity,
   ApiBffAndRefreshSecurity,
@@ -60,7 +60,7 @@ export class AuthController {
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.GUEST_SESSION, ttl: THROTTLE_TTL_MS } })
   @Serialize(AuthResponseDto)
-  @AuditLog(AuditEventType.GUEST_SESSION_CREATED)
+  @AuditLog(AuditLogEventType.GUEST_SESSION_CREATED)
   async createGuestSession() {
     return this.authService.createGuestSession();
   }
@@ -77,7 +77,7 @@ export class AuthController {
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.REGISTER, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.USER_REGISTERED)
+  @AuditLog(AuditLogEventType.USER_REGISTERED)
   async register(@Body() body: AuthCredentialsDto) {
     return this.authService.register(body);
   }
@@ -94,7 +94,7 @@ export class AuthController {
   @ThrottleByEmail()
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
-  @AuditLog(AuditEventType.USER_LOGIN_SUCCESS)
+  @AuditLog(AuditLogEventType.USER_LOGIN_SUCCESS)
   async login(@Body() body: AuthCredentialsDto) {
     return this.authService.login(body);
   }
@@ -111,7 +111,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.REFRESH_TOKEN, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.OK)
   @Serialize(AuthResponseDto)
-  @AuditLog(AuditEventType.TOKEN_REFRESHED)
+  @AuditLog(AuditLogEventType.TOKEN_REFRESHED)
   async refreshToken(
     @Req() req: Request,
     @CurrentUser()
@@ -136,7 +136,7 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.USER_LOGOUT)
+  @AuditLog(AuditLogEventType.USER_LOGOUT)
   async logout(@CurrentUser() user: RefreshTokenUser) {
     return this.authService.logout(user);
   }
@@ -149,7 +149,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGOUT_ALL_DEVICES, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.USER_LOGOUT_ALL_DEVICES)
+  @AuditLog(AuditLogEventType.USER_LOGOUT_ALL_DEVICES)
   async logoutAllDevices(@CurrentUser('userId') userId: string) {
     return this.authService.logoutAllDevices(userId);
   }
@@ -163,7 +163,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.UPDATE_PASSWORD, ttl: THROTTLE_TTL_MS } })
   @Serialize(AuthResponseDto)
-  @AuditLog(AuditEventType.PASSWORD_CHANGED)
+  @AuditLog(AuditLogEventType.PASSWORD_CHANGED)
   async updatePassword(@CurrentUser('userId') userId: string, @Body() body: UpdatePasswordDto) {
     return this.authService.updatePasswordAndReauthenticate(userId, body);
   }
@@ -180,7 +180,7 @@ export class AuthController {
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.FORGOT_PASSWORD, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.PASSWORD_FORGOTTEN)
+  @AuditLog(AuditLogEventType.PASSWORD_FORGOTTEN)
   async forgotPassword(@Body() body: AuthForgotPasswordDto) {
     return this.authService.forgotPassword(body);
   }
@@ -196,7 +196,7 @@ export class AuthController {
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.RESET_PASSWORD, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.PASSWORD_RESET)
+  @AuditLog(AuditLogEventType.PASSWORD_RESET)
   async resetPassword(@Body() body: AuthResetPasswordDto) {
     return this.authService.resetPassword(body);
   }
@@ -212,7 +212,7 @@ export class AuthController {
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.VERIFY_EMAIL, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.EMAIL_VERIFIED)
+  @AuditLog(AuditLogEventType.EMAIL_VERIFIED)
   async verifyEmail(@Body() body: AuthVerifyEmailDto) {
     return this.authService.verifyEmail(body);
   }
@@ -230,7 +230,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.RESEND_VERIFICATION_EMAIL, ttl: THROTTLE_TTL_MS } })
   @ThrottleByEmail()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.EMAIL_VERIFICATION_RESENT)
+  @AuditLog(AuditLogEventType.EMAIL_VERIFICATION_RESENT)
   async resendVerificationEmail(@Body() body: AuthResendVerificationEmailDto) {
     return this.authService.resendVerificationEmail(body);
   }

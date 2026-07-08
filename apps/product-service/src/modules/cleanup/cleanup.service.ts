@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { PrismaService } from '@/prisma/prisma.service';
@@ -38,8 +38,8 @@ export class CleanupService {
 
       this.logger.log(auditMessage);
       this.auditLogProvider.auditRequest({
-        eventType: AuditEventType.SCHEDULED_TASK,
-        severity: AuditSeverity.INFO,
+        eventType: AuditLogEventType.SCHEDULED_TASK,
+        severity: AuditLogSeverity.INFO,
         statusCode: HttpStatus.NO_CONTENT,
         message: auditMessage,
       });

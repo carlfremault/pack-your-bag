@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity, Prisma } from '@repo/db';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -66,8 +66,8 @@ describe('PrismaExceptionFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.CONFLICT_ERROR,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.CONFLICT_ERROR,
+          severity: AuditLogSeverity.WARN,
           statusCode: HttpStatus.CONFLICT,
           message: expect.stringContaining('email') as string,
         }),
@@ -83,8 +83,8 @@ describe('PrismaExceptionFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.CONFLICT_ERROR,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.CONFLICT_ERROR,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: expect.stringContaining('ID Collision') as string,
         }),
@@ -126,8 +126,8 @@ describe('PrismaExceptionFilter', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.RESOURCE_NOT_FOUND,
-          severity: AuditSeverity.WARN,
+          eventType: AuditLogEventType.RESOURCE_NOT_FOUND,
+          severity: AuditLogSeverity.WARN,
         }),
         expect.anything(),
       );

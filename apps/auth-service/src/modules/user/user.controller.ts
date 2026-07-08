@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
-import { AuditEventType } from '@repo/db';
+import { AuditLogEventType } from '@repo/db';
 import {
   ApiBffAndAccessSecurity,
   ApiBffSecurity,
@@ -37,7 +37,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.DELETE_USER, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.USER_DELETED)
+  @AuditLog(AuditLogEventType.USER_DELETED)
   async deleteUser(
     @Body() body: DeleteUserDto,
     @CurrentUser('userId') userId: string,
@@ -58,7 +58,7 @@ export class UserController {
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: THROTTLE_LIMITS.CANCEL_ACCOUNT_DELETION, ttl: THROTTLE_TTL_MS } })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @AuditLog(AuditEventType.CANCEL_ACCOUNT_DELETION)
+  @AuditLog(AuditLogEventType.CANCEL_ACCOUNT_DELETION)
   async cancelAccountDeletion(@Body() body: CancelDeletionDto): Promise<{ user: { id: string } }> {
     return this.userService.cancelAccountDeletion(body);
   }

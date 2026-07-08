@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -54,11 +54,11 @@ describe('Custom Throttler Log (e2e)', () => {
       });
 
       const auditLogEntry = await ctx.authHelpers.waitForMostRecentLog({
-        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
+        eventType: AuditLogEventType.SECURITY_RATE_LIMIT_EXCEEDED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: AuditSeverity.WARN,
+        severity: AuditLogSeverity.WARN,
         ipAddress: expect.any(String) as string,
         path: '/auth/register',
         method: 'POST',
@@ -85,11 +85,11 @@ describe('Custom Throttler Log (e2e)', () => {
       });
 
       const auditLogEntry = await ctx.authHelpers.waitForMostRecentLog({
-        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
+        eventType: AuditLogEventType.SECURITY_RATE_LIMIT_EXCEEDED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: AuditSeverity.WARN,
+        severity: AuditLogSeverity.WARN,
         ipAddress: expect.any(String) as string,
         path: '/auth/login',
         method: 'POST',
@@ -138,11 +138,11 @@ describe('Custom Throttler Log (e2e)', () => {
       });
 
       const auditLogEntry = await ctx.authHelpers.waitForMostRecentLog({
-        eventType: AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED,
+        eventType: AuditLogEventType.SECURITY_RATE_LIMIT_EXCEEDED,
       });
 
       expect(auditLogEntry).toMatchObject({
-        severity: AuditSeverity.WARN,
+        severity: AuditLogSeverity.WARN,
         ipAddress: expect.any(String) as string,
         path: '/auth/update-password',
         method: 'PATCH',
