@@ -86,6 +86,11 @@ enum TokenType {
   @@schema("app_auth")
 }
 
+// TODO: old models used before migration to Audit Schema
+// -  AuditLog is called AuditLogEntry in Audit Schema
+// -  AuditEventType is called  AuditLogEventType in Audit Schema
+// -  AuditSeverity is called AuditLogSeverity in Audit Schema
+// Could be deleted but harmless for now
 model AuditLog {
   id            String      @id @db.Uuid
   eventType     AuditEventType
@@ -171,11 +176,6 @@ enum AuditSeverity {
 // ============================================
 // Audit Schema (app_audit)
 // ============================================
-// TODO: temporary duplicates to keep current service running
-// - AuditLogEntry === AuditLog
-// - AuditLogEventType === AuditEventType
-// - AuditLogSeverity === AuditSeverity
-// Needs to be migrated and cleaned up when done
 
 model AuditLogEntry {
   id            String      @id @db.Uuid

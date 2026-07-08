@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity, Prisma } from '@repo/db';
 
 import { Request, Response } from 'express';
 
@@ -36,8 +36,8 @@ export interface ErrorContext {
   error: string;
   clientMessage: string;
   auditMessage: string;
-  eventType: AuditEventType;
-  severity: AuditSeverity;
+  eventType: AuditLogEventType;
+  severity: AuditLogSeverity;
   metadata?: Prisma.InputJsonValue;
 }
 
@@ -107,8 +107,8 @@ export abstract class BasePrismaExceptionsFilter implements ExceptionFilter {
         clientMessage:
           'Something went wrong, please try again. If the problem persists, please contact support.',
         auditMessage: 'Data Integrity Error: ID Collision detected',
-        eventType: AuditEventType.CONFLICT_ERROR,
-        severity: AuditSeverity.ERROR,
+        eventType: AuditLogEventType.CONFLICT_ERROR,
+        severity: AuditLogSeverity.ERROR,
         metadata: { fields },
       };
     }
@@ -125,8 +125,8 @@ export abstract class BasePrismaExceptionsFilter implements ExceptionFilter {
       error: 'Conflict',
       clientMessage: userMessage,
       auditMessage: fields.length ? `Duplicate entry: ${fieldList}` : 'Duplicate entry detected',
-      eventType: AuditEventType.CONFLICT_ERROR,
-      severity: AuditSeverity.WARN,
+      eventType: AuditLogEventType.CONFLICT_ERROR,
+      severity: AuditLogSeverity.WARN,
       metadata: { fields },
     };
   }
@@ -152,8 +152,8 @@ export abstract class BasePrismaExceptionsFilter implements ExceptionFilter {
       clientMessage:
         'Something went wrong, please try again. If the problem persists, please contact support.',
       auditMessage,
-      eventType: AuditEventType.RESOURCE_NOT_FOUND,
-      severity: AuditSeverity.WARN,
+      eventType: AuditLogEventType.RESOURCE_NOT_FOUND,
+      severity: AuditLogSeverity.WARN,
       metadata: { operation, targetModel },
     };
   }

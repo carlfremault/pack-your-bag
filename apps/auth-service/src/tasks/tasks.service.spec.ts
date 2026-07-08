@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import { MS_PER_DAY, MS_PER_HOUR, RMQ_PUBLISHERS } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
@@ -84,8 +84,8 @@ describe('TasksService', () => {
       expect(mockRefreshTokenService.deleteRefreshTokens).toHaveBeenCalled();
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining('Cleaned up 5 expired/revoked tokens') as string,
         }),
@@ -99,8 +99,8 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: expect.stringContaining('Refresh token cleanup failed: DB Failure') as string,
         }),
@@ -114,7 +114,7 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          severity: AuditSeverity.ERROR,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Refresh token cleanup failed: raw string error',
         }),
@@ -159,8 +159,8 @@ describe('TasksService', () => {
       ]);
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining('Cleaned up 2 deleted users') as string,
         }),
@@ -183,8 +183,8 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: expect.stringContaining(
             'Deleted users cleanup failed: User Fetch Failed',
@@ -200,7 +200,7 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          severity: AuditSeverity.ERROR,
+          severity: AuditLogSeverity.ERROR,
           message: 'Deleted users cleanup failed: 42',
         }),
       );
@@ -223,8 +223,8 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining(
             `Cleaned up 10 expired/used verification tokens. Cutoff: ${cutoff.toISOString()}`,
@@ -243,8 +243,8 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: expect.stringContaining(
             'Verification token cleanup failed: DB Failure',
@@ -260,7 +260,7 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          severity: AuditSeverity.ERROR,
+          severity: AuditLogSeverity.ERROR,
           message: 'Verification token cleanup failed: null',
         }),
       );
@@ -312,8 +312,8 @@ describe('TasksService', () => {
       ]);
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining('Cleaned up 2 expired guests') as string,
           metadata: expect.objectContaining({
@@ -330,8 +330,8 @@ describe('TasksService', () => {
 
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.ERROR,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.ERROR,
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: expect.stringContaining(
             'Guest session cleanup failed: Guest Fetch Failed',

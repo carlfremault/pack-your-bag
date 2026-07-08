@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 
-import { AuditEventType, AuditSeverity, Prisma } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity, Prisma } from '@repo/db';
 import { safeCaptureSentryException } from '@repo/nestjs-common';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
@@ -169,8 +169,8 @@ export class EmailService {
       {
         exception: error,
         request: null,
-        errorCode: AuditEventType.EMAIL_SEND_FAILED,
-        eventType: AuditEventType.EMAIL_SEND_FAILED,
+        errorCode: AuditLogEventType.EMAIL_SEND_FAILED,
+        eventType: AuditLogEventType.EMAIL_SEND_FAILED,
         level: 'error',
         fingerprint: [emailType, 'EMAIL_SEND_FAILED'],
       },
@@ -178,10 +178,10 @@ export class EmailService {
     );
 
     this.auditLogProvider.auditRequest({
-      eventType: AuditEventType.EMAIL_SEND_FAILED,
-      severity: AuditSeverity.ERROR,
+      eventType: AuditLogEventType.EMAIL_SEND_FAILED,
+      severity: AuditLogSeverity.ERROR,
       statusCode: null,
-      errorCode: AuditEventType.EMAIL_SEND_FAILED,
+      errorCode: AuditLogEventType.EMAIL_SEND_FAILED,
       message: auditMessage,
       metadata: {
         errorMessage,

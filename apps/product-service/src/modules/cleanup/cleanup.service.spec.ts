@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuditEventType, AuditSeverity } from '@repo/db';
+import { AuditLogEventType, AuditLogSeverity } from '@repo/db';
 import { AuditLogProvider } from '@repo/nestjs-common';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -56,8 +56,8 @@ describe('CleanupService', () => {
       expect(mockPrismaService.$transaction).toHaveBeenCalledOnce();
       expect(mockAuditLogProvider.auditRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          eventType: AuditEventType.SCHEDULED_TASK,
-          severity: AuditSeverity.INFO,
+          eventType: AuditLogEventType.SCHEDULED_TASK,
+          severity: AuditLogSeverity.INFO,
           statusCode: HttpStatus.NO_CONTENT,
           message: expect.stringContaining('5 item(s)') as string,
         }),

@@ -1,4 +1,4 @@
-import { AuditEventType } from '@repo/db';
+import { AuditLogEventType } from '@repo/db';
 
 declare global {
   namespace Express {
@@ -10,7 +10,7 @@ declare global {
     interface Request {
       id?: string; // populated by request-ID middleware; check before use
       user?: User;
-      auditOverride?: AuditEventType;
+      auditOverride?: AuditLogEventType;
     }
   }
 }
