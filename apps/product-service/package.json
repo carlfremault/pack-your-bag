@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --debug 127.0.0.1:9231",
+    "dev": "nest start --watch --debug 127.0.0.1:9231",
     "start": "nest start",
     "start:prod": "node dist/src/main",
     "lint": "eslint . --fix",
