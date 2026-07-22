@@ -88,6 +88,37 @@ export class ListService {
     });
   }
 
+  async cloneList(id: string, newName: string, userId: string): Promise<ListResponseDto> {
+    return this.prisma.$transaction(async (tx) => {
+      const storedList = await tx.list.findUnique({ where: { id, userId } });
+      if (!storedList) {
+        throw new NotFoundException('List not found');
+      }
+
+      const { id: _id, name: _name, createdAt: _ca, updatedAt: _ua, ...listData } = storedList;
+
+      const result = await tx.list.create({
+        data: {
+          ...listData,
+          id: uuidv7(),
+          name: newName,
+          userId,
+        },
+      });
+
+      const itemsInList = await tx.itemList.findMany({ where: { listId: id } });
+      await tx.itemList.createMany({
+        data: itemsInList.map((itemList) => ({
+          ...itemList,
+          id: uuidv7(),
+          listId: result.id,
+        })),
+      });
+
+      return plainToInstance(ListResponseDto, result);
+    });
+  }
+
   // ============================================
   // LIST MANAGEMENT
   // ============================================

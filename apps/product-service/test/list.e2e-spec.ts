@@ -3,6 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { CloneListDto } from '@/modules/list/dto/clone-list.dto';
 import { CreateListDto } from '@/modules/list/dto/create-list.dto';
 import { ListBaseResponseDto } from '@/modules/list/dto/list-response.dto';
 import { UpdateListDto } from '@/modules/list/dto/update-list.dto';
@@ -601,6 +602,195 @@ describe('List (e2e)', () => {
       expect(body).toMatchObject({
         error: 'Bad Request',
       });
+    });
+  });
+
+  describe('List - /list/:id/clone (POST)', () => {
+    const cloneName = 'Cloned List';
+
+    it('should clone an empty list', async () => {
+      const { body: list } = await ctx.listHelpers.createList({
+        payload: listDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body: clonedList } = await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      expect(clonedList).toMatchObject({
+        id: expect.any(String) as string,
+        name: cloneName,
+        description: list.description,
+        colorTheme: list.colorTheme,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
+      });
+      expect(clonedList.id).not.toBe(list.id);
+      expect(clonedList.createdAt).not.toBe(list.createdAt);
+    });
+
+    it('should clone a list with its items', async () => {
+      const { list, item } = await createItemOnList(ctx, validAccessToken);
+
+      const { body: clonedList } = await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedClone } = await ctx.listHelpers.getList({
+        id: clonedList.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedClone).toMatchObject({
+        items: [{ quantity: 1, item }],
+      });
+    });
+
+    it('should preserve item quantities when cloning', async () => {
+      const { list, item1, item2 } = await createMultipleItemsOnList(ctx, validAccessToken);
+
+      await ctx.itemListHelpers.upsertItemOnList({
+        payload: { itemId: item1.id, listId: list.id, quantity: 3 },
+        accessToken: validAccessToken,
+      });
+      await ctx.itemListHelpers.upsertItemOnList({
+        payload: { itemId: item2.id, listId: list.id, quantity: 5 },
+        accessToken: validAccessToken,
+      });
+
+      const { body: clonedList } = await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedClone } = await ctx.listHelpers.getList({
+        id: clonedList.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedClone.items).toHaveLength(2);
+      expect(fetchedClone.items).toContainEqual(
+        expect.objectContaining({
+          quantity: 3,
+          item: expect.objectContaining({ id: item1.id }) as Record<string, unknown>,
+        }),
+      );
+      expect(fetchedClone.items).toContainEqual(
+        expect.objectContaining({
+          quantity: 5,
+          item: expect.objectContaining({ id: item2.id }) as Record<string, unknown>,
+        }),
+      );
+    });
+
+    it('should not affect the original list', async () => {
+      const { list, item } = await createItemOnList(ctx, validAccessToken);
+
+      await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: originalList } = await ctx.listHelpers.getList({
+        id: list.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(originalList).toMatchObject({
+        id: list.id,
+        name: list.name,
+        items: [{ quantity: 1, item }],
+      });
+    });
+
+    it('should return 401 if the user is not authenticated', async () => {
+      const { body } = await ctx.listHelpers.cloneList({
+        id: listId,
+        payload: { newName: cloneName },
+        accessToken: '',
+        expectedStatus: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(body).toMatchObject({ error: 'Unauthorized' });
+    });
+
+    it('should return 404 if the list is not found', async () => {
+      const { body } = await ctx.listHelpers.cloneList({
+        id: listId,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.NOT_FOUND,
+      });
+
+      expect(body).toMatchObject({ error: 'Not Found' });
+    });
+
+    it('should return 404 if the list belongs to another user', async () => {
+      const { body: list } = await ctx.listHelpers.createList({
+        payload: listDto,
+        accessToken: validAccessToken,
+      });
+      const userId2 = uuidv7();
+      const validAccessToken2 = ctx.authHelpers.getValidAccessToken(userId2);
+
+      const { body } = await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken2,
+        expectedStatus: HttpStatus.NOT_FOUND,
+      });
+
+      expect(body).toMatchObject({ error: 'Not Found' });
+    });
+
+    it('should return 400 if the id is not a valid uuid v7', async () => {
+      const { body } = await ctx.listHelpers.cloneList({
+        id: 'invalid-uuid',
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+
+    it('should return 400 if the payload is invalid', async () => {
+      const { body: list } = await ctx.listHelpers.createList({
+        payload: listDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: { newName: 123 } as unknown as Partial<CloneListDto>,
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+
+    it('should return 400 if the payload is missing required fields', async () => {
+      const { body: list } = await ctx.listHelpers.createList({
+        payload: listDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.listHelpers.cloneList({
+        id: list.id,
+        payload: {} as Partial<CloneListDto>,
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
     });
   });
 

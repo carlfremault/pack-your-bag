@@ -3,6 +3,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
+import { CloneListDto } from '@/modules/list/dto/clone-list.dto';
 import { CreateListDto } from '@/modules/list/dto/create-list.dto';
 import { ListDeleteImpactDto } from '@/modules/list/dto/list-delete-impact.dto';
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
@@ -92,6 +93,25 @@ export class ListHelpers {
 
     const req = request(this.app.getHttpServer())
       .delete(`/list/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async cloneList(options: {
+    id: string;
+    payload: Partial<CloneListDto> | null;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: ListResponseDto;
+  }> {
+    const { id, payload, accessToken, expectedStatus = HttpStatus.CREATED } = options;
+
+    const req = request(this.app.getHttpServer())
+      .post(`/list/${id}/clone`)
+      .send(payload ?? undefined)
       .set('Authorization', `Bearer ${accessToken}`)
       .set('x-bff-secret', this.bffSecret);
 
