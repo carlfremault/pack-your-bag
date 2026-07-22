@@ -105,6 +105,46 @@ export class PackService {
     });
   }
 
+  async clonePack(id: string, newName: string, userId: string): Promise<PackResponseDto> {
+    return this.prisma.$transaction(async (tx) => {
+      const storedPack = await tx.pack.findUnique({ where: { id, userId } });
+      if (!storedPack) {
+        throw new NotFoundException('Pack not found');
+      }
+
+      const { id: _id, name: _name, createdAt: _ca, updatedAt: _ua, ...packData } = storedPack;
+
+      const result = await tx.pack.create({
+        data: {
+          ...packData,
+          id: uuidv7(),
+          name: newName,
+          userId: userId,
+        },
+      });
+
+      const itemsInPack = await tx.itemPack.findMany({ where: { packId: id } });
+      await tx.itemPack.createMany({
+        data: itemsInPack.map((itemPack) => ({
+          ...itemPack,
+          id: uuidv7(),
+          packId: result.id,
+        })),
+      });
+
+      const listsInPack = await tx.listPack.findMany({ where: { packId: id } });
+      await tx.listPack.createMany({
+        data: listsInPack.map((listPack) => ({
+          ...listPack,
+          id: uuidv7(),
+          packId: result.id,
+        })),
+      });
+
+      return plainToInstance(PackResponseDto, result);
+    });
+  }
+
   // ============================================
   // PACK MANAGEMENT
   // ============================================

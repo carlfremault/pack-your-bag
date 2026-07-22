@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
+import { ClonePackDto } from '@/modules/pack/dto/clone-pack.dto';
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
 import { PackBaseResponseDto } from '@/modules/pack/dto/pack-response.dto';
 import { UpdatePackDto } from '@/modules/pack/dto/update-pack.dto';
@@ -733,6 +734,234 @@ describe('Pack (e2e)', () => {
     it('should return 400 if the id is not a valid uuid v7', async () => {
       const { body } = await ctx.packHelpers.deletePack({
         id: 'invalid-uuid',
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+  });
+
+  describe('Pack - /pack/:id/clone (POST)', () => {
+    const cloneName = 'Cloned Pack';
+
+    it('should clone an empty pack', async () => {
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: packDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body: clonedPack } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      expect(clonedPack).toMatchObject({
+        id: expect.any(String) as string,
+        name: cloneName,
+        description: pack.description,
+        colorTheme: pack.colorTheme,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
+      });
+      expect(clonedPack.id).not.toBe(pack.id);
+      expect(clonedPack.createdAt).not.toBe(pack.createdAt);
+    });
+
+    it('should clone a pack with its items', async () => {
+      const { pack, item } = await createItemInPack(ctx, validAccessToken);
+
+      const { body: clonedPack } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedClone } = await ctx.packHelpers.getPack({
+        id: clonedPack.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedClone).toMatchObject({
+        items: [{ quantity: 1, item }],
+      });
+    });
+
+    it('should clone a pack with its lists', async () => {
+      const { pack, list } = await createListInPack(ctx, validAccessToken);
+
+      const { body: clonedPack } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedClone } = await ctx.packHelpers.getPack({
+        id: clonedPack.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedClone).toMatchObject({
+        lists: [{ quantity: 1, list }],
+      });
+    });
+
+    it('should clone a pack with its items and lists', async () => {
+      const { pack, item, list } = await createItemAndListInPack(ctx, validAccessToken);
+
+      const { body: clonedPack } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedClone } = await ctx.packHelpers.getPack({
+        id: clonedPack.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedClone).toMatchObject({
+        items: [{ quantity: 1, item }],
+        lists: [{ quantity: 1, list }],
+      });
+    });
+
+    it('should preserve item quantities when cloning', async () => {
+      const { pack, item1, item2 } = await createMultipleItemsInPackWithQuantity(
+        ctx,
+        validAccessToken,
+        3,
+      );
+
+      const { body: clonedPack } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: fetchedClone } = await ctx.packHelpers.getPack({
+        id: clonedPack.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(fetchedClone.items).toHaveLength(2);
+      expect(fetchedClone.items).toContainEqual(
+        expect.objectContaining({
+          quantity: 3,
+          item: expect.objectContaining({ id: item1.id }) as Record<string, unknown>,
+        }),
+      );
+      expect(fetchedClone.items).toContainEqual(
+        expect.objectContaining({
+          quantity: 3,
+          item: expect.objectContaining({ id: item2.id }) as Record<string, unknown>,
+        }),
+      );
+    });
+
+    it('should not affect the original pack', async () => {
+      const { pack, item } = await createItemInPack(ctx, validAccessToken);
+
+      await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+      });
+
+      const { body: originalPack } = await ctx.packHelpers.getPack({
+        id: pack.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(originalPack).toMatchObject({
+        id: pack.id,
+        name: pack.name,
+        items: [
+          {
+            quantity: 1,
+            item: expect.objectContaining({ id: item.id }) as Record<string, unknown>,
+          },
+        ],
+      });
+    });
+
+    it('should return 401 if the user is not authenticated', async () => {
+      const { body } = await ctx.packHelpers.clonePack({
+        id: packId,
+        payload: { newName: cloneName },
+        accessToken: '',
+        expectedStatus: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(body).toMatchObject({ error: 'Unauthorized' });
+    });
+
+    it('should return 404 if the pack is not found', async () => {
+      const { body } = await ctx.packHelpers.clonePack({
+        id: packId,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.NOT_FOUND,
+      });
+
+      expect(body).toMatchObject({ error: 'Not Found' });
+    });
+
+    it('should return 404 if the pack belongs to another user', async () => {
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: packDto,
+        accessToken: validAccessToken,
+      });
+      const userId2 = uuidv7();
+      const validAccessToken2 = ctx.authHelpers.getValidAccessToken(userId2);
+
+      const { body } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: cloneName },
+        accessToken: validAccessToken2,
+        expectedStatus: HttpStatus.NOT_FOUND,
+      });
+
+      expect(body).toMatchObject({ error: 'Not Found' });
+    });
+
+    it('should return 400 if the id is not a valid uuid v7', async () => {
+      const { body } = await ctx.packHelpers.clonePack({
+        id: 'invalid-uuid',
+        payload: { newName: cloneName },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+
+    it('should return 400 if the payload is invalid', async () => {
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: packDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: { newName: 123 } as unknown as Partial<ClonePackDto>,
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({ error: 'Bad Request' });
+    });
+
+    it('should return 400 if the payload is missing required fields', async () => {
+      const { body: pack } = await ctx.packHelpers.createPack({
+        payload: packDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body } = await ctx.packHelpers.clonePack({
+        id: pack.id,
+        payload: {} as Partial<ClonePackDto>,
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });

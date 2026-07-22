@@ -35,6 +35,14 @@ describe('PackService', () => {
       update: vi.fn(),
       delete: vi.fn(),
     },
+    itemPack: {
+      findMany: vi.fn(),
+      createMany: vi.fn(),
+    },
+    listPack: {
+      findMany: vi.fn(),
+      createMany: vi.fn(),
+    },
     trip: {
       findMany: vi.fn(),
     },
@@ -265,6 +273,135 @@ describe('PackService', () => {
       await expect(service.deletePack(id, userId)).rejects.toThrow('Pack not found');
 
       expect(mockPrismaService.pack.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('clonePack', () => {
+    const userId = 'user-1';
+    const originalId = 'pack-1';
+    const newName = 'Cloned Pack';
+    const now = new Date();
+
+    const storedPack = {
+      id: originalId,
+      name: 'Original Pack',
+      description: 'Original Description',
+      colorTheme: 'slate',
+      userId,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    it('should create a new pack with a new id and name, excluding timestamps', async () => {
+      mockPrismaService.pack.findUnique.mockResolvedValue(storedPack);
+      let capturedData: Record<string, unknown> = {};
+      mockPrismaService.pack.create.mockImplementation(
+        (args: { data: Record<string, unknown> }) => {
+          capturedData = args.data;
+          return Promise.resolve({ ...args.data });
+        },
+      );
+      mockPrismaService.itemPack.findMany.mockResolvedValue([]);
+      mockPrismaService.listPack.findMany.mockResolvedValue([]);
+
+      await service.clonePack(originalId, newName, userId);
+
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
+      expect(mockPrismaService.pack.findUnique).toHaveBeenCalledWith({
+        where: { id: originalId, userId },
+      });
+      expect(capturedData.name).toBe(newName);
+      expect(capturedData.description).toBe('Original Description');
+      expect(capturedData.colorTheme).toBe('slate');
+      expect(capturedData.userId).toBe(userId);
+      expect(capturedData.id).toBeDefined();
+      expect(capturedData.id).not.toBe(originalId);
+      expect(capturedData.createdAt).toBeUndefined();
+      expect(capturedData.updatedAt).toBeUndefined();
+    });
+
+    it('should clone items in the pack', async () => {
+      const clonedPackId = 'cloned-pack-id';
+      mockPrismaService.pack.findUnique.mockResolvedValue(storedPack);
+      mockPrismaService.pack.create.mockResolvedValue({ ...storedPack, id: clonedPackId });
+      mockPrismaService.itemPack.findMany.mockResolvedValue([
+        { id: 'ip-1', quantity: 2, itemId: 'item-1', packId: originalId },
+        { id: 'ip-2', quantity: 3, itemId: 'item-2', packId: originalId },
+      ]);
+      mockPrismaService.listPack.findMany.mockResolvedValue([]);
+      let capturedData: Array<Record<string, unknown>> = [];
+      mockPrismaService.itemPack.createMany.mockImplementation(
+        (args: { data: Array<Record<string, unknown>> }) => {
+          capturedData = args.data;
+          return Promise.resolve({ count: args.data.length });
+        },
+      );
+
+      await service.clonePack(originalId, newName, userId);
+
+      expect(mockPrismaService.itemPack.findMany).toHaveBeenCalledWith({
+        where: { packId: originalId },
+      });
+      expect(capturedData).toHaveLength(2);
+      expect(capturedData).toContainEqual(
+        expect.objectContaining({ quantity: 2, itemId: 'item-1', packId: clonedPackId }),
+      );
+      expect(capturedData).toContainEqual(
+        expect.objectContaining({ quantity: 3, itemId: 'item-2', packId: clonedPackId }),
+      );
+      for (const entry of capturedData) {
+        expect(entry.id).toBeDefined();
+        expect(entry.id).not.toBe('ip-1');
+        expect(entry.id).not.toBe('ip-2');
+      }
+    });
+
+    it('should clone lists in the pack', async () => {
+      const clonedPackId = 'cloned-pack-id';
+      mockPrismaService.pack.findUnique.mockResolvedValue(storedPack);
+      mockPrismaService.pack.create.mockResolvedValue({ ...storedPack, id: clonedPackId });
+      mockPrismaService.itemPack.findMany.mockResolvedValue([]);
+      mockPrismaService.listPack.findMany.mockResolvedValue([
+        { id: 'lp-1', quantity: 1, listId: 'list-1', packId: originalId },
+        { id: 'lp-2', quantity: 4, listId: 'list-2', packId: originalId },
+      ]);
+      let capturedData: Array<Record<string, unknown>> = [];
+      mockPrismaService.listPack.createMany.mockImplementation(
+        (args: { data: Array<Record<string, unknown>> }) => {
+          capturedData = args.data;
+          return Promise.resolve({ count: args.data.length });
+        },
+      );
+
+      await service.clonePack(originalId, newName, userId);
+
+      expect(mockPrismaService.listPack.findMany).toHaveBeenCalledWith({
+        where: { packId: originalId },
+      });
+      expect(capturedData).toHaveLength(2);
+      expect(capturedData).toContainEqual(
+        expect.objectContaining({ quantity: 1, listId: 'list-1', packId: clonedPackId }),
+      );
+      expect(capturedData).toContainEqual(
+        expect.objectContaining({ quantity: 4, listId: 'list-2', packId: clonedPackId }),
+      );
+      for (const entry of capturedData) {
+        expect(entry.id).toBeDefined();
+        expect(entry.id).not.toBe('lp-1');
+        expect(entry.id).not.toBe('lp-2');
+      }
+    });
+
+    it('should throw an error if the pack is not found', async () => {
+      mockPrismaService.pack.findUnique.mockResolvedValue(null);
+
+      await expect(service.clonePack(originalId, newName, userId)).rejects.toThrow(
+        'Pack not found',
+      );
+
+      expect(mockPrismaService.pack.create).not.toHaveBeenCalled();
+      expect(mockPrismaService.itemPack.findMany).not.toHaveBeenCalled();
+      expect(mockPrismaService.listPack.findMany).not.toHaveBeenCalled();
     });
   });
 
