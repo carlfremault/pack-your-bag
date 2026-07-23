@@ -166,6 +166,23 @@ export interface paths {
     patch: operations['ListController_updateList'];
     trace?: never;
   };
+  '/list/{id}/clone': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Clone a list from ID */
+    post: operations['ListController_cloneList'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/pack': {
     parameters: {
       query?: never;
@@ -218,6 +235,23 @@ export interface paths {
     head?: never;
     /** Update a pack by ID */
     patch: operations['PackController_updatePack'];
+    trace?: never;
+  };
+  '/pack/{id}/clone': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Clone a pack from ID */
+    post: operations['PackController_clonePack'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/trip': {
@@ -791,6 +825,13 @@ export interface components {
        */
       colorTheme?: string;
     };
+    CloneListDto: {
+      /**
+       * @description List name
+       * @example List name
+       */
+      newName: string;
+    };
     UpdateListDto: {
       /**
        * @description List name
@@ -906,6 +947,13 @@ export interface components {
        * @example slate
        */
       colorTheme?: string;
+    };
+    ClonePackDto: {
+      /**
+       * @description Pack name
+       * @example Pack name
+       */
+      newName: string;
     };
     UpdatePackDto: {
       /**
@@ -1988,6 +2036,60 @@ export interface operations {
       };
     };
   };
+  ListController_cloneList: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CloneListDto'];
+      };
+    };
+    responses: {
+      /** @description List cloned successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ListResponseDto'];
+        };
+      };
+      /** @description Validation failed (invalid UUID v7 format or invalid body) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description List not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description ThrottlerException: Too Many Requests. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   PackController_getPacks: {
     parameters: {
       query?: never;
@@ -2232,6 +2334,60 @@ export interface operations {
     responses: {
       /** @description Pack updated successfully. */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PackResponseDto'];
+        };
+      };
+      /** @description Validation failed (invalid UUID v7 format or invalid body) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Pack not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description ThrottlerException: Too Many Requests. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PackController_clonePack: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClonePackDto'];
+      };
+    };
+    responses: {
+      /** @description Pack cloned successfully. */
+      201: {
         headers: {
           [name: string]: unknown;
         };

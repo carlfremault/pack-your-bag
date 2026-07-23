@@ -11,6 +11,8 @@ import {
 import { toHttpError } from '@/utils/http-error';
 
 import {
+  CloneListBody,
+  ClonePackBody,
   Collection,
   CollectionDetail,
   CollectionType,
@@ -244,6 +246,76 @@ const useUpdateCollection = () => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: ['pack'] });
       queryClient.invalidateQueries({ queryKey: [variables.type, variables.id] });
+    },
+  });
+};
+
+// --------------------------------
+// Clone Collection (List or Pack)
+// --------------------------------
+
+type CloneCollectionVariables =
+  | { id: string; type: 'list'; body: CloneListBody }
+  | { id: string; type: 'pack'; body: ClonePackBody };
+
+const cloneCollection = async ({
+  id,
+  type,
+  body,
+}: CloneCollectionVariables): Promise<List | Pack> => {
+  const res = await fetch(`/api/${type}/${id}/clone`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await toHttpError(res);
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+const useCloneCollection = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: cloneCollection,
+    onMutate: async ({ type, body }) => {
+      await queryClient.cancelQueries({ queryKey: ['collections'] });
+
+      const previousCollections = queryClient.getQueryData<Collection[]>(['collections']) ?? [];
+
+      const optimisticId = nextOptimisticCollectionId();
+      const optimisticCollection = {
+        id: optimisticId,
+        type,
+        name: body.newName,
+        description: null,
+        colorTheme: null,
+        itemCount: 0,
+        totalWeight: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData(['collections'], (old: Collection[] = []) => [
+        ...old,
+        optimisticCollection,
+      ]);
+
+      return { previousCollections, optimisticId };
+    },
+    onError: (_error, _body, context) => {
+      if (context?.previousCollections !== undefined) {
+        queryClient.setQueryData(['collections'], context.previousCollections);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['pack'] });
     },
   });
 };
@@ -523,6 +595,7 @@ export {
   useCollection,
   useCreateCollection,
   useUpdateCollection,
+  useCloneCollection,
   useCollectionDeleteImpact,
   useDeleteCollection,
   useUpsertItemInCollection,

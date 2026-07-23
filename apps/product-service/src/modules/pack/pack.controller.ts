@@ -24,6 +24,7 @@ import {
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
+import { ClonePackDto } from './dto/clone-pack.dto';
 import { CreatePackDto } from './dto/create-pack.dto';
 import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
 import { PackResponseDto, PackSummaryResponseDto } from './dto/pack-response.dto';
@@ -114,6 +115,29 @@ export class PackController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.POST, ttl: THROTTLE_TTL_MS } })
   async createPack(@Body() pack: CreatePackDto, @CurrentUser('userId') userId: string) {
     return this.packService.createPack(pack, userId);
+  }
+
+  @Post(':id/clone')
+  @ApiBffAndAccessSecurity()
+  @ApiOperation({ summary: 'Clone a pack from ID' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Pack cloned successfully.',
+    type: PackResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (invalid UUID v7 format or invalid body)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Pack not found.' })
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.PACKS.POST, ttl: THROTTLE_TTL_MS } })
+  async clonePack(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() body: ClonePackDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.packService.clonePack(id, body.newName, userId);
   }
 
   @Patch(':id')

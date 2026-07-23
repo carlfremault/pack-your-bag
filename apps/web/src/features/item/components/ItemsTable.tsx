@@ -83,7 +83,13 @@ export default function ItemsTable<TData extends ItemForDisplay>(props: ItemsTab
 
   return (
     <div className="bg-background h-full w-full">
-      <DataTable data={items} columns={columns} noResults={noResults} scrollable />
+      <DataTable
+        data={items}
+        columns={columns}
+        getRowId={(row) => row.id}
+        noResults={noResults}
+        scrollable
+      />
     </div>
   );
 }

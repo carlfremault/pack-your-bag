@@ -3,6 +3,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
+import { ClonePackDto } from '@/modules/pack/dto/clone-pack.dto';
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
 import { PackDeleteImpactDto } from '@/modules/pack/dto/pack-delete-impact.dto';
 import { PackResponseDto } from '@/modules/pack/dto/pack-response.dto';
@@ -92,6 +93,25 @@ export class PackHelpers {
 
     const req = request(this.app.getHttpServer())
       .delete(`/pack/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async clonePack(options: {
+    id: string;
+    payload: Partial<ClonePackDto> | null;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: PackResponseDto;
+  }> {
+    const { id, payload, accessToken, expectedStatus = HttpStatus.CREATED } = options;
+
+    const req = request(this.app.getHttpServer())
+      .post(`/pack/${id}/clone`)
+      .send(payload ?? undefined)
       .set('Authorization', `Bearer ${accessToken}`)
       .set('x-bff-secret', this.bffSecret);
 

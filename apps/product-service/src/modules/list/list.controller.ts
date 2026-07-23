@@ -24,6 +24,7 @@ import {
 
 import { THROTTLE_LIMITS, THROTTLE_TTL_MS } from '@/common/constants/product.constants';
 
+import { CloneListDto } from './dto/clone-list.dto';
 import { CreateListDto } from './dto/create-list.dto';
 import { ListDeleteImpactDto } from './dto/list-delete-impact.dto';
 import { ListResponseDto, ListSummaryResponseDto } from './dto/list-response.dto';
@@ -118,6 +119,29 @@ export class ListController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.LISTS.POST, ttl: THROTTLE_TTL_MS } })
   async createList(@Body() list: CreateListDto, @CurrentUser('userId') userId: string) {
     return this.listService.createList(list, userId);
+  }
+
+  @Post(':id/clone')
+  @ApiBffAndAccessSecurity()
+  @ApiOperation({ summary: 'Clone a list from ID' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'List cloned successfully.',
+    type: ListResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation failed (invalid UUID v7 format or invalid body)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'List not found.' })
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LISTS.POST, ttl: THROTTLE_TTL_MS } })
+  async cloneList(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() body: CloneListDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.listService.cloneList(id, body.newName, userId);
   }
 
   @Patch(':id')
