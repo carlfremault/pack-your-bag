@@ -144,6 +144,7 @@ export const UpdateListDto = z
   })
   .partial()
   .passthrough();
+export const CloneListDto = z.object({ newName: z.string().min(1).max(128) }).passthrough();
 export const PackSummaryResponseDto = z
   .object({
     id: z.string(),
@@ -184,6 +185,7 @@ export const UpdatePackDto = z
   })
   .partial()
   .passthrough();
+export const ClonePackDto = z.object({ newName: z.string().min(1).max(128) }).passthrough();
 export const TripSummaryResponseDto = z
   .object({
     id: z.string(),

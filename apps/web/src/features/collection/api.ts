@@ -2,6 +2,8 @@ import { handleApiResponse, handleApiVoidResponse } from '@/lib/api-handlers';
 import { getProductClient } from '@/lib/clients/product-client';
 
 import {
+  CloneListBody,
+  ClonePackBody,
   Collection,
   CreateListBody,
   CreatePackBody,
@@ -101,6 +103,28 @@ export async function updateList(id: string, body: UpdateListBody): Promise<List
 export async function updatePack(id: string, body: UpdatePackBody): Promise<Pack> {
   const productClient = await getProductClient();
   const { data, error, response } = await productClient.PATCH('/pack/{id}', {
+    params: { path: { id } },
+    body,
+  });
+  return handleApiResponse(data, error, response);
+}
+
+// -------------------------------
+// Clone functions
+// -------------------------------
+
+export async function cloneList(id: string, body: CloneListBody): Promise<List> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/list/{id}/clone', {
+    params: { path: { id } },
+    body,
+  });
+  return handleApiResponse(data, error, response);
+}
+
+export async function clonePack(id: string, body: ClonePackBody): Promise<Pack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/pack/{id}/clone', {
     params: { path: { id } },
     body,
   });

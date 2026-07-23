@@ -27,7 +27,10 @@ export function toCollectionCardProps(
 
 export function toCollectionDetailsCardProps(
   collection: CollectionForDetailsCardDisplay,
-  handlers: Pick<CollectionDetailsCardProps, 'onEditCollection' | 'onDeleteCollection'>,
+  handlers: Pick<
+    CollectionDetailsCardProps,
+    'onEditCollection' | 'onDeleteCollection' | 'onCloneCollection'
+  >,
 ): CollectionDetailsCardProps {
   return {
     id: collection.id,

@@ -2,7 +2,12 @@
 
 import { BsBackpack } from 'react-icons/bs';
 import { HiOutlineScale } from 'react-icons/hi2';
-import { MdDeleteOutline, MdOutlineEdit, MdOutlineFormatListBulleted } from 'react-icons/md';
+import {
+  MdDeleteOutline,
+  MdOutlineContentCopy,
+  MdOutlineEdit,
+  MdOutlineFormatListBulleted,
+} from 'react-icons/md';
 
 import { Button } from '@repo/react-common/button';
 import { ColorTheme, colorThemes } from '@repo/react-common/color-themes';
@@ -26,6 +31,7 @@ export interface CollectionDetailsCardProps {
   }[];
   onEditCollection: (id: string, type: 'list' | 'pack') => void;
   onDeleteCollection: (id: string, type: 'list' | 'pack') => void;
+  onCloneCollection: (id: string, type: 'list' | 'pack') => void;
 }
 
 export function CollectionDetailsCard(props: CollectionDetailsCardProps) {
@@ -41,6 +47,7 @@ export function CollectionDetailsCard(props: CollectionDetailsCardProps) {
     categoryWeights,
     onEditCollection,
     onDeleteCollection,
+    onCloneCollection,
   } = props;
 
   const { className: colorThemeClassName } = colorThemes[colorTheme] ?? colorThemes['default'];
@@ -92,6 +99,14 @@ export function CollectionDetailsCard(props: CollectionDetailsCardProps) {
       )}
 
       <div className="flex flex-none justify-end gap-8 p-4">
+        <Button
+          variant="unstyledIcon"
+          color="primary"
+          aria-label={`Clone ${name}`}
+          onClick={() => onCloneCollection(id, type)}
+        >
+          <MdOutlineContentCopy className="h-6 w-6" aria-hidden="true" />
+        </Button>
         <Button
           variant="unstyledIcon"
           color="primary"
