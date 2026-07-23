@@ -1,5 +1,9 @@
-import { MdOutlineAdd, MdOutlineEdit } from 'react-icons/md';
-import { MdOutlineExplore } from 'react-icons/md';
+import {
+  MdOutlineAdd,
+  MdOutlineContentCopy,
+  MdOutlineEdit,
+  MdOutlineExplore,
+} from 'react-icons/md';
 import { TbTrash } from 'react-icons/tb';
 
 import classNames from 'classnames';
@@ -44,7 +48,17 @@ export function ExploreModalTitle({ label }: { label: string }) {
   );
 }
 
-type ModalTitleType = 'add' | 'edit' | 'delete' | 'explore';
+export function CloneModalTitle({ label }: { label: string }) {
+  return (
+    <ModalTitleWrapper
+      icon={<MdOutlineContentCopy size={16} className="text-primary" aria-hidden="true" />}
+      label={label}
+      type="clone"
+    />
+  );
+}
+
+type ModalTitleType = 'add' | 'edit' | 'delete' | 'explore' | 'clone';
 interface ModalTitleWrapperProps {
   icon: React.ReactNode;
   label: string;

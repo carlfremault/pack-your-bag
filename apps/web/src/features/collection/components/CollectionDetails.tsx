@@ -26,6 +26,7 @@ import {
 
 import AddItemsModal from './AddItemsModal';
 import AddListsModal from './AddListsModal';
+import CollectionCloneModal from './CollectionCloneModal';
 import CollectionDeleteModal from './CollectionDeleteModal';
 import ListContent from './ListContent';
 import PackContent from './PackContent';
@@ -44,6 +45,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
   const action = searchParams.get('action');
 
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
+  const [cloneCollectionId, setCloneCollectionId] = useState<string | null>(null);
   const { data: collection } = useCollection(id, type);
   const { data: preferences } = usePreferences();
 
@@ -92,6 +94,14 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     setDeleteCollectionId(null);
   };
 
+  const handleCloneCollection = (id: string) => {
+    setCloneCollectionId(id);
+  };
+
+  const closeCloneModal = () => {
+    setCloneCollectionId(null);
+  };
+
   const collectionDeleteModal = deleteCollectionId && (
     <CollectionDeleteModal
       collectionId={deleteCollectionId}
@@ -100,9 +110,18 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
     />
   );
 
+  const collectionCloneModal = cloneCollectionId && (
+    <CollectionCloneModal
+      collectionId={cloneCollectionId}
+      collectionType={type}
+      onClose={closeCloneModal}
+    />
+  );
+
   const detailsCardProps = toCollectionDetailsCardProps(collectionForDetailsCardDisplay, {
     onEditCollection: handleEditCollection,
     onDeleteCollection: handleDeleteCollection,
+    onCloneCollection: handleCloneCollection,
   });
 
   const collectionDetailsContent = (
@@ -133,6 +152,7 @@ export default function CollectionDetails(props: CollectionDetailsProps) {
       {collection.type === 'list' && <ListContent collection={collection} />}
       {collection.type === 'pack' && <PackContent collection={collection} />}
       {collectionDeleteModal}
+      {collectionCloneModal}
     </div>
   );
 }

@@ -832,6 +832,65 @@
         ]
       }
     },
+    "/list/{id}/clone": {
+      "post": {
+        "operationId": "ListController_cloneList",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneListDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "List cloned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "List not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Clone a list from ID",
+        "tags": [
+          "list"
+        ]
+      }
+    },
     "/pack": {
       "get": {
         "operationId": "PackController_getPacks",
@@ -1104,6 +1163,65 @@
           }
         ],
         "summary": "Delete a pack by ID",
+        "tags": [
+          "pack"
+        ]
+      }
+    },
+    "/pack/{id}/clone": {
+      "post": {
+        "operationId": "PackController_clonePack",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClonePackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pack cloned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (invalid UUID v7 format or invalid body)"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Pack not found."
+          },
+          "429": {
+            "description": "ThrottlerException: Too Many Requests."
+          }
+        },
+        "security": [
+          {
+            "bff-secret": [],
+            "access-token": []
+          }
+        ],
+        "summary": "Clone a pack from ID",
         "tags": [
           "pack"
         ]
@@ -2517,6 +2635,21 @@
           "name"
         ]
       },
+      "CloneListDto": {
+        "type": "object",
+        "properties": {
+          "newName": {
+            "type": "string",
+            "description": "List name",
+            "example": "List name",
+            "maxLength": 128,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "newName"
+        ]
+      },
       "UpdateListDto": {
         "type": "object",
         "properties": {
@@ -2688,6 +2821,21 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "ClonePackDto": {
+        "type": "object",
+        "properties": {
+          "newName": {
+            "type": "string",
+            "description": "Pack name",
+            "example": "Pack name",
+            "maxLength": 128,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "newName"
         ]
       },
       "UpdatePackDto": {
