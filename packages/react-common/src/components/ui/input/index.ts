@@ -1,6 +1,7 @@
 export { Input, type InputProps } from './Input';
 export { InputDateRange, type InputDateRangeProps, type DateRange } from './InputDateRange';
 export { InputSelect, type InputSelectProps, type InputSelectOption } from './InputSelect';
+export { InputMultiSelect, type InputMultiSelectProps } from './InputMultiSelect';
 export { InputPassword, type InputPasswordProps } from './InputPassword';
 export { QuantityStepper, type QuantityStepperProps } from './QuantityStepper';
 export { InputTextarea, type InputTextareaProps } from './InputTextarea';

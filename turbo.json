@@ -17,7 +17,8 @@
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
         "MONGO_*",
-        "RABBITMQ_*"
+        "RABBITMQ_*",
+        "GEMINI_API_KEY"
       ]
     },
     "lint": {
@@ -41,7 +42,8 @@
         "DEV_SENTRY_DSN",
         "POSTGRES_*",
         "MONGO_*",
-        "RABBITMQ_*"
+        "RABBITMQ_*",
+        "GEMINI_API_KEY"
       ]
     },
     "test:setup": {
@@ -62,7 +64,8 @@
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
         "MONGO_*",
-        "RABBITMQ_*"
+        "RABBITMQ_*",
+        "GEMINI_API_KEY"
       ]
     },
     "test:watch": {
@@ -79,7 +82,8 @@
         "NEXT_PUBLIC_*",
         "POSTGRES_*",
         "MONGO_*",
-        "RABBITMQ_*"
+        "RABBITMQ_*",
+        "GEMINI_API_KEY"
       ]
     },
     "test:browser": {

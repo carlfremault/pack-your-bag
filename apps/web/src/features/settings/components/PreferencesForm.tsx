@@ -1,34 +1,14 @@
 'use client';
 
-import { ComponentType } from 'react';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 
 import { DateFormat, Theme, TimeFormat, Units } from '@repo/constants';
 import { IconToggleOption, InputIconToggle } from '@repo/react-common/input';
+import { makeTextIcon } from '@repo/react-common/utilities';
 import { SectionNotReady } from '@repo/react-common/utils';
-
-import classNames from 'classnames';
 
 import { usePreferences, useUpdatePreferences } from '../queries';
 import { UpdatePreferencesBody } from '../types';
-
-function makeTextIcon(text: string): ComponentType<{ className?: string }> {
-  function TextIcon({ className }: { className?: string }) {
-    return (
-      <span
-        aria-hidden="true"
-        className={classNames(
-          className,
-          'inline-flex h-5 w-auto! items-center justify-center px-1 font-mono text-[10px] leading-none font-bold whitespace-nowrap',
-        )}
-      >
-        {text}
-      </span>
-    );
-  }
-  TextIcon.displayName = `TextIcon(${text})`;
-  return TextIcon;
-}
 
 const THEME_OPTIONS: IconToggleOption<string | null>[] = [
   { value: Theme.LIGHT, label: 'Light theme', icon: MdLightMode },
