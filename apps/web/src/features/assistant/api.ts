@@ -61,7 +61,6 @@ function buildPrompt(payload: AssistantFormType): string {
 }
 
 export async function fetchPackingList(payload: AssistantFormType): Promise<AssistantPackingList> {
-  console.log('fetchPackingList api call', payload);
   const response = await ai.models.generateContent({
     model: 'gemini-3.5-flash-lite',
     contents: buildPrompt(payload),
