@@ -5,6 +5,7 @@ export { CollectionCard, type CollectionCardProps } from './CollectionCard';
 export { CollectionDetailsCard, type CollectionDetailsCardProps } from './CollectionDetailsCard';
 export { CollectionListCard, type CollectionListCardProps } from './CollectionListCard';
 export { ItemCard, type ItemCardProps } from './ItemCard';
+export { AssistantItemCard, type AssistantItemCardProps } from './AssistantItemCard';
 export { TripCard, type TripCardProps } from './TripCard';
 export { TripDetailsCard, type TripDetailsCardProps } from './TripDetailsCard';
 export { TripItemCard, type TripItemCardProps } from './TripItemCard';

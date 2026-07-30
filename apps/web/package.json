@@ -13,6 +13,7 @@
     "test:browser": "vitest --config=vitest.browser.config.mts"
   },
   "dependencies": {
+    "@google/genai": "^2.12.0",
     "@repo/auth-client": "workspace:*",
     "@repo/constants": "workspace:*",
     "@repo/product-client": "workspace:*",
