@@ -12,13 +12,13 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="flex max-h-full min-h-0 w-full flex-col-reverse items-center gap-4 overflow-y-auto md:w-auto lg:flex-row">
-      <WelcomeCard>
-        <GuestExploreButton />
-      </WelcomeCard>
+    <div className="flex max-h-full min-h-0 w-full flex-col items-center gap-4 overflow-y-auto md:w-auto lg:flex-row-reverse">
       <CenteredSurfaceCard title="Sign in">
         <LoginForm />
       </CenteredSurfaceCard>
+      <WelcomeCard>
+        <GuestExploreButton />
+      </WelcomeCard>
     </div>
   );
 }
