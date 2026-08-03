@@ -10,6 +10,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 import { TripResponseDto } from '../trip/dto/trip-response.dto';
 
+import { CreateAssistantPackDto } from './dto/assistant-pack.dto';
 import { CreatePackDto } from './dto/create-pack.dto';
 import { PackDeleteImpactDto } from './dto/pack-delete-impact.dto';
 import {
@@ -77,6 +78,89 @@ export class PackService {
     const result = await this.prisma.pack.create({ data });
 
     return plainToInstance(PackResponseDto, result);
+  }
+
+  async createAssistantPack(
+    assistantPack: CreateAssistantPackDto,
+    userId: string,
+  ): Promise<PackResponseDto> {
+    const uuid = uuidv7();
+
+    return this.prisma.$transaction(async (tx) => {
+      const packName = assistantPack.packName;
+
+      const categoryNames = Array.from(
+        new Set(
+          assistantPack.items.filter((item) => item.category).map((item) => item.category.name),
+        ),
+      );
+
+      const existingCategories = categoryNames.length
+        ? await tx.category.findMany({
+            where: { userId, name: { in: categoryNames } },
+          })
+        : [];
+
+      const categoryMap = new Map<string, { id: string; name: string; colorTheme: string }>();
+      for (const existing of existingCategories) {
+        categoryMap.set(existing.name, existing);
+      }
+
+      const categoriesToCreate: { id: string; name: string; colorTheme: string }[] = [];
+      for (const item of assistantPack.items) {
+        if (item.category && !categoryMap.has(item.category.name)) {
+          const newCategory = { id: uuidv7(), ...item.category };
+          categoryMap.set(newCategory.name, newCategory);
+          categoriesToCreate.push(newCategory);
+        }
+      }
+
+      if (categoriesToCreate.length > 0) {
+        await tx.category.createMany({
+          data: categoriesToCreate.map((category) => ({
+            ...category,
+            userId,
+          })),
+        });
+      }
+
+      const preparedItems = assistantPack.items.map((sourceItem) => ({
+        id: uuidv7(),
+        name: sourceItem.name,
+        description: sourceItem.note,
+        userId,
+        categoryId: sourceItem.category
+          ? (categoryMap.get(sourceItem.category.name)?.id ?? null)
+          : null,
+        quantity: sourceItem.quantity ?? 0,
+      }));
+
+      await tx.item.createManyAndReturn({
+        data: preparedItems.map(({ quantity: _quantity, ...item }) => item),
+        include: { category: true },
+      });
+
+      const data: Prisma.PackCreateInput = {
+        name: packName,
+        id: uuid,
+        userId: userId,
+      };
+
+      const result = await tx.pack.create({ data });
+
+      await tx.itemPack.createMany({
+        data: preparedItems
+          .map((item) => ({
+            id: uuidv7(),
+            packId: data.id,
+            itemId: item.id,
+            quantity: item.quantity,
+          }))
+          .filter((item) => item.quantity > 0),
+      });
+
+      return plainToInstance(PackResponseDto, result);
+    });
   }
 
   async updatePack(id: string, pack: UpdatePackDto, userId: string): Promise<PackResponseDto> {

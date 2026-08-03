@@ -1,8 +1,27 @@
 import { GoogleGenAI, Type } from '@google/genai';
 
+import { handleApiResponse } from '@/lib/api-handlers';
+import { getProductClient } from '@/lib/clients/product-client';
+
+import { Pack } from '../collection/types';
+
 import { comfortOptions, luggageConstraintsOptions } from './constants';
-import { assistantPackingListSchema } from './schema';
-import { AssistantFormType, AssistantPackingList } from './types';
+import { generatedSchema } from './schema';
+import { AssistantFormType, CreateAssistantPackBody, GeneratedPackingList } from './types';
+
+// -------------------------------
+// Create functions
+// -------------------------------
+
+export async function createAssistantPack(body: CreateAssistantPackBody): Promise<Pack> {
+  const productClient = await getProductClient();
+  const { data, error, response } = await productClient.POST('/pack/assistant', { body });
+  return handleApiResponse(data, error, response);
+}
+
+// -------------------------------
+// AI Pack generation
+// -------------------------------
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -60,7 +79,7 @@ function buildPrompt(payload: AssistantFormType): string {
         Group items into logical categories (clothing, toiletries, electronics, documents, etc). Scale quantities for the number of people, trip length, and laundry access.`;
 }
 
-export async function fetchPackingList(payload: AssistantFormType): Promise<AssistantPackingList> {
+export async function fetchPackingList(payload: AssistantFormType): Promise<GeneratedPackingList> {
   const response = await ai.models.generateContent({
     model: 'gemini-3.5-flash-lite',
     contents: buildPrompt(payload),
@@ -72,5 +91,5 @@ export async function fetchPackingList(payload: AssistantFormType): Promise<Assi
 
   const raw = JSON.parse(response.text ?? '{}');
 
-  return assistantPackingListSchema.parse(raw);
+  return generatedSchema.parse(raw);
 }

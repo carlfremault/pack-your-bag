@@ -1,3 +1,5 @@
+import { schemas } from '@repo/product-client';
+
 import z from 'zod';
 
 export const assistantFormSchema = z.object({
@@ -14,7 +16,7 @@ export const assistantFormSchema = z.object({
   remarks: z.string(),
 });
 
-export const assistantPackingListSchema = z.object({
+export const generatedSchema = z.object({
   categories: z.array(
     z.object({
       name: z.string(),
@@ -28,3 +30,5 @@ export const assistantPackingListSchema = z.object({
     }),
   ),
 });
+
+export const createAssistantPackSchema = schemas.CreateAssistantPackDto;
