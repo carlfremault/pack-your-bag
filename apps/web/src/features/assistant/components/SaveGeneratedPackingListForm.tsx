@@ -1,10 +1,15 @@
+import toast from 'react-hot-toast';
+import { redirect } from 'next/navigation';
+
 import { NAME_MAX_LENGTH } from '@repo/constants';
 import { Button, SubmitButton } from '@repo/react-common/button';
 import { Input } from '@repo/react-common/input';
 
+import { Pack } from '@/features/collection/types';
 import { useFormState } from '@/hooks/useFormState';
 
-import { AssistantPackingList } from '../types';
+import { useCreateGeneratedPack } from '../queries';
+import { CreateAssistantPackBody } from '../types';
 
 type SaveGeneratedPackingListFormErrors = {
   name: string;
@@ -15,17 +20,24 @@ const SAVE_GENERATED_PACKING_LIST_FORM_FIELDS: (keyof SaveGeneratedPackingListFo
 ];
 
 type SaveGeneratedPackingListFormProps = {
-  packingList: AssistantPackingList;
+  packingList: CreateAssistantPackBody['items'];
   resetForm: () => void;
 };
 
 export default function SaveGeneratedPackingListForm(props: SaveGeneratedPackingListFormProps) {
   const { packingList, resetForm } = props;
 
-  const isPending = false;
+  const { mutate, isPending } = useCreateGeneratedPack();
 
   const { formValues, fieldErrors, setFieldErrors, handleFieldChange, handleReset, handleError } =
     useFormState(getInitialFormValues(), SAVE_GENERATED_PACKING_LIST_FORM_FIELDS);
+
+  const handleSuccess = (data: Pack) => {
+    setFieldErrors({});
+    resetForm();
+    toast.success('Pack created successfully.');
+    redirect(`/pack/${data.id}`);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,13 +49,14 @@ export default function SaveGeneratedPackingListForm(props: SaveGeneratedPacking
     }
 
     const payload = {
-      name: trimmedName,
-      packingList: packingList,
+      packName: trimmedName,
+      items: packingList,
     };
 
-    console.log('submit', payload);
-    // TODO: save packing list, onSuccess callback to setFieldErrors({}) and redirect to the pack + show a toast ({ onSuccess: handleSuccess, onError: handleError },)
-    // Also take care of hardcoded isPending state
+    mutate(payload, {
+      onSuccess: (data) => handleSuccess(data),
+      onError: handleError,
+    });
   };
 
   const handleResetForm = () => {

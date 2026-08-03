@@ -1,13 +1,28 @@
+import type { RequestBody } from '@repo/product-client';
+
 import z from 'zod';
 
-import { assistantFormSchema, assistantPackingListSchema } from './schema';
+import { assistantFormSchema } from './schema';
+
+export type CreateAssistantPackBody = RequestBody<'/pack/assistant', 'post'>;
 
 export type AssistantFormType = z.infer<typeof assistantFormSchema>;
-export type AssistantPackingList = z.infer<typeof assistantPackingListSchema>;
 
-export type AssistantItemForDisplay = {
+export type AssistantItem = {
   name: string;
-  category: { name: string; colorTheme: string } | null;
   quantity: number;
   note?: string;
+};
+
+export type AssistantPackingCategory = {
+  name: string;
+  items: AssistantItem[];
+};
+
+export type GeneratedPackingList = {
+  categories: AssistantPackingCategory[];
+};
+
+export type AssistantItemForDisplay = AssistantItem & {
+  category: { name: string; colorTheme: string } | null;
 };

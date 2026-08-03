@@ -22,7 +22,7 @@ import {
   transportationOptions,
 } from '../constants';
 import { useAllAIAssistantPackingLists } from '../queries';
-import { AssistantPackingList } from '../types';
+import { GeneratedPackingList } from '../types';
 
 type AssistantFormErrors = {
   destination?: string;
@@ -53,7 +53,7 @@ const ASSISTANT_FORM_FIELDS: (keyof AssistantFormErrors)[] = [
 ];
 
 type AssistantFormProps = {
-  setGeneratedPackingList: (value: AssistantPackingList | null) => void;
+  setGeneratedPackingList: (value: GeneratedPackingList | null) => void;
 };
 
 export default function AssistantForm(props: AssistantFormProps) {
