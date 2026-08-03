@@ -9,6 +9,8 @@ import { comfortOptions, luggageConstraintsOptions } from './constants';
 import { generatedSchema } from './schema';
 import { AssistantFormType, CreateAssistantPackBody, GeneratedPackingList } from './types';
 
+import 'server-only';
+
 // -------------------------------
 // Create functions
 // -------------------------------

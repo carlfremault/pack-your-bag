@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = await fetchPackingList(body);
+    const data = await fetchPackingList(parsedBody.data);
 
     return NextResponse.json({ data }, { status: 201 });
   });
