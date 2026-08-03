@@ -12,7 +12,7 @@ export function MobileBottomNav(props: MobileBottomNavProps) {
   const { tabs, activeTabId, linkAs: LinkComponent = 'a' } = props;
 
   const tabClassName =
-    'inline-flex h-11 w-fit cursor-pointer flex-col items-center justify-center px-5 text-base font-medium tracking-wide rounded-md transition-[filter,transform,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2';
+    'inline-flex h-11 cursor-pointer flex-col items-center justify-center flex-1 text-base font-medium tracking-wide rounded-md transition-[filter,transform,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2';
   const activeClassName = 'text-primary ring-primary-ring hover:bg-primary/10';
   const inactiveClassName = 'text-info ring-info-ring hover:bg-info/10';
 
