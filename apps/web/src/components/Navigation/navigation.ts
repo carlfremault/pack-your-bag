@@ -1,5 +1,5 @@
 import { IoShirt } from 'react-icons/io5';
-import { MdHiking, MdOutlineSettings, MdShoppingBag } from 'react-icons/md';
+import { MdAutoAwesome, MdHiking, MdOutlineSettings, MdShoppingBag } from 'react-icons/md';
 
 import type { NavItem } from '@repo/react-common/navigation';
 
@@ -7,6 +7,7 @@ export const navTabs: NavItem[] = [
   { id: 'items', label: 'Items', icon: IoShirt, href: '/items' },
   { id: 'collections', label: 'Collections', icon: MdShoppingBag, href: '/collections' },
   { id: 'trips', label: 'Trips', icon: MdHiking, href: '/trip' },
+  { id: 'assistant', label: 'Assistant', icon: MdAutoAwesome, href: '/assistant' },
 ];
 
 export const settingsLink: NavItem = {
