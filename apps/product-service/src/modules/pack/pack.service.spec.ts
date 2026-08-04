@@ -429,7 +429,7 @@ describe('PackService', () => {
       mockPrismaService.pack.findUnique.mockResolvedValue(storedPack);
       mockPrismaService.pack.create.mockResolvedValue({ ...storedPack, id: clonedPackId });
       mockPrismaService.itemPack.findMany.mockResolvedValue([
-        { id: 'ip-1', quantity: 2, itemId: expect.any(String) as string, packId: originalId },
+        { id: 'ip-1', quantity: 2, itemId: 'item-1', packId: originalId },
         { id: 'ip-2', quantity: 3, itemId: 'item-2', packId: originalId },
       ]);
       mockPrismaService.listPack.findMany.mockResolvedValue([]);
