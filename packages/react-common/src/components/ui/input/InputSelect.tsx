@@ -1,8 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react';
 import { MdClose, MdExpandMore } from 'react-icons/md';
 
 import classNames from 'classnames';
 
+import { useInputSelect } from './hooks/useInputSelect';
 import {
   inputFieldClassName,
   inputLabelClassName,
@@ -42,39 +42,20 @@ export function InputSelect<T = string>(props: InputSelectProps<T>) {
     clearValue = '' as T,
   } = props;
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const errorId = useId();
-  const listboxId = useId();
-  const buttonId = useId();
-  const optionIdPrefix = useId();
-
+  const {
+    isOpen,
+    setIsOpen,
+    focusedIndex,
+    setFocusedIndex,
+    wrapperRef,
+    buttonRef,
+    errorId,
+    listboxId,
+    buttonId,
+    optionIdPrefix,
+    close,
+  } = useInputSelect();
   const selectedOption = options.find((o) => o.value === value);
-
-  const close = () => {
-    setIsOpen(false);
-    setFocusedIndex(-1);
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handlePointerDown = (e: PointerEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        close();
-      }
-    };
-    document.addEventListener('pointerdown', handlePointerDown, { capture: true });
-    return () => document.removeEventListener('pointerdown', handlePointerDown, { capture: true });
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen && focusedIndex >= 0) {
-      const focusedElement = document.getElementById(`${optionIdPrefix}-${focusedIndex}`);
-      focusedElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-  }, [isOpen, focusedIndex, optionIdPrefix]);
 
   const handleSelect = (optionValue: T) => {
     onChange(optionValue);

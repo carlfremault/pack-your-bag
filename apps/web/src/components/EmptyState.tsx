@@ -3,10 +3,10 @@ import { NoResults } from '@repo/react-common/utils';
 interface EmptyStateProps {
   message: string;
   suggestion: string;
-  hasActiveFilters: boolean;
+  hasActiveFilters?: boolean;
 }
 
-export function EmptyState({ message, suggestion, hasActiveFilters }: EmptyStateProps) {
+export function EmptyState({ message, suggestion, hasActiveFilters = false }: EmptyStateProps) {
   return (
     <NoResults>
       <p>{message}</p>

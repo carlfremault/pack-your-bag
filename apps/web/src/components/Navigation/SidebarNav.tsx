@@ -1,5 +1,10 @@
 import { IoShirtOutline } from 'react-icons/io5';
-import { MdHiking, MdOutlineSettings, MdOutlineShoppingBag } from 'react-icons/md';
+import {
+  MdHiking,
+  MdOutlineAutoAwesome,
+  MdOutlineSettings,
+  MdOutlineShoppingBag,
+} from 'react-icons/md';
 
 import ActionNavLinks from './ActionNavLinks';
 
@@ -16,6 +21,7 @@ export function SidebarNav(props: SidebarNavProps) {
     pathname.startsWith('/pack');
   const tripsView = pathname.startsWith('/trip');
   const settingsView = pathname.startsWith('/settings');
+  const aiAssistantView = pathname.startsWith('/assistant');
 
   let icon: React.ReactNode;
   if (collectionsView) {
@@ -24,6 +30,8 @@ export function SidebarNav(props: SidebarNavProps) {
     icon = <MdHiking size={64} className="text-primary" aria-hidden="true" />;
   } else if (settingsView) {
     icon = <MdOutlineSettings size={64} className="text-primary" aria-hidden="true" />;
+  } else if (aiAssistantView) {
+    icon = <MdOutlineAutoAwesome size={64} className="text-primary" aria-hidden="true" />;
   } else {
     icon = <IoShirtOutline size={64} className="text-primary" aria-hidden="true" />;
   }

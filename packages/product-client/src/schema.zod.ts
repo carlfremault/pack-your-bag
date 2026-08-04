@@ -185,6 +185,17 @@ export const UpdatePackDto = z
   })
   .partial()
   .passthrough();
+export const AssistantPackItemDto = z
+  .object({
+    name: z.string().min(1).max(128),
+    quantity: z.number(),
+    note: z.string().optional(),
+    category: CreateCategoryDto,
+  })
+  .passthrough();
+export const CreateAssistantPackDto = z
+  .object({ packName: z.string().min(1).max(128), items: z.array(AssistantPackItemDto) })
+  .passthrough();
 export const ClonePackDto = z.object({ newName: z.string().min(1).max(128) }).passthrough();
 export const TripSummaryResponseDto = z
   .object({

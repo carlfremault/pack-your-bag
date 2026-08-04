@@ -4,14 +4,14 @@ import { useState } from 'react';
 
 import { getFieldErrorsFromHttpError } from '@/utils/getFieldErrors';
 
-export function useFormState<TValues extends Record<string, string>>(
+export function useFormState<TValues extends Record<string, string | string[]>>(
   initialValues: TValues,
   fieldNames: (keyof TValues & string)[],
 ) {
   const [formValues, setFormValues] = useState<TValues>(initialValues);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof TValues, string>>>({});
 
-  const handleFieldChange = (fieldName: keyof TValues & string, value: string) => {
+  const handleFieldChange = <K extends keyof TValues & string>(fieldName: K, value: TValues[K]) => {
     setFormValues((current) => ({ ...current, [fieldName]: value }));
     setFieldErrors((current) => {
       if (!current[fieldName]) return current;
