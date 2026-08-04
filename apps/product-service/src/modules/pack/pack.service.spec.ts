@@ -28,6 +28,13 @@ describe('PackService', () => {
   let prisma: PrismaService;
 
   const mockPrismaService = {
+    category: {
+      createMany: vi.fn(),
+      findMany: vi.fn(),
+    },
+    item: {
+      createManyAndReturn: vi.fn(),
+    },
     pack: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
@@ -206,6 +213,103 @@ describe('PackService', () => {
       });
       expect(capturedData.id).toBeDefined();
       expect(typeof capturedData.id).toBe('string');
+    });
+  });
+
+  describe('createAssistantPack', () => {
+    it('should create a pack with items and lists', async () => {
+      const userId = 'user-1';
+      const assistantPack = {
+        packName: 'Test Pack',
+        items: [
+          { name: 'Item 1', quantity: 2, category: { name: 'Category 1', colorTheme: 'slate' } },
+          { name: 'Item 2', quantity: 3, category: { name: 'Category 2', colorTheme: 'slate' } },
+        ],
+      };
+      let capturedData: Record<string, unknown> = {};
+      mockPrismaService.pack.create.mockImplementation(
+        (args: { data: Record<string, unknown> }) => {
+          capturedData = args.data;
+          return Promise.resolve({ id: capturedData.id, ...assistantPack, userId });
+        },
+      );
+      mockPrismaService.item.createManyAndReturn.mockResolvedValue([
+        { id: 'item-1', name: 'Item 1', description: null, userId, categoryId: 'category-1' },
+        { id: 'item-2', name: 'Item 2', description: null, userId, categoryId: 'category-2' },
+      ]);
+      mockPrismaService.category.createMany.mockResolvedValue([
+        { id: 'category-1', name: 'Category 1', colorTheme: 'slate', userId },
+        { id: 'category-2', name: 'Category 2', colorTheme: 'slate', userId },
+      ]);
+      mockPrismaService.category.findMany.mockResolvedValue([]);
+      mockPrismaService.itemPack.createMany.mockResolvedValue([
+        { id: 'ip-1', packId: 'pack-1', itemId: 'item-1', quantity: 2 },
+        { id: 'ip-2', packId: 'pack-1', itemId: 'item-2', quantity: 3 },
+      ]);
+
+      await service.createAssistantPack(assistantPack, userId);
+
+      expect(capturedData).toMatchObject({
+        name: 'Test Pack',
+        userId: 'user-1',
+      });
+      expect(capturedData.id).toBeDefined();
+      expect(typeof capturedData.id).toBe('string');
+
+      expect(mockPrismaService.pack.create).toHaveBeenCalledWith({
+        data: {
+          name: 'Test Pack',
+          userId: 'user-1',
+          id: expect.any(String) as string,
+        },
+      });
+
+      expect(mockPrismaService.category.findMany).toHaveBeenCalledWith({
+        where: { userId, name: { in: ['Category 1', 'Category 2'] } },
+      });
+
+      expect(mockPrismaService.category.createMany).toHaveBeenCalledWith({
+        data: [
+          { id: expect.any(String) as string, name: 'Category 1', colorTheme: 'slate', userId },
+          { id: expect.any(String) as string, name: 'Category 2', colorTheme: 'slate', userId },
+        ],
+      });
+
+      expect(mockPrismaService.item.createManyAndReturn).toHaveBeenCalledWith({
+        data: [
+          {
+            id: expect.any(String) as string,
+            name: 'Item 1',
+            description: undefined,
+            userId,
+            categoryId: expect.any(String) as string,
+          },
+          {
+            id: expect.any(String) as string,
+            name: 'Item 2',
+            description: undefined,
+            userId,
+            categoryId: expect.any(String) as string,
+          },
+        ],
+        include: { category: true },
+      });
+      expect(mockPrismaService.itemPack.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            id: expect.any(String) as string,
+            packId: expect.any(String) as string,
+            itemId: expect.any(String) as string,
+            quantity: 2,
+          },
+          {
+            id: expect.any(String) as string,
+            packId: expect.any(String) as string,
+            itemId: expect.any(String) as string,
+            quantity: 3,
+          },
+        ],
+      });
     });
   });
 

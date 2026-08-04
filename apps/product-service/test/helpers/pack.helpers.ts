@@ -3,6 +3,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
+import { CreateAssistantPackDto } from '@/modules/pack/dto/assistant-pack.dto';
 import { ClonePackDto } from '@/modules/pack/dto/clone-pack.dto';
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
 import { PackDeleteImpactDto } from '@/modules/pack/dto/pack-delete-impact.dto';
@@ -23,6 +24,16 @@ export class PackHelpers {
     };
   }
 
+  get defaultAssistantPackDto() {
+    return {
+      packName: 'Assistant Test Pack',
+      items: [
+        { name: 'Item 1', quantity: 2, category: { name: 'Category 1', colorTheme: 'slate' } },
+        { name: 'Item 2', quantity: 3, category: { name: 'Category 2', colorTheme: 'slate' } },
+      ],
+    };
+  }
+
   async createPack(options: {
     payload: Partial<CreatePackDto> | null;
     accessToken: string;
@@ -34,6 +45,24 @@ export class PackHelpers {
 
     const req = request(this.app.getHttpServer())
       .post('/pack')
+      .send(payload ?? undefined) // For testing invalid payloads
+      .set('Authorization', `Bearer ${accessToken}`)
+      .set('x-bff-secret', this.bffSecret);
+
+    return req.expect(expectedStatus);
+  }
+
+  async createAssistantPack(options: {
+    payload: Partial<CreateAssistantPackDto> | null;
+    accessToken: string;
+    expectedStatus?: number;
+  }): Promise<{
+    body: PackResponseDto;
+  }> {
+    const { payload, accessToken, expectedStatus = HttpStatus.CREATED } = options;
+
+    const req = request(this.app.getHttpServer())
+      .post('/pack/assistant')
       .send(payload ?? undefined) // For testing invalid payloads
       .set('Authorization', `Bearer ${accessToken}`)
       .set('x-bff-secret', this.bffSecret);

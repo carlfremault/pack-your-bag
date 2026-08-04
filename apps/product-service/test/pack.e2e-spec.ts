@@ -3,7 +3,10 @@ import { HttpStatus } from '@nestjs/common';
 import { v7 as uuidv7 } from 'uuid';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { ItemResponseDto, ItemWithQuantityResponseDto } from '@/common/dto/item-response.dto';
+import { CategoryResponseDto } from '@/modules/category/dto/category-response.dto';
 import { ListResponseDto } from '@/modules/list/dto/list-response.dto';
+import { CreateAssistantPackDto } from '@/modules/pack/dto/assistant-pack.dto';
 import { ClonePackDto } from '@/modules/pack/dto/clone-pack.dto';
 import { CreatePackDto } from '@/modules/pack/dto/create-pack.dto';
 import { PackBaseResponseDto } from '@/modules/pack/dto/pack-response.dto';
@@ -26,6 +29,7 @@ describe('Pack (e2e)', () => {
   let ctx: IntegrationTestContext;
   let validAccessToken: string;
   let packDto: CreatePackDto;
+  let assistantPackDto: CreateAssistantPackDto;
 
   const userId = uuidv7();
   const packId = uuidv7(); // This is the pack id that will be used in "not found" tests
@@ -34,6 +38,7 @@ describe('Pack (e2e)', () => {
     ctx = await createIntegrationContext();
     validAccessToken = ctx.authHelpers.getValidAccessToken(userId);
     packDto = ctx.packHelpers.defaultPackDto;
+    assistantPackDto = ctx.packHelpers.defaultAssistantPackDto;
   });
 
   beforeEach(async () => {
@@ -88,6 +93,212 @@ describe('Pack (e2e)', () => {
     it('should return 400 if the payload is missing required fields', async () => {
       const { body } = await ctx.packHelpers.createPack({
         payload: { description: 'Test Description', colorTheme: 'slate' },
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({
+        error: 'Bad Request',
+      });
+    });
+  });
+
+  describe('Pack - /pack/assistant (POST)', () => {
+    it('should create a pack', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: assistantPackDto,
+        accessToken: validAccessToken,
+      });
+
+      expect(body).toMatchObject({
+        id: expect.any(String) as string,
+        name: assistantPackDto.packName,
+        createdAt: isoDateMatcher,
+        updatedAt: isoDateMatcher,
+      });
+    });
+
+    it('should create items and attach them to the pack with the given quantity', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: assistantPackDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body: createdPack } = await ctx.packHelpers.getPack({
+        id: body.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(createdPack.items).toHaveLength(2);
+      expect(createdPack.items).toContainEqual(
+        expect.objectContaining({
+          quantity: 2,
+          item: expect.objectContaining({ name: 'Item 1' }) as Record<string, unknown>,
+        }),
+      );
+      expect(createdPack.items).toContainEqual(
+        expect.objectContaining({
+          quantity: 3,
+          item: expect.objectContaining({ name: 'Item 2' }) as Record<string, unknown>,
+        }),
+      );
+    });
+
+    it('should create a category for each item that has one', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: assistantPackDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body: createdPack } = await ctx.packHelpers.getPack({
+        id: body.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(createdPack.items).toContainEqual(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            category: expect.objectContaining({
+              name: 'category 1',
+              colorTheme: 'slate',
+            }) as CategoryResponseDto,
+          }) as ItemResponseDto,
+        }),
+      );
+      expect(createdPack.items).toContainEqual(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            category: expect.objectContaining({
+              name: 'category 2',
+              colorTheme: 'slate',
+            }) as CategoryResponseDto,
+          }) as ItemResponseDto,
+        }),
+      );
+
+      const categories = await ctx.prisma.category.findMany({ where: { userId } });
+      expect(categories).toHaveLength(2);
+    });
+
+    it('should reuse an existing category instead of creating a duplicate', async () => {
+      const existingCategory = await ctx.prisma.category.create({
+        data: { id: uuidv7(), name: 'category 1', colorTheme: 'teal', userId },
+      });
+
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: assistantPackDto,
+        accessToken: validAccessToken,
+      });
+
+      const { body: createdPack } = await ctx.packHelpers.getPack({
+        id: body.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(createdPack.items).toContainEqual(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            category: expect.objectContaining({
+              id: existingCategory.id,
+              name: 'category 1',
+              colorTheme: 'teal',
+            }) as CategoryResponseDto,
+          }) as ItemResponseDto,
+        }),
+      );
+
+      const categories = await ctx.prisma.category.findMany({
+        where: { userId, name: 'category 1' },
+      });
+      expect(categories).toHaveLength(1);
+    });
+
+    it('should only create one category when multiple items share the same category name', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: {
+          packName: 'Shared Category Pack',
+          items: [
+            { name: 'Item A', quantity: 1, category: { name: 'Shared', colorTheme: 'slate' } },
+            { name: 'Item B', quantity: 1, category: { name: 'Shared', colorTheme: 'slate' } },
+          ],
+        },
+        accessToken: validAccessToken,
+      });
+
+      const { body: createdPack } = await ctx.packHelpers.getPack({
+        id: body.id,
+        accessToken: validAccessToken,
+      });
+
+      const categories = await ctx.prisma.category.findMany({
+        where: { userId, name: 'shared' },
+      });
+      expect(categories).toHaveLength(1);
+
+      const [itemA, itemB] = createdPack.items as ItemWithQuantityResponseDto[];
+      expect(itemA).toBeDefined();
+      expect(itemB).toBeDefined();
+      expect(itemA!.item.category?.id).toBe(itemB!.item.category?.id);
+    });
+
+    it('should store the item note as its description', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: {
+          packName: 'Note Pack',
+          items: [
+            {
+              name: 'Item With Note',
+              quantity: 1,
+              note: 'Pack this last',
+              category: { name: 'Category', colorTheme: 'slate' },
+            },
+          ],
+        },
+        accessToken: validAccessToken,
+      });
+
+      const { body: createdPack } = await ctx.packHelpers.getPack({
+        id: body.id,
+        accessToken: validAccessToken,
+      });
+
+      expect(createdPack.items).toContainEqual(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            name: 'Item With Note',
+            description: 'Pack this last',
+          }) as Record<string, unknown>,
+        }),
+      );
+    });
+
+    it('should return 401 if the user is not authenticated', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: assistantPackDto,
+        accessToken: '',
+        expectedStatus: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(body).toMatchObject({
+        error: 'Unauthorized',
+      });
+    });
+
+    it('should return 400 if the payload is invalid', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: { packName: 123 } as unknown as Partial<CreateAssistantPackDto>,
+        accessToken: validAccessToken,
+        expectedStatus: HttpStatus.BAD_REQUEST,
+      });
+
+      expect(body).toMatchObject({
+        error: 'Bad Request',
+      });
+    });
+
+    it('should return 400 if the payload is missing required fields', async () => {
+      const { body } = await ctx.packHelpers.createAssistantPack({
+        payload: {} as Partial<CreateAssistantPackDto>,
         accessToken: validAccessToken,
         expectedStatus: HttpStatus.BAD_REQUEST,
       });
