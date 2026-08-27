@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="flex w-full justify-center lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+    <div className="flex w-full flex-col justify-center overflow-y-auto">
       <h1 className="sr-only">AI Assistant</h1>
       <AssistantView />
     </div>
