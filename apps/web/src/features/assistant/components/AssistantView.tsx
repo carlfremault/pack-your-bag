@@ -54,7 +54,7 @@ export default function AssistantView() {
 
   if (!generatedPackingList)
     return (
-      <div className="flex w-full max-w-7xl flex-col gap-4 p-4">
+      <div className="flex w-full max-w-7xl flex-col gap-4 overflow-y-auto p-4">
         <AssistantForm setGeneratedPackingList={setGeneratedPackingList} />
         <div className="bg-surface border-primary-ring text-primary rounded-md border p-6 text-center text-sm">
           <EmptyState
@@ -86,7 +86,7 @@ export default function AssistantView() {
   });
 
   return (
-    <div className="flex w-full max-w-7xl flex-col gap-4 p-4">
+    <div className="flex w-full max-w-7xl flex-col gap-4 overflow-y-auto p-4">
       <SaveGeneratedPackingListForm
         packingList={formattedPackingList}
         resetForm={resetAssistantForm}

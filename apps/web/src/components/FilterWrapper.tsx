@@ -123,9 +123,9 @@ export function FilterWrapper({
               (!isFilterRowOpen || isTransitioning) && 'overflow-hidden',
             )}
           >
-            <div className="flex min-w-0 flex-col gap-4 pt-4 lg:contents lg:pt-0">
+            <div className="flex min-w-0 flex-col gap-4 pt-4 lg:flex-row lg:gap-4 lg:pt-0">
               {children}
-              <div className="flex gap-4 lg:contents">
+              <div className="flex gap-4">
                 <div className="min-w-0 flex-1">
                   <InputSelect
                     label="Sort by"

@@ -133,7 +133,6 @@ export default function AssistantForm(props: AssistantFormProps) {
                 if (patch.dateUntil !== undefined) handleFieldChange('dateUntil', patch.dateUntil);
               }}
               grow
-              className="md:flex-row"
             />
           </div>
           <InputMultiSelect
