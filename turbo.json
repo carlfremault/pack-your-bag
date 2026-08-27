@@ -133,6 +133,14 @@
       "persistent": true,
       "outputs": ["storybook-static/**"]
     },
+    "generate-dataset": {
+      "cache": false,
+      "env": ["GEMINI_API_KEY"]
+    },
+    "run-evals": {
+      "cache": false,
+      "env": ["GEMINI_API_KEY"]
+    },
     "transit": {
       "dependsOn": ["^transit"]
     }

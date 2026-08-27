@@ -1,0 +1,1043 @@
+[
+  {
+    "output": {
+      "categories": [
+        {
+          "name": "Clothing",
+          "items": [
+            {
+              "name": "Business suit",
+              "quantity": 1,
+              "note": "Wear on plane to save space"
+            },
+            {
+              "name": "Dress shirt",
+              "quantity": 2,
+              "note": "Wrinkle-resistant"
+            },
+            {
+              "name": "Ties",
+              "quantity": 2,
+              "note": "Compact"
+            },
+            {
+              "name": "Undershirts",
+              "quantity": 3,
+              "note": "Minimalist packing"
+            },
+            {
+              "name": "Dress socks",
+              "quantity": 3,
+              "note": "Pairs"
+            },
+            {
+              "name": "Underwear",
+              "quantity": 3,
+              "note": "Pairs"
+            },
+            {
+              "name": "Dress shoes",
+              "quantity": 1,
+              "note": "Wear on plane"
+            },
+            {
+              "name": "Light winter coat",
+              "quantity": 1,
+              "note": "For NYC November weather"
+            }
+          ]
+        },
+        {
+          "name": "Toiletries",
+          "items": [
+            {
+              "name": "Toothbrush",
+              "quantity": 1,
+              "note": "Travel size"
+            },
+            {
+              "name": "Toothpaste",
+              "quantity": 1,
+              "note": "Under 3.4 oz for carry-on"
+            },
+            {
+              "name": "Deodorant",
+              "quantity": 1,
+              "note": "Solid stick"
+            },
+            {
+              "name": "TSA-approved clear bag",
+              "quantity": 1,
+              "note": "For liquids"
+            }
+          ]
+        },
+        {
+          "name": "Electronics",
+          "items": [
+            {
+              "name": "Smartphone",
+              "quantity": 1,
+              "note": "With charger"
+            },
+            {
+              "name": "Laptop",
+              "quantity": 1,
+              "note": "For business meetings"
+            },
+            {
+              "name": "Laptop charger",
+              "quantity": 1,
+              "note": "Compact"
+            }
+          ]
+        },
+        {
+          "name": "Documents",
+          "items": [
+            {
+              "name": "ID / Driver's License",
+              "quantity": 1,
+              "note": "Required for flight"
+            },
+            {
+              "name": "Boarding pass",
+              "quantity": 1,
+              "note": "Digital or printed"
+            },
+            {
+              "name": "Hotel reservation",
+              "quantity": 1,
+              "note": "Digital copy"
+            },
+            {
+              "name": "Business cards",
+              "quantity": 20,
+              "note": "For networking"
+            }
+          ]
+        }
+      ]
+    },
+    "testCase": {
+      "promptInputs": {
+        "destination": "New York City, USA",
+        "activity": [
+          "business"
+        ],
+        "comfort": "minimalist",
+        "transportation": [
+          "plane"
+        ],
+        "accomodationType": [
+          "hotel"
+        ],
+        "luggageConstraints": "Carry-on only",
+        "laundryAccess": "No",
+        "dateFrom": "2023-11-10",
+        "dateUntil": "2023-11-12",
+        "nbPersons": "1",
+        "remarks": "Must adhere strictly to carry-on liquid limits and airline restrictions for business attire."
+      },
+      "solutionCriteria": [
+        "Includes essential business professional clothing suitable for a weekend trip without exceeding carry-on capacity.",
+        "Accounts for the lack of laundry access by providing sufficient undergarments and wrinkle-resistant items.",
+        "Adheres to airplane carry-on constraints including liquid limits for toiletries."
+      ],
+      "taskDescription": "Create a packing list for a trip",
+      "scenario": "Testing a minimalist, carry-on only weekend business trip by plane with no laundry access and strict luggage constraints"
+    },
+    "score": 10,
+    "reasoning": "The AI-generated solution thoroughly meets all criteria. It provides essential business professional clothing for a short 3-day trip, accounts for the lack of laundry access with an adequate supply of undergarments and wrinkle-resistant items, and correctly adheres to airplane carry-on and liquid constraints."
+  },
+  {
+    "output": {
+      "categories": [
+        {
+          "name": "Clothing",
+          "items": [
+            {
+              "name": "High-end ski jacket",
+              "quantity": 4,
+              "note": "Insulated and waterproof for winter sports"
+            },
+            {
+              "name": "Thermal base layers",
+              "quantity": 12,
+              "note": "Three per person for warmth during winter sports"
+            },
+            {
+              "name": "Formal evening wear",
+              "quantity": 8,
+              "note": "For upscale hotel dining"
+            },
+            {
+              "name": "Cashmere sweaters",
+              "quantity": 8,
+              "note": "Two per person for relaxing indoors"
+            },
+            {
+              "name": "Waterproof snow pants",
+              "quantity": 4,
+              "note": "For skiing and snowboarding"
+            },
+            {
+              "name": "Wool socks",
+              "quantity": 16,
+              "note": "Four pairs per person"
+            }
+          ]
+        },
+        {
+          "name": "Footwear",
+          "items": [
+            {
+              "name": "Luxury winter snow boots",
+              "quantity": 4,
+              "note": "Insulated and stylish for alpine walking"
+            },
+            {
+              "name": "Formal dress shoes",
+              "quantity": 4,
+              "note": "To match evening attire"
+            },
+            {
+              "name": "Indoor lounge slippers",
+              "quantity": 4,
+              "note": "For hotel relaxation"
+            }
+          ]
+        },
+        {
+          "name": "Accessories",
+          "items": [
+            {
+              "name": "Designer ski goggles",
+              "quantity": 4,
+              "note": "UV protection for bright mountain sun"
+            },
+            {
+              "name": "Cashmere scarves and gloves",
+              "quantity": 8,
+              "note": "Warmth for the whole family"
+            },
+            {
+              "name": "UV protection sunglasses",
+              "quantity": 4,
+              "note": "Essential for snow glare"
+            }
+          ]
+        },
+        {
+          "name": "Toiletries",
+          "items": [
+            {
+              "name": "High-SPF sunscreen and lip balm",
+              "quantity": 2,
+              "note": "Mountain sun protection"
+            },
+            {
+              "name": "Hydrating skincare products",
+              "quantity": 4,
+              "note": "To combat dry alpine air"
+            },
+            {
+              "name": "Personal medications and first aid",
+              "quantity": 1,
+              "note": "Family health essentials"
+            }
+          ]
+        },
+        {
+          "name": "Documents",
+          "items": [
+            {
+              "name": "Passports and visas",
+              "quantity": 4,
+              "note": "Required for international travel"
+            },
+            {
+              "name": "Train and flight tickets",
+              "quantity": 4,
+              "note": "Digital or printed copies for transit"
+            },
+            {
+              "name": "Hotel and ski resort reservations",
+              "quantity": 1,
+              "note": "Confirmation paperwork"
+            },
+            {
+              "name": "Travel insurance documents",
+              "quantity": 1,
+              "note": "Covering winter sports and luxury travel"
+            }
+          ]
+        },
+        {
+          "name": "Electronics",
+          "items": [
+            {
+              "name": "Universal power adapters",
+              "quantity": 2,
+              "note": "For European outlets"
+            },
+            {
+              "name": "Smartphones and chargers",
+              "quantity": 4,
+              "note": "Family communication and navigation"
+            },
+            {
+              "name": "Portable power banks",
+              "quantity": 2,
+              "note": "Keep devices charged in cold weather"
+            }
+          ]
+        }
+      ]
+    },
+    "testCase": {
+      "promptInputs": {
+        "destination": "Swiss Alps",
+        "activity": [
+          "winterSports",
+          "relaxing"
+        ],
+        "comfort": "luxury",
+        "transportation": [
+          "plane",
+          "train",
+          "car"
+        ],
+        "accomodationType": [
+          "hotel"
+        ],
+        "luggageConstraints": "No restriction",
+        "laundryAccess": "Yes",
+        "dateFrom": "2024-12-20",
+        "dateUntil": "2024-12-27",
+        "nbPersons": "4",
+        "remarks": "Traveling with family including children, need high-end winter gear and formal evening attire for hotel dining."
+      },
+      "solutionCriteria": [
+        "Includes appropriate winter sports gear and warm clothing suitable for the Swiss Alps",
+        "Accounts for luxury comfort level and formal evening wear for hotel dining",
+        "Reflects family size and winter seasonal timing"
+      ],
+      "taskDescription": "Create a packing list for a trip",
+      "scenario": "Testing a luxury family winter sports vacation in the Swiss Alps staying in a hotel with multiple transport methods and no luggage limits"
+    },
+    "score": 10,
+    "reasoning": "The generated packing list thoroughly meets all criteria outlined in the prompt, including appropriate winter gear for the Swiss Alps, luxury considerations, formal evening attire, and correct scaling for a family of four during the winter season."
+  },
+  {
+    "output": {
+      "categories": [
+        {
+          "name": "Clothing",
+          "items": [
+            {
+              "name": "Base layer top",
+              "quantity": 3,
+              "note": "Merino wool"
+            },
+            {
+              "name": "Base layer bottom",
+              "quantity": 3,
+              "note": "Merino wool"
+            },
+            {
+              "name": "Insulating fleece jacket",
+              "quantity": 1,
+              "note": "Heavyweight"
+            },
+            {
+              "name": "Down jacket",
+              "quantity": 1,
+              "note": "Extreme cold weather rating"
+            },
+            {
+              "name": "Hard shell waterproof jacket",
+              "quantity": 1,
+              "note": "Windproof and waterproof"
+            },
+            {
+              "name": "Hard shell waterproof pants",
+              "quantity": 1,
+              "note": "Windproof and waterproof"
+            },
+            {
+              "name": "Hiking socks",
+              "quantity": 7,
+              "note": "Merino wool, thick"
+            },
+            {
+              "name": "Underwear",
+              "quantity": 7,
+              "note": "Quick-drying"
+            },
+            {
+              "name": "Winter mountaineering boots",
+              "quantity": 1,
+              "note": "Insulated and crampon-compatible"
+            },
+            {
+              "name": "Gaiters",
+              "quantity": 1,
+              "note": "For snow protection"
+            },
+            {
+              "name": "Balaclava",
+              "quantity": 1,
+              "note": "Windproof"
+            },
+            {
+              "name": "Insulated winter gloves",
+              "quantity": 2,
+              "note": "Waterproof and windproof"
+            },
+            {
+              "name": "Wool beanie",
+              "quantity": 2,
+              "note": "Warm headwear"
+            }
+          ]
+        },
+        {
+          "name": "Camping & Hiking Gear",
+          "items": [
+            {
+              "name": "4-season tent",
+              "quantity": 1,
+              "note": "Wind-resistant geodesic design"
+            },
+            {
+              "name": "Extreme cold sleeping bag",
+              "quantity": 1,
+              "note": "Rated to -20C or lower"
+            },
+            {
+              "name": "Insulated sleeping pad",
+              "quantity": 1,
+              "note": "High R-value for frozen ground"
+            },
+            {
+              "name": "Trekking poles",
+              "quantity": 2,
+              "note": "With snow baskets"
+            },
+            {
+              "name": "Liquid fuel stove",
+              "quantity": 1,
+              "note": "Performs well in sub-zero temps"
+            },
+            {
+              "name": "Fuel canisters",
+              "quantity": 4,
+              "note": "Appropriate for cold weather"
+            },
+            {
+              "name": "Cookset and spoon",
+              "quantity": 1,
+              "note": "Lightweight metal"
+            },
+            {
+              "name": "Headlamp",
+              "quantity": 1,
+              "note": "With extra lithium batteries"
+            },
+            {
+              "name": "Water purification system",
+              "quantity": 1,
+              "note": "Filters or tablets that do not freeze easily"
+            },
+            {
+              "name": "Insulated water bottles",
+              "quantity": 2,
+              "note": "Wide mouth to prevent freezing shut"
+            },
+            {
+              "name": "Multi-tool / Knife",
+              "quantity": 1,
+              "note": "General utility"
+            },
+            {
+              "name": "Snow stakes",
+              "quantity": 8,
+              "note": "For secure tent anchoring in high winds"
+            }
+          ]
+        },
+        {
+          "name": "Winter Sports Gear",
+          "items": [
+            {
+              "name": "Skis or snowshoes",
+              "quantity": 1,
+              "note": "Depending on specific route plan"
+            },
+            {
+              "name": "Avalanche beacon, probe, and shovel",
+              "quantity": 1,
+              "note": "Essential safety kit"
+            },
+            {
+              "name": "Snow goggles",
+              "quantity": 1,
+              "note": "Anti-fog and UV protection for high winds"
+            }
+          ]
+        },
+        {
+          "name": "Toiletries & First Aid",
+          "items": [
+            {
+              "name": "First aid kit",
+              "quantity": 1,
+              "note": "Including blister care and emergency blanket"
+            },
+            {
+              "name": "Sunscreen and lip balm",
+              "quantity": 1,
+              "note": "High SPF for snow glare"
+            },
+            {
+              "name": "Toothbrush and toothpaste",
+              "quantity": 1,
+              "note": "Travel size"
+            },
+            {
+              "name": "Biodegradable wet wipes",
+              "quantity": 2,
+              "note": "For hygiene when no shower access"
+            },
+            {
+              "name": "Personal medications",
+              "quantity": 1,
+              "note": "Sufficient for 15 days"
+            }
+          ]
+        },
+        {
+          "name": "Electronics",
+          "items": [
+            {
+              "name": "Smartphone",
+              "quantity": 1,
+              "note": "Loaded with offline maps"
+            },
+            {
+              "name": "Power bank",
+              "quantity": 2,
+              "note": "High capacity, kept warm in inner pockets"
+            },
+            {
+              "name": "GPS device or Satellite Messenger",
+              "quantity": 1,
+              "note": "For remote emergency communication"
+            }
+          ]
+        },
+        {
+          "name": "Documents & Money",
+          "items": [
+            {
+              "name": "Passport",
+              "quantity": 1,
+              "note": "Valid for duration of stay"
+            },
+            {
+              "name": "Travel insurance policy",
+              "quantity": 1,
+              "note": "Covering high-altitude remote rescue"
+            },
+            {
+              "name": "Cash",
+              "quantity": 1,
+              "note": "Local currency for remote areas"
+            },
+            {
+              "name": "Credit card",
+              "quantity": 1,
+              "note": "For transit and supplies"
+            }
+          ]
+        }
+      ]
+    },
+    "testCase": {
+      "promptInputs": {
+        "destination": "Patagonia",
+        "activity": [
+          "hiking",
+          "winterSports"
+        ],
+        "comfort": "minimalist",
+        "transportation": [
+          "plane",
+          "bus"
+        ],
+        "accomodationType": [
+          "wild camping"
+        ],
+        "luggageConstraints": "Backpack (multi-day capacity)",
+        "laundryAccess": "No",
+        "dateFrom": "2023-06-01",
+        "dateUntil": "2023-06-15",
+        "nbPersons": "1",
+        "remarks": "Sub-zero temperatures and high winds expected, need gear suitable for extreme winter wild camping."
+      },
+      "solutionCriteria": [
+        "Includes essential cold-weather layering and thermal gear suitable for Patagonia winters",
+        "Contains multi-day wild camping equipment adapted for backpack constraints",
+        "Accounts for the lack of laundry access by recommending appropriate quantities or quick-dry fabrics"
+      ],
+      "taskDescription": "Create a packing list for a trip",
+      "scenario": "Testing an extended backpacking and wild camping trip in Patagonia during winter with multi-day backpack constraints and no laundry access"
+    },
+    "score": 10,
+    "reasoning": "The generated packing list thoroughly addresses all the specified criteria, including extreme cold-weather gear for Patagonia, wild camping and winter sports equipment suitable for a multi-day backpack constraint, and practical accommodations for the lack of laundry access."
+  },
+  {
+    "output": {
+      "categories": [
+        {
+          "name": "Clothing",
+          "items": [
+            {
+              "name": "T-shirts and casual tops",
+              "quantity": 36,
+              "note": "6 per person for 10 days"
+            },
+            {
+              "name": "Shorts and casual bottoms",
+              "quantity": 24,
+              "note": "4 per person"
+            },
+            {
+              "name": "Swimsuits",
+              "quantity": 18,
+              "note": "3 per person for beach and water sports"
+            },
+            {
+              "name": "Lightweight dinner outfits",
+              "quantity": 18,
+              "note": "3 per person for resort dinners"
+            },
+            {
+              "name": "Underwear and socks",
+              "quantity": 72,
+              "note": "12 per person to account for no laundry access"
+            },
+            {
+              "name": "Sleepwear",
+              "quantity": 12,
+              "note": "2 per person"
+            },
+            {
+              "name": "Light jacket or cardigan",
+              "quantity": 6,
+              "note": "1 per person for air-conditioned indoor spaces"
+            }
+          ]
+        },
+        {
+          "name": "Footwear",
+          "items": [
+            {
+              "name": "Beach sandals or flip-flops",
+              "quantity": 6,
+              "note": "1 pair per person"
+            },
+            {
+              "name": "Walking sneakers",
+              "quantity": 6,
+              "note": "1 pair per person for sightseeing"
+            },
+            {
+              "name": "Nice sandals or casual shoes",
+              "quantity": 6,
+              "note": "1 pair per person for dining out"
+            }
+          ]
+        },
+        {
+          "name": "Beach and Water Sports",
+          "items": [
+            {
+              "name": "Beach towels",
+              "quantity": 6,
+              "note": "Resort may provide, but good to have backups"
+            },
+            {
+              "name": "Snorkel gear",
+              "quantity": 6,
+              "note": "Optional personal sets"
+            },
+            {
+              "name": "Dry bags",
+              "quantity": 2,
+              "note": "For water sports electronics and valuables"
+            },
+            {
+              "name": "Pool floats",
+              "quantity": 3,
+              "note": "Fun for the family"
+            }
+          ]
+        },
+        {
+          "name": "Toiletries and Sun Care",
+          "items": [
+            {
+              "name": "Sunscreen SPF 50",
+              "quantity": 4,
+              "note": "Reef-safe family size bottles"
+            },
+            {
+              "name": "After-sun aloe vera gel",
+              "quantity": 2,
+              "note": "For sunburn relief"
+            },
+            {
+              "name": "Shampoo and conditioner",
+              "quantity": 2,
+              "note": "Large bottles since driving"
+            },
+            {
+              "name": "Body wash and soap",
+              "quantity": 2,
+              "note": "Family size"
+            },
+            {
+              "name": "Toothbrushes and toothpaste",
+              "quantity": 6,
+              "note": "Personal items"
+            },
+            {
+              "name": "Hair brushes and combs",
+              "quantity": 2,
+              "note": "For group use"
+            },
+            {
+              "name": "Insect repellent",
+              "quantity": 2,
+              "note": "For evenings outdoors"
+            }
+          ]
+        },
+        {
+          "name": "Electronics",
+          "items": [
+            {
+              "name": "Smartphones and chargers",
+              "quantity": 6,
+              "note": "One per person"
+            },
+            {
+              "name": "Portable power banks",
+              "quantity": 3,
+              "note": "For long days out sightseeing"
+            },
+            {
+              "name": "Waterproof phone pouches",
+              "quantity": 6,
+              "note": "For beach and water sports"
+            },
+            {
+              "name": "Bluetooth portable speaker",
+              "quantity": 1,
+              "note": "For hotel room or beach relaxation"
+            }
+          ]
+        },
+        {
+          "name": "Documents and Money",
+          "items": [
+            {
+              "name": "Driver licenses and IDs",
+              "quantity": 6,
+              "note": "Required for adults and driving"
+            },
+            {
+              "name": "Hotel reservation details",
+              "quantity": 1,
+              "note": "Printed or digital copy"
+            },
+            {
+              "name": "Credit cards and cash",
+              "quantity": 3,
+              "note": "Distributed among adults"
+            },
+            {
+              "name": "Car insurance and registration",
+              "quantity": 1,
+              "note": "Mandatory for road trip"
+            }
+          ]
+        },
+        {
+          "name": "Health and First Aid",
+          "items": [
+            {
+              "name": "Pain relievers",
+              "quantity": 1,
+              "note": "Ibuprofen or Acetaminophen"
+            },
+            {
+              "name": "Bandages and antiseptic wipes",
+              "quantity": 1,
+              "note": "First aid kit for minor scrapes"
+            },
+            {
+              "name": "Motion sickness pills",
+              "quantity": 1,
+              "note": "For boat water sports"
+            },
+            {
+              "name": "Personal prescription medications",
+              "quantity": 6,
+              "note": "Enough for 10 days plus extra"
+            }
+          ]
+        }
+      ]
+    },
+    "testCase": {
+      "promptInputs": {
+        "destination": "Miami, Florida",
+        "activity": [
+          "relaxing",
+          "beach",
+          "waterSports",
+          "sightseeing"
+        ],
+        "comfort": "comfortable",
+        "transportation": [
+          "car"
+        ],
+        "accomodationType": [
+          "hotel"
+        ],
+        "luggageConstraints": "Checked bag",
+        "laundryAccess": "No",
+        "dateFrom": "2023-07-10",
+        "dateUntil": "2023-07-20",
+        "nbPersons": "6",
+        "remarks": "Staying at a beach resort with family."
+      },
+      "solutionCriteria": [
+        "Includes beach and water sports gear appropriate for a warm summer climate.",
+        "Accounts for a 10-day trip with checked bags and no laundry access by including sufficient clothing quantities.",
+        "Caters to a group of 6 people staying at a resort."
+      ],
+      "taskDescription": "Create a packing list for a trip",
+      "scenario": "Testing a relaxing beach holiday for a large group staying at a resort with multiple activities like water sports and sightseeing, traveling by car with checked bags"
+    },
+    "score": 10,
+    "reasoning": "The AI-generated solution successfully meets all mandatory and secondary criteria. It includes appropriate beach and water sports gear for the warm Miami climate, accounts for the 10-day trip with no laundry access by calculating sufficient clothing quantities for a checked bag, and accurately caters to a group of 6 people staying at a resort."
+  },
+  {
+    "output": {
+      "categories": [
+        {
+          "name": "Clothing",
+          "items": [
+            {
+              "name": "T-shirts and casual tops",
+              "quantity": 5,
+              "note": "For daily sightseeing"
+            },
+            {
+              "name": "Trousers/Jeans",
+              "quantity": 2,
+              "note": "Standard city wear"
+            },
+            {
+              "name": "Underwear",
+              "quantity": 6,
+              "note": "No laundry access"
+            },
+            {
+              "name": "Socks",
+              "quantity": 6,
+              "note": "Including dress socks"
+            },
+            {
+              "name": "Sweater or Cardigan",
+              "quantity": 2,
+              "note": "For cooler October weather"
+            },
+            {
+              "name": "Light jacket",
+              "quantity": 1,
+              "note": "Wear during transit"
+            },
+            {
+              "name": "Formal suit",
+              "quantity": 1,
+              "note": "For the evening wedding event"
+            },
+            {
+              "name": "Dress shirt",
+              "quantity": 1,
+              "note": "For the wedding"
+            },
+            {
+              "name": "Tie",
+              "quantity": 1,
+              "note": "For the wedding"
+            }
+          ]
+        },
+        {
+          "name": "Footwear",
+          "items": [
+            {
+              "name": "Walking shoes",
+              "quantity": 1,
+              "note": "Comfortable for city exploration"
+            },
+            {
+              "name": "Dress shoes",
+              "quantity": 1,
+              "note": "For the formal wedding event"
+            }
+          ]
+        },
+        {
+          "name": "Toiletries",
+          "items": [
+            {
+              "name": "Toothbrush and toothpaste",
+              "quantity": 1,
+              "note": "Travel size for carry-on"
+            },
+            {
+              "name": "Deodorant",
+              "quantity": 1,
+              "note": "Solid or travel size"
+            },
+            {
+              "name": "Shampoo and body wash",
+              "quantity": 1,
+              "note": "Travel sized containers"
+            },
+            {
+              "name": "Hairbrush",
+              "quantity": 1,
+              "note": "Compact"
+            }
+          ]
+        },
+        {
+          "name": "Electronics",
+          "items": [
+            {
+              "name": "Smartphone and charger",
+              "quantity": 1,
+              "note": "Essential for navigation"
+            },
+            {
+              "name": "Power bank",
+              "quantity": 1,
+              "note": "For long days out"
+            },
+            {
+              "name": "Type C/F power adapter",
+              "quantity": 1,
+              "note": "Standard for Austria"
+            },
+            {
+              "name": "Earphones",
+              "quantity": 1,
+              "note": "For train and bus rides"
+            }
+          ]
+        },
+        {
+          "name": "Documents & Money",
+          "items": [
+            {
+              "name": "Passport",
+              "quantity": 1,
+              "note": "Valid for travel"
+            },
+            {
+              "name": "Train and bus tickets",
+              "quantity": 1,
+              "note": "Digital or printed"
+            },
+            {
+              "name": "Wedding invitation",
+              "quantity": 1,
+              "note": "Digital or printed copy"
+            },
+            {
+              "name": "Credit cards and cash",
+              "quantity": 1,
+              "note": "Euros for Vienna"
+            },
+            {
+              "name": "Hostel booking confirmation",
+              "quantity": 1,
+              "note": "Printed or digital"
+            }
+          ]
+        },
+        {
+          "name": "Miscellaneous",
+          "items": [
+            {
+              "name": "Reusable water bottle",
+              "quantity": 1,
+              "note": "Empty through security"
+            },
+            {
+              "name": "Compact umbrella",
+              "quantity": 1,
+              "note": "Autumn weather precaution"
+            },
+            {
+              "name": "Garment bag / folding folder",
+              "quantity": 1,
+              "note": "To keep the formal suit wrinkle-free in carry-on"
+            }
+          ]
+        }
+      ]
+    },
+    "testCase": {
+      "promptInputs": {
+        "destination": "Vienna, Austria",
+        "activity": [
+          "cultural",
+          "cityTrip",
+          "event"
+        ],
+        "comfort": "standard",
+        "transportation": [
+          "train",
+          "bus"
+        ],
+        "accomodationType": [
+          "hostel"
+        ],
+        "luggageConstraints": "Carry-on only",
+        "laundryAccess": "No",
+        "dateFrom": "2023-10-10",
+        "dateUntil": "2023-10-15",
+        "nbPersons": "1",
+        "remarks": "Attending a formal evening wedding event which requires packing formal attire like a suit and dress shoes alongside standard sightseeing gear."
+      },
+      "solutionCriteria": [
+        "Includes appropriate clothing and gear for a cultural city trip in October",
+        "Accounts for hostel living and carry-on luggage constraints without laundry access",
+        "Includes formal attire and shoes suitable for the wedding event mentioned in remarks"
+      ],
+      "taskDescription": "Create a packing list for a trip",
+      "scenario": "Testing a cultural city trip utilizing public transportation and hostels, featuring specific remarks about attending a formal wedding event requiring specialized attire"
+    },
+    "score": 8,
+    "reasoning": "The solution effectively meets all mandatory criteria, including appropriate clothing for an October city trip, accommodation of carry-on constraints with no laundry access, and inclusion of formal attire for the wedding. Minor weaknesses include a lack of a backup dress shirt and missing standard hostel gear, but overall the packing list is well-tailored to the inputs."
+  }
+]

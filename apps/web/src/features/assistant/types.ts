@@ -2,7 +2,7 @@ import type { RequestBody } from '@repo/product-client';
 
 import z from 'zod';
 
-import { assistantFormSchema } from './schema';
+import type { assistantFormSchema } from './schema';
 
 export type CreateAssistantPackBody = RequestBody<'/pack/assistant', 'post'>;
 
