@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import z from 'zod';
 
-import { fetchPackingList } from '@/features/assistant/api';
+import { fetchPackingList } from '@/features/assistant/generate';
 import { assistantFormSchema } from '@/features/assistant/schema';
 import { withErrorHandling } from '@/lib/api-handlers';
 

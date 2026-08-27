@@ -3,9 +3,11 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "include": [
+    "**/*.mjs",
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
