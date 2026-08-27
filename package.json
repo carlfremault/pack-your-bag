@@ -27,7 +27,9 @@
     "generate:auth-client": "yarn workspace @repo/auth-client generate:client",
     "generate:product-client": "yarn workspace @repo/product-client generate:client",
     "generate:user-data-client": "yarn workspace @repo/user-data-client generate:client",
-    "storybook": "turbo run storybook"
+    "storybook": "turbo run storybook",
+    "generate-dataset": "turbo run generate-dataset",
+    "run-evals": "turbo run run-evals"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",

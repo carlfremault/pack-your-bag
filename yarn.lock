@@ -14810,6 +14810,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-limit@npm:^7.3.1":
+  version: 7.3.1
+  resolution: "p-limit@npm:7.3.1"
+  dependencies:
+    yocto-queue: "npm:^1.2.1"
+  checksum: 10c0/49b7d7fcc244d4659fa3b260c7b4e632bc72333c60e76e4cd24c7befdeb9b8e22da644e5064e83df9e2ded75245e3e3b9df0e9cf8500b08db8ebf58ac18c6764
+  languageName: node
+  linkType: hard
+
 "p-locate@npm:^4.1.0":
   version: 4.1.0
   resolution: "p-locate@npm:4.1.0"
@@ -19005,6 +19014,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^7.1.1"
     iron-session: "npm:^8.0.4"
     next: "npm:^16.2.11"
+    p-limit: "npm:^7.3.1"
     playwright: "npm:^1.58.2"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
@@ -19532,6 +19542,13 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
+  languageName: node
+  linkType: hard
+
+"yocto-queue@npm:^1.2.1":
+  version: 1.2.2
+  resolution: "yocto-queue@npm:1.2.2"
+  checksum: 10c0/36d4793e9cf7060f9da543baf67c55e354f4862c8d3d34de1a1b1d7c382d44171315cc54abf84d8900b8113d742b830108a1434f4898fb244f9b7e8426d4b8f5
   languageName: node
   linkType: hard
 

@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest --watch --no-coverage",
     "check-types": "tsc --noEmit",
-    "test:browser": "vitest --config=vitest.browser.config.mts"
+    "test:browser": "vitest --config=vitest.browser.config.mts",
+    "generate-dataset": "node --experimental-strip-types evals/packing-list/generate.ts",
+    "run-evals": "node --import ./evals/register-hooks.mjs evals/packing-list/run.ts"
   },
   "dependencies": {
     "@google/genai": "^2.12.0",
@@ -50,6 +52,7 @@
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "p-limit": "^7.3.1",
     "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "tsconfig-paths": "^4.2.0",

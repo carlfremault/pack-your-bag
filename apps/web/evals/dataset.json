@@ -1,0 +1,153 @@
+[
+  {
+    "promptInputs": {
+      "destination": "New York City, USA",
+      "activity": [
+        "business"
+      ],
+      "comfort": "minimalist",
+      "transportation": [
+        "plane"
+      ],
+      "accomodationType": [
+        "hotel"
+      ],
+      "luggageConstraints": "Carry-on only",
+      "laundryAccess": "No",
+      "dateFrom": "2023-11-10",
+      "dateUntil": "2023-11-12",
+      "nbPersons": "1",
+      "remarks": "Must adhere strictly to carry-on liquid limits and airline restrictions for business attire."
+    },
+    "solutionCriteria": [
+      "Includes essential business professional clothing suitable for a weekend trip without exceeding carry-on capacity.",
+      "Accounts for the lack of laundry access by providing sufficient undergarments and wrinkle-resistant items.",
+      "Adheres to airplane carry-on constraints including liquid limits for toiletries."
+    ],
+    "taskDescription": "Create a packing list for a trip",
+    "scenario": "Testing a minimalist, carry-on only weekend business trip by plane with no laundry access and strict luggage constraints"
+  },
+  {
+    "promptInputs": {
+      "destination": "Swiss Alps",
+      "activity": [
+        "winterSports",
+        "relaxing"
+      ],
+      "comfort": "luxury",
+      "transportation": [
+        "plane",
+        "train",
+        "car"
+      ],
+      "accomodationType": [
+        "hotel"
+      ],
+      "luggageConstraints": "No restriction",
+      "laundryAccess": "Yes",
+      "dateFrom": "2024-12-20",
+      "dateUntil": "2024-12-27",
+      "nbPersons": "4",
+      "remarks": "Traveling with family including children, need high-end winter gear and formal evening attire for hotel dining."
+    },
+    "solutionCriteria": [
+      "Includes appropriate winter sports gear and warm clothing suitable for the Swiss Alps",
+      "Accounts for luxury comfort level and formal evening wear for hotel dining",
+      "Reflects family size and winter seasonal timing"
+    ],
+    "taskDescription": "Create a packing list for a trip",
+    "scenario": "Testing a luxury family winter sports vacation in the Swiss Alps staying in a hotel with multiple transport methods and no luggage limits"
+  },
+  {
+    "promptInputs": {
+      "destination": "Patagonia",
+      "activity": [
+        "hiking",
+        "winterSports"
+      ],
+      "comfort": "minimalist",
+      "transportation": [
+        "plane",
+        "bus"
+      ],
+      "accomodationType": [
+        "wild camping"
+      ],
+      "luggageConstraints": "Backpack (multi-day capacity)",
+      "laundryAccess": "No",
+      "dateFrom": "2023-06-01",
+      "dateUntil": "2023-06-15",
+      "nbPersons": "1",
+      "remarks": "Sub-zero temperatures and high winds expected, need gear suitable for extreme winter wild camping."
+    },
+    "solutionCriteria": [
+      "Includes essential cold-weather layering and thermal gear suitable for Patagonia winters",
+      "Contains multi-day wild camping equipment adapted for backpack constraints",
+      "Accounts for the lack of laundry access by recommending appropriate quantities or quick-dry fabrics"
+    ],
+    "taskDescription": "Create a packing list for a trip",
+    "scenario": "Testing an extended backpacking and wild camping trip in Patagonia during winter with multi-day backpack constraints and no laundry access"
+  },
+  {
+    "promptInputs": {
+      "destination": "Miami, Florida",
+      "activity": [
+        "relaxing",
+        "beach",
+        "waterSports",
+        "sightseeing"
+      ],
+      "comfort": "comfortable",
+      "transportation": [
+        "car"
+      ],
+      "accomodationType": [
+        "hotel"
+      ],
+      "luggageConstraints": "Checked bag",
+      "laundryAccess": "No",
+      "dateFrom": "2023-07-10",
+      "dateUntil": "2023-07-20",
+      "nbPersons": "6",
+      "remarks": "Staying at a beach resort with family."
+    },
+    "solutionCriteria": [
+      "Includes beach and water sports gear appropriate for a warm summer climate.",
+      "Accounts for a 10-day trip with checked bags and no laundry access by including sufficient clothing quantities.",
+      "Caters to a group of 6 people staying at a resort."
+    ],
+    "taskDescription": "Create a packing list for a trip",
+    "scenario": "Testing a relaxing beach holiday for a large group staying at a resort with multiple activities like water sports and sightseeing, traveling by car with checked bags"
+  },
+  {
+    "promptInputs": {
+      "destination": "Vienna, Austria",
+      "activity": [
+        "cultural",
+        "cityTrip",
+        "event"
+      ],
+      "comfort": "standard",
+      "transportation": [
+        "train",
+        "bus"
+      ],
+      "accomodationType": [
+        "hostel"
+      ],
+      "luggageConstraints": "Carry-on only",
+      "laundryAccess": "No",
+      "dateFrom": "2023-10-10",
+      "dateUntil": "2023-10-15",
+      "nbPersons": "1",
+      "remarks": "Attending a formal evening wedding event which requires packing formal attire like a suit and dress shoes alongside standard sightseeing gear."
+    },
+    "solutionCriteria": [
+      "Includes appropriate clothing and gear for a cultural city trip in October",
+      "Accounts for hostel living and carry-on luggage constraints without laundry access",
+      "Includes formal attire and shoes suitable for the wedding event mentioned in remarks"
+    ],
+    "taskDescription": "Create a packing list for a trip",
+    "scenario": "Testing a cultural city trip utilizing public transportation and hostels, featuring specific remarks about attending a formal wedding event requiring specialized attire"
+  }
+]
